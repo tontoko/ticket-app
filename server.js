@@ -1,6 +1,5 @@
-const express = require('express')
 const next = require('next')
-
+const express = require('express')
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
@@ -18,6 +17,24 @@ app
 
         server.get('/events/:id', (req, res) => {
             const actualPage = '/events/show'
+            const queryParams = { id: req.params.id }
+            app.render(req, res, actualPage, queryParams)
+        })
+
+        server.get('/events/:id/purchase/', (req, res) => {
+            const actualPage = '/events/purchase'
+            const queryParams = { id: req.params.id }
+            app.render(req, res, actualPage, queryParams)
+        })
+
+        server.get('/events/:id/purchase/confirmation', (req, res) => {
+            const actualPage = '/events/purchase/confirmation'
+            const queryParams = { id: req.params.id, familyName: req.query.familyName, firstName: req.query.firstName, email: req.query.email }
+            app.render(req, res, actualPage, queryParams)
+        })
+
+        server.get('/events/:id/purchase/checkout', (req, res) => {
+            const actualPage = '/events/purchase/checkout'
             const queryParams = { id: req.params.id }
             app.render(req, res, actualPage, queryParams)
         })

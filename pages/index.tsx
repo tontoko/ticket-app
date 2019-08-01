@@ -1,22 +1,14 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Alert } from 'reactstrap';
 import { useState, useEffect } from 'react'
 import Login from './login'
 import React from 'react'
-import Router from 'next/router'
-
-
+import {useRouter} from 'next/router'
 
 export const Index: React.FC = () => {
-    const [isLogin, setIsLogin] = useState<boolean>(false)
+    const router = useRouter()
 
-    useEffect(() => {
-        if (isLogin) {
-            Router.push('/users/1')
-        }
-    })
-
-    return <Login setIsLogin={setIsLogin}/>
+    // トップページ作る
+    return <Login/>
 }
 
 export default Index

@@ -1,19 +1,25 @@
 import Link from 'next/link'
 import React from 'react'
-import {Dispatch, SetStateAction} from 'react'
+import { Dispatch, SetStateAction } from 'react'
+import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
 
-interface CustomInputProps {
-    setIsLogin: Dispatch<SetStateAction<boolean>>; 
-}
-
-export const Login: React.FC<CustomInputProps> = (props) => {
+export const Login: React.FC = (props) => {
 
     return (
-        <>
-            <p>login</p>
-            <Link href="/register"><a>register</a></Link>
-            <button onClick={() => props.setIsLogin(true)}>ログイン</button>
-        </>
+        <Container>
+            <Form style={{marginTop: '5em'}}>
+                <FormGroup>
+                    <Label>メールアドレス</Label>
+                    <Input type="email" name="email" placeholder="メールアドレス" />
+                </FormGroup>
+                <FormGroup>
+                    <Label>パスワード</Label>
+                    <Input type="password" name="password" placeholder="パスワード" />
+                </FormGroup>
+                <Button>ログイン</Button>
+            </Form>
+            <Link href="/register"><a>ユーザー登録</a></Link>
+        </Container>
     );
 }
 
