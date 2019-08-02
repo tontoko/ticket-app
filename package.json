@@ -18,7 +18,9 @@
     "express": "^4.17.1",
     "firebase": "^6.3.1",
     "next": "^9.0.2",
+    "prop-types": "^15.7.2",
     "react": "^16.8.6",
+    "react-avatar": "^3.6.0",
     "react-dom": "^16.8.6",
     "reactstrap": "^8.0.1"
   },
