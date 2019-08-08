@@ -38,21 +38,23 @@ export const UserLayout: React.FC = () => {
         <div>
             <Navbar color="primary" expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
-                <Avater size="50" className="ml-auto" round style={{ marginRight: "1em", cursor: "pointer" }} />
-                <NavbarToggler onClick={() => toggle(!isOpen)} />
-                <Collapse isOpen={isOpen} navbar>
-                    <Nav className="ml-auto" navbar>
-                        <NavItem>
-                            <NavLink href="/events">イベント一覧</NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink href="/users/show/myEvents">主催するイベント</NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink href="/users/show/myTickets">購入済みチケット</NavLink>
-                        </NavItem>
-                    </Nav>
-                </Collapse>
+                <div className="ml-auto d-flex">
+                    <Avater size="40" className="mr-2" round style={{ cursor: "pointer" }} />
+                    <NavbarToggler onClick={() => toggle(!isOpen)} />
+                    <Collapse isOpen={isOpen} navbar>
+                        <Nav  navbar>
+                            <NavItem>
+                                <NavLink href="/events">イベント一覧</NavLink>
+                            </NavItem>
+                            <NavItem>
+                                <NavLink href="/users/show/myEvents">主催するイベント</NavLink>
+                            </NavItem>
+                            <NavItem>
+                                <NavLink href="/users/show/myTickets">購入済みチケット</NavLink>
+                            </NavItem>
+                        </Nav>
+                    </Collapse>
+                </div>
             </Navbar>
         </div>
     );
