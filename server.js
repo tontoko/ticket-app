@@ -39,6 +39,22 @@ app
             app.render(req, res, actualPage, queryParams)
         })
 
+        server.get('/users/:id/show/myEvents', (req, res) => {
+            const actualPage = '/users/show/myEvents'
+            const queryParams = {
+                id: req.params.id
+            }
+            app.render(req, res, actualPage, queryParams)
+        })
+
+        server.get('/users/:id/show/myTickets', (req, res) => {
+            const actualPage = '/users/show/myTickets'
+            const queryParams = {
+                id: req.params.id
+            }
+            app.render(req, res, actualPage, queryParams)
+        })
+
         server.get('*', (req, res) => {
             return handle(req, res)
         })
