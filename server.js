@@ -9,12 +9,6 @@ app
     .then(() => {
         const server = express()
 
-        server.get('/users/:id', (req, res) => {
-            const actualPage = '/users/show'
-            const queryParams = { id: req.params.id }
-            app.render(req, res, actualPage, queryParams)
-        })
-
         server.get('/events/:id/reception', (req, res) => {
             const actualPage = '/events/reception'
             const queryParams = { id: req.params.id }
@@ -77,6 +71,18 @@ app
 
         server.get('/events/:id/report', (req, res) => {
             const actualPage = '/events/report'
+            const queryParams = { id: req.params.id }
+            app.render(req, res, actualPage, queryParams)
+        })
+
+        server.get('/users/:id', (req, res) => {
+            const actualPage = '/users/show'
+            const queryParams = { id: req.params.id }
+            app.render(req, res, actualPage, queryParams)
+        })
+
+        server.get('/users/:id/edit', (req, res) => {
+            const actualPage = '/users/edit'
             const queryParams = { id: req.params.id }
             app.render(req, res, actualPage, queryParams)
         })

@@ -27,7 +27,7 @@ export default () => {
                         </Col>
                         <Col sm="8">
                             <Label for="image">添付する画像を選択</Label>
-                            <Input type="file" name="file1" id="image" />
+                            <Input type="file" name="file1" id="image" style={{ border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em" }} />
                         </Col>
                     </Row>
                 </FormGroup>
@@ -38,7 +38,7 @@ export default () => {
                         </Col>
                         <Col sm="8">
                             <Label for="image">添付する画像を選択</Label>
-                            <Input type="file" name="file2" id="image" />
+                            <Input type="file" name="file2" id="image" style={{ border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em" }} />
                         </Col>
                     </Row>
                 </FormGroup>
@@ -49,7 +49,7 @@ export default () => {
                         </Col>
                         <Col sm="8">
                             <Label for="image">添付する画像を選択</Label>
-                            <Input type="file" name="file3" id="image" />
+                            <Input type="file" name="file3" id="image" style={{ border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em" }} />
                         </Col>
                     </Row>
                 </FormGroup>

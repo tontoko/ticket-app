@@ -1,13 +1,26 @@
 import React from 'react';
 import {
     Card, CardImg, CardText, CardBody,
-    CardTitle, CardSubtitle, Button, Container, Col, Row, Pagination, PaginationItem, PaginationLink
+    CardTitle, CardSubtitle, Button, Container, Col, Row, Pagination, PaginationItem, PaginationLink, Form, FormGroup, Label, Input
 } from 'reactstrap';
 import Link from 'next/link'
 
 export default () => {
     return (
         <Container>
+            <Form inline style={{ marginTop: "1em" }}>
+                <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                    <Label for="id" className="mr-sm-2">ID</Label>
+                    <Input type="text" name="id" id="id" />
+                </FormGroup>
+                <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                    <Label for="name" className="mr-sm-2">名前</Label>
+                    <Input type="text" name="name" id="name" />
+                </FormGroup>
+                <Col sm="12" md="1" className="p-0">
+                    <Button style={{ height: "2.4em", width: "4em" }}>検索</Button>
+                </Col>
+            </Form>
             <div style={{ marginTop: "1em" }}>
                 <Link href="/events/1">
                     <Card style={{cursor: 'pointer'}}>

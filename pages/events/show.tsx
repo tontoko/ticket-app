@@ -94,19 +94,19 @@ export default () => {
             // 主催者
             return (
                 <Row style={{ marginTop: "1.5em" }}>
-                    <Col>
-                        <Link href={urlToEdit}>
-                            <Button color="info">このイベントを変更する</Button>
-                        </Link>
-                    </Col>
-                    <Col>
+                    <Col sm="12" style={{ margin: "0.2em" }}>
                         <Link href={urlToReception}>
-                            <Button color="success">会場受付</Button>
+                            <Button block color="success">会場受付</Button>
                         </Link>
                     </Col>
-                    <Col>
+                    <Col sm="12" style={{margin: "0.2em"}}>
+                        <Link href={urlToEdit}>
+                            <Button block color="info">イベントを変更する</Button>
+                        </Link>
+                    </Col>
+                    <Col sm="12" style={{ margin: "0.2em" }}>
                         <Link href={urlToReport}>
-                            <Button color="primary" outline>レポートを見る</Button>
+                            <Button block color="info">レポートを見る</Button>
                         </Link>
                     </Col>
                 </Row>

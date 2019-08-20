@@ -11,9 +11,9 @@ export const UserLayout: React.FC = () => {
 
     return (
         <div>
-            <Navbar color="primary" expand="md" dark>
+            <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
-                <Link href="/users/show">
+                <Link href="/users/edit">
                     <div className="ml-auto mr-2">
                             <Avater size="40" round style={{ cursor: "pointer" }} />
                     </div>
@@ -21,9 +21,9 @@ export const UserLayout: React.FC = () => {
                 <NavbarToggler onClick={() => toggle(!isOpen)} />
                 <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">
                     <Nav navbar>
-                        <NavItem>
+                        {/* <NavItem>
                             <NavLink href="/events">イベント一覧</NavLink>
-                        </NavItem>
+                        </NavItem> */}
                         <NavItem>
                             <NavLink href="/users/1/myEvents">主催するイベント</NavLink>
                         </NavItem>
