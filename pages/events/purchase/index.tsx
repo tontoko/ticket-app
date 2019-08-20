@@ -28,7 +28,7 @@ export const Purchase: React.FC = () => {
     }
 
     const router = useRouter();
-    const UrlToConfirmation = `/events/${router.query.id}/purchase/confirmation`
+    const UrlToConfirm = `/events/${router.query.id}/purchase/confirm`
 
     const [familyName, setFamilyName] = useState('')
     const [firstName, setFirstName] = useState('')
@@ -57,7 +57,7 @@ export const Purchase: React.FC = () => {
                     <Card>
                         <CardBody>
                             <Row>
-                                <Col xs="2">
+                                <Col sm="2" xs="3">
                                     <img width="100%" src="https://cdn.pixabay.com/photo/2019/06/21/20/19/grapes-4290308_1280.jpg" alt="Card image cap" />
                                 </Col>
                                 <Col xs="auto">
@@ -73,7 +73,7 @@ export const Purchase: React.FC = () => {
                     </Card>
                 </FormGroup>
                 <Row className="flex-row-reverse">
-                    <Link href={{ pathname: UrlToConfirmation, query: { familyName, firstName, email } }}><Button style={{ marginRight: '1em' }}>確認</Button></Link>
+                    <Link href={{ pathname: UrlToConfirm, query: { familyName, firstName, email } }}><Button style={{ marginRight: '1em' }}>確認</Button></Link>
                 </Row>
             </Form>
         </Container>

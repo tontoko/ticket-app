@@ -77,7 +77,7 @@ const Confirmation: React.FC = () => {
                     <Card>
                         <CardBody>
                             <Row>
-                                <Col xs="2">
+                                <Col sm="2" xs="3">
                                     <img width="100%" src="https://cdn.pixabay.com/photo/2019/06/21/20/19/grapes-4290308_1280.jpg" alt="Card image cap" />
                                 </Col>
                                 <Col xs="auto">
