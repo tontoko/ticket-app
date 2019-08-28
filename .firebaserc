@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "ticket-app-d3f5a"
+    "default": "ticket-app-d3f5a",
+    "dev": "ticket-app-dev-11346"
   }
 }

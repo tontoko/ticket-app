@@ -2,16 +2,11 @@
   "name": "ticket-app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "node server.js",
-    "build": "next build",
-    "start": "cross-env NODE_ENV=production node server.js"
+  "engines": {
+    "node": "8"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
+    "@babel/cli": "^7.2.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.21",
     "@fortawesome/free-brands-svg-icons": "^5.10.1",
     "@fortawesome/free-solid-svg-icons": "^5.10.1",
@@ -19,10 +14,12 @@
     "@types/react-qr-reader": "^2.1.2",
     "@zeit/next-css": "^1.0.1",
     "bootstrap": "^4.3.1",
-    "cross-env": "^5.2.0",
+    "cross-env": "5.2.0",
     "express": "^4.17.1",
-    "firebase": "^6.3.1",
-    "next": "^9.0.2",
+    "firebase-admin": "^8.2.0",
+    "firebase-functions": "^3.2.0",
+    "grpc": "^1.22.2",
+    "next": "latest",
     "prop-types": "^15.7.2",
     "qrcode.react": "^0.9.3",
     "react": "^16.8.6",
@@ -36,6 +33,25 @@
     "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.4",
     "eslint-plugin-react-hooks": "^1.6.1",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "@babel/cli": "^7.2.0",
+    "cpx": "^1.5.0",
+    "cross-env": "^5.2.0",
+    "firebase-functions-test": "^0.1.6",
+    "firebase-tools": "^6.1.0",
+    "rimraf": "^2.6.0"
+  },
+  "scripts": {
+    "dev": "node src/app/server.js",
+    "preserve": "npm run build-public && npm run build-funcs && npm run build-app && npm run copy-deps && npm run install-deps",
+    "serve": "cross-env NODE_ENV=production firebase serve",
+    "predeploy": "npm run build-public && npm run build-funcs && npm run build-app && npm run copy-deps",
+    "deploy": "firebase deploy",
+    "clean": "rimraf \"dist/functions/**\" && rimraf \"dist/public\"",
+    "build-public": "cpx \"src/public/**/*.*\" \"dist/public\" -C",
+    "build-funcs": "babel \"src/functions\" --out-dir \"dist/functions\"",
+    "build-app": "next build \"src/app/\"",
+    "copy-deps": "cpx \"*{package.json,package-lock.json,yarn.lock}\" \"dist/functions\" -C",
+    "install-deps": "cd \"dist/functions\" && npm i"
   }
 }
