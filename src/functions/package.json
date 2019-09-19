@@ -1,0 +1,45 @@
+{
+  "name": "ticket-app",
+  "version": "1.0.0",
+  "description": "",
+  "engines": {
+    "node": "8"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "firebase-admin": "^8.2.0",
+    "firebase-functions": "3.0.2",
+    "@fortawesome/fontawesome-svg-core": "^1.2.21",
+    "@fortawesome/free-brands-svg-icons": "^5.10.1",
+    "@fortawesome/free-solid-svg-icons": "^5.10.1",
+    "@fortawesome/react-fontawesome": "^0.1.4",
+    "@zeit/next-css": "^1.0.1",
+    "bootstrap": "^4.3.1",
+    "next": "latest",
+    "prop-types": "^15.7.2",
+    "qrcode.react": "^0.9.3",
+    "react": "^16.9.0",
+    "react-avatar": "^3.6.0",
+    "react-dom": "^16.9.0",
+    "react-qr-reader": "^2.2.1",
+    "reactstrap": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^12.6.8",
+    "@types/react": "^16.8.23",
+    "@types/react-dom": "^16.8.4",
+    "@types/react-qr-reader": "^2.1.2",
+    "eslint-plugin-react-hooks": "^1.6.1",
+    "firebase-functions-test": "^0.1.6",
+    "typescript": "^3.6.3"
+  },
+  "scripts": {
+    "lint": "./node_modules/.bin/eslint --max-warnings=0 .",
+    "serve": "firebase serve --only functions",
+    "shell": "firebase experimental:functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "private": true
+}
