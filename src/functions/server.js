@@ -2,9 +2,10 @@ const next = require('next')
 const express = require('express')
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ 
-    dev,
-    dir: './src/app'
-})
+    dev, 
+    // conf: { distDir: 'next' },
+    dir: '../app'
+});
 const handle = app.getRequestHandler()
 
 app
@@ -119,3 +120,5 @@ app
         console.error(ex.stack)
         process.exit(1)
     })
+
+    module.exports.app
