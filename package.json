@@ -6,7 +6,7 @@
     "node": "8"
   },
   "scripts": {
-    "dev": "cd src/functions && NODE_ENV=development node server.js",
+    "dev": "cd src/functions && NODE_ENV=development node index.js",
     "install": "npm run build-all",
     "next": "npm run build-firebase && cd \"src/app\" && npm install",
     "preserve": "npm run build-all",
