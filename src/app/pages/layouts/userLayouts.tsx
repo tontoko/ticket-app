@@ -13,7 +13,7 @@ export const UserLayout: React.FC = () => {
         <div>
             <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
-                <Link href="/users/edit">
+                <Link href="/users/1/show">
                     <div className="ml-auto mr-2">
                             <Avater size="40" round style={{ cursor: "pointer" }} />
                     </div>

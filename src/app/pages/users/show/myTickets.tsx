@@ -10,6 +10,7 @@ export default () => {
         <Container>
             <div style={{marginTop: "1em"}}>
                 <Link href="/events/1">
+                    <div>
                     <Card style={{ cursor: 'pointer' }}>
                         <CardBody>
                             <Row>
@@ -24,8 +25,10 @@ export default () => {
                             </Row>
                         </CardBody>
                     </Card>
+                    </div>
                 </Link>
                 <Link href="/events/2">
+                    <div>
                     <Card style={{ cursor: 'pointer' }}>
                         <CardBody>
                             <Row>
@@ -40,6 +43,7 @@ export default () => {
                             </Row>
                         </CardBody>
                     </Card>
+                    </div>
                 </Link>
             </div>
             <Pagination aria-label="Page navigation" xs="" style={{ marginTop: "1em", justifyContent: "center" }}>

@@ -95,8 +95,20 @@ app.prepare()
       app.render(req, res, actualPage, queryParams)
     })
 
+    server.get('/users/:id/show', (req, res) => {
+      const actualPage = '/users/show'
+      const queryParams = { id: req.params.id }
+      app.render(req, res, actualPage, queryParams)
+    })
+
     server.get('/users/:id/edit', (req, res) => {
       const actualPage = '/users/edit'
+      const queryParams = { id: req.params.id }
+      app.render(req, res, actualPage, queryParams)
+    })
+
+    server.get('/users/:id/edit/confirm', (req, res) => {
+      const actualPage = '/users/edit/confirm'
       const queryParams = { id: req.params.id }
       app.render(req, res, actualPage, queryParams)
     })

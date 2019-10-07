@@ -27,6 +27,7 @@
     "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.4",
     "@types/react-qr-reader": "^2.1.2",
+    "@types/reactstrap": "^8.0.4",
     "eslint-plugin-react-hooks": "^1.6.1",
     "typescript": "^3.6.3"
   },

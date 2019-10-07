@@ -6,7 +6,7 @@ import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons'
 
-export const UserShow: React.FC = () => {
+export const Confirm: React.FC = () => {
 
     return (
         <Container>
@@ -14,15 +14,11 @@ export const UserShow: React.FC = () => {
                 <h3>登録情報</h3>
                 <FormGroup style={{marginTop: "1em"}}>
                     <Label for="email">メールアドレス</Label>
-                    <Input type="email" name="email" id="email" />
+                    <p>テスト</p>
                 </FormGroup>
                 <FormGroup>
                     <Label for="password">パスワード</Label>
-                    <Input type="password" name="password" id="password" />
-                </FormGroup>
-                <FormGroup>
-                    <Label for="password_confirm">パスワード確認</Label>
-                    <Input type="password" name="password_confirm" id="password_confirm" />
+                    <Input disabled type="password" name="password" id="password" />
                 </FormGroup>
                 <FormGroup>
                     <Label>連携済みサービス</Label>
@@ -35,10 +31,14 @@ export const UserShow: React.FC = () => {
                 </FormGroup>
                 <FormGroup>
                     <Label for="image">プロフィール画像を選択</Label>
-                    <Input type="file" name="image" id="image" style={{border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em"}} />
+                    <Row>
+                        <Col sm="4">
+                            <img height="150em" src="https://cdn.pixabay.com/photo/2019/06/21/20/19/grapes-4290308_1280.jpg" />
+                        </Col>
+                    </Row>
                 </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href="/events/new/confirm">
+                    <Link href="/users/edit/confirm">
                         <Button className="ml-auto">確認</Button>
                     </Link>
                 </Row>
@@ -47,4 +47,4 @@ export const UserShow: React.FC = () => {
     )
 }
 
-export default UserShow
+export default Confirm
