@@ -7,7 +7,7 @@ import Link from 'next/link'
 export default () => {
     return (
         <Container>
-            <Form style={{ marginTop: "2em" }}>
+            <Form style={{ marginTop: "2em", marginBottom: "2em" }}>
                 <FormGroup>
                     <label className="mr-2">イベント名</label>
                     <p>てすと</p>

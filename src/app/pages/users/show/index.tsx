@@ -5,6 +5,7 @@ import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, FormText, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons'
+import initFirebase from '../../../initFirebase'
 
 export const UserShow: React.FC = () => {
 
@@ -28,6 +29,15 @@ export const UserShow: React.FC = () => {
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
                     <Link href="/users/1/edit">
                         <Button className="ml-auto">編集</Button>
+                    </Link>
+                </Row>
+                <Row style={{ margin: 0, marginTop: "1em" }}>
+                    <Link href="/login">
+                        <Button className="ml-auto" onClick={async() => {
+                            const firebase = await initFirebase()
+                            firebase.auth().signOut()
+                        }}>
+                            ログアウト</Button>
                     </Link>
                 </Row>
             </Form>

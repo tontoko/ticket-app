@@ -1,6 +1,21 @@
 const functions = require('firebase-functions');
 const next = require('next')
+const session = require('express-session')
+const FileStore = require('session-file-store')(session)
 const dev = process.env.NODE_ENV !== 'production'
+const admin = require('firebase-admin')
+let firebase
+if (dev) {
+  firebase = admin.initializeApp({
+    credential: admin.credential.cert(require('../../ticket-app-dev-11346-firebase-adminsdk-j87hi-708418f22e.json'))
+  },
+  'server'
+  )
+} else {
+  firebase = admin.initializeApp()
+}
+
+
 let app
 if (dev) {
   app = next({
@@ -22,6 +37,59 @@ const server = express()
 
 app.prepare()
   .then(() => {
+
+    server.use(express.json())
+    server.use(express.urlencoded({ extended: true }))
+    server.use(
+      session({
+        secret: 'geheimnis',
+        saveUninitialized: true,
+        store: new FileStore({ secret: 'geheimnis' }),
+        resave: false,
+        rolling: true,
+        httpOnly: true,
+        cookie: { maxAge: 604800000 } // week
+      })
+    )
+
+    server.use((req, res, next) => {
+      req.firebaseServer = firebase
+      const token = req.session.decodedToken
+      if (!req.url.match(/\/api\/.*/) && !req.url.match(/\/_next\/.*/)) {
+        if (token) {
+          if (req.url === '/login' || req.url === '/register') {
+            return res.redirect(`/users/${token.user_id}`)
+          }
+        } else {
+          if (req.url !== '/login' && req.url !== '/register') {
+            return res.redirect(`/login`)
+          }
+        }
+      } 
+      next()
+    })
+
+    server.post('/api/login', (req, res) => {
+      if (!req.body) return res.sendStatus(400)
+
+      const token = req.body.token
+      firebase
+        .auth()
+        .verifyIdToken(token)
+        .then(decodedToken => {
+          req.session.decodedToken = decodedToken
+          return decodedToken
+        })
+        .then(decodedToken => {
+          res.json({ status: true, decodedToken })
+        })
+        .catch(error => res.json({ error }))
+    })
+
+    server.post('/api/logout', (req, res) => {
+      req.session.decodedToken = null
+      res.json({ status: true })
+    })
 
     server.get('/events/:id/reception', (req, res) => {
       const actualPage = '/events/reception'
@@ -90,12 +158,6 @@ app.prepare()
     })
 
     server.get('/users/:id', (req, res) => {
-      const actualPage = '/users/show'
-      const queryParams = { id: req.params.id }
-      app.render(req, res, actualPage, queryParams)
-    })
-
-    server.get('/users/:id/show', (req, res) => {
       const actualPage = '/users/show'
       const queryParams = { id: req.params.id }
       app.render(req, res, actualPage, queryParams)

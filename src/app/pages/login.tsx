@@ -1,22 +1,37 @@
 import Link from 'next/link'
-import React from 'react'
+import Router from 'next/router'
+import React, {useState} from 'react'
 import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
+import initFirebase from '../initFirebase'
 
-export const Login: React.FC = (props) => {
+export const Login = () => {
+
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    
+    const loginWithEmail = async () => {
+        try {
+            console.log(process.env)
+            const firebase = await initFirebase()
+            firebase.auth().signInWithEmailAndPassword(email, password)
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
     return (
         <Container>
             <Form style={{marginTop: '5em'}}>
                 <FormGroup>
                     <Label>メールアドレス</Label>
-                    <Input type="email" name="email" placeholder="メールアドレス" />
+                    <Input type="email" name="email" placeholder="メールアドレス" onChange={e => setEmail(e.target.value)} />
                 </FormGroup>
                 <FormGroup>
                     <Label>パスワード</Label>
-                    <Input type="password" name="password" placeholder="パスワード" />
+                    <Input type="password" name="password" placeholder="パスワード" onChange={e => setPassword(e.target.value)} />
                 </FormGroup>
-                <Button>ログイン</Button>
+                <Button onClick={() => loginWithEmail()}>ログイン</Button>
             </Form>
             <Link href="/register"><a>ユーザー登録</a></Link>
         </Container>
