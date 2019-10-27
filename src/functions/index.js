@@ -1,21 +1,21 @@
 const functions = require('firebase-functions');
 const next = require('next')
 const session = require('express-session')
-const FirebaseStore = require('connect-session-firebase')(session)
-const dev = process.env.NODE_ENV !== 'production'
-const admin = require('firebase-admin')
-const firebase = admin.initializeApp({
-  credential: admin.credential.cert(require('./ticket-app-dev.json')),
-  databaseURL: "https://ticket-app-dev-11346.firebaseio.com"
-})
+const dev = !functions.config().node
+const firebase = require('firebase-admin')
 let app
 if (dev) {
+  firebase.initializeApp({
+    credential: firebase.credential.cert(require('../../ticket-app-admin-dev.json')),
+    databaseURL: "https://ticket-app-dev-11346.firebaseio.com"
+  })
   app = next({
     dev,
     // conf: { distDir: 'next' },
     dir: '../app'
   });
 } else {
+  firebase.initializeApp()
   app = next({
     dev,
     conf: { distDir: 'next' },
@@ -34,10 +34,8 @@ app.prepare()
     server.use(express.urlencoded({ extended: true }))
     server
       .use(session({
-        store: new FirebaseStore({
-          database: firebase.database()
-        }),
         secret: 'keyboard cat',
+        name: '__session',
         resave: true,
         saveUninitialized: true
       }));

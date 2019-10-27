@@ -32,7 +32,7 @@ export default class MyApp extends App {
                         return fetch('/api/login', {
                             method: 'POST',
                             // eslint-disable-next-line no-undef
-                            headers: new Headers({ 'Content-Type': 'application/json' }),
+                            headers: new Headers({ 'Content-Type': 'application/json', 'Cache-Control': 'private' }),
                             credentials: 'same-origin',
                             body: JSON.stringify({ token })
                         })

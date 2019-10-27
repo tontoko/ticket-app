@@ -68,4 +68,5 @@ node_modules/
 
 next
 
-ticket-app-dev.json
+ticket-app-dev.ts
+ticket-app-admin-dev.json
