@@ -35,17 +35,16 @@ app.prepare()
     server
       .use(session({
         secret: 'keyboard cat',
-        name: '__session',
         resave: true,
         saveUninitialized: true
       }));
 
     server.use((req, res, next) => {
       req.firebaseServer = firebase
-      const token = req.session.decodedToken
+      const token = req.session["decodedToken"]
       if (!req.url.match(/\/api\/.*/) && !req.url.match(/\/_next\/.*/)) {
         if (token) {
-          if (req.url === '/login' || req.url === '/register') {
+          if (req.url === '/login' || req.url === '/register' || req.url === '/') {
             return res.redirect(`/users/${token.user_id}`)
           }
         } else {
@@ -75,7 +74,7 @@ app.prepare()
     })
 
     server.post('/api/logout', (req, res) => {
-      req.session.decodedToken = null
+      res.clearCookie(decodedToken)
       res.json({ status: true })
     })
 

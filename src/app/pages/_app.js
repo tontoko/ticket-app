@@ -39,7 +39,7 @@ export default class MyApp extends App {
                     })
                     .then(() => {
                         if (Router.pathname === '/login' || Router.pathname === '/register') {
-                            Router.push(`/users/${firebase.auth().currentUser}`)
+                            Router.push(`/users/${firebase.auth().currentUser.uid}`)
                         }
                     })
             } else {
@@ -50,7 +50,7 @@ export default class MyApp extends App {
                     credentials: 'same-origin'
                 })
                 .then(() => {
-                    if (Router.pathname !== '/login' || Router.pathname !== '/register') {
+                    if (Router.pathname !== '/login' || Router.pathname !== '/register' || Router.pathname !== '/') {
                         Router.push(`/login`)
                     }
                 })
