@@ -5,9 +5,8 @@ import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, FormText, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons'
-import initFirebase from '../../../../initFirebase'
 
-export const UserShow: React.FC = () => {
+export const Confirm: React.FC = () => {
 
     return (
         <Container>
@@ -15,7 +14,11 @@ export const UserShow: React.FC = () => {
                 <h3>登録情報</h3>
                 <FormGroup style={{marginTop: "1em"}}>
                     <Label for="email">メールアドレス</Label>
-                    <Input disabled type="email" name="email" id="email" />
+                    <p>テスト</p>
+                </FormGroup>
+                <FormGroup>
+                    <Label for="password">パスワード</Label>
+                    <Input disabled type="password" name="password" id="password" />
                 </FormGroup>
                 <FormGroup>
                     <Label>連携済みサービス</Label>
@@ -26,18 +29,17 @@ export const UserShow: React.FC = () => {
                         </Col>
                     </Row>
                 </FormGroup>
+                <FormGroup>
+                    <Label for="image">プロフィール画像を選択</Label>
+                    <Row>
+                        <Col sm="4">
+                            <img height="150em" src="https://cdn.pixabay.com/photo/2019/06/21/20/19/grapes-4290308_1280.jpg" />
+                        </Col>
+                    </Row>
+                </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href="/users/1/edit">
-                        <Button className="ml-auto">編集</Button>
-                    </Link>
-                </Row>
-                <Row style={{ margin: 0, marginTop: "1em" }}>
-                    <Link href="/login">
-                        <Button className="ml-auto" onClick={async() => {
-                            const firebase = await initFirebase()
-                            firebase.auth().signOut()
-                        }}>
-                            ログアウト</Button>
+                    <Link href="/users/edit/confirm">
+                        <Button className="ml-auto">確認</Button>
                     </Link>
                 </Row>
             </Form>
@@ -45,4 +47,4 @@ export const UserShow: React.FC = () => {
     )
 }
 
-export default UserShow
+export default Confirm

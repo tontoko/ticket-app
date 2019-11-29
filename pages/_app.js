@@ -21,7 +21,6 @@ export default class MyApp extends App {
             // SSR
             if (!ctx.pathname.match(/\/api\/.*/) && !ctx.pathname.match(/\/_next\/.*/)) {
                 const { uid } = cookies(ctx)
-                console.log(uid)
                 if (uid) {
                     if (ctx.pathname === '/login' || ctx.pathname === '/register' || ctx.pathname === '/') {
                         ctx.res.writeHead(302, {

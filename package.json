@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "engines": {
-    "node": "8"
+    "node": "10"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.21",
@@ -41,16 +41,9 @@
     "firebase-tools": "^7.7.0"
   },
   "scripts": {
-    "dev": "cd src/functions && NODE_ENV=development node index.js",
-    "install": "npm run build-all",
-    "next": "npm run install-firebase && cd \"src/app\" && npm install",
-    "preserve": "npm run build-all",
-    "serve": "firebase serve",
-    "predeploy": "npm run build-all",
-    "deploy": "cd \"src/functions\" && firebase deploy",
-    "build-all": "npm run install-next && npm run install-firebase && npm run build-firebase",
-    "install-next": "cd \"src/app\" && npm install",
-    "install-firebase": "cd \"src/functions\" && npm install",
-    "build-firebase": "sudo firebase functions:config:set node.env='production' && cd \"src/app\" && npm run build"
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "deploy": "npm run build && gcloud app deploy"
   }
 }
