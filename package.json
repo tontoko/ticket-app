@@ -2,9 +2,6 @@
   "name": "ticket-app",
   "version": "1.0.0",
   "description": "",
-  "engines": {
-    "node": "10"
-  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.21",
     "@fortawesome/free-brands-svg-icons": "^5.10.1",
@@ -43,7 +40,7 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 8080",
     "deploy": "npm run build && gcloud app deploy"
   }
 }
