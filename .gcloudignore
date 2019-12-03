@@ -16,7 +16,4 @@
 # Node.js dependencies:
 node_modules/
 
-# Next.js source code
-/pages/
-
 .DS_Store
