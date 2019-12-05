@@ -5,7 +5,7 @@ import {
     Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem } from 'reactstrap'
 import Avater from 'react-avatar'
 
-export const UserLayout: React.FC<Linkny> = (props) => {
+export const UserLayout: React.FC<any> = (props) => {
 
     const [isOpen, toggle] = useState(false)
 

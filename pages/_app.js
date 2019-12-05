@@ -92,8 +92,7 @@ export default class MyApp extends App {
         
     render() {
         const { Component } = this.props
-        console.log(this.state)
-        if (this.state.loading && !this.state.uid) {
+        if (this.state.loading && !this.props.uid) {
             return (
                 <div style = {
                         {

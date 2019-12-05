@@ -33,7 +33,7 @@ export const Login = () => {
                 </FormGroup>
                 <Button onClick={() => loginWithEmail()}>ログイン</Button>
             </Form>
-            <Link href="/register"><a>ユーザー登録</Link></Link>
+            <Link href="/register"><a>ユーザー登録</a></Link>
         </Container>
     );
 }
