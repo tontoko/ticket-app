@@ -5,7 +5,7 @@ import {
     Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem } from 'reactstrap'
 import Avater from 'react-avatar'
 
-export const UserLayout: React.FC = () => {
+export const UserLayout: React.FC<Linkny> = (props) => {
 
     const [isOpen, toggle] = useState(false)
 
@@ -13,7 +13,7 @@ export const UserLayout: React.FC = () => {
         <div>
             <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
-                <Link href="/users/1">
+                <Link href={`/users/${props.uid}/show`}>
                     <div className="ml-auto mr-2">
                             <Avater size="40" round style={{ cursor: "pointer" }} />
                     </div>
@@ -25,14 +25,14 @@ export const UserLayout: React.FC = () => {
                             <NavLink href="/events">イベント一覧</NavLink>
                         </NavItem> */}
                         <NavItem>
-                            <NavLink href="/users/1/myEvents">主催するイベント</NavLink>
+                            <NavLink href={`/users/${props.uid}/show/myEvents`}>主催するイベント</NavLink>
                         </NavItem>
                         <NavItem>
-                            <NavLink href="/users/1/myTickets">購入済みチケット</NavLink>
+                            <NavLink href={`/users/${props.uid}/show/myTickets`}>購入済みチケット</NavLink>
                         </NavItem>
                     </Nav>
                 </Collapse>
-            </Navbar>
+            </Navbar>{console.log(props)}
         </div>
     );
 }

@@ -20,9 +20,9 @@ export const UserShow: React.FC = () => {
                 <FormGroup>
                     <Label>連携済みサービス</Label>
                     <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                        <Col>
-                            <FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2", marginLeft: "1em" }} />
-                            <FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2", marginLeft: "1em" }} />
+                        <Col style={{display: 'flex'}}>
+                            <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2", marginLeft: "1em" }} /></p>
+                            <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2", marginLeft: "1em" }} /></p>
                         </Col>
                     </Row>
                 </FormGroup>
