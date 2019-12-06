@@ -4,7 +4,6 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import UserLayouts from './layouts/userLayouts'
 import initFirebase from '../initFirebase'
 import Router from 'next/router'
-import cookies from 'next-cookies'
 import {Spinner} from 'reactstrap'
 
 export default class MyApp extends App {
@@ -23,24 +22,38 @@ export default class MyApp extends App {
         }
         if (ctx.req) {
             // SSR
-            const { uid } = cookies(ctx)
-            if (uid && ctx.query.id && uid === ctx.query.id || uid && !ctx.query.id) {
-                if (ctx.pathname === '/login' || ctx.pathname === '/register' || ctx.pathname === '/') {
-                    ctx.res.writeHead(302, {
+            const { useSession } = require('next-session')
+            const { req, res, pathname, query } = ctx
+            const _req = {...req}
+            const _res = {...res}
+            await useSession(_req, _res);
+            const session = _req.session
+            if (pathname.match(/\/api\/.*/) && pathname.match(/\/_next\/.*/)) {
+                return {
+                    pageProps,
+                    uid: ''
+                }
+            }
+            // const { uid } = cookies(ctx)
+            const uid = session && session.token ? session.token.uid : null
+            console.log(session)
+            if ((uid && query.id && uid === query.id) || uid && (!query.id)) {
+                if (pathname === '/login' || pathname === '/register' || pathname === '/') {
+                    res.writeHead(302, {
                         Location: `/users/${uid}/show`
                     })
-                    ctx.res.end()
+                    res.end()
                 }
                 return {
                     pageProps,
                     uid: uid
                 }
             } else {
-                if (ctx.pathname !== '/login' && ctx.pathname !== '/register') {
-                    ctx.res.writeHead(302, {
+                if (pathname !== '/login' && pathname !== '/register') {
+                    res.writeHead(302, {
                         Location: `/login`
                     })
-                    ctx.res.end()
+                    res.end()
                 }
                 return {
                     pageProps,
@@ -61,7 +74,7 @@ export default class MyApp extends App {
                 if (user && user.uid === this.props.router.query.id || user && !this.props.router.query.id) {
                     this.setState({uid:user.uid})
                     const token = await user.getIdToken()
-                    await fetch('/api/login', {
+                    const res = await fetch('/api/login', {
                         method: 'POST',
                         headers: new Headers({
                             'Content-Type': 'application/json',
@@ -72,6 +85,7 @@ export default class MyApp extends App {
                             token
                         })
                     })
+                    console.log(res)
                     this.setState({loading: false})
                     if (Router.pathname === '/login' || Router.pathname === '/register') {
                         Router.push(`/users/${user.uid}/show`)
@@ -92,7 +106,7 @@ export default class MyApp extends App {
         
     render() {
         const { Component } = this.props
-        if (this.state.loading && !this.props.uid) {
+        if (this.state.loading && !this.props.uid && !this.state.uid) {
             return (
                 <div style = {
                         {

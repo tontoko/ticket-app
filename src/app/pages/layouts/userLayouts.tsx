@@ -32,7 +32,7 @@ export const UserLayout: React.FC<any> = (props) => {
                         </NavItem>
                     </Nav>
                 </Collapse>
-            </Navbar>{console.log(props)}
+            </Navbar>
         </div>
     );
 }
