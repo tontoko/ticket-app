@@ -21,22 +21,20 @@ export default class MyApp extends App {
             pageProps = await Component.getInitialProps(ctx)
         }
         if (ctx.req) {
-            // SSR
-            const { useSession } = require('next-session')
             const { req, res, pathname, query } = ctx
-            const _req = {...req}
-            const _res = {...res}
-            await useSession(_req, _res);
-            const session = _req.session
-            if (pathname.match(/\/api\/.*/) && pathname.match(/\/_next\/.*/)) {
+            if (pathname.match(/api/) || pathname.match(/_next/)) {
                 return {
                     pageProps,
                     uid: ''
                 }
             }
-            // const { uid } = cookies(ctx)
+            // SSR
+            const { useSession } = require('next-session')
+            const _req = {...req}
+            const _res = {...res}
+            await useSession(_req, _res);
+            const session = _req.session
             const uid = session && session.token ? session.token.uid : null
-            console.log(session)
             if ((uid && query.id && uid === query.id) || uid && (!query.id)) {
                 if (pathname === '/login' || pathname === '/register' || pathname === '/') {
                     res.writeHead(302, {
@@ -70,11 +68,11 @@ export default class MyApp extends App {
     componentDidMount() {
         (async() => {
             const firebase = await initFirebase()
-            firebase.auth().onAuthStateChanged(async user => {
+            this.unsubscribe = firebase.auth().onAuthStateChanged(async user => {
                 if (user && user.uid === this.props.router.query.id || user && !this.props.router.query.id) {
                     this.setState({uid:user.uid})
                     const token = await user.getIdToken()
-                    const res = await fetch('/api/login', {
+                    await fetch('/api/login', {
                         method: 'POST',
                         headers: new Headers({
                             'Content-Type': 'application/json',
@@ -85,7 +83,6 @@ export default class MyApp extends App {
                             token
                         })
                     })
-                    console.log(res)
                     this.setState({loading: false})
                     if (Router.pathname === '/login' || Router.pathname === '/register') {
                         Router.push(`/users/${user.uid}/show`)
@@ -102,6 +99,10 @@ export default class MyApp extends App {
                 }
             })
         })()
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe && this.unsubscribe()
     }
         
     render() {
