@@ -27,18 +27,18 @@ export const UserShow: React.FC = () => {
                     </Row>
                 </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href="/users/1/edit">
+                    <a href="/users/1/edit">
                         <Button className="ml-auto">編集</Button>
-                    </Link>
+                    </a>
                 </Row>
                 <Row style={{ margin: 0, marginTop: "1em" }}>
-                    <Link href="/login">
+                    <a href="/login">
                         <Button className="ml-auto" onClick={async() => {
                             const firebase = await initFirebase()
                             firebase.auth().signOut()
                         }}>
                             ログアウト</Button>
-                    </Link>
+                    </a>
                 </Row>
             </Form>
         </Container>

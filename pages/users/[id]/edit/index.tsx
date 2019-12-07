@@ -38,14 +38,14 @@ export const UserShow: React.FC = () => {
                     <Input type="file" name="image" id="image" style={{border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em"}} />
                 </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href="/users/1/edit/confirm">
+                    <a href="/users/1/edit/confirm">
                         <Button className="ml-auto">確認</Button>
-                    </Link>
+                    </a>
                 </Row>
                 <Row style={{ margin: 0, marginTop: "1.5em" }}>
-                    <Link href="/users/edit/leave">
+                    <a href="/users/edit/leave">
                         <Button className="ml-auto">退会</Button>
-                    </Link>
+                    </a>
                 </Row>
             </Form>
         </Container>

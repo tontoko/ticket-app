@@ -11,7 +11,7 @@ export default class MyApp extends App {
         super(props)
         this.state = {
             loading: true,
-            uid: null
+            uid: ''
         }
     }
 
@@ -35,7 +35,7 @@ export default class MyApp extends App {
             await useSession(_req, _res);
             const session = _req.session
             const uid = session && session.token ? session.token.uid : null
-            if ((uid && query.id && uid === query.id) || uid && (!query.id)) {
+            if (uid && query.id && uid === query.id || uid && !query.id) {
                 if (pathname === '/login' || pathname === '/register' || pathname === '/') {
                     res.writeHead(302, {
                         Location: `/users/${uid}/show`
@@ -70,7 +70,6 @@ export default class MyApp extends App {
             const firebase = await initFirebase()
             this.unsubscribe = firebase.auth().onAuthStateChanged(async user => {
                 if (user && user.uid === this.props.router.query.id || user && !this.props.router.query.id) {
-                    this.setState({uid:user.uid})
                     const token = await user.getIdToken()
                     await fetch('/api/login', {
                         method: 'POST',
@@ -83,8 +82,8 @@ export default class MyApp extends App {
                             token
                         })
                     })
-                    this.setState({loading: false})
-                    if (Router.pathname === '/login' || Router.pathname === '/register') {
+                    this.setState({loading: false, uid:user.uid})
+                    if ((Router.pathname === '/login' || Router.pathname === '/register') && user.uid) {
                         Router.push(`/users/${user.uid}/show`)
                     }
                 } else {
@@ -92,9 +91,9 @@ export default class MyApp extends App {
                         method: 'POST',
                         credentials: 'same-origin'
                     })
-                    this.setState({loading: false})
+                    this.setState({loading: false, uid: ''})
                     if (Router.pathname !== '/login' || Router.pathname !== '/register' || Router.pathname !== '/') {
-                        Router.push(`/login`)
+                        Router.push('/login')
                     }
                 }
             })

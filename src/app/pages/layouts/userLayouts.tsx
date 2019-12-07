@@ -13,11 +13,13 @@ export const UserLayout: React.FC<any> = (props) => {
         <div>
             <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
-                <Link href={`/users/${props.uid}/show`}>
-                    <div className="ml-auto mr-2">
-                            <Avater size="40" round style={{ cursor: "pointer" }} />
-                    </div>
-                </Link>
+                <div style={{marginLeft: "auto"}}>
+                    <a href={`/users/${props.uid}/show`}>
+                        <div className="ml-auto mr-2">
+                                <Avater size="40" round style={{ cursor: "pointer" }} />
+                        </div>
+                    </a>
+                </div>
                 <NavbarToggler onClick={() => toggle(!isOpen)} />
                 <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">
                     <Nav navbar>

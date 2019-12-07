@@ -38,9 +38,9 @@ export const Confirm: React.FC = () => {
                     </Row>
                 </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href="/users/edit/confirm">
+                    <a href="/users/edit/confirm">
                         <Button className="ml-auto">確認</Button>
-                    </Link>
+                    </a>
                 </Row>
             </Form>
         </Container>

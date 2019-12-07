@@ -9,7 +9,7 @@ export default () => {
     return (
         <Container>
             <div style={{ marginTop: "1em" }}>
-                <Link href="/events/1">
+                <a href="/events/1">
                     <div>
                     <Card style={{ cursor: 'pointer' }}>
                         <CardBody>
@@ -26,8 +26,8 @@ export default () => {
                         </CardBody>
                     </Card>
                     </div>
-                </Link>
-                <Link href="/events/2">
+                </a>
+                <a href="/events/2">
                     <div>
                     <Card style={{ cursor: 'pointer' }}>
                         <CardBody>
@@ -44,7 +44,7 @@ export default () => {
                         </CardBody>
                     </Card>
                     </div>
-                </Link>
+                </a>
             </div>
             <Pagination aria-label="Page navigation" xs="" style={{ marginTop: "1em", justifyContent: "center" }}>
                 <PaginationItem>
@@ -86,9 +86,9 @@ export default () => {
                 </PaginationItem>
             </Pagination>
             <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                <Link href="/events/new">
+                <a href="/events/new">
                     <Button className="ml-auto">新しいイベントを作成</Button>
-                </Link>
+                </a>
             </Row>
         </Container>
     );

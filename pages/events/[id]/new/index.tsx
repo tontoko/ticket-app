@@ -54,9 +54,9 @@ export default () => {
                     </Row>
                 </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href="/events/new/confirm">
+                    <a href="/events/new/confirm">
                         <Button className="ml-auto">確認</Button>
-                    </Link>
+                    </a>
                 </Row>
             </Form>
         </Container>

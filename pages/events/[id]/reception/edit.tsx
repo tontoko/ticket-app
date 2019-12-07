@@ -30,9 +30,9 @@ export default () => {
                     </Input>
                 </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href="/events/reception">
+                    <a href="/events/reception">
                         <Button className="ml-auto">確認</Button>
-                    </Link>
+                    </a>
                 </Row>
             </Form>
         </Container>
