@@ -92,7 +92,7 @@ export default class MyApp extends App {
                         credentials: 'same-origin'
                     })
                     this.setState({loading: false, uid: ''})
-                    if (Router.pathname !== '/login' || Router.pathname !== '/register' || Router.pathname !== '/') {
+                    if (Router.pathname === '/login' || Router.pathname === '/register' || Router.pathname === '/') {
                         Router.push('/login')
                     }
                 }
