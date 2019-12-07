@@ -18,7 +18,7 @@ export default () => {
                 </FormGroup>
                 <Button>登録</Button>
             </Form>
-            <a href="/login"><a>ログイン</a></a>
+            <a href="/login">ログイン</a>
         </Container>
     )
 }

@@ -13,27 +13,28 @@ export const UserLayout: React.FC<any> = (props) => {
         <div>
             <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
-                <div style={{marginLeft: "auto"}}>
-                    <a href={`/users/${props.uid}/show`}>
-                        <div className="ml-auto mr-2">
-                                <Avater size="40" round style={{ cursor: "pointer" }} />
-                        </div>
-                    </a>
-                </div>
-                <NavbarToggler onClick={() => toggle(!isOpen)} />
-                <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">
-                    <Nav navbar>
-                        {/* <NavItem>
-                            <NavLink href="/events">イベント一覧</NavLink>
-                        </NavItem> */}
-                        <NavItem>
-                            <NavLink href={`/users/${props.uid}/show/myEvents`}>主催するイベント</NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink href={`/users/${props.uid}/show/myTickets`}>購入済みチケット</NavLink>
-                        </NavItem>
-                    </Nav>
-                </Collapse>
+                {props.uid && 
+                    <>
+                    <div style={{marginLeft: "auto"}}>
+                        <a href={`/users/${props.uid}/show`}>
+                            <div className="ml-auto mr-2">
+                                    <Avater size="40" round style={{ cursor: "pointer" }} />
+                            </div>
+                        </a>
+                    </div>
+                    <NavbarToggler onClick={() => toggle(!isOpen)} />
+                    <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">
+                        <Nav navbar>
+                            <NavItem>
+                                <NavLink href={`/users/${props.uid}/show/myEvents`}>主催するイベント</NavLink>
+                            </NavItem>
+                            <NavItem>
+                                <NavLink href={`/users/${props.uid}/show/myTickets`}>購入済みチケット</NavLink>
+                            </NavItem>
+                        </Nav>
+                    </Collapse>
+                    </>
+                }
             </Navbar>
         </div>
     );

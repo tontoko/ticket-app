@@ -1,9 +1,15 @@
 import admin from '../../initFirebaseAdmin'
-import withMiddleware from './middleware'
+const micro_session = require('micro-cookie-session')({
+    name: 'session',
+    keys: ['geheimnis'],
+    maxAge: 24 * 60 * 60 * 1000
+})
+
 
 const endpoint = (async (req, res) => {
     if (!req.body) return res.sendStatus(400)
-
+    micro_session(req, res)
+    console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS)
     try {
         let session = req.session
         const firebase = await admin()
@@ -15,4 +21,4 @@ const endpoint = (async (req, res) => {
     }
 })
 
-export default withMiddleware(endpoint)
+export default endpoint

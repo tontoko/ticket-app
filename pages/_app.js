@@ -5,6 +5,11 @@ import UserLayouts from './layouts/userLayouts'
 import initFirebase from '../initFirebase'
 import Router from 'next/router'
 import {Spinner} from 'reactstrap'
+const micro_session = require('micro-cookie-session')({
+    name: 'session',
+    keys: ['geheimnis'],
+    maxAge: 24 * 60 * 60 * 1000
+})
 
 export default class MyApp extends App {
     constructor (props) {
@@ -29,10 +34,9 @@ export default class MyApp extends App {
                 }
             }
             // SSR
-            const { useSession } = require('next-session')
             const _req = {...req}
             const _res = {...res}
-            await useSession(_req, _res);
+            micro_session(_req, _res)
             const session = _req.session
             const uid = session && session.token ? session.token.uid : null
             if (uid && query.id && uid === query.id || uid && !query.id) {
@@ -109,31 +113,32 @@ export default class MyApp extends App {
         if (this.state.loading && !this.props.uid && !this.state.uid) {
             return (
                 <div style = {
-                        {
-                            opacity: "0.5",
-                            height: "100%",
-                            width: "100%",
-                            position: "absolute",
-                            zIndex: 10,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center"
-                        }
-                    } >
-                    <Spinner style={
-                        {
-                            width: '8rem',
-                            height: '8rem'
-                        }
+                    {
+                        opacity: "0.5",
+                        height: "100%",
+                        width: "100%",
+                        position: "absolute",
+                        zIndex: 10,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
                     }
-                color="info" />
-                    </div>
-                )
+                } >
+                <Spinner style={
+                    {
+                        width: '8rem',
+                        height: '8rem'
+                    }
+                }
+                color="info" 
+                />
+                </div>
+            )
         } else {
             return (
                 <>
-                    <UserLayouts {...this.props} {...this.state} />
-                    <Component {...this.props} {...this.state} />
+                    <UserLayouts {...this.state} {...this.props} />
+                    <Component {...this.state} {...this.props} />
                 </>
             )
         }
