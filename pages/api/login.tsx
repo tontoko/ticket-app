@@ -9,7 +9,6 @@ const micro_session = require('micro-cookie-session')({
 const endpoint = (async (req, res) => {
     if (!req.body) return res.sendStatus(400)
     micro_session(req, res)
-    console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS)
     try {
         let session = req.session
         const firebase = await admin()

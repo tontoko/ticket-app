@@ -1,4 +1,4 @@
-import params from '../../ticket-app-dev'
+import params from './ticket-app-dev'
 
 const initFirebase = async () => {
     const firebase = await import('firebase/app')

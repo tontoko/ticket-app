@@ -12,7 +12,6 @@ export const Login = () => {
     
     const loginWithEmail = async () => {
         try {
-            console.log(process.env)
             const firebase = await initFirebase()
             firebase.auth().signInWithEmailAndPassword(email, password)
         } catch (e) {
