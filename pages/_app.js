@@ -5,11 +5,19 @@ import UserLayouts from './layouts/userLayouts'
 import initFirebase from '../initFirebase'
 import Router from 'next/router'
 import {Spinner} from 'reactstrap'
+import NProgress from 'nprogress'
 const micro_session = require('micro-cookie-session')({
     name: 'session',
     keys: ['geheimnis'],
     maxAge: 24 * 60 * 60 * 1000
 })
+Router.events.on('routeChangeStart', url => {
+    require('nprogress/nprogress.css')
+    console.log(`Loading: ${url}`)
+    NProgress.start()
+})
+Router.events.on('routeChangeComplete', () => NProgress.done())
+Router.events.on('routeChangeError', () => NProgress.done())
 
 export default class MyApp extends App {
     constructor (props) {
