@@ -4,11 +4,10 @@ import {useState} from 'react'
 import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, FormText, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons'
+import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import initFirebase from '../../../../initFirebase'
 
-export const UserShow: React.FC = () => {
-
+export const UserShow: React.FC<any> = (props) => {
     return (
         <Container>
             <Form style={{marginTop: "1.5em"}}>
@@ -17,15 +16,20 @@ export const UserShow: React.FC = () => {
                     <Label for="email">メールアドレス</Label>
                     <Input disabled type="email" name="email" id="email" />
                 </FormGroup>
+                {props.user.firebase && props.user.firebase.sign_in_provider !== 'password' && 
                 <FormGroup>
                     <Label>連携済みサービス</Label>
                     <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                        <Col style={{display: 'flex'}}>
-                            <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2", marginLeft: "1em" }} /></p>
-                            <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2", marginLeft: "1em" }} /></p>
+                        <Col style={{display: 'flex', padding: 0}}>
+                            {props.user.firebase && props.user.firebase.sign_in_provider === 'twitter.com' && 
+                                <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2" }} className="fa-2x" /></p>}
+                            {props.user.firebase && props.user.firebase.sign_in_provider === 'facebook.com' && 
+                                <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2" }} className="fa-2x" /></p>}
+                            {props.user.firebase && props.user.firebase.sign_in_provider === 'google.com' && 
+                                <p><FontAwesomeIcon icon={faGoogle} size="lg" style={{ color: "#DB4437" }} className="fa-2x" /></p>}
                         </Col>
                     </Row>
-                </FormGroup>
+                </FormGroup>}
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
                     <a href="/users/1/edit">
                         <Button className="ml-auto">編集</Button>

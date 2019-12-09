@@ -13,7 +13,6 @@ const micro_session = require('micro-cookie-session')({
 })
 Router.events.on('routeChangeStart', url => {
     require('nprogress/nprogress.css')
-    console.log(`Loading: ${url}`)
     NProgress.start()
 })
 Router.events.on('routeChangeComplete', () => NProgress.done())
