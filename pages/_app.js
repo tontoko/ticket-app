@@ -24,7 +24,7 @@ export default class MyApp extends App {
         super(props)
         this.state = {
             loading: true,
-            uid: ''
+            user: null
         }
     }
 
@@ -38,7 +38,7 @@ export default class MyApp extends App {
             if (pathname.match(/api/) || pathname.match(/_next/)) {
                 return {
                     pageProps,
-                    uid: ''
+                    user
                 }
             }
             // SSR
@@ -46,7 +46,8 @@ export default class MyApp extends App {
             const _res = {...res}
             micro_session(_req, _res)
             const session = _req.session
-            const uid = session && session.token ? session.token.uid : null
+            const user = session && session.token ? session.token : null
+            const uid = user ? session.token.uid : null
             if (uid && query.id && uid === query.id || uid && !query.id) {
                 if (pathname === '/login' || pathname === '/register' || pathname === '/') {
                     res.writeHead(302, {
@@ -56,7 +57,7 @@ export default class MyApp extends App {
                 }
                 return {
                     pageProps,
-                    uid: uid
+                    user
                 }
             } else {
                 if (pathname !== '/login' && pathname !== '/register') {
@@ -67,13 +68,13 @@ export default class MyApp extends App {
                 }
                 return {
                     pageProps,
-                    uid: ''
+                    user: null
                 }
             }
         } 
         return {
             pageProps,
-            uid: ''
+            user: null
         }
     }
 
@@ -94,8 +95,8 @@ export default class MyApp extends App {
                             token
                         })
                     })
-                    this.setState({loading: false, uid:user.uid})
-                    if ((Router.pathname === '/login' || Router.pathname === '/register') && user.uid) {
+                    this.setState({loading: false, user})
+                    if (Router.pathname === '/login' || Router.pathname === '/register') {
                         Router.push(`/users/${user.uid}/show`)
                     }
                 } else {
@@ -103,7 +104,7 @@ export default class MyApp extends App {
                         method: 'POST',
                         credentials: 'same-origin'
                     })
-                    this.setState({loading: false, uid: ''})
+                    this.setState({loading: false, user: null})
                     if (Router.pathname !== '/login' && Router.pathname !== '/register' && Router.pathname !== '/') {
                         Router.push('/login')
                     }
@@ -118,7 +119,7 @@ export default class MyApp extends App {
         
     render() {
         const { Component } = this.props
-        if (this.state.loading && !this.props.uid && !this.state.uid) {
+        if (this.state.loading && !this.props.user && !this.state.user) {
             return (
                 <div style = {
                     {
