@@ -11,11 +11,11 @@ export const UserLayout: React.FC = () => {
     return (
         <Navbar color="danger" dark>
             <NavbarBrand href="/">管理者ツール</NavbarBrand>
-            <a href="/users/show">
+            <Link href="/users/show">
                 <div className="ml-auto mr-2">
                     <Avater size="40" round style={{ cursor: "pointer" }} />
                 </div>
-            </a>
+            </Link>
             <NavbarToggler onClick={() => toggle(!isOpen)} />
             <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">
                 <Nav navbar>

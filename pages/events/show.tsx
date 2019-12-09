@@ -76,18 +76,18 @@ export default () => {
             // 申し込み
             return (
                 <div style={{ marginTop: "1.5em" }}>
-                    <a href={urlToPurchase}>
+                    <Link href={urlToPurchase}>
                         <Button color="primary">このイベントに申し込む</Button>
-                    </a>
+                    </Link>
                 </div>
             )
         } else if (false) {
             // 申し込み後
             return (
                 <div style={{ marginTop: "1.5em" }}>
-                    <a href="">
+                    <Link href="">
                         <Button color="danger">チケットを購入済みです！</Button>
-                    </a>
+                    </Link>
                 </div>
             )
         } else {
@@ -95,19 +95,19 @@ export default () => {
             return (
                 <Row style={{ marginTop: "1.5em" }}>
                     <Col sm="12" style={{ margin: "0.2em" }}>
-                        <a href={urlToReception}>
+                        <Link href={urlToReception}>
                             <Button block color="success">会場受付</Button>
-                        </a>
+                        </Link>
                     </Col>
                     <Col sm="12" style={{margin: "0.2em"}}>
-                        <a href={urlToEdit}>
+                        <Link href={urlToEdit}>
                             <Button block color="info">イベントを変更する</Button>
-                        </a>
+                        </Link>
                     </Col>
                     <Col sm="12" style={{ margin: "0.2em" }}>
-                        <a href={urlToReport}>
+                        <Link href={urlToReport}>
                             <Button block color="info">レポートを見る</Button>
-                        </a>
+                        </Link>
                     </Col>
                 </Row>
             )

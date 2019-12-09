@@ -15,7 +15,7 @@ export const UserLayout: React.FC<any> = (props) => {
                 {props.user && 
                     <>
                     <div style={{marginLeft: "auto"}}>
-                        <a href={`/users/${props.user.uid}/show`}>
+                        <Link href={`/users/${props.user.uid}/show`}>
                             <div className="ml-auto mr-2">
                                     <Avater 
                                     size="40" 
@@ -24,7 +24,7 @@ export const UserLayout: React.FC<any> = (props) => {
                                     src={props.user.picture}
                                     />
                             </div>
-                        </a>
+                        </Link>
                     </div>
                     <NavbarToggler onClick={() => toggle(!isOpen)} />
                     <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">

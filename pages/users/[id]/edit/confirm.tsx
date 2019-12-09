@@ -6,7 +6,7 @@ import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons'
 
-export const Confirm: React.FC = () => {
+export const Confirm: React.FC<any> = (props) => {
 
     return (
         <Container>
@@ -38,9 +38,9 @@ export const Confirm: React.FC = () => {
                     </Row>
                 </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <a href="/users/edit/confirm">
+                    <Link href={`/users/${props.user.uid}/show`}>
                         <Button className="ml-auto">確認</Button>
-                    </a>
+                    </Link>
                 </Row>
             </Form>
         </Container>

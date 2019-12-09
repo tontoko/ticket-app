@@ -53,9 +53,9 @@ export default () => {
         <Container>
             <Row style={{marginTop: "1.5em"}}>
                 <Col>
-                    <a href={readHref}>
+                    <Link href={readHref}>
                         <Button color="success">QRリーダーを起動する</Button>
-                    </a>
+                    </Link>
                 </Col>
             </Row>
             <Table striped style={{ marginTop: "1em" }}>

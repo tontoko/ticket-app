@@ -34,12 +34,6 @@ export default class MyApp extends App {
         }
         if (ctx.req) {
             const { req, res, pathname, query } = ctx
-            if (pathname.match(/api/) || pathname.match(/_next/)) {
-                return {
-                    pageProps,
-                    user
-                }
-            }
             // SSR
             const _req = {...req}
             const _res = {...res}
@@ -143,10 +137,14 @@ export default class MyApp extends App {
                 </div>
             )
         } else {
+            let user
+            user = this.state.user && this.state.user
+            user = this.props.user && this.props.user
+            
             return (
                 <>
-                    <UserLayouts {...this.state} {...this.props} />
-                    <Component {...this.state} {...this.props} />
+                    <UserLayouts user={user} />
+                    <Component user={user} />
                 </>
             )
         }

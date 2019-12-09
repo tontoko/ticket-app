@@ -6,7 +6,7 @@ import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons'
 
-export const UserShow: React.FC = () => {
+export const UserShow: React.FC<any> = (props) => {
 
     return (
         <Container>
@@ -38,14 +38,14 @@ export const UserShow: React.FC = () => {
                     <Input type="file" name="image" id="image" style={{border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em"}} />
                 </FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <a href="/users/1/edit/confirm">
+                    <Link href={`/users/${props.user.uid}/edit/confirm`}>
                         <Button className="ml-auto">確認</Button>
-                    </a>
+                    </Link>
                 </Row>
                 <Row style={{ margin: 0, marginTop: "1.5em" }}>
-                    <a href="/users/edit/leave">
+                    <Link href="/users/edit/leave">
                         <Button className="ml-auto">退会</Button>
-                    </a>
+                    </Link>
                 </Row>
             </Form>
         </Container>

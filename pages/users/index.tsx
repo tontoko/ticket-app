@@ -27,7 +27,7 @@ export default () => {
                 </Col>
             </Form>
             <div style={{ marginTop: "1em" }}>
-                <a href="/users/1">
+                <Link href="/users/1">
                     <Card style={{ cursor: 'pointer' }}>
                         <CardBody className="p-1">
                             <Row>
@@ -41,8 +41,8 @@ export default () => {
                             </Row>
                         </CardBody>
                     </Card>
-                </a>
-                <a href="/users/2">
+                </Link>
+                <Link href="/users/2">
                     <Card style={{ cursor: 'pointer' }}>
                         <CardBody className="p-1">
                             <Row>
@@ -56,7 +56,7 @@ export default () => {
                             </Row>
                         </CardBody>
                     </Card>
-                </a>
+                </Link>
             </div>
             <Pagination aria-label="Page navigation" xs="" style={{ marginTop: "1em", justifyContent: "center" }}>
                 <PaginationItem>
