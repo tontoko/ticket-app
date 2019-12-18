@@ -11,7 +11,7 @@ export const UserLayout: React.FC = () => {
     return (
         <Navbar color="danger" dark>
             <NavbarBrand href="/">管理者ツール</NavbarBrand>
-            <Link href="/users/show">
+            <Link href="/users/1">
                 <div className="ml-auto mr-2">
                     <Avater size="40" round style={{ cursor: "pointer" }} />
                 </div>

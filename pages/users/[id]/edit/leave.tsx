@@ -13,8 +13,14 @@ export const Leave: React.FC = () => {
             <Form style={{ marginTop: "6.5em" }}>
                 <h5>本当に退会しますか？</h5>
                 <p>削除されたデータは復元することができません。</p>
+                <FormGroup check>
+                    <Label check>
+                        <Input type="checkbox" id="checkbox2" />{' '}
+                        上記の説明を理解しました
+                    </Label>
+                </FormGroup>
                 <Row style={{ margin: 0, marginTop: "10em" }}>
-                    <Button className="ml-auto">上記の説明を理解した上で退会</Button>
+                    <Button className="ml-auto">退会する</Button>
                 </Row>
             </Form>
         </Container>

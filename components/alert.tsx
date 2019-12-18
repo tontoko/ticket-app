@@ -1,0 +1,13 @@
+import { Alert } from 'reactstrap'
+
+export default ({ style, options, message, close }) => {
+    let color =''
+    if (options.type === 'success') color = 'success'
+    if (options.type === 'error') color = 'danger'
+    if (options.type === 'info') color = 'info'
+    return (
+        <Alert color={color} style={style} onClick={close}>
+            {message}
+        </Alert>
+    )
+}

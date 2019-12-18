@@ -6,18 +6,20 @@ import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reac
 import initFirebase from '../initFirebase'
 import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useAlert } from "react-alert"
+import errorMsg from '../lib/errorMsg'
 
 export const Login = () => {
-
+    const alert = useAlert()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     
     const loginWithEmail = async () => {
         try {
             const firebase = await initFirebase()
-            firebase.auth().signInWithEmailAndPassword(email, password)
+            await firebase.auth().signInWithEmailAndPassword(email, password)
         } catch (e) {
-            console.log(e)
+            alert.error(errorMsg(e))
         }
     }
 
@@ -31,15 +33,16 @@ export const Login = () => {
             // The signed-in user info.
             // const user = result.user
             // ...
-        } catch (error) {
+        } catch (e) {
             // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessage = error.message;
+            const errorCode = e.code;
+            const errorMessage = e.message;
             // The email of the user's account used.
-            const email = error.email;
+            const email = e.email;
             // The firebase.auth.AuthCredential type that was used.
-            const credential = error.credential;
+            const credential = e.credential;
             // ...
+            alert.error(errorMsg(e))
         }
     }
 
@@ -53,15 +56,16 @@ export const Login = () => {
             // The signed-in user info.
             // const user = result.user
             // ...
-        } catch (error) {
+        } catch (e) {
             // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessage = error.message;
+            const errorCode = e.code;
+            const errorMessage = e.message;
             // The email of the user's account used.
-            const email = error.email;
+            const email = e.email;
             // The firebase.auth.AuthCredential type that was used.
-            const credential = error.credential;
+            const credential = e.credential;
             // ...
+            alert.error(errorMsg(e))
         }
     }
 
@@ -75,15 +79,16 @@ export const Login = () => {
             // The signed-in user info.
             // const user = result.user
             // ...
-        } catch (error) {
+        } catch (e) {
             // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessage = error.message;
+            const errorCode = e.code;
+            const errorMessage = e.message;
             // The email of the user's account used.
-            const email = error.email;
+            const email = e.email;
             // The firebase.auth.AuthCredential type that was used.
-            const credential = error.credential;
+            const credential = e.credential;
             // ...
+            alert.error(errorMsg(e))
         }
     }
 

@@ -1,49 +1,56 @@
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import React from 'react'
-import {useState} from 'react'
-import { Dispatch, SetStateAction } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, FormText, Row, Col } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons'
+import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
+import { useAlert } from "react-alert"
+import { useRouter } from 'next/router'
 
-export const UserShow: React.FC<any> = (props) => {
+const UserShow = (props) => {
+    const alert = useAlert()
+    const router = useRouter()
+    const [msg, setMsg] = useState(router.query.msg ? router.query.msg : null)
+    
+    useEffect(() => {
+        switch (msg) {
+            case 'updateEmail':
+                alert.success('メールアドレスを変更しました。')
+                break;
+        
+            default:
+                break;
+        }
+        setMsg(null)
+    })
 
     return (
         <Container>
             <Form style={{marginTop: "1.5em"}}>
                 <h3>登録情報</h3>
-                <FormGroup style={{marginTop: "1em"}}>
-                    <Label for="email">メールアドレス</Label>
-                    <Input type="email" name="email" id="email" />
+                <FormGroup style={{ marginTop: '2em' }}>
+                    <Link href={`/users/${props.user.uid}/edit/updateEmail`}><a>メールアドレスを変更する</a></Link>
                 </FormGroup>
                 <FormGroup>
-                    <Label for="password">パスワード</Label>
-                    <Input type="password" name="password" id="password" />
+                    <Link href={`/users/${props.user.uid}/edit/updatePassword`}><a>パスワードを変更する</a></Link>
                 </FormGroup>
-                <FormGroup>
-                    <Label for="password_confirm">パスワード確認</Label>
-                    <Input type="password" name="password_confirm" id="password_confirm" />
-                </FormGroup>
-                <FormGroup>
-                    <Label>連携済みサービス</Label>
-                    <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                        <Col>
-                            <FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2", marginLeft: "1em" }} />
-                            <FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2", marginLeft: "1em" }} />
-                        </Col>
-                    </Row>
-                </FormGroup>
-                <FormGroup>
-                    <Label for="image">プロフィール画像を選択</Label>
-                    <Input type="file" name="image" id="image" style={{border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em"}} />
-                </FormGroup>
-                <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href={`/users/${props.user.uid}/edit/confirm`}>
-                        <Button className="ml-auto">確認</Button>
-                    </Link>
-                </Row>
-                <Row style={{ margin: 0, marginTop: "1.5em" }}>
-                    <Link href="/users/edit/leave">
+
+                {props.user.firebase && props.user.firebase.sign_in_provider !== 'password' &&
+                    <FormGroup style={{marginTop: '2em'}}>
+                        <Label>連携済みサービス</Label>
+                        <Row style={{ margin: 0 }}>
+                            <Col style={{ display: 'flex', padding: 0 }}>
+                                {props.user.firebase && props.user.firebase.sign_in_provider === 'twitter.com' &&
+                                    <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2" }} className="fa-2x" /></p>}
+                                {props.user.firebase && props.user.firebase.sign_in_provider === 'facebook.com' &&
+                                    <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2" }} className="fa-2x" /></p>}
+                                {props.user.firebase && props.user.firebase.sign_in_provider === 'google.com' &&
+                                    <p><FontAwesomeIcon icon={faGoogle} size="lg" style={{ color: "#DB4437" }} className="fa-2x" /></p>}
+                            </Col>
+                        </Row>
+                    </FormGroup>}
+                <Row style={{ margin: 0, marginTop: "5em" }}>
+                    <Link href={`/users/${props.user.uid}/edit/leave`}>
                         <Button className="ml-auto">退会</Button>
                     </Link>
                 </Row>

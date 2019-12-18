@@ -6,6 +6,9 @@ import initFirebase from '../initFirebase'
 import Router from 'next/router'
 import {Spinner} from 'reactstrap'
 import NProgress from 'nprogress'
+import { positions, Provider } from "react-alert";
+import AlertTemplate from '../components/alert'
+import { types } from 'util'
 const micro_session = require('micro-cookie-session')({
     name: 'session',
     keys: ['geheimnis'],
@@ -44,7 +47,7 @@ export default class MyApp extends App {
             if (uid && query.id && uid === query.id || uid && !query.id) {
                 if (pathname === '/login' || pathname === '/register' || pathname === '/') {
                     res.writeHead(302, {
-                        Location: `/users/${uid}/show`
+                        Location: `/users/${uid}`
                     })
                     res.end()
                 }
@@ -53,15 +56,11 @@ export default class MyApp extends App {
                     user
                 }
             } else {
-                if (pathname !== '/login' && pathname !== '/register') {
+                if (pathname !== '/login' && pathname !== '/register' && pathname.match(/^\/users/)) {
                     res.writeHead(302, {
                         Location: `/login`
                     })
                     res.end()
-                }
-                return {
-                    pageProps,
-                    user: null
                 }
             }
         } 
@@ -88,17 +87,17 @@ export default class MyApp extends App {
                             token
                         })
                     })
-                    this.setState({loading: false, user})
+                    if (this.state.loading) this.setState({loading: false, user})
                     if (Router.pathname === '/login' || Router.pathname === '/register') {
-                        Router.push(`/users/${user.uid}/show`)
+                        Router.push(`/users/${user.uid}`)
                     }
                 } else {
                     await fetch('/api/logout', {
                         method: 'POST',
                         credentials: 'same-origin'
                     })
-                    this.setState({loading: false, user: null})
-                    if (Router.pathname !== '/login' && Router.pathname !== '/register' && Router.pathname !== '/') {
+                    if (this.state.loading) this.setState({loading: false, user: null})
+                    if (Router.pathname !== '/login' && Router.pathname !== '/register' && Router.pathname !== '/' && Router.pathname.match(/^\/users/)) {
                         Router.push('/login')
                     }
                 }
@@ -140,12 +139,17 @@ export default class MyApp extends App {
             let user
             user = this.state.user && this.state.user
             user = this.props.user && this.props.user
+
+            const options = {
+                timeout: 4000,
+                position: 'top left'
+            }
             
             return (
-                <>
+                <Provider template={AlertTemplate} {...options}>
                     <UserLayouts user={user} />
                     <Component user={user} />
-                </>
+                </Provider>
             )
         }
     }
