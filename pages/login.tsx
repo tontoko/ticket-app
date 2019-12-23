@@ -19,8 +19,7 @@ export const Login = () => {
             const firebase = await initFirebase()
             await firebase.auth().signInWithEmailAndPassword(email, password)
         } catch (e) {
-            alert.error(errorMsg(e))
-        }
+            alert.error(errorMsg(e, 'signin'))        }
     }
 
     const loginWithFacebook = async() => {
@@ -42,7 +41,7 @@ export const Login = () => {
             // The firebase.auth.AuthCredential type that was used.
             const credential = e.credential;
             // ...
-            alert.error(errorMsg(e))
+            alert.error(errorMsg(e, 'signin/popup'))
         }
     }
 
@@ -65,8 +64,7 @@ export const Login = () => {
             // The firebase.auth.AuthCredential type that was used.
             const credential = e.credential;
             // ...
-            alert.error(errorMsg(e))
-        }
+            alert.error(errorMsg(e, 'signin/popup'))        }
     }
 
     const loginWithGoogle = async () => {
@@ -88,8 +86,7 @@ export const Login = () => {
             // The firebase.auth.AuthCredential type that was used.
             const credential = e.credential;
             // ...
-            alert.error(errorMsg(e))
-        }
+            alert.error(errorMsg(e, 'signin/popup'))        }
     }
 
     return (

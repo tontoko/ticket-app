@@ -17,7 +17,9 @@ const UserShow = (props) => {
             case 'updateEmail':
                 alert.success('メールアドレスを変更しました。')
                 break;
-        
+            case 'updatePassword':
+                alert.success('パスワードを変更しました。')
+                break;
             default:
                 break;
         }
@@ -27,13 +29,17 @@ const UserShow = (props) => {
     return (
         <Container>
             <Form style={{marginTop: "1.5em"}}>
-                <h3>登録情報</h3>
+                <h4>登録情報の変更</h4>
+                {props.user.providerId === 'email' && (
+                <>
                 <FormGroup style={{ marginTop: '2em' }}>
                     <Link href={`/users/${props.user.uid}/edit/updateEmail`}><a>メールアドレスを変更する</a></Link>
                 </FormGroup>
                 <FormGroup>
                     <Link href={`/users/${props.user.uid}/edit/updatePassword`}><a>パスワードを変更する</a></Link>
                 </FormGroup>
+                </>
+                )}
 
                 {props.user.firebase && props.user.firebase.sign_in_provider !== 'password' &&
                     <FormGroup style={{marginTop: '2em'}}>

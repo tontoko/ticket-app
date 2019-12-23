@@ -8,7 +8,7 @@ import {Spinner} from 'reactstrap'
 import NProgress from 'nprogress'
 import { positions, Provider } from "react-alert";
 import AlertTemplate from '../components/alert'
-import { types } from 'util'
+import Loading from '../components/loading'
 const micro_session = require('micro-cookie-session')({
     name: 'session',
     keys: ['geheimnis'],
@@ -45,7 +45,12 @@ export default class MyApp extends App {
             const user = session && session.token ? session.token : null
             const uid = user ? session.token.uid : null
             if (uid && query.id && uid === query.id || uid && !query.id) {
-                if (pathname === '/login' || pathname === '/register' || pathname === '/') {
+                if (!user.emailVerified && pathname !== '/confirmEmail') {
+                    res.writeHead(302, {
+                        Location: '/confirmEmail'
+                    })
+                    res.end()
+                } else if (pathname === '/login' || pathname === '/register' || pathname === '/') {
                     res.writeHead(302, {
                         Location: `/users/${uid}`
                     })
@@ -112,33 +117,11 @@ export default class MyApp extends App {
     render() {
         const { Component } = this.props
         if (this.state.loading && !this.props.user && !this.state.user) {
-            return (
-                <div style = {
-                    {
-                        opacity: "0.5",
-                        height: "100%",
-                        width: "100%",
-                        position: "absolute",
-                        zIndex: 10,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                    }
-                } >
-                <Spinner style={
-                    {
-                        width: '8rem',
-                        height: '8rem'
-                    }
-                }
-                color="info" 
-                />
-                </div>
-            )
+            return <Loading/>
         } else {
             let user
-            user = this.state.user && this.state.user
-            user = this.props.user && this.props.user
+            if (this.props.user) user = this.props.user
+            if (this.state.user) user = this.state.user
 
             const options = {
                 timeout: 4000,

@@ -1,17 +1,15 @@
-import Link from 'next/link'
+import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
+import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
 import initFirebase from '../../../../initFirebase'
 import 'firebase/storage'
-import Avater from 'react-avatar'
+import { useAlert } from "react-alert"
+import errorMsg from '../../../../lib/errorMsg'
 
 export const UpdatePassword: React.FC<any> = (props) => {
-    const [image, setImage] = useState('')
-    const [imageFile, setImageFile] = useState()
-    const [email, setEmail] = useState('')
+    const router = useRouter()
+    const alert = useAlert()
     const [pwd, setPwd] = useState('')
     const [newPwd, setNewPwd] = useState('')
     const [newPwdConfirm, setNewPwdConfirm] = useState('')
@@ -25,14 +23,14 @@ export const UpdatePassword: React.FC<any> = (props) => {
                 const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
                 await currentUser.reauthenticateAndRetrieveDataWithCredential(credential)
             } catch (e) {
-                console.log(e)
+                alert.error(errorMsg(e))
             }
         }
         try {
-            currentUser.updatePassword(newPwd)
-
+            await currentUser.updatePassword(newPwd)
+            router.push({pathname: `/users/${props.user.uid}/edit`, query: {msg: 'updatePassword'}})
         } catch (e) {
-            console.log(e)
+            alert.error(errorMsg(e))
         }
     }
 

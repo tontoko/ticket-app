@@ -6,7 +6,7 @@ export default ({ style, options, message, close }) => {
     if (options.type === 'error') color = 'danger'
     if (options.type === 'info') color = 'info'
     return (
-        <Alert color={color} style={style} onClick={close}>
+        <Alert color={color} style={{...style, opacity: '0.95'}} onClick={close}>
             {message}
         </Alert>
     )

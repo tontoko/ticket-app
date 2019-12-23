@@ -4,7 +4,7 @@ export default (e, method?) => {
         case 'auth/popup-closed-by-user':
             return 'ポップアップが閉じられました。';
         case 'auth/email-already-in-use':
-            if (method.indexOf('signup') !== -1) {
+            if (method && method.indexOf('signup') !== -1) {
                 return 'このメールアドレスは使用されています。';
             } else {
                 return 'メールアドレスまたはパスワードが違います。';
@@ -16,7 +16,7 @@ export default (e, method?) => {
         case 'auth/user-not-found':
             return 'メールアドレスまたはパスワードが正しくありません。';
         case 'auth/user-mismatch':
-            if (method === 'signin/popup') {
+            if (method && method === 'signin/popup') {
                 return '認証されているユーザーと異なるアカウントです。';
             } else {
                 return 'メールアドレスまたはパスワードが正しくありません。';
@@ -35,7 +35,7 @@ export default (e, method?) => {
         case 'auth/requires-recent-login':
             return '認証の有効期限が切れています。';
         default:
-            if (method.indexOf('signin') !== -1) {
+            if (method && method.indexOf('signin') !== -1) {
                 return '認証に失敗しました。しばらく時間をおいて再度お試しください。';
             }
                 return 'エラーが発生しました。しばらく時間をおいてお試しください。';

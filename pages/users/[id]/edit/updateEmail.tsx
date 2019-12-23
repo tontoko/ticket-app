@@ -1,13 +1,11 @@
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
+import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
 import initFirebase from '../../../../initFirebase'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
+import errorMsg from '../../../../lib/errorMsg'
 
 export const UpdateEmail: React.FC<any> = (props) => {
     const router = useRouter()
@@ -24,14 +22,14 @@ export const UpdateEmail: React.FC<any> = (props) => {
                 const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
                 await currentUser.reauthenticateAndRetrieveDataWithCredential(credential)
             } catch(e) {
-                alert.error(e.message)
+                alert.error(errorMsg(e))
             }
         }
         try {
             await currentUser.updateEmail(email)
-            router.push({pathname: `/users/${props.user.uid}/edit`, query: {msg: updateEmail}})
+            router.push({pathname: `/users/${props.user.uid}/edit`, query: {msg: 'updateEmail'}},)
         } catch (e) {
-            alert.error(e.message)
+            alert.error(errorMsg(e))
         }
     }
 
@@ -40,7 +38,7 @@ export const UpdateEmail: React.FC<any> = (props) => {
             <Form style={{ marginTop: "1.5em" }}>
                 <h3>登録情報</h3>
                 <FormGroup style={{marginTop: "1em"}}>
-                    <Label for="email">メールアドレス</Label>
+                    <Label for="email">新しいメールアドレス</Label>
                     <Input type="email" name="email" id="email" onChange={e => setEmail(e.target.value)} />
                 </FormGroup>
                 <FormGroup>
