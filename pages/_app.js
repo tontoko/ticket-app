@@ -45,7 +45,7 @@ export default class MyApp extends App {
             const user = session && session.token ? session.token : null
             const uid = user ? session.token.uid : null
             if (uid && query.id && uid === query.id || uid && !query.id) {
-                if (!user.emailVerified && pathname !== '/confirmEmail') {
+                if (user.firebase.sign_in_provider === 'password' && !user.emailVerified && pathname !== '/confirmEmail') {
                     res.writeHead(302, {
                         Location: '/confirmEmail'
                     })

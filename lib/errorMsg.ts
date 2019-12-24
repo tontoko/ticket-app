@@ -34,6 +34,8 @@ export default (e, method?) => {
             return '現在この認証方法はご利用頂けません。';
         case 'auth/requires-recent-login':
             return '認証の有効期限が切れています。';
+        case 'auth/too-many-requests':
+            return '短時間に複数のリクエストを受け取ったためブロックされました。しばらく時間をおいて再度お試しください。'
         default:
             if (method && method.indexOf('signin') !== -1) {
                 return '認証に失敗しました。しばらく時間をおいて再度お試しください。';
