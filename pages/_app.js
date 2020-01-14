@@ -121,7 +121,6 @@ export default class MyApp extends App {
         } else {
             let user
             if (this.props.user) user = this.props.user
-            if (this.state.user) user = this.state.user
 
             const options = {
                 timeout: 4000,

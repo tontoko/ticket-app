@@ -9,24 +9,25 @@ export default (props) => {
     const router = useRouter()
     const [msg, setMsg] = useState('')
     const [loading, setLoading] = useState(true)
-    const [user, setUser] = useState(props.user)
     
     useEffect(() => {
-        // クライアント側の認証を待つ
-        setUser(props.user)
-        if (!user.providerId) return
-        if (!loading) return
-        sendEmail()
+        (async() => {
+            // クライアント側の認証を待つ
+            const auth = (await initFirebase()).auth()
+            if (!auth.currentUser) return
+            if (!loading) return
+            sendEmail(auth)
+        })()
     })
 
-    const sendEmail = async() => {
-        const auth = (await initFirebase()).auth()
+    const sendEmail = async(auth) => {
         try {
             await auth.currentUser.sendEmailVerification()
             setLoading(false)
             setMsg('登録されたメールアドレスに認証用メールを送信しました。リダイレクトします。')
         } catch (e) {
             console.log(e)
+            setLoading(false)
             setMsg(errorMsg(e))
         }
         setTimeout(async () => {
