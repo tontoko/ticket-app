@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
 import initFirebase from '../../../initFirebase'
@@ -7,6 +6,7 @@ import errorMsg from '../../../lib/errorMsg'
 import Loading from '../../../components/loading'
 import {useRouter} from 'next/router'
 import Firebase from 'firebase'
+import ResetPassword from './resetPassword'
 
 interface props {
     user: Firebase.User
@@ -15,28 +15,14 @@ interface props {
 export default (props:props) => {
     const alert = useAlert()
     const router = useRouter()
+    const { mode, oobCode } = router.query
     const [loading, setLoading] = useState(true)
-    const [msg, setMsg] = useState('')
     const [valid, setValid] = useState(false)
-
-    const [mode, setMode] = useState('')
-    const [code, setCode] = useState('')
-    
-    const [newPwd, setNewPwd] = useState('')
-    const [newPwdConfirm, setNewPwdConfirm] = useState('')    
+    const [view, setView] = useState(null)
 
     useEffect(() => {
         (async() => {
-            if(!props.user) {
-                setLoading(false)
-                setTimeout(() => {
-                    router.push('/login')
-                }, 5000)
-            }
             try {
-                const { mode, oobCode } = router.query
-                setMode(mode as string)
-                setCode(oobCode as string)
                 manageMode()
             } catch(e) {
                 setLoading(false)
@@ -50,7 +36,7 @@ export default (props:props) => {
     const manageMode = async () => {
         // await firebase.auth().checkActionCode(oobCode as string)
         const auth = (await initFirebase()).auth()
-        switch (mode) {
+        switch (mode as string) {
             case 'resetPassword':
                 // Display reset password handler and UI.
                 handleResetPassword(auth);
@@ -71,35 +57,41 @@ export default (props:props) => {
 
     const handleResetPassword = async (auth:Firebase.auth.Auth) => {
         try {
-            auth.verifyPasswordResetCode(code)
+            auth.verifyPasswordResetCode(oobCode as string)
             setValid(true)
+            setView(<ResetPassword confirmResetPassword={confirmResetPassword} />)
             setLoading(false)
         }catch(e) {
             throw new Error("エラーが発生しました。")
         }
     }
 
-    const confirmResetPassword = async() => {
+    const confirmResetPassword = async (newPwd, newPwdConfirm) => {
         if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません。')
         const auth = (await initFirebase()).auth()
-        auth.confirmPasswordReset(code, newPwd).then(function (resp) {
-            router.push({pathname: `/users/${props.user.uid}/edit`, query: {msg: mode}})
-        }).catch(function (error) {
-            alert.error('エラーが発生しました。')
-        });
+        try {
+            await auth.confirmPasswordReset(oobCode as string, newPwd)
+            const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
+            setTimeout(() => {
+                router.push({ pathname, query: { msg: mode } })
+            }, 5000)
+        } catch(e) {
+            alert.error(errorMsg(e))
+        }
     }
 
     const handleRecoverEmail = async (auth: Firebase.auth.Auth) => {
         try {
-            const info = await auth.checkActionCode(code)
+            const info = await auth.checkActionCode(oobCode as string)
             const restoredEmail = info['data']['email']
-            await auth.applyActionCode(code)
+            await auth.applyActionCode(oobCode as string)
             await auth.sendPasswordResetEmail(restoredEmail)
-            setMsg("メールアドレスを復元しました。パスワードを変更してください。リダイレクトします。")
+            setView(<h4>メールアドレスを復元しました。パスワードを変更してください。リダイレクトします。</h4>)
             setValid(true)
             setLoading(false)
+            const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
             setTimeout(() => {
-                router.push({pathname: `/users/${props.user.uid}/edit`})
+                router.push({ pathname })
             }, 5000)
         } catch(e) {
             throw new Error("エラーが発生しました。")
@@ -108,12 +100,13 @@ export default (props:props) => {
 
     const handleVerifyEmail = async (auth: Firebase.auth.Auth) => {
         try {
-            await auth.applyActionCode(code)
-            setMsg("メールアドレスが認証されました。リダイレクトします。")
+            await auth.applyActionCode(oobCode as string)
+            setView(<h4>メールアドレスが認証されました。リダイレクトします。</h4>)
             setValid(true)
             setLoading(false)
+            const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
             setTimeout(() => {
-                router.push({ pathname: `/users/${props.user.uid}/edit`})
+                router.push({pathname})
             }, 5000)
         }catch(e) {
             throw new Error("エラーが発生しました。")
@@ -127,45 +120,17 @@ export default (props:props) => {
         <Container>
             <Form style={{ marginTop: '5em' }}>
             {(() => {
-                if (!props.user) {
+                if (!valid) {
                     return (
                         <>
-                        <h4>ログインしていません。再度ログインしてください。</h4>
-                        <div style={{ marginTop: '2em' }}>
-                            <a href="/login">ログイン</a>
-                        </div>
+                            <h4>認証に失敗しました。リダイレクトします。</h4>
+                            <div style={{ marginTop: '2em' }}>
+                                <a href="/login">ログイン</a>
+                            </div>
                         </>
-                    )
-                } else if (!valid) {
-                    return (
-                        <>
-                        <h4>認証に失敗しました。リダイレクトします。</h4>
-                        <div style={{ marginTop: '2em' }}>
-                            <a href="/login">ログイン</a>
-                        </div>
-                        </>
-                    )
-                } else if (mode === 'resetPassword') {
-                    return (
-                        <Container>
-                            <Form style={{ marginTop: "1.5em" }}>
-                                <FormGroup>
-                                    <Label for="password">新しいパスワード</Label>
-                                    <Input type="password" name="password" id="password" onChange={e => setNewPwd(e.target.value)} />
-                                </FormGroup>
-                                <FormGroup>
-                                    <Label for="password_confirm">パスワード確認</Label>
-                                    <Input type="password" name="password_confirm" id="password_confirm" onChange={e => setNewPwdConfirm(e.target.value)} />
-                                </FormGroup>
-                                <Button className="ml-auto" onClick={() => confirmResetPassword()}>変更</Button>
-                            </Form>
-                        </Container>
-                    )
-                } else {
-                    return (
-                        <h4>{msg}</h4>
                     )
                 }
+                return view
             })()}
             </Form>
         </Container>

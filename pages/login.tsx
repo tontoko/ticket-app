@@ -19,7 +19,8 @@ export const Login = () => {
             const firebase = await initFirebase()
             await firebase.auth().signInWithEmailAndPassword(email, password)
         } catch (e) {
-            alert.error(errorMsg(e, 'signin'))        }
+            alert.error(errorMsg(e, 'signin'))
+        }
     }
 
     const loginWithFacebook = async() => {
