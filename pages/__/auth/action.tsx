@@ -39,20 +39,37 @@ export default (props:props) => {
         switch (mode as string) {
             case 'resetPassword':
                 // Display reset password handler and UI.
-                handleResetPassword(auth);
+                await handleResetPassword(auth);
                 break;
             case 'recoverEmail':
                 // Display email recovery handler and UI.
-                handleRecoverEmail(auth);
+                await handleRecoverEmail(auth);
                 break;
             case 'verifyEmail':
                 // Display email verification handler and UI.
-                handleVerifyEmail(auth);
+                await handleVerifyEmail(auth);
                 break;
             default:
                 // Error: invalid mode.
                 throw new Error("不正なリクエストです。")
         }
+        await auth.currentUser.reload()
+        const token = await auth.currentUser.getIdToken()
+        await fetch('/api/login', {
+            method: 'POST',
+            headers: new Headers({
+                'Content-Type': 'application/json',
+                'Cache-Control': 'private'
+            }),
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                token
+            })
+        })
+        const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
+        setTimeout(() => {
+            router.push({ pathname, query: { msg: mode } })
+        }, 5000)
     } 
 
     const handleResetPassword = async (auth:Firebase.auth.Auth) => {
@@ -71,10 +88,6 @@ export default (props:props) => {
         const auth = (await initFirebase()).auth()
         try {
             await auth.confirmPasswordReset(oobCode as string, newPwd)
-            const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
-            setTimeout(() => {
-                router.push({ pathname, query: { msg: mode } })
-            }, 5000)
         } catch(e) {
             alert.error(errorMsg(e))
         }
@@ -90,9 +103,6 @@ export default (props:props) => {
             setValid(true)
             setLoading(false)
             const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
-            setTimeout(() => {
-                router.push({ pathname })
-            }, 5000)
         } catch(e) {
             throw new Error("エラーが発生しました。")
         }
@@ -105,9 +115,6 @@ export default (props:props) => {
             setValid(true)
             setLoading(false)
             const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
-            setTimeout(() => {
-                router.push({pathname})
-            }, 5000)
         }catch(e) {
             throw new Error("エラーが発生しました。")
         }

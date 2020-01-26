@@ -24,16 +24,12 @@ export default (props) => {
         try {
             await auth.currentUser.sendEmailVerification()
             setLoading(false)
-            setMsg('登録されたメールアドレスに認証用メールを送信しました。リダイレクトします。')
+            setMsg('登録されたメールアドレスに認証用メールを送信しました。')
         } catch (e) {
             console.log(e)
             setLoading(false)
             setMsg(errorMsg(e))
         }
-        setTimeout(async () => {
-            await auth.signOut()
-            router.push('/login')
-        }, 5000)
     }
 
     if (loading) return <Loading/>
