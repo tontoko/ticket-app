@@ -14,7 +14,7 @@ export const UserShow: React.FC<any> = (props) => {
                 <h3>登録情報</h3>
                 <FormGroup style={{marginTop: "1em"}}>
                     <Label for="email">メールアドレス</Label>
-                    <Input disabled type="email" name="email" id="email" />
+                    <Input disabled type="email" name="email" id="email" value={props.user.email} />
                 </FormGroup>
                 {props.user.firebase && props.user.firebase.sign_in_provider !== 'password' && 
                 <FormGroup>

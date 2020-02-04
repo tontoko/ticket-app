@@ -34,24 +34,27 @@ export default (props:props) => {
     })
 
     const manageMode = async () => {
-        // await firebase.auth().checkActionCode(oobCode as string)
         const auth = (await initFirebase()).auth()
-        switch (mode as string) {
-            case 'resetPassword':
-                // Display reset password handler and UI.
-                await handleResetPassword(auth);
-                break;
-            case 'recoverEmail':
-                // Display email recovery handler and UI.
-                await handleRecoverEmail(auth);
-                break;
-            case 'verifyEmail':
-                // Display email verification handler and UI.
-                await handleVerifyEmail(auth);
-                break;
-            default:
-                // Error: invalid mode.
-                throw new Error("不正なリクエストです。")
+        try {
+            switch (mode as string) {
+                case 'resetPassword':
+                    // Display reset password handler and UI.
+                    await handleResetPassword(auth);
+                    break;
+                case 'recoverEmail':
+                    // Display email recovery handler and UI.
+                    await handleRecoverEmail(auth);
+                    break;
+                case 'verifyEmail':
+                    // Display email verification handler and UI.
+                    await handleVerifyEmail(auth);
+                    break;
+                default:
+                    // Error: invalid mode.
+                    throw new Error("不正なリクエストです。")
+            }
+        } catch(e) {
+            alert.error(errorMsg(e))
         }
         await auth.currentUser.reload()
         const token = await auth.currentUser.getIdToken()
@@ -74,12 +77,12 @@ export default (props:props) => {
 
     const handleResetPassword = async (auth:Firebase.auth.Auth) => {
         try {
-            auth.verifyPasswordResetCode(oobCode as string)
+            await auth.verifyPasswordResetCode(oobCode as string)
             setValid(true)
             setView(<ResetPassword confirmResetPassword={confirmResetPassword} />)
             setLoading(false)
-        }catch(e) {
-            throw new Error("エラーが発生しました。")
+        } catch(e) {
+            throw new Error(e)
         }
     }
 
@@ -103,7 +106,7 @@ export default (props:props) => {
             setValid(true)
             setLoading(false)
         } catch(e) {
-            throw new Error("エラーが発生しました。")
+            throw new Error(e)
         }
     }
 
@@ -114,7 +117,7 @@ export default (props:props) => {
             setValid(true)
             setLoading(false)
         }catch(e) {
-            throw new Error("エラーが発生しました。")
+            throw new Error(e)
         }
     }
 

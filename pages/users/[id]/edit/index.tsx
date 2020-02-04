@@ -30,7 +30,7 @@ const UserShow = (props) => {
         <Container>
             <Form style={{marginTop: "1.5em"}}>
                 <h4>登録情報の変更</h4>
-                {props.user.providerId === 'email' && (
+                {props.user.firebase.sign_in_provider === 'password' && (
                 <>
                 <FormGroup style={{ marginTop: '2em' }}>
                     <Link href={`/users/${props.user.uid}/edit/updateEmail`}><a>メールアドレスを変更する</a></Link>

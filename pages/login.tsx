@@ -111,6 +111,7 @@ export const Login = () => {
                 </Col>
             </Row>
             <Link href="/register"><a>ユーザー登録</a></Link>
+            <Link href="/forgetPassword"><a style={{marginTop: '2em'}}>パスワード再設定</a></Link>
         </Container>
     );
 }
