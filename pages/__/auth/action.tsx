@@ -102,7 +102,6 @@ export default (props:props) => {
             setView(<h4>メールアドレスを復元しました。パスワードを変更してください。リダイレクトします。</h4>)
             setValid(true)
             setLoading(false)
-            const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
         } catch(e) {
             throw new Error("エラーが発生しました。")
         }
@@ -114,7 +113,6 @@ export default (props:props) => {
             setView(<h4>メールアドレスが認証されました。リダイレクトします。</h4>)
             setValid(true)
             setLoading(false)
-            const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
         }catch(e) {
             throw new Error("エラーが発生しました。")
         }

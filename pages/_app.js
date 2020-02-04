@@ -42,10 +42,9 @@ export default class MyApp extends App {
             const _res = {...res}
             micro_session(_req, _res)
             const session = _req.session
-            const user = session && session.token ? session.token : null
-            const uid = user ? session.token.uid : null
+            const uid = session.token ? session.token.uid : null
             if (uid && query.id && uid === query.id || uid && !query.id) {
-                if (user.firebase.sign_in_provider === 'password' && !user.emailVerified && pathname !== '/confirmEmail') {
+                if (session.token.firebase.sign_in_provider === 'password' && !session.token.email_verified && pathname !== '/confirmEmail') {
                     res.writeHead(302, {
                         Location: '/confirmEmail'
                     })
@@ -58,7 +57,7 @@ export default class MyApp extends App {
                 }
                 return {
                     pageProps,
-                    user
+                    user: session.token
                 }
             } else {
                 if (pathname !== '/login' && pathname !== '/register' && pathname.match(/^\/users/)) {
