@@ -14,18 +14,18 @@ export const UserShow: React.FC<any> = (props) => {
                 <h3>登録情報</h3>
                 <FormGroup style={{marginTop: "1em"}}>
                     <Label for="email">メールアドレス</Label>
-                    <Input disabled type="email" name="email" id="email" value={props.email} />
+                    <Input disabled type="email" name="email" id="email" value={props.params.email} />
                 </FormGroup>
-                {props.sign_in_provider !== 'password' && 
+                {props.params.sign_in_provider !== 'password' && 
                 <FormGroup>
                     <Label>連携済みサービス</Label>
                     <Row style={{ margin: 0, marginTop: "0.5em" }}>
                         <Col style={{display: 'flex', padding: 0}}>
-                            {props.sign_in_provider === 'twitter.com' && 
+                            {props.params.sign_in_provider === 'twitter.com' && 
                                 <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2" }} className="fa-2x" /></p>}
-                            {props.sign_in_provider === 'facebook.com' && 
+                            {props.params.sign_in_provider === 'facebook.com' && 
                                 <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2" }} className="fa-2x" /></p>}
-                            {props.sign_in_provider === 'google.com' && 
+                            {props.params.sign_in_provider === 'google.com' && 
                                 <p><FontAwesomeIcon icon={faGoogle} size="lg" style={{ color: "#DB4437" }} className="fa-2x" /></p>}
                         </Col>
                     </Row>

@@ -30,7 +30,7 @@ const UserShow = (props) => {
         <Container>
             <Form style={{marginTop: "1.5em"}}>
                 <h4>登録情報の変更</h4>
-                {props.sign_in_provider === 'password' && (
+                {props.params.sign_in_provider === 'password' && (
                 <>
                 <FormGroup style={{ marginTop: '2em' }}>
                     <Link href={`/users/edit/updateEmail`}><a>メールアドレスを変更する</a></Link>
@@ -41,16 +41,16 @@ const UserShow = (props) => {
                 </>
                 )}
 
-                {props.sign_in_provider !== 'password' &&
+                {props.params.sign_in_provider !== 'password' &&
                     <FormGroup style={{marginTop: '2em'}}>
                         <Label>連携済みサービス</Label>
                         <Row style={{ margin: 0 }}>
                             <Col style={{ display: 'flex', padding: 0 }}>
-                                {props.sign_in_provider === 'twitter.com' &&
+                                {props.params.sign_in_provider === 'twitter.com' &&
                                     <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2" }} className="fa-2x" /></p>}
-                                {props.sign_in_provider === 'facebook.com' &&
+                                {props.params.sign_in_provider === 'facebook.com' &&
                                     <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2" }} className="fa-2x" /></p>}
-                                {props.sign_in_provider === 'google.com' &&
+                                {props.params.sign_in_provider === 'google.com' &&
                                     <p><FontAwesomeIcon icon={faGoogle} size="lg" style={{ color: "#DB4437" }} className="fa-2x" /></p>}
                             </Col>
                         </Row>

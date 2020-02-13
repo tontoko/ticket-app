@@ -17,7 +17,7 @@ export const Leave = (props) => {
         const { sign_in_provider } = props.user.firebase
         let credencial:any
         try {
-            if (props.sign_in_provider === 'password') {
+            if (props.params.sign_in_provider === 'password') {
                 credencial = await auth.signInWithEmailAndPassword(auth.currentUser.email, pwd)
             } else { 
                 credencial = await auth.currentUser.reauthenticateWithPopup(sign_in_provider)
@@ -41,7 +41,7 @@ export const Leave = (props) => {
                         上記の説明を理解しました
                     </Label>
                 </FormGroup>
-                {props.sign_in_provider === 'password' && (
+                {props.params.sign_in_provider === 'password' && (
                     <>
                     <Input type="password" placeholder="パスワード" value={pwd} onChange={e => setPwd(e.target.value)} />
                     </>

@@ -125,6 +125,7 @@ export default class MyApp extends App {
             let params = {
                 email: '',
                 sign_in_provider: '',
+                picture: ''
             }
             if (this.state.currentUser) {
                 const currentUser = this.state.currentUser
@@ -145,8 +146,8 @@ export default class MyApp extends App {
 
             return (
                 <Provider template={AlertTemplate} {...options}>
-                    <UserLayouts user={this.props.user} email={params.email} sign_in_provider={params.sign_in_provider} />
-                    <Component user={this.props.user} email={params.email} sign_in_provider={params.sign_in_provider} />
+                    <UserLayouts user={this.props.user} params={params} />
+                    <Component user={this.props.user} params={params} />
                 </Provider>
             )
         }
