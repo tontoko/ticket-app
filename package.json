@@ -41,6 +41,6 @@
     "dev": "next",
     "build": "next build",
     "start": "next start -p 8080",
-    "deploy": "npm run build && gcloud app deploy"
+    "deploy": "firebase deploy --only functions && npm run build && gcloud app deploy"
   }
 }

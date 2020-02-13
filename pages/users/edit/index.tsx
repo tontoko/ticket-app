@@ -30,33 +30,33 @@ const UserShow = (props) => {
         <Container>
             <Form style={{marginTop: "1.5em"}}>
                 <h4>登録情報の変更</h4>
-                {props.user.firebase.sign_in_provider === 'password' && (
+                {props.sign_in_provider === 'password' && (
                 <>
                 <FormGroup style={{ marginTop: '2em' }}>
-                    <Link href={`/users/${props.user.uid}/edit/updateEmail`}><a>メールアドレスを変更する</a></Link>
+                    <Link href={`/users/edit/updateEmail`}><a>メールアドレスを変更する</a></Link>
                 </FormGroup>
                 <FormGroup>
-                    <Link href={`/users/${props.user.uid}/edit/updatePassword`}><a>パスワードを変更する</a></Link>
+                    <Link href={`/users/edit/updatePassword`}><a>パスワードを変更する</a></Link>
                 </FormGroup>
                 </>
                 )}
 
-                {props.user.firebase && props.user.firebase.sign_in_provider !== 'password' &&
+                {props.sign_in_provider !== 'password' &&
                     <FormGroup style={{marginTop: '2em'}}>
                         <Label>連携済みサービス</Label>
                         <Row style={{ margin: 0 }}>
                             <Col style={{ display: 'flex', padding: 0 }}>
-                                {props.user.firebase && props.user.firebase.sign_in_provider === 'twitter.com' &&
+                                {props.sign_in_provider === 'twitter.com' &&
                                     <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2" }} className="fa-2x" /></p>}
-                                {props.user.firebase && props.user.firebase.sign_in_provider === 'facebook.com' &&
+                                {props.sign_in_provider === 'facebook.com' &&
                                     <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2" }} className="fa-2x" /></p>}
-                                {props.user.firebase && props.user.firebase.sign_in_provider === 'google.com' &&
+                                {props.sign_in_provider === 'google.com' &&
                                     <p><FontAwesomeIcon icon={faGoogle} size="lg" style={{ color: "#DB4437" }} className="fa-2x" /></p>}
                             </Col>
                         </Row>
                     </FormGroup>}
                 <Row style={{ margin: 0, marginTop: "5em" }}>
-                    <Link href={`/users/${props.user.uid}/edit/leave`}>
+                    <Link href={`/users/edit/leave`}>
                         <Button className="ml-auto">退会</Button>
                     </Link>
                 </Row>

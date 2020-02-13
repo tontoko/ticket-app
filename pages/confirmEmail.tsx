@@ -20,7 +20,7 @@ export default (props) => {
         })()
     })
 
-    const sendEmail = async(auth) => {
+    const sendEmail = async(auth: firebase.auth.Auth) => {
         try {
             await auth.currentUser.sendEmailVerification()
             setLoading(false)
@@ -30,6 +30,10 @@ export default (props) => {
             setLoading(false)
             setMsg(errorMsg(e))
         }
+        setTimeout(async() => {
+            await auth.signOut()
+            window.location.href = '/login'
+        }, 5000)
     }
 
     if (loading) return <Loading/>

@@ -26,7 +26,7 @@ export default class MyApp extends App {
         super(props)
         this.state = {
             loading: true,
-            user: null
+            currentUser: null
         }
     }
 
@@ -40,7 +40,7 @@ export default class MyApp extends App {
             // SSR
             const _req = {...req}
             const _res = {...res}
-            micro_session(_req, _res)
+            await micro_session(_req, _res)
             const session = _req.session
             const uid = session.token ? session.token.uid : null
             if (uid && query.id && uid === query.id || uid && !query.id) {
@@ -51,7 +51,7 @@ export default class MyApp extends App {
                     res.end()
                 } else if (pathname === '/login' || pathname === '/register' || pathname === '/') {
                     res.writeHead(302, {
-                        Location: `/users/${uid}`
+                        Location: `/users`
                     })
                     res.end()
                 }
@@ -77,9 +77,9 @@ export default class MyApp extends App {
     componentDidMount() {
         (async() => {
             const firebase = await initFirebase()
-            this.unsubscribe = firebase.auth().onAuthStateChanged(async user => {
-                if (user && user.uid === this.props.router.query.id || user && !this.props.router.query.id) {
-                    const token = await user.getIdToken()
+            this.unsubscribe = firebase.auth().onAuthStateChanged(async currentUser => {
+                if (currentUser && currentUser.uid === this.props.router.query.id || currentUser && !this.props.router.query.id) {
+                    const token = await currentUser.getIdToken()
                     await fetch('/api/login', {
                         method: 'POST',
                         headers: new Headers({
@@ -91,16 +91,16 @@ export default class MyApp extends App {
                             token
                         })
                     })
-                    if (this.state.loading) this.setState({loading: false, user})
+                    this.state.loading ? this.setState({loading: false, currentUser}) : this.setState({loading: this.state.loading, currentUser})
                     if (Router.pathname === '/login' || Router.pathname === '/register') {
-                        Router.push(`/users/${user.uid}`)
+                        Router.push(`/users`)
                     }
                 } else {
                     await fetch('/api/logout', {
                         method: 'POST',
                         credentials: 'same-origin'
                     })
-                    if (this.state.loading) this.setState({loading: false, user: null})
+                    this.state.loading ? this.setState({loading: false, currentUser: null}) : this.setState({loading: this.state.loading, currentUser: null})
                     if (Router.pathname !== '/login' && Router.pathname !== '/register' && Router.pathname !== '/' && Router.pathname.match(/^\/users/)) {
                         Router.push('/login')
                     }
@@ -115,21 +115,36 @@ export default class MyApp extends App {
         
     render() {
         const { Component } = this.props
-        if (this.state.loading && !this.props.user && !this.state.user) {
+        if (this.state.loading && !this.props.user && !this.state.currentUser) {
             return <Loading/>
         } else {
-            let user
-            if (this.props.user) user = this.props.user
-
             const options = {
                 timeout: 4000,
                 position: 'top left'
             }
-            
+            let params = {
+                email: '',
+                sign_in_provider: '',
+            }
+            if (this.state.currentUser) {
+                const currentUser = this.state.currentUser
+                let sign_in_provider 
+                sign_in_provider = currentUser.providerData ? currentUser.providerData[0].providerId : 'password'
+                params = {
+                    email: currentUser.email,
+                    sign_in_provider
+                }
+            } else if (this.props.user) {
+                params = {
+                    email: this.props.user.email,
+                    sign_in_provider: this.props.user.firebase.sign_in_provider
+                }
+            }
+            console.log(params)
             return (
                 <Provider template={AlertTemplate} {...options}>
-                    <UserLayouts user={user} />
-                    <Component user={user} />
+                    <UserLayouts user={this.props.user} email={params.email} sign_in_provider={params.sign_in_provider} />
+                    <Component user={this.props.user} email={params.email} sign_in_provider={params.sign_in_provider} />
                 </Provider>
             )
         }

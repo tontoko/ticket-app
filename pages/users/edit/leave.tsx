@@ -1,9 +1,9 @@
 import React from 'react'
 import { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, FormText, Row, Col } from 'reactstrap'
-import errorMsg from '../../../../lib/errorMsg'
+import errorMsg from '../../../lib/errorMsg'
 import { useAlert } from "react-alert"
-import initFirebase from '../../../../initFirebase'
+import initFirebase from '../../../initFirebase'
 
 export const Leave = (props) => {
     const alert = useAlert()
@@ -17,7 +17,7 @@ export const Leave = (props) => {
         const { sign_in_provider } = props.user.firebase
         let credencial:any
         try {
-            if (props.user.firebase.sign_in_provider === 'password') {
+            if (props.sign_in_provider === 'password') {
                 credencial = await auth.signInWithEmailAndPassword(auth.currentUser.email, pwd)
             } else { 
                 credencial = await auth.currentUser.reauthenticateWithPopup(sign_in_provider)
@@ -41,7 +41,7 @@ export const Leave = (props) => {
                         上記の説明を理解しました
                     </Label>
                 </FormGroup>
-                {props.user.firebase.sign_in_provider === 'password' && (
+                {props.sign_in_provider === 'password' && (
                     <>
                     <Input type="password" placeholder="パスワード" value={pwd} onChange={e => setPwd(e.target.value)} />
                     </>

@@ -69,7 +69,7 @@ export default (props:props) => {
                 token
             })
         })
-        const pathname = props.user ? `/users/${props.user.uid}/edit` : '/login'
+        const pathname = props.user ? `/users/edit` : '/login'
         setTimeout(() => {
             router.push({ pathname, query: { msg: mode } })
         }, 5000)
