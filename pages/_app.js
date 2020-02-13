@@ -140,7 +140,7 @@ export default class MyApp extends App {
                     sign_in_provider: this.props.user.firebase.sign_in_provider
                 }
             }
-            console.log(params)
+            
             return (
                 <Provider template={AlertTemplate} {...options}>
                     <UserLayouts user={this.props.user} email={params.email} sign_in_provider={params.sign_in_provider} />
