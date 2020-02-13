@@ -12,7 +12,7 @@ export const UserLayout: React.FC<any> = (props) => {
         <div>
             <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
-                {props.user && 
+                {props.email && 
                     <>
                     <div style={{marginLeft: "auto"}}>
                         <Link href={`/users`}>
@@ -21,7 +21,7 @@ export const UserLayout: React.FC<any> = (props) => {
                                     size="40" 
                                     round 
                                     style={{ cursor: "pointer" }}
-                                    src={props.user.picture}
+                                    src={props.picture}
                                     />
                             </div>
                         </Link>
