@@ -11,7 +11,7 @@ export const UserLayout: React.FC = () => {
     return (
         <Navbar color="danger" dark>
             <NavbarBrand href="/">管理者ツール</NavbarBrand>
-            <Link href="/users/1">
+            <Link href="/user/1">
                 <div className="ml-auto mr-2">
                     <Avater size="40" round style={{ cursor: "pointer" }} />
                 </div>
@@ -23,7 +23,7 @@ export const UserLayout: React.FC = () => {
                         <NavLink href="/events">イベント一覧</NavLink>
                     </NavItem>
                     <NavItem>
-                        <NavLink href="/users/index">ユーザー一覧</NavLink>
+                        <NavLink href="/user/index">ユーザー一覧</NavLink>
                     </NavItem>
                 </Nav>
             </Collapse>

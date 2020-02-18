@@ -27,7 +27,7 @@ export const UpdateEmail: React.FC<any> = (props) => {
         }
         try {
             await currentUser.updateEmail(email)
-            router.push({pathname: `/users/edit`, query: {msg: 'updateEmail'}},)
+            router.push({pathname: `/user/edit`, query: {msg: 'updateEmail'}},)
         } catch (e) {
             alert.error(errorMsg(e))
         }

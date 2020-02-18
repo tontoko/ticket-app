@@ -15,7 +15,7 @@ export const UserLayout: React.FC<any> = (props) => {
                 {props.params.email && 
                     <>
                     <div style={{marginLeft: "auto"}}>
-                        <Link href={`/users`}>
+                        <Link href={`/user`}>
                             <div className="ml-auto mr-2">
                                     <Avater 
                                     size="40" 
@@ -30,10 +30,10 @@ export const UserLayout: React.FC<any> = (props) => {
                     <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">
                         <Nav navbar>
                             <NavItem>
-                                <NavLink href={`/users/myEvents`}>主催するイベント</NavLink>
+                                <NavLink href={`/user/myEvents`}>主催するイベント</NavLink>
                             </NavItem>
                             <NavItem>
-                                <NavLink href={`/users/myTickets`}>購入済みチケット</NavLink>
+                                <NavLink href={`/user/myTickets`}>購入済みチケット</NavLink>
                             </NavItem>
                         </Nav>
                     </Collapse>

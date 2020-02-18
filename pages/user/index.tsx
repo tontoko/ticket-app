@@ -31,7 +31,7 @@ export const UserShow: React.FC<any> = (props) => {
                     </Row>
                 </FormGroup>}
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Link href={`/users/edit`}>
+                    <Link href={`/user/edit`}>
                         <Button className="ml-auto">編集</Button>
                     </Link>
                 </Row>

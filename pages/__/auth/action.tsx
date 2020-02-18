@@ -39,16 +39,22 @@ export default (props:props) => {
             switch (mode as string) {
                 case 'resetPassword':
                     // Display reset password handler and UI.
-                    await handleResetPassword(auth);
-                    break;
+                    handleResetPassword(auth)
+                    return
                 case 'recoverEmail':
                     // Display email recovery handler and UI.
-                    await handleRecoverEmail(auth);
-                    break;
+                    await handleRecoverEmail(auth)
+                    setTimeout(() => {
+                        redirectAfterUpdate(auth)
+                    }, 5000)
+                    return
                 case 'verifyEmail':
                     // Display email verification handler and UI.
-                    await handleVerifyEmail(auth);
-                    break;
+                    await handleVerifyEmail(auth)
+                    setTimeout(() => {
+                        redirectAfterUpdate(auth)
+                    }, 5000)
+                    return
                 default:
                     // Error: invalid mode.
                     throw new Error("不正なリクエストです。")
@@ -56,6 +62,10 @@ export default (props:props) => {
         } catch(e) {
             alert.error(errorMsg(e))
         }
+        
+    } 
+
+    const redirectAfterUpdate = async(auth:Firebase.auth.Auth, msg?:string) => {
         await auth.currentUser.reload()
         const token = await auth.currentUser.getIdToken()
         await fetch('/api/login', {
@@ -69,11 +79,9 @@ export default (props:props) => {
                 token
             })
         })
-        const pathname = props.user ? `/users/edit` : '/login'
-        setTimeout(() => {
-            router.push({ pathname, query: { msg: mode } })
-        }, 5000)
-    } 
+        const pathname = props.user ? `/user/edit` : '/login'
+        router.push({ pathname, query: { msg } })
+    }
 
     const handleResetPassword = async (auth:Firebase.auth.Auth) => {
         try {
@@ -91,6 +99,7 @@ export default (props:props) => {
         const auth = (await initFirebase()).auth()
         try {
             await auth.confirmPasswordReset(oobCode as string, newPwd)
+            redirectAfterUpdate(auth, '新しいパスワードに更新しました。')
         } catch(e) {
             alert.error(errorMsg(e))
         }

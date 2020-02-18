@@ -26,7 +26,7 @@ export default class MyApp extends App {
         super(props)
         this.state = {
             loading: true,
-            currentUser: null
+            currentUser: null,
         }
     }
 
@@ -35,6 +35,8 @@ export default class MyApp extends App {
         if (Component.getInitialProps) {
             pageProps = await Component.getInitialProps(ctx)
         }
+        ctx.query.msg && alert.success(ctx.query.msg)
+        console.log(ctx.query.msg)
         if (ctx.req) {
             const { req, res, pathname, query } = ctx
             // SSR
@@ -51,16 +53,17 @@ export default class MyApp extends App {
                     res.end()
                 } else if (pathname === '/login' || pathname === '/register' || pathname === '/') {
                     res.writeHead(302, {
-                        Location: `/users`
+                        Location: `/user`
                     })
                     res.end()
                 }
                 return {
                     pageProps,
-                    user: session.token
+                    user: session.token,
+                    msg: query?.msg
                 }
             } else {
-                if (pathname !== '/login' && pathname !== '/register' && pathname.match(/^\/users/)) {
+                if (pathname !== '/login' && pathname !== '/register' && pathname.match(/^\/user/)) {
                     res.writeHead(302, {
                         Location: `/login`
                     })
@@ -70,7 +73,8 @@ export default class MyApp extends App {
         } 
         return {
             pageProps,
-            user: null
+            user: null,
+            msg: null
         }
     }
 
@@ -93,7 +97,7 @@ export default class MyApp extends App {
                     })
                     this.state.loading ? this.setState({loading: false, currentUser}) : this.setState({loading: this.state.loading, currentUser})
                     if (Router.pathname === '/login' || Router.pathname === '/register') {
-                        Router.push(`/users`)
+                        Router.push(`/user`)
                     }
                 } else {
                     await fetch('/api/logout', {
@@ -101,7 +105,7 @@ export default class MyApp extends App {
                         credentials: 'same-origin'
                     })
                     this.state.loading ? this.setState({loading: false, currentUser: null}) : this.setState({loading: this.state.loading, currentUser: null})
-                    if (Router.pathname !== '/login' && Router.pathname !== '/register' && Router.pathname !== '/' && Router.pathname.match(/^\/users/)) {
+                    if (Router.pathname !== '/login' && Router.pathname !== '/register' && Router.pathname !== '/' && Router.pathname.match(/^\/user/)) {
                         Router.push('/login')
                     }
                 }

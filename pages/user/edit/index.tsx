@@ -8,22 +8,12 @@ import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 
 const UserShow = (props) => {
-    const alert = useAlert()
     const router = useRouter()
-    const [msg, setMsg] = useState(router.query.msg ? router.query.msg : null)
-    
+    const alert = useAlert()
+
     useEffect(() => {
-        switch (msg) {
-            case 'updateEmail':
-                alert.success('メールアドレスを変更しました。')
-                break;
-            case 'updatePassword':
-                alert.success('パスワードを変更しました。')
-                break;
-            default:
-                break;
-        }
-        setMsg(null)
+        const {msg} = router.query
+        msg ?? alert.success(msg)
     })
 
     return (
@@ -33,10 +23,10 @@ const UserShow = (props) => {
                 {props.params.sign_in_provider === 'password' && (
                 <>
                 <FormGroup style={{ marginTop: '2em' }}>
-                    <Link href={`/users/edit/updateEmail`}><a>メールアドレスを変更する</a></Link>
+                    <Link href={`/user/edit/updateEmail`}><a>メールアドレスを変更する</a></Link>
                 </FormGroup>
                 <FormGroup>
-                    <Link href={`/users/edit/updatePassword`}><a>パスワードを変更する</a></Link>
+                    <Link href={`/user/edit/updatePassword`}><a>パスワードを変更する</a></Link>
                 </FormGroup>
                 </>
                 )}
@@ -56,7 +46,7 @@ const UserShow = (props) => {
                         </Row>
                     </FormGroup>}
                 <Row style={{ margin: 0, marginTop: "5em" }}>
-                    <Link href={`/users/edit/leave`}>
+                    <Link href={`/user/edit/leave`}>
                         <Button className="ml-auto">退会</Button>
                     </Link>
                 </Row>

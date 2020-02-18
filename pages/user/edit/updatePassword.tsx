@@ -28,7 +28,7 @@ export const UpdatePassword: React.FC<any> = (props) => {
         }
         try {
             await currentUser.updatePassword(newPwd)
-            router.push({pathname: `/users/edit`, query: {msg: 'updatePassword'}})
+            router.push({pathname: `/user/edit`, query: {msg: 'updatePassword'}})
         } catch (e) {
             alert.error(errorMsg(e))
         }
