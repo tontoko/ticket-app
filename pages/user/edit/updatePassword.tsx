@@ -40,15 +40,15 @@ export const UpdatePassword: React.FC<any> = (props) => {
                 <h3>登録情報</h3>
                 <FormGroup>
                     <Label for="password">現在のパスワード</Label>
-                    <Input type="password" name="password" id="password" onChange={e => setPwd(e.target.value)} />
+                    <Input type="password" onChange={e => setPwd(e.target.value)} />
                 </FormGroup>
                 <FormGroup>
                     <Label for="password">新しいパスワード</Label>
-                    <Input type="password" name="password" id="password" onChange={e => setNewPwd(e.target.value)} />
+                    <Input type="password" onChange={e => setNewPwd(e.target.value)} />
                 </FormGroup>
                 <FormGroup>
                     <Label for="password_confirm">パスワード確認</Label>
-                    <Input type="password" name="password_confirm" id="password_confirm" onChange={e => setNewPwdConfirm(e.target.value)} />
+                    <Input type="password" onChange={e => setNewPwdConfirm(e.target.value)} />
                 </FormGroup>
                 <Button className="ml-auto" onClick={() => updatePassword()}>変更</Button>
             </Form>

@@ -31,7 +31,7 @@ export default (props:props) => {
                 }, 5000)
             }
         })()
-    })
+    }, [])
 
     const manageMode = async () => {
         const auth = (await initFirebase()).auth()
@@ -66,19 +66,21 @@ export default (props:props) => {
     } 
 
     const redirectAfterUpdate = async(auth:Firebase.auth.Auth, msg?:string) => {
-        await auth.currentUser.reload()
-        const token = await auth.currentUser.getIdToken()
-        await fetch('/api/login', {
-            method: 'POST',
-            headers: new Headers({
-                'Content-Type': 'application/json',
-                'Cache-Control': 'private'
-            }),
-            credentials: 'same-origin',
-            body: JSON.stringify({
-                token
+        if (auth.currentUser) {
+            await auth.currentUser.reload()
+            const token = await auth.currentUser.getIdToken()
+            await fetch('/api/login', {
+                method: 'POST',
+                headers: new Headers({
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'private'
+                }),
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    token
+                })
             })
-        })
+        }
         const pathname = props.user ? `/user/edit` : '/login'
         router.push({ pathname, query: { msg } })
     }

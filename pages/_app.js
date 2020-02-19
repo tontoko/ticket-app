@@ -35,8 +35,6 @@ export default class MyApp extends App {
         if (Component.getInitialProps) {
             pageProps = await Component.getInitialProps(ctx)
         }
-        ctx.query.msg && alert.success(ctx.query.msg)
-        console.log(ctx.query.msg)
         if (ctx.req) {
             const { req, res, pathname, query } = ctx
             // SSR
@@ -96,6 +94,10 @@ export default class MyApp extends App {
                         })
                     })
                     this.state.loading ? this.setState({loading: false, currentUser}) : this.setState({loading: this.state.loading, currentUser})
+                    if (!currentUser.emailVerified && currentUser.providerData[0].providerId === 'password'){
+                        Router.push('/confirmEmail')
+                        return
+                    }
                     if (Router.pathname === '/login' || Router.pathname === '/register') {
                         Router.push(`/user`)
                     }
@@ -116,7 +118,7 @@ export default class MyApp extends App {
     componentWillUnmount() {
         this.unsubscribe && this.unsubscribe()
     }
-        
+
     render() {
         const { Component } = this.props
         if (this.state.loading && !this.props.user && !this.state.currentUser) {

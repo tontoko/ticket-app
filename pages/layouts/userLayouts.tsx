@@ -1,13 +1,22 @@
 import Link from 'next/link'
 import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem } from 'reactstrap'
 import Avater from 'react-avatar'
+import { useAlert } from "react-alert"
+import { useRouter } from 'next/router'
 
 export const UserLayout: React.FC<any> = (props) => {
-
+    const router = useRouter()
+    const alert = useAlert()
     const [isOpen, toggle] = useState(false)
+
+    useEffect(() => {
+        const {msg} = router.query
+        if (msg) alert.success(msg)
+    })
+
     return (
         <div>
             <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>

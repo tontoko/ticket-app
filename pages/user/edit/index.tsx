@@ -8,13 +8,13 @@ import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 
 const UserShow = (props) => {
-    const router = useRouter()
-    const alert = useAlert()
+    // const router = useRouter()
+    // const alert = useAlert()
 
-    useEffect(() => {
-        const {msg} = router.query
-        msg ?? alert.success(msg)
-    })
+    // // useEffect(() => {
+    // //     const {msg} = router.query
+    // //     msg && alert.success(msg)
+    // // })
 
     return (
         <Container>
