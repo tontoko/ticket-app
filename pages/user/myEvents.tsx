@@ -1,50 +1,65 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, Button, Container, Col, Row, Pagination, PaginationItem, PaginationLink
 } from 'reactstrap';
 import Link from 'next/link'
+import getImg from '../../lib/getImg'
+import initFirebase from '../../initFirebase'
 
-export default () => {
+export default (props) => {
+
+    const [events, setEvents] = useState([])
+
+    useEffect(() => {
+        (async() => {
+            const firebase = await initFirebase()
+            const firestore = firebase.firestore()
+            const {user} = props
+            const result = await firestore.collection('events').where('created_user', '==', user.uid).get()
+            const newEvents = []
+            result && result.forEach(doc => newEvents.push(doc.data()))
+            const renderEvents = await renderUserEvents(newEvents)
+            setEvents(renderEvents)
+        })()
+    },[])
+
+    const renderUserEvents = async events => await Promise.all(
+        events.map(async (event, i) => {
+            const date = new Date(event.start_date.seconds * 1000)
+            const year = date.getFullYear()
+            const month = date.getMonth() + 1
+            const day = date.getDate()
+            let img
+            await getImg(event.created_user, event.photos[0]).then(result => img = result)
+
+            return (
+                <Link key={i} href={`/events/${event.id}`}>
+                    <div>
+                        <Card style={{ cursor: 'pointer' }}>
+                            <CardBody>
+                                <Row>
+                                    <Col sm="2" xs="3">
+                                        <img width="100%" src={img} alt="Card image cap" />
+                                    </Col>
+                                    <Col xs="auto">
+                                        <CardTitle>{event.name}</CardTitle>
+                                        <CardSubtitle>{event.placeName}</CardSubtitle>
+                                        <CardText>{`${year}/${month}/${day}`}</CardText>
+                                    </Col>
+                                </Row>
+                            </CardBody>
+                        </Card>
+                    </div>
+                </Link>
+            )
+        }
+    ))
+
     return (
         <Container>
             <div style={{ marginTop: "1em" }}>
-                <Link href="/events/1">
-                    <div>
-                    <Card style={{ cursor: 'pointer' }}>
-                        <CardBody>
-                            <Row>
-                                <Col sm="2" xs="3">
-                                    <img width="100%" src="https://cdn.pixabay.com/photo/2019/06/21/20/19/grapes-4290308_1280.jpg" alt="Card image cap" />
-                                </Col>
-                                <Col xs="auto">
-                                    <CardTitle>テストイベント</CardTitle>
-                                    <CardSubtitle>テスト場所</CardSubtitle>
-                                    <CardText>テスト説明文</CardText>
-                                </Col>
-                            </Row>
-                        </CardBody>
-                    </Card>
-                    </div>
-                </Link>
-                <Link href="/events/2">
-                    <div>
-                    <Card style={{ cursor: 'pointer' }}>
-                        <CardBody>
-                            <Row>
-                                <Col sm="2" xs="3">
-                                    <img width="100%" src="https://cdn.pixabay.com/photo/2019/06/21/20/19/grapes-4290308_1280.jpg" alt="Card image cap" />
-                                </Col>
-                                <Col xs="auto">
-                                    <CardTitle>テストイベント</CardTitle>
-                                    <CardSubtitle>テスト場所</CardSubtitle>
-                                    <CardText>テスト説明文</CardText>
-                                </Col>
-                            </Row>
-                        </CardBody>
-                    </Card>
-                    </div>
-                </Link>
+                {events}
             </div>
             <Pagination aria-label="Page navigation" xs="" style={{ marginTop: "1em", justifyContent: "center" }}>
                 <PaginationItem>

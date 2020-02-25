@@ -12,7 +12,7 @@ const Page = () => {
         e.returnValue = '本当に移動しますか？'
     }
 
-    const { file1, file2, file3, eventName, placeName, eventDetail } = router.query
+    const { file1, file2, file3, eventName, placeName, eventDetail, startDate, time } = router.query
     const items = [file1, file2, file3].filter(v=>v).map((file,i) => {
         return {
             src: file as string,
@@ -61,9 +61,9 @@ const Page = () => {
         const hh = ("00" + dt.getHours()).slice(-2)
         const mm = ("00" + dt.getMinutes()).slice(-2)
         const ss = ("00" + dt.getSeconds()).slice(-2)
-        const filename = yyyy + MM + dd + hh + mm + ss + '_' + number + '.jpg'
+        const filename = yyyy + MM + dd + hh + mm + ss + '_' + number
         const storageRef = firebase.storage().ref()
-        const userEventRef = storageRef.child(`${firebase.auth().currentUser.uid}/events/${filename}`)
+        const userEventRef = storageRef.child(`${firebase.auth().currentUser.uid}/events/${filename}.jpg`)
         await userEventRef.putString(file, 'data_url')
         return filename
     }
@@ -79,9 +79,14 @@ const Page = () => {
             photos,
             placeName,
             name: eventName,
-            created_at: new Date
+            createdAt: new Date,
+            createdUser: firebase.auth().currentUser.uid,
+            eventDetail,
+            startDate,
+            updatedAt: startDate,
+            time
         })
-        router.push('/users/myEvents')
+        router.push('/user/myEvents')
     }
 
     return (
@@ -108,6 +113,13 @@ const Page = () => {
                 <FormGroup>
                     <Label className="mr-2">会場名</Label>
                     <p>{placeName}</p>
+                </FormGroup>
+                <FormGroup>
+                    <Label>開始日</Label>
+                    <Input type="date" value={startDate} disabled />
+                </FormGroup>
+                <FormGroup>
+                    <Input type="time" value={time} disabled />
                 </FormGroup>
                 <FormGroup>
                     <Label for="describe">イベント詳細</Label>
