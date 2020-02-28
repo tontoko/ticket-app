@@ -5,34 +5,46 @@ import { Dispatch, SetStateAction } from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, } from 'reactstrap'
+import initFirebase from '../../../../initFirebase'
+import getImg from '../../../../lib/getImg'
 
 export const Purchase: React.FC = () => {
-
-    useEffect(() => {
-        // ログインしてなければリダイレクト
-        if (false) {
-            router.push('/login')
-        }
-    })
-
-    const changeFamilyName = (e) => {
-        setFamilyName(e.target.value)
-    }
-
-    const changeFirstName = (e) => {
-        setFirstName(e.target.value)
-    }
-
-    const changeEmail = (e) => {
-        setEmail(e.target.value)
-    }
-
     const router = useRouter();
-    const UrlToConfirm = `/events/${router.query.id}/purchase/confirm`
 
     const [familyName, setFamilyName] = useState('')
     const [firstName, setFirstName] = useState('')
     const [email, setEmail] = useState('')
+    const [invalidEmail, setInvalidEmail] = useState(false)
+    const [event, setEvent]: [firebase.firestore.DocumentData, Dispatch<SetStateAction<firebase.firestore.DocumentData>>] = useState()
+    const [img, setImg]: [string, Dispatch<SetStateAction<string>>] = useState()
+
+    useEffect(() => {
+        (async () => {
+            const firebase = await initFirebase()
+            const firestore = firebase.firestore()
+            const result = await firestore.collection('events').doc(router.query.id as string).get()
+            if (!result.exists) router.back()
+            setEvent(result.data())
+            setImg(await getImg(result.data().photos[0]))
+        })()
+    }, [])
+
+    const changeEmail = (e) => {
+        validationEmail()
+        setEmail(e.target.value)
+    }
+
+    const validationEmail = () => {
+        setInvalidEmail(!email.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/))
+    }
+
+    const submit = () => {
+        if (!email.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/) ||
+        !firstName ||
+        !familyName) return
+        const pathname = `/events/${router.query.id}/purchase/confirm`
+        router.push({ pathname, query: { familyName, firstName, email } })
+    }
 
     return (
         <Container>
@@ -41,16 +53,16 @@ export const Purchase: React.FC = () => {
                     <Label>お名前</Label>
                     <Row>
                         <Col xs="3">
-                            <Input type="text" name="familyName" placeholder="性" onChange={changeFamilyName} value={familyName} />
+                            <Input type="text" name="familyName" placeholder="性" onChange={e =>setFamilyName(e.target.value)} value={familyName} invalid={!familyName} />
                         </Col>
                         <Col xs="3">
-                            <Input type="text" name="firstName" placeholder="名" onChange={changeFirstName} value={firstName} />
+                            <Input type="text" name="firstName" placeholder="名" onChange={e => setFirstName(e.target.value)} value={firstName} invalid={!firstName} />
                         </Col>
                     </Row>
                 </FormGroup>
                 <FormGroup>
                     <Label>メールアドレス</Label>
-                    <Input type="email" name="email" placeholder="メールアドレス" onChange={changeEmail} value={email} />
+                    <Input type="email" name="email" placeholder="メールアドレス" onChange={changeEmail} value={email} invalid={invalidEmail}/>
                 </FormGroup>
                 <FormGroup>
                     <Label>イベント情報</Label>
@@ -58,12 +70,12 @@ export const Purchase: React.FC = () => {
                         <CardBody>
                             <Row>
                                 <Col sm="2" xs="3">
-                                    <img width="100%" src="https://cdn.pixabay.com/photo/2019/06/21/20/19/grapes-4290308_1280.jpg" alt="Card image cap" />
+                                    <img width="100%" src={img} alt="image" />
                                 </Col>
                                 <Col xs="auto">
-                                    <CardTitle>テストイベント</CardTitle>
-                                    <CardSubtitle>テスト場所</CardSubtitle>
-                                    <CardText>テスト説明文</CardText>
+                                    <CardTitle>{event?.name}</CardTitle>
+                                    <CardSubtitle>{event?.placeName}</CardSubtitle>
+                                    <CardText>{event?.eventDetail}</CardText>
                                 </Col>
                             </Row>
                             <Row className="flex-row-reverse">
@@ -73,7 +85,7 @@ export const Purchase: React.FC = () => {
                     </Card>
                 </FormGroup>
                 <Row className="flex-row-reverse">
-                    <Link href={{ pathname: UrlToConfirm, query: { familyName, firstName, email } }}><Button style={{ marginRight: '1em' }}>確認</Button></Link>
+                    <Button style={{ marginRight: '1em' }} onClick={() => submit()}>確認</Button>
                 </Row>
             </Form>
         </Container>

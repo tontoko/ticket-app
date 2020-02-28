@@ -1,40 +1,53 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import {
-    Button, Container, Col, Row, 
+    Button, Container, Col, Row, Label,
     Carousel,
     CarouselItem,
     CarouselControl,
     CarouselIndicators,
     CarouselCaption
 } from 'reactstrap';
+import getImg from '../../../lib/getImg'
+import initFirebase from '../../../initFirebase'
+import Loading from '../../../components/loading'
 
-const items = [
-    {
-        src: 'https://cdn.pixabay.com/photo/2019/08/12/10/03/tourism-4400872_1280.jpg',
-        altText: 'Test Slide 1',
-        caption: 'Test Slide 1'
-    },
-    {
-        src: 'https://cdn.pixabay.com/photo/2018/07/30/10/54/moon-3572287_1280.jpg',
-        altText: 'Test Slide 2',
-        caption: 'Test Slide 2'
-    },
-    {
-        src: 'https://cdn.pixabay.com/photo/2019/08/13/03/16/tokyo-4402415_1280.jpg',
-        altText: 'Test Slide 3',
-        caption: 'Test Slide 3'
-    }
-];
-
-export default () => {
+export default props => {
 
     const router = useRouter();
-
+    const [event, setEvent] = useState()
+    const [loading, setLoading] = useState(true)
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false)
-    const [title, setTitle] = useState(`ID: ${router.query.id} のテストタイトル`)
+    const [items, setItems] = useState([])
+    const [status, setStatus] = useState()
+
+    useEffect(() => {
+        (async () => {
+            const firebase = await initFirebase()
+            const firestore = firebase.firestore()
+            const result = await firestore.collection('events').doc(router.query.id as string).get()
+            if (!result.exists) router.back()
+            setItems(await Promise.all(result.data().photos.map(async (file, i) => {
+                const url = await getImg(file)
+                return {
+                    src: url,
+                    altText: '画像' + i,
+                    caption: '画像' + i
+                }
+            })))
+            const { createdUser } = result.data()
+            if (createdUser == props.uid) {
+                setStatus('organizer')
+            } else {
+                const payments = await firestore.collection('users').doc(props.user.uid).collection('payments').where("event", "==", result.id).get()
+                payments.size > 0 && setStatus('bought')
+            }
+            setEvent(result.data())
+            setLoading(false)
+        })()
+    }, [])
 
     const next = () => {
         if (animating) return;
@@ -72,25 +85,7 @@ export default () => {
     const urlToReport = `/events/${router.query.id}/report`
     
     const buttons = () => {
-        if (false) {
-            // 申し込み
-            return (
-                <div style={{ marginTop: "1.5em" }}>
-                    <Link href={urlToPurchase}>
-                        <Button color="primary">このイベントに申し込む</Button>
-                    </Link>
-                </div>
-            )
-        } else if (false) {
-            // 申し込み後
-            return (
-                <div style={{ marginTop: "1.5em" }}>
-                    <Link href="">
-                        <Button color="danger">チケットを購入済みです！</Button>
-                    </Link>
-                </div>
-            )
-        } else {
+        if (status == 'organizer') {
             // 主催者
             return (
                 <Row style={{ marginTop: "1.5em" }}>
@@ -99,7 +94,7 @@ export default () => {
                             <Button block color="success">会場受付</Button>
                         </Link>
                     </Col>
-                    <Col sm="12" style={{margin: "0.2em"}}>
+                    <Col sm="12" style={{ margin: "0.2em" }}>
                         <Link href={urlToEdit}>
                             <Button block color="info">イベントを変更する</Button>
                         </Link>
@@ -111,13 +106,33 @@ export default () => {
                     </Col>
                 </Row>
             )
+        } else if (status == 'bought') {
+            // 申し込み後
+            return (
+                <div style={{ marginTop: "1.5em" }}>
+                    <Link href="">
+                        <Button color="danger">チケットを購入済みです！</Button>
+                    </Link>
+                </div>
+            )
+        } else {
+            // 申し込み
+            return (
+                <div style={{ marginTop: "1.5em" }}>
+                    <Link href={urlToPurchase}>
+                        <Button color="primary">このイベントに申し込む</Button>
+                    </Link>
+                </div>
+            )
         }
     }
+
+    if (loading) return <Loading />
 
     return (
         <Container>
             <Row style={{ marginTop: '1em', marginLeft: "0" }}>
-                <h4>{title}</h4>
+                <h4>{event.name}</h4>
             </Row>
             <Row style={{ marginTop: '1em' }}>
                 <Col xs="12" md="6" lg="4">
@@ -134,9 +149,10 @@ export default () => {
                         <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
                         <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
                     </Carousel>
+                    <Label style={{marginTop: '0.5em'}}>会場: {event.placeName}</Label>
                 </Col>
-                <Col xs="12" md="6" lg="8">
-                    <h6>イベントの説明　テストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテストテスト</h6>
+                <Col xs="12" md="6" lg="8" style={{marginTop: '2em'}}>
+                    <h6>{event.eventDetail}</h6>
                     {buttons()}
                 </Col>
             </Row>

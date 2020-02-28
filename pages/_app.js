@@ -43,7 +43,7 @@ export default class MyApp extends App {
             await micro_session(_req, _res)
             const session = _req.session
             const uid = session.token ? session.token.uid : null
-            if (uid && query.id && uid === query.id || uid && !query.id) {
+            if (uid) {
                 if (session.token.firebase.sign_in_provider === 'password' && !session.token.email_verified && pathname !== '/confirmEmail') {
                     res.writeHead(302, {
                         Location: '/confirmEmail'
@@ -80,7 +80,7 @@ export default class MyApp extends App {
         (async() => {
             const firebase = await initFirebase()
             this.unsubscribe = firebase.auth().onAuthStateChanged(async currentUser => {
-                if (currentUser && currentUser.uid === this.props.router.query.id || currentUser && !this.props.router.query.id) {
+                if (currentUser) {
                     const token = await currentUser.getIdToken()
                     await fetch('/api/login', {
                         method: 'POST',

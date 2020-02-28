@@ -23,7 +23,7 @@
     "react-dom": "^16.12.0",
     "react-qr-reader": "^2.2.1",
     "reactstrap": "^8.4.1",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.2",

@@ -1,6 +1,6 @@
 import initFirebase from '../initFirebase'
 
-export default async (uid:string, img:string, size?: string) => {
+export default async (img:string, size?: string) => {
   const firebase = await initFirebase()
   const storage = firebase.storage()
   

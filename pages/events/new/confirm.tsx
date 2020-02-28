@@ -82,8 +82,8 @@ const Page = () => {
             createdAt: new Date,
             createdUser: firebase.auth().currentUser.uid,
             eventDetail,
-            startDate,
-            updatedAt: startDate,
+            startDate: new Date(startDate as string),
+            updatedAt: new Date(startDate as string),
             time
         })
         router.push('/user/myEvents')
