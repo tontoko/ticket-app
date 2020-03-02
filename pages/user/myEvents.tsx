@@ -14,17 +14,19 @@ export default (props) => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        let unsubscribe = () => void
         (async() => {
             const firebase = await initFirebase()
             const firestore = firebase.firestore()
             const {user} = props
-            const result = await firestore.collection('events').where('createdUser', '==', user.uid).get()
-            const newEvents = []
-            result && result.forEach(doc => newEvents.push(doc))
-            const renderEvents = await renderUserEvents(newEvents)
-            setEvents(renderEvents)
-            setLoading(false)
+            unsubscribe = firestore.collection('events').where('createdUser', '==', user.uid).onSnapshot(async result => {
+                const newEvents = result.docs.map(doc => doc)
+                const renderEvents = await renderUserEvents(newEvents)
+                setEvents(renderEvents)
+                setLoading(false)
+            })
         })()
+        return unsubscribe()
     },[])
 
     const renderUserEvents = async events => await Promise.all(

@@ -16,37 +16,43 @@ import Loading from '../../../components/loading'
 export default props => {
 
     const router = useRouter();
-    const [event, setEvent] = useState()
+    const [event, setEvent]: [firebase.firestore.DocumentData, React.Dispatch<firebase.firestore.DocumentData>] = useState()
+    const [categories, setCategories]: [firebase.firestore.DocumentData, React.Dispatch<firebase.firestore.DocumentData>] = useState()
     const [loading, setLoading] = useState(true)
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false)
     const [items, setItems] = useState([])
-    const [status, setStatus] = useState()
+    const [status, setStatus] = useState('')
 
     useEffect(() => {
+        let unsubscribe = () => void
         (async () => {
             const firebase = await initFirebase()
             const firestore = firebase.firestore()
-            const result = await firestore.collection('events').doc(router.query.id as string).get()
-            if (!result.exists) router.back()
-            setItems(await Promise.all(result.data().photos.map(async (file, i) => {
-                const url = await getImg(file)
-                return {
-                    src: url,
-                    altText: '画像' + i,
-                    caption: '画像' + i
+            unsubscribe = await firestore.collection('events').doc(router.query.id as string).onSnapshot(async result => {
+                if (!result.exists) router.push('/user')
+                const categories = await result.ref.collection('categories').get()
+                setCategories(categories.docs.map(category => category.data()))
+                setItems(await Promise.all(result.data().photos.map(async (file, i) => {
+                    const url = await getImg(file)
+                    return {
+                        src: url,
+                        altText: '画像' + i,
+                        caption: '画像' + i
+                    }
+                })))
+                const { createdUser } = result.data()
+                if (createdUser == props.user.uid) {
+                    setStatus('organizer')
+                } else {
+                    const payments = await firestore.collection('users').doc(props.user.uid).collection('payments').where("event", "==", result.id).get()
+                    payments.size > 0 && setStatus('bought')
                 }
-            })))
-            const { createdUser } = result.data()
-            if (createdUser == props.uid) {
-                setStatus('organizer')
-            } else {
-                const payments = await firestore.collection('users').doc(props.user.uid).collection('payments').where("event", "==", result.id).get()
-                payments.size > 0 && setStatus('bought')
-            }
-            setEvent(result.data())
-            setLoading(false)
+                setEvent(result.data())
+                setLoading(false)
+            })
         })()
+        return unsubscribe()
     }, [])
 
     const next = () => {
@@ -149,7 +155,11 @@ export default props => {
                         <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
                         <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
                     </Carousel>
-                    <Label style={{marginTop: '0.5em'}}>会場: {event.placeName}</Label>
+                    <h5 style={{ marginTop: '0.5em' }}>会場</h5>
+                    <p>会場: {event.placeName}</p>
+                    <h5>チケットカテゴリ</h5>
+                    {categories.map(category => <p>{`${category.name}: ${category.price} 円`}</p>)}
+                    {status == 'organizer' && <Link href={`/events/${router.query.id}/categories/edit`}><Button>編集する</Button></Link>}
                 </Col>
                 <Col xs="12" md="6" lg="8" style={{marginTop: '2em'}}>
                     <h6>{event.eventDetail}</h6>
