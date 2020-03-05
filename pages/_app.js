@@ -138,12 +138,14 @@ export default class MyApp extends App {
                 let sign_in_provider 
                 sign_in_provider = currentUser.providerData ? currentUser.providerData[0].providerId : 'password'
                 params = {
+                    uid: currentUser.uid,
                     email: currentUser.email,
                     sign_in_provider,
                     picture: currentUser.photoURL
                 }
             } else if (this.props.user) {
                 params = {
+                    uid: this.props.user.uid,
                     email: this.props.user.email,
                     sign_in_provider: this.props.user.firebase.sign_in_provider,
                     picture: this.props.user.picture

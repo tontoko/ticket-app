@@ -18,7 +18,8 @@ export default (props) => {
         (async() => {
             const firebase = await initFirebase()
             const firestore = firebase.firestore()
-            const {user} = props
+            const user = props.user ? props.user : props.params.uid
+            if (!user) return
             unsubscribe = firestore.collection('events').where('createdUser', '==', user.uid).onSnapshot(async result => {
                 const newEvents = result.docs.map(doc => doc)
                 const renderEvents = await renderUserEvents(newEvents)
@@ -27,7 +28,7 @@ export default (props) => {
             })
         })()
         return unsubscribe()
-    },[])
+    },[props.params.uid])
 
     const renderUserEvents = async events => await Promise.all(
         events.map(async (event, i) => {

@@ -7,7 +7,8 @@ import {
     CarouselItem,
     CarouselControl,
     CarouselIndicators,
-    CarouselCaption
+    CarouselCaption,
+    FormGroup
 } from 'reactstrap';
 import getImg from '../../../lib/getImg'
 import initFirebase from '../../../initFirebase'
@@ -29,16 +30,15 @@ export default props => {
         (async () => {
             const firebase = await initFirebase()
             const firestore = firebase.firestore()
-            unsubscribe = await firestore.collection('events').doc(router.query.id as string).onSnapshot(async result => {
+            unsubscribe = firestore.collection('events').doc(router.query.id as string).onSnapshot(async result => {
                 if (!result.exists) router.push('/user')
-                const categories = await result.ref.collection('categories').get()
-                setCategories(categories.docs.map(category => category.data()))
+                setCategories(result.data().categories)
                 setItems(await Promise.all(result.data().photos.map(async (file, i) => {
                     const url = await getImg(file)
                     return {
                         src: url,
-                        altText: '画像' + i,
-                        caption: '画像' + i
+                        altText: '画像' + (i+1),
+                        caption: '画像' + (i+1)
                     }
                 })))
                 const { createdUser } = result.data()
@@ -80,7 +80,7 @@ export default props => {
                 key={item.src}
             >
                 <img src={item.src} alt={item.altText} style={{width: "100%", height: "100%"}} />
-                <CarouselCaption captionText={item.caption} captionHeader={item.caption} />
+                <CarouselCaption captionText={item.caption} />
             </CarouselItem>
         );
     });
@@ -155,11 +155,15 @@ export default props => {
                         <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
                         <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
                     </Carousel>
-                    <h5 style={{ marginTop: '0.5em' }}>会場</h5>
-                    <p>会場: {event.placeName}</p>
-                    <h5>チケットカテゴリ</h5>
-                    {categories.map(category => <p>{`${category.name}: ${category.price} 円`}</p>)}
-                    {status == 'organizer' && <Link href={`/events/${router.query.id}/categories/edit`}><Button>編集する</Button></Link>}
+                    <FormGroup>
+                        <h5>会場</h5>
+                        <p>会場: {event.placeName}</p>
+                    </FormGroup>
+                    <FormGroup style={{ marginTop: '2em' }}>
+                        <h5>チケットカテゴリ</h5>
+                        {categories && categories.map(category => <p>{`${category.name}: ${category.price} 円`}</p>)}
+                        {status == 'organizer' && <Link href={`/events/${router.query.id}/categories/edit`}><Button>カテゴリの編集</Button></Link>}
+                    </FormGroup>
                 </Col>
                 <Col xs="12" md="6" lg="8" style={{marginTop: '2em'}}>
                     <h6>{event.eventDetail}</h6>

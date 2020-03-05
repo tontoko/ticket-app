@@ -12,43 +12,53 @@ import {
   CardTitle, CardSubtitle,
 } from 'reactstrap'
 import initFirebase from '../../../../../initFirebase'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+import Loading from '../../../../../components/loading'
 
 export default props => {
   const router = useRouter();
 
   const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     (async () => {
       const firebase = await initFirebase()
       const firestore = firebase.firestore()
-      const categoryResult = await firestore.collection('events').doc(router.query.id as string).collection('categories').get()
-      const EventResult = await firestore.collection('events').doc(router.query.id as string).get()
-      const { createdUser } = EventResult.data()
-      if (createdUser !== props.user.uid) router.push('/user')
-      setCategories(categoryResult.docs.map(v => v.data()))
+      const event = await firestore.collection('events').doc(router.query.id as string).get()
+      setCategories(event.data().categories)
+      setLoading(false)
     })()
   }, [])
 
-  const submit = () => {
-    
-  }
-
-  const renderCategories = () => categories.map((category: firebase.firestore.DocumentData, i) => {
-    const setPrice = (i, price) => {
+  const renderCategories = () => categories && categories.map((category: firebase.firestore.DocumentData, i) => {
+    const setName = (name:string) => {
+      const copyCategories = [...categories]
+      copyCategories[i] = { ...copyCategories[i], name }
+      setCategories(copyCategories)
+    }
+    const setPrice = (price:number) => {
+      if (price < 0) return
       const copyCategories = [...categories]
       copyCategories[i] = {...copyCategories[i], price}
+      setCategories(copyCategories)
+    }
+    const deleteCategory = () => {
+      const copyCategories = [...categories]
+      copyCategories.splice(i,1)
       setCategories(copyCategories)
     }
     return (
         <FormGroup key={i}>
           <Row style={{margin: 0}}>
             <Col>
-              <Input value={category.name} />
+              <Input value={category.name} onChange={e => setName(e.target.value)} />
             </Col>
             <Col sm='4' md='3' lg='2' style={{display: 'flex'}}>
-                <Input type='number' value={category.price} onChange={e => setPrice(i, e.target.value)} style={{textAlign: 'right'}} />
-                <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
+              <Input type='number' min='0' value={category.price} onChange={e => setPrice(e.target.value)} style={{textAlign: 'right'}} />
+              <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
+              <p style={{marginLeft: '1em'}} onClick={deleteCategory}><FontAwesomeIcon icon={faTimesCircle} size="sm" style={{ color: "black" }} className="fa-2x" /></p>
             </Col>
           </Row>
         </FormGroup>
@@ -56,13 +66,23 @@ export default props => {
     }
   )
 
+  const addCategory = () => {
+    const copyCategories = categories ? [...categories] : []
+    copyCategories.push({name: '', price: 0})
+    setCategories(copyCategories)
+  }
+  if (loading) return <Loading/>
+
   return (
     <Container>
       <Form style={{ marginTop: '5em' }}>
         <h5 style={{marginBottom: '1em'}}>カテゴリ一覧</h5>
         {renderCategories()}
+        <Button onClick={addCategory}>追加</Button>
         <Row className="flex-row-reverse" style={{marginTop: '2em'}}>
-          <Button style={{ marginRight: '1em' }} onClick={() => submit()}>確認</Button>
+          <Link href={`/events/${router.query.id}/categories/edit/[confirm]`} as={`/events/${router.query.id}/categories/edit/${JSON.stringify(categories)}`}>
+            <Button style={{ marginRight: '1em' }}>確認</Button>
+          </Link>
         </Row>
       </Form>
     </Container>
