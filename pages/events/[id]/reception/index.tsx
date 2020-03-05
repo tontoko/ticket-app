@@ -5,6 +5,8 @@ import { Table, Container, Row, Col, Label, Button, Input } from 'reactstrap';
 
 export default () => {
 
+    const router = useRouter()
+
     const [state, setState] = useState([
         {
             id: 1,
@@ -47,7 +49,7 @@ export default () => {
         );
     }
 
-    const readHref = `/events/reception/qrReader`
+    const readHref = `/events/${router.query.id}/reception/qrReader`
 
     return (
         <Container>

@@ -27,7 +27,8 @@ const Confirmation= props => {
     try {
       await firestore.runTransaction(async transaction => {
         const event = transaction.get(eventRef)
-        transaction.set(eventRef, {...(await event).data(), categories})
+        const conversionedCategories = [...categories].map(category => ({...category, price: Number(category.price)}))
+        transaction.set(eventRef, { ...(await event).data(), categories: conversionedCategories})
       })
     } catch(e) {
       errorMsg(e)

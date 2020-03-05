@@ -157,11 +157,13 @@ export default props => {
                     </Carousel>
                     <FormGroup>
                         <h5>会場</h5>
-                        <p>会場: {event.placeName}</p>
+                        <p style={{ marginLeft: '0.5em' }}>{event.placeName}</p>
                     </FormGroup>
                     <FormGroup style={{ marginTop: '2em' }}>
                         <h5>チケットカテゴリ</h5>
-                        {categories && categories.map(category => <p>{`${category.name}: ${category.price} 円`}</p>)}
+                        <FormGroup style={{marginLeft: '0.5em'}}>
+                            {categories && categories.map(category => <p>{`${category.name}: ${category.price} 円`}</p>)}
+                        </FormGroup>
                         {status == 'organizer' && <Link href={`/events/${router.query.id}/categories/edit`}><Button>カテゴリの編集</Button></Link>}
                     </FormGroup>
                 </Col>

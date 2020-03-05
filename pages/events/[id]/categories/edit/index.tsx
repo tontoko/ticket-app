@@ -38,8 +38,8 @@ export default props => {
       copyCategories[i] = { ...copyCategories[i], name }
       setCategories(copyCategories)
     }
-    const setPrice = (price:number) => {
-      if (price < 0) return
+    const setPrice = (price:string) => {
+      if (Number(price) < 0) return
       const copyCategories = [...categories]
       copyCategories[i] = {...copyCategories[i], price}
       setCategories(copyCategories)
