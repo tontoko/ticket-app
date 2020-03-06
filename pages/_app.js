@@ -9,11 +9,6 @@ import NProgress from 'nprogress'
 import { positions, Provider } from "react-alert";
 import AlertTemplate from '../components/alert'
 import Loading from '../components/loading'
-const micro_session = require('micro-cookie-session')({
-    name: 'session',
-    keys: ['geheimnis'],
-    maxAge: 24 * 60 * 60 * 1000
-})
 Router.events.on('routeChangeStart', url => {
     require('nprogress/nprogress.css')
     NProgress.start()
@@ -38,6 +33,12 @@ export default class MyApp extends App {
         if (ctx.req) {
             const { req, res, pathname, query } = ctx
             // SSR
+            // Webpackにバンドルされない
+            const micro_session = eval("require('micro-cookie-session')")({
+                name: 'session',
+                keys: ['geheimnis'],
+                maxAge: 24 * 60 * 60 * 1000
+            })
             const _req = {...req}
             const _res = {...res}
             await micro_session(_req, _res)
