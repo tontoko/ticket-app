@@ -98,7 +98,7 @@ export default class MyApp extends App {
                         Router.push('/confirmEmail')
                         return
                     }
-                    if (Router.pathname === '/login' || Router.pathname === '/register') {
+                    if (Router.pathname === '/' || Router.pathname === '/login' || Router.pathname === '/register') {
                         Router.push(`/user`)
                     }
                 } else {
