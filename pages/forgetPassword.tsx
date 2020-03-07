@@ -10,7 +10,7 @@ export default () => {
   const [email, setEmail] = useState('')
 
   const sendEmail = async () => {
-    const firebase = await initFirebase()
+    const {firebase} = await initFirebase()
     try {
       await firebase.auth().sendPasswordResetEmail(email)
       alert.success('確認メールを送信しました。メールのリンクからパスワードを再設定してください。')

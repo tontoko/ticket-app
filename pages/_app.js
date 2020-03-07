@@ -79,7 +79,7 @@ export default class MyApp extends App {
 
     componentDidMount() {
         (async() => {
-            const firebase = await initFirebase()
+            const {firebase} = await initFirebase()
             this.unsubscribe = firebase.auth().onAuthStateChanged(async currentUser => {
                 if (currentUser) {
                     const token = await currentUser.getIdToken()

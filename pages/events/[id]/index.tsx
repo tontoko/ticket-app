@@ -28,8 +28,7 @@ export default props => {
     useEffect(() => {
         let unsubscribe = () => void
         (async () => {
-            const firebase = await initFirebase()
-            const firestore = firebase.firestore()
+            const {firebase, firestore} = await initFirebase()
             unsubscribe = firestore.collection('events').doc(router.query.id as string).onSnapshot(async result => {
                 if (!result.exists) router.push('/user')
                 setCategories(result.data().categories)

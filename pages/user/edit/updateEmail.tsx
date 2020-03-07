@@ -14,7 +14,7 @@ export const UpdateEmail: React.FC<any> = (props) => {
     const [pwd, setPwd] = useState('')
 
     const updateEmail = async() => {
-        const firebase = await initFirebase()
+        const {firebase} = await initFirebase()
         const { currentUser } = firebase.auth()
         if (email || pwd) {
             try {

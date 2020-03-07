@@ -12,7 +12,7 @@ export const Leave = (props) => {
 
     const leave = async () => {
         if (!checkBox) return alert.error('チェックボックスが選択されていません。')
-        const firebase = await initFirebase()
+        const {firebase} = await initFirebase()
         const auth = firebase.auth()
         const { sign_in_provider } = props.user.firebase
         let credencial:any

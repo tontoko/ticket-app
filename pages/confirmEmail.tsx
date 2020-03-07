@@ -13,7 +13,7 @@ export default (props) => {
     useEffect(() => {
         (async() => {
             // クライアント側の認証を待つ
-            const auth = (await initFirebase()).auth()
+            const auth = (await initFirebase()).firebase.auth()
             if (!auth.currentUser) return
             if (!loading) return
             sendEmail(auth)

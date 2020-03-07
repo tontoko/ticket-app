@@ -34,7 +34,7 @@ export default (props:props) => {
     }, [])
 
     const manageMode = async () => {
-        const auth = (await initFirebase()).auth()
+        const auth = (await initFirebase()).firebase.auth()
         try {
             switch (mode as string) {
                 case 'resetPassword':
@@ -98,7 +98,7 @@ export default (props:props) => {
 
     const confirmResetPassword = async (newPwd, newPwdConfirm) => {
         if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません。')
-        const auth = (await initFirebase()).auth()
+        const auth = (await initFirebase()).firebase.auth()
         try {
             await auth.confirmPasswordReset(oobCode as string, newPwd)
             redirectAfterUpdate(auth, '新しいパスワードに更新しました。')

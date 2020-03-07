@@ -24,8 +24,7 @@ export default props => {
 
   useEffect(() => {
     (async () => {
-      const firebase = await initFirebase()
-      const firestore = firebase.firestore()
+      const { firebase, firestore } = await initFirebase()
       const event = await firestore.collection('events').doc(router.query.id as string).get()
       setCategories(event.data().categories)
       setLoading(false)

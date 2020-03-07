@@ -13,7 +13,7 @@ export default () => {
 
     const sendEmail = async () => {
         if (pwd !== pwdConfirm) return alert.error('確認用パスワードが一致していません。')
-        const firebase = await initFirebase()
+        const {firebase} = await initFirebase()
         try {
             await firebase.auth().createUserWithEmailAndPassword(email, pwd)
         } catch(e) {

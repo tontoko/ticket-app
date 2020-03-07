@@ -37,7 +37,7 @@ export const UserShow: React.FC<any> = (props) => {
                 </Row>
                 <Row style={{ margin: 0, marginTop: "1em" }}>
                         <Button className="ml-auto" onClick={async() => {
-                            const firebase = await initFirebase()
+                            const {firebase} = await initFirebase()
                             firebase.auth().signOut()
                         }}>
                             ログアウト

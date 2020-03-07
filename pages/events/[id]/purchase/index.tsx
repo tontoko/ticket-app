@@ -20,8 +20,7 @@ export const Purchase: React.FC = () => {
 
     useEffect(() => {
         (async () => {
-            const firebase = await initFirebase()
-            const firestore = firebase.firestore()
+            const { firebase, firestore } = await initFirebase()
             const result = await firestore.collection('events').doc(router.query.id as string).get()
             if (!result.exists) router.push('/user')
             setEvent(result.data())

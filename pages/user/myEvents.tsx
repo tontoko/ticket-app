@@ -16,8 +16,7 @@ export default (props) => {
     useEffect(() => {
         let unsubscribe = () => void
         (async() => {
-            const firebase = await initFirebase()
-            const firestore = firebase.firestore()
+            const { firebase, firestore } = await initFirebase()
             const user = props.user ? props.user : props.params.uid
             if (!user) return
             unsubscribe = firestore.collection('events').where('createdUser', '==', user.uid).onSnapshot(async result => {

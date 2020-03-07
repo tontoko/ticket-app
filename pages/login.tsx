@@ -16,7 +16,7 @@ export const Login = () => {
     
     const loginWithEmail = async () => {
         try {
-            const firebase = await initFirebase()
+            const {firebase} = await initFirebase()
             await firebase.auth().signInWithEmailAndPassword(email, password)
         } catch (e) {
             alert.error(errorMsg(e, 'signin'))
@@ -25,7 +25,7 @@ export const Login = () => {
 
     const loginWithFacebook = async() => {
         try {
-            const firebase = await initFirebase()
+            const {firebase} = await initFirebase()
             const provider = new firebase.auth.FacebookAuthProvider()
             const result = await firebase.auth().signInWithPopup(provider)
             // This gives you a Facebook Access Token. You can use it to access the Facebook API.
@@ -48,7 +48,7 @@ export const Login = () => {
 
     const loginWithTwitter = async () => {
         try {
-            const firebase = await initFirebase()
+            const {firebase} = await initFirebase()
             const provider = new firebase.auth.TwitterAuthProvider()
             const result = await firebase.auth().signInWithPopup(provider)
             // This gives you a Facebook Access Token. You can use it to access the Facebook API.
@@ -70,7 +70,7 @@ export const Login = () => {
 
     const loginWithGoogle = async () => {
         try {
-            const firebase = await initFirebase()
+            const {firebase} = await initFirebase()
             const provider = new firebase.auth.GoogleAuthProvider()
             const result = await firebase.auth().signInWithPopup(provider)
             // This gives you a Facebook Access Token. You can use it to access the Facebook API.

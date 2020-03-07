@@ -15,7 +15,7 @@ export const UpdatePassword: React.FC<any> = (props) => {
     const [newPwdConfirm, setNewPwdConfirm] = useState('')
 
     const updatePassword = async () => {
-        const firebase = await initFirebase()
+        const {firebase} = await initFirebase()
         const { currentUser } = firebase.auth()
         if (pwd && newPwd && newPwdConfirm && newPwd === newPwdConfirm) {
             try {

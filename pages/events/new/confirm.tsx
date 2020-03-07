@@ -69,7 +69,7 @@ const Page = () => {
     }
 
     const createEvent = async() => {
-        const firebase = await initFirebase()
+        const {firebase} = await initFirebase()
         let photos:string[] = []
         file1 && photos.push(await saveImages(file1 as string, 1, firebase))
         file2 && photos.push(await saveImages(file2 as string, 1, firebase))

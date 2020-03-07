@@ -1,8 +1,7 @@
 import initFirebase from '../initFirebase'
 
 export default async (img:string, size?: string) => {
-  const firebase = await initFirebase()
-  const storage = firebase.storage()
+  const {firebase, storage} = await initFirebase()
   
   if (!img) return storage.ref('event_default_360x360.jpg').getDownloadURL()
   

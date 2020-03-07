@@ -21,8 +21,7 @@ const Confirmation= props => {
   const [categories, setCategories] = useState([...JSON.parse(router.query.confirm as string)])
 
   const submit = async () => {
-    const firebase = await initFirebase()
-    const firestore = firebase.firestore()
+    const {firebase, firestore} = await initFirebase()
     const eventRef = firestore.collection('events').doc(router.query.id as string)
     try {
       await firestore.runTransaction(async transaction => {
