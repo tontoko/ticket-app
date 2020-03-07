@@ -10,7 +10,6 @@ const initFirebase = async () => {
     }
     const settings = { timestampsInSnapshots: true };
     const firestore = firebase.firestore()
-    firestore.settings(settings)
     const storage = firebase.storage()
     return {firebase, firestore, storage}
 }

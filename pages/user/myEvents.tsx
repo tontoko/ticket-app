@@ -32,7 +32,7 @@ export default (props) => {
     const renderUserEvents = async events => await Promise.all(
         events.map(async (event, i) => {
             const data = event.data()
-            const date = new Date(data.startDate.seconds * 1000)
+            const date:Date = data.startDate.toDate()
             const year = date.getFullYear()
             const month = date.getMonth() + 1
             const day = date.getDate()
