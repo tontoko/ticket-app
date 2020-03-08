@@ -54,10 +54,10 @@ export default props => {
             <Col>
               <Input value={category.name} onChange={e => setName(e.target.value)} />
             </Col>
-            <Col sm='4' md='3' lg='2' style={{display: 'flex'}}>
+            <Col sm="12" md='4' lg='3' style={{display: 'flex'}}>
               <Input type='number' min='0' value={category.price} onChange={e => setPrice(e.target.value)} style={{textAlign: 'right'}} />
               <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
-              <p style={{marginLeft: '1em'}} onClick={deleteCategory}><FontAwesomeIcon icon={faTimesCircle} size="sm" style={{ color: "black" }} className="fa-2x" /></p>
+            <p style={{ margin: 'auto', marginLeft: '0.5em' }} onClick={deleteCategory}><FontAwesomeIcon icon={faTimesCircle} size="sm" style={{ color: "black" }} className="fa-2x" /></p>
             </Col>
           </Row>
         </FormGroup>

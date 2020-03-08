@@ -19,6 +19,7 @@ export default props => {
     const router = useRouter();
     const [event, setEvent]: [firebase.firestore.DocumentData, React.Dispatch<firebase.firestore.DocumentData>] = useState()
     const [categories, setCategories]: [firebase.firestore.DocumentData, React.Dispatch<firebase.firestore.DocumentData>] = useState()
+    const [date, setDate] = useState(new Date)
     const [loading, setLoading] = useState(true)
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false)
@@ -47,6 +48,7 @@ export default props => {
                     const payments = await firestore.collection('users').doc(props.user.uid).collection('payments').where("event", "==", result.id).get()
                     payments.size > 0 && setStatus('bought')
                 }
+                setDate(result.data().startDate.toDate())
                 setEvent(result.data())
                 setLoading(false)
             })
@@ -158,10 +160,15 @@ export default props => {
                         <h5>会場</h5>
                         <p style={{ marginLeft: '0.5em' }}>{event.placeName}</p>
                     </FormGroup>
+                    <FormGroup>
+                        <h5>開始時間</h5>
+                        <p style={{ marginLeft: '0.5em' }}>{`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`}<br/>
+                        {`${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`}</p>
+                    </FormGroup>
                     <FormGroup style={{ marginTop: '2em' }}>
                         <h5>チケットカテゴリ</h5>
                         <FormGroup style={{marginLeft: '0.5em'}}>
-                            {categories && categories.map((category,i) => <p key={i}>{`${category.name}: ${category.price} 円`}</p>)}
+                            {categories && categories.map((category,i) => <h6 key={i}>{`${category.name}: ${category.price} 円`}</h6>)}
                         </FormGroup>
                         {status == 'organizer' && <Link href={`/events/${router.query.id}/categories/edit`}><Button>カテゴリの編集</Button></Link>}
                     </FormGroup>

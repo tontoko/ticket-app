@@ -38,7 +38,7 @@ const Confirmation= props => {
   return (
     <Container>
       <Form style={{ marginTop: '5em' }}>
-        <h5 style={{ marginBottom: '1em' }}>カテゴリ一覧</h5>
+        <h5 style={{ marginBottom: '1em' }}>チケットカテゴリーを以下に更新します。<br/>よろしいですか？</h5>
         {categories.map((category,i) => (
           <FormGroup key={i}>
             <p>{`${category.name}: ${category.price} 円`}</p>
