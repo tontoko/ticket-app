@@ -72,8 +72,8 @@ const Page = () => {
         const {firebase} = await initFirebase()
         let photos:string[] = []
         file1 && photos.push(await saveImages(file1 as string, 1, firebase))
-        file2 && photos.push(await saveImages(file2 as string, 1, firebase))
-        file3 && photos.push(await saveImages(file3 as string, 1, firebase))
+        file2 && photos.push(await saveImages(file2 as string, 2, firebase))
+        file3 && photos.push(await saveImages(file3 as string, 3, firebase))
         const firestore = firebase.firestore()
         await firestore.collection('events').add({
             photos,

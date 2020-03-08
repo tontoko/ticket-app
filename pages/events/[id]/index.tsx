@@ -161,7 +161,7 @@ export default props => {
                     <FormGroup style={{ marginTop: '2em' }}>
                         <h5>チケットカテゴリ</h5>
                         <FormGroup style={{marginLeft: '0.5em'}}>
-                            {categories && categories.map(category => <p>{`${category.name}: ${category.price} 円`}</p>)}
+                            {categories && categories.map((category,i) => <p key={i}>{`${category.name}: ${category.price} 円`}</p>)}
                         </FormGroup>
                         {status == 'organizer' && <Link href={`/events/${router.query.id}/categories/edit`}><Button>カテゴリの編集</Button></Link>}
                     </FormGroup>

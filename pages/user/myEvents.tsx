@@ -37,7 +37,7 @@ export default (props) => {
             const month = date.getMonth() + 1
             const day = date.getDate()
             let img
-            await getImg(data.photos[0]).then(result => img = result)
+            await getImg(data.photos[0], '360').then(result => img = result)
 
             return (
                 <Link key={i} href={`/events/${event.id}`}>
