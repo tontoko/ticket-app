@@ -4,9 +4,9 @@ import {
 } from 'reactstrap';
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import initFirebase from '../../../initFirebase'
-import Loading from '../../../components/loading'
-import getImg from '../../../lib/getImg'
+import initFirebase from '@/initFirebase'
+import Loading from '@/components/loading'
+import getImg from '@/lib/getImg'
 
 export default () => {
     const router = useRouter()

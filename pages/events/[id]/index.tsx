@@ -10,9 +10,9 @@ import {
     CarouselCaption,
     FormGroup
 } from 'reactstrap';
-import getImg from '../../../lib/getImg'
-import initFirebase from '../../../initFirebase'
-import Loading from '../../../components/loading'
+import getImg from '@/lib/getImg'
+import initFirebase from '@/initFirebase'
+import Loading from '@/components/loading'
 
 export default props => {
 

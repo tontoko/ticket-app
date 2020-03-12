@@ -1,4 +1,4 @@
-import admin from '../../initFirebaseAdmin'
+import admin from '@/initFirebaseAdmin'
 const micro_session = require('micro-cookie-session')({
     name: 'session',
     keys: ['geheimnis'],

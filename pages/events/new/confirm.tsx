@@ -3,7 +3,7 @@ import {
     Button, Container, Col, Row, Form, Input, FormGroup, Label, CarouselItem, CarouselCaption, Carousel, CarouselControl, CarouselIndicators
 } from 'reactstrap';
 import {useRouter} from 'next/router'
-import initFirebase from '../../../initFirebase'
+import initFirebase from '@/initFirebase'
 
 const Page = () => {
     const router = useRouter()

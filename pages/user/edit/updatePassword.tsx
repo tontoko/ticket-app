@@ -2,10 +2,10 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
-import initFirebase from '../../../initFirebase'
+import initFirebase from '@/initFirebase'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
-import errorMsg from '../../../lib/errorMsg'
+import errorMsg from '@/lib/errorMsg'
 
 export const UpdatePassword: React.FC<any> = (props) => {
     const router = useRouter()

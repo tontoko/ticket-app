@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import React, {useState, useEffect} from 'react'
-import initFirebase from '../initFirebase'
+import initFirebase from '@/initFirebase'
 import {useRouter} from 'next/router'
-import errorMsg from '../lib/errorMsg'
-import Loading from '../components/loading'
+import errorMsg from '@/lib/errorMsg'
+import Loading from '@/components/loading'
 
 export default (props) => {
     const router = useRouter()

@@ -1,9 +1,9 @@
 import React from 'react'
 import { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, FormText, Row, Col } from 'reactstrap'
-import errorMsg from '../../../lib/errorMsg'
+import errorMsg from '@/lib/errorMsg'
 import { useAlert } from "react-alert"
-import initFirebase from '../../../initFirebase'
+import initFirebase from '@/initFirebase'
 
 export const Leave = (props) => {
     const alert = useAlert()

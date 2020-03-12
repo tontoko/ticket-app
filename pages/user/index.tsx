@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, FormText, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
-import initFirebase from '../../initFirebase'
+import initFirebase from '@/initFirebase'
 
 export const UserShow: React.FC<any> = (props) => {
     return (

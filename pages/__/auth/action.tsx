@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
-import initFirebase from '../../../initFirebase'
+import initFirebase from '@/initFirebase'
 import { useAlert } from "react-alert"
-import errorMsg from '../../../lib/errorMsg'
-import Loading from '../../../components/loading'
+import errorMsg from '@/lib/errorMsg'
+import Loading from '@/components/loading'
 import {useRouter} from 'next/router'
 import Firebase from 'firebase'
 import ResetPassword from './resetPassword'

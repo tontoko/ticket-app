@@ -11,10 +11,10 @@ import {
   Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
   CardTitle, CardSubtitle,
 } from 'reactstrap'
-import initFirebase from '../../../../../initFirebase'
+import initFirebase from '@/initFirebase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
-import Loading from '../../../../../components/loading'
+import Loading from '@/components/loading'
 
 export default props => {
   const router = useRouter();

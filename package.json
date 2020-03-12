@@ -13,7 +13,7 @@
     "firebase-admin": "^8.9.2",
     "isomorphic-unfetch": "^3.0.0",
     "micro-cookie-session": "^2.0.0-beta.1",
-    "next": "^9.2.1",
+    "next": "^9.3.0",
     "nprogress": "^0.2.0",
     "prop-types": "^15.7.2",
     "qrcode.react": "^0.9.3",
@@ -24,7 +24,7 @@
     "react-qr-reader": "^2.2.1",
     "react-stripe-elements": "^6.1.0",
     "reactstrap": "^8.4.1",
-    "typescript": "^3.8.2"
+    "typescript": "^3.8.3"
   },
   "devDependencies": {
     "@types/express": "^4.17.2",

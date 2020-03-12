@@ -4,9 +4,11 @@ import {
     CardTitle, CardSubtitle, Button, Container, Col, Row
 } from 'reactstrap';
 import Link from 'next/link'
-import getImg from '../../lib/getImg'
-import initFirebase from '../../initFirebase'
-import Loading from '../../components/loading'
+import getImg from '@/lib/getImg'
+import initFirebase from '@/initFirebase'
+import Loading from '@/components/loading'
+import { GetServerSideProps } from 'next'
+import isLogin from '@/lib/isLogin'
 
 export default (props) => {
 
@@ -79,3 +81,11 @@ export default (props) => {
         </Container>
     );
 };
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    const {user, msg} = await isLogin(ctx)
+    const { firestore } = await initFirebase()
+    const result = await firestore.collection('events').where('createdUser', '==', user.uid).get()
+    const events = result.docs.map(doc => doc)
+    return {props: {events}}
+}

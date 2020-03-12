@@ -1,4 +1,4 @@
-import initFirebase from '../initFirebase'
+import initFirebase from '@/initFirebase'
 
 export default async (img:string, size?: string) => {
   const {firebase, storage} = await initFirebase()

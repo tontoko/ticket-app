@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
-import initFirebase from '../initFirebase'
+import initFirebase from '@/initFirebase'
 import { useAlert } from "react-alert"
-import errorMsg from '../lib/errorMsg'
+import errorMsg from '@/lib/errorMsg'
 
 export default () => {
     const alert = useAlert()

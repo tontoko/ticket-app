@@ -13,8 +13,8 @@ import {
   Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
   CardTitle, CardSubtitle, FormFeedback
 } from 'reactstrap'
-import initFirebase from '../../../../../initFirebase'
-import errorMsg from '../../../../../lib/errorMsg'
+import initFirebase from '@/initFirebase'
+import errorMsg from '@/lib/errorMsg'
 
 const Confirmation= props => {
   const router = useRouter()

@@ -5,8 +5,8 @@ import { Dispatch, SetStateAction } from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, } from 'reactstrap'
-import initFirebase from '../../../../initFirebase'
-import getImg from '../../../../lib/getImg'
+import initFirebase from '@/initFirebase'
+import getImg from '@/lib/getImg'
 
 export const Purchase: React.FC = () => {
     const router = useRouter();

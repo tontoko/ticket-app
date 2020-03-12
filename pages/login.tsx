@@ -3,11 +3,11 @@ import Router from 'next/router'
 import React, {useState} from 'react'
 import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
-import initFirebase from '../initFirebase'
+import initFirebase from '@/initFirebase'
 import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAlert } from "react-alert"
-import errorMsg from '../lib/errorMsg'
+import errorMsg from '@/lib/errorMsg'
 
 export const Login = () => {
     const alert = useAlert()
