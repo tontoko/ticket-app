@@ -17,7 +17,7 @@ export const UserLayout: React.FC<any> = ({user}) => {
     useEffect(() => {
         const {msg} = router.query
         if (msg) alert.success(msg)
-    })
+    },[])
 
     return (
         <div>

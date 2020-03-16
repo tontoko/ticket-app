@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import {
-    Button, Container, Col, Row, Label,
+    Button, Container, Col, Row, 
     Carousel,
     CarouselItem,
     CarouselControl,
@@ -11,34 +11,15 @@ import {
     FormGroup
 } from 'reactstrap';
 import getImg from '@/lib/getImgSSR'
-import Loading from '@/components/loading'
 import { GetServerSideProps } from 'next'
 import initFirebaseAdmin from '@/initFirebaseAdmin'
 import isLogin from '@/lib/isLogin'
-
-type event = { 
-    createdAt: FirebaseFirestore.Timestamp,
-    updatedAt: FirebaseFirestore.Timestamp,
-    startDate: FirebaseFirestore.Timestamp,
-    photos: string[],
-    id: string,
-    placeName: string,
-    time: string,
-    name: string,
-    eventDetails: string,
-    categories: categories,
-    createdUser: string
-}
-
-type categories = {
-    name: string,
-    price: number
-}
+import { event } from 'events'
 
 export default ({ user, event, categories, status, items }) => {
 
     const router = useRouter();
-    const [date, setDate] = useState(new Date)
+    const startDate = new Date(event.startDate * 1000)
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false)
 
@@ -146,8 +127,8 @@ export default ({ user, event, categories, status, items }) => {
                     </FormGroup>
                     <FormGroup>
                         <h5>開始時間</h5>
-                        <p style={{ marginLeft: '0.5em' }}>{`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`}<br/>
-                        {`${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`}</p>
+                        <p style={{ marginLeft: '0.5em' }}>{`${startDate.getFullYear()}/${startDate.getMonth() + 1}/${startDate.getDate()}`}<br/>
+                            {`${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2,'0')}`}</p>
                     </FormGroup>
                     <FormGroup style={{ marginTop: '2em' }}>
                         <h5>チケットカテゴリ</h5>

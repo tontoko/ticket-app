@@ -1,10 +1,3 @@
-//todo
-
-
-
-
-
-
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
@@ -13,8 +6,12 @@ import {
   Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
   CardTitle, CardSubtitle, FormFeedback
 } from 'reactstrap'
+import initFirebaseAdmin from '@/initFirebaseAdmin'
 import initFirebase from '@/initFirebase'
 import errorMsg from '@/lib/errorMsg'
+import { GetServerSideProps } from 'next'
+import { event } from 'events'
+import isLogin from '@/lib/isLogin'
 
 const Confirmation= props => {
   const router = useRouter()
@@ -32,7 +29,7 @@ const Confirmation= props => {
     } catch(e) {
       errorMsg(e)
     }
-    router.push(`/events/${router.query.id}`)
+    router.push(`/events/${router.query.id}?msg=更新しました`)
   }
 
   return (
@@ -53,3 +50,8 @@ const Confirmation= props => {
 }
 
 export default Confirmation
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { user } = await isLogin(ctx)
+  return { props: {user} }
+}
