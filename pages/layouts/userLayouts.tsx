@@ -6,8 +6,10 @@ import {
 import Avater from 'react-avatar'
 import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
+import {GetServerSideProps} from 'next'
+import isLogin from '@/lib/isLogin'
 
-export const UserLayout: React.FC<any> = (props) => {
+export const UserLayout: React.FC<any> = ({user}) => {
     const router = useRouter()
     const alert = useAlert()
     const [isOpen, toggle] = useState(false)
@@ -21,7 +23,7 @@ export const UserLayout: React.FC<any> = (props) => {
         <div>
             <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
-                {props.params.email && 
+                {user && user.email && 
                     <>
                     <div style={{marginLeft: "auto"}}>
                         <Link href={`/user`}>
@@ -30,7 +32,7 @@ export const UserLayout: React.FC<any> = (props) => {
                                     size="40" 
                                     round 
                                     style={{ cursor: "pointer" }}
-                                    src={props.params.picture}
+                                    src={user.picture}
                                     />
                             </div>
                         </Link>
@@ -51,6 +53,11 @@ export const UserLayout: React.FC<any> = (props) => {
             </Navbar>
         </div>
     );
+}
+
+export const getServerSideProps = async ctx => {
+    const { user } = await isLogin(ctx)
+    return { props: { user } }
 }
 
 export default UserLayout

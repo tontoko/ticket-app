@@ -28,9 +28,20 @@ export default async (ctx) => {
       }
       user = session.token,
       msg = query?.msg
+  } else {
+      if (pathname !== '/login' || pathname !== '/register' || pathname !== '/') {
+        res.writeHead(302, {
+          Location: `/login`
+        })
+        res.end()
+      }
   }
   return {
     user,
-    msg
+    msg,
+    req,
+    res,
+    pathname,
+    query
   }
 }

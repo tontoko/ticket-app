@@ -10,51 +10,37 @@ import {
     CarouselCaption,
     FormGroup
 } from 'reactstrap';
-import getImg from '@/lib/getImg'
-import initFirebase from '@/initFirebase'
+import getImg from '@/lib/getImgSSR'
 import Loading from '@/components/loading'
+import { GetServerSideProps } from 'next'
+import initFirebaseAdmin from '@/initFirebaseAdmin'
+import isLogin from '@/lib/isLogin'
 
-export default props => {
+type event = { 
+    createdAt: FirebaseFirestore.Timestamp,
+    updatedAt: FirebaseFirestore.Timestamp,
+    startDate: FirebaseFirestore.Timestamp,
+    photos: string[],
+    id: string,
+    placeName: string,
+    time: string,
+    name: string,
+    eventDetails: string,
+    categories: categories,
+    createdUser: string
+}
+
+type categories = {
+    name: string,
+    price: number
+}
+
+export default ({ user, event, categories, status, items }) => {
 
     const router = useRouter();
-    const [event, setEvent]: [firebase.firestore.DocumentData, React.Dispatch<firebase.firestore.DocumentData>] = useState()
-    const [categories, setCategories]: [firebase.firestore.DocumentData, React.Dispatch<firebase.firestore.DocumentData>] = useState()
     const [date, setDate] = useState(new Date)
-    const [loading, setLoading] = useState(true)
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false)
-    const [items, setItems] = useState([])
-    const [status, setStatus] = useState('')
-
-    useEffect(() => {
-        let unsubscribe = () => void
-        (async () => {
-            const {firebase, firestore} = await initFirebase()
-            unsubscribe = firestore.collection('events').doc(router.query.id as string).onSnapshot(async result => {
-                if (!result.exists) router.push('/user')
-                setCategories(result.data().categories)
-                setItems(await Promise.all(result.data().photos.map(async (file, i) => {
-                    const url = await getImg(file)
-                    return {
-                        src: url,
-                        altText: '画像' + (i+1),
-                        caption: '画像' + (i+1)
-                    }
-                })))
-                const { createdUser } = result.data()
-                if (createdUser == props.user.uid) {
-                    setStatus('organizer')
-                } else {
-                    const payments = await firestore.collection('users').doc(props.user.uid).collection('payments').where("event", "==", result.id).get()
-                    payments.size > 0 && setStatus('bought')
-                }
-                setDate(result.data().startDate.toDate())
-                setEvent(result.data())
-                setLoading(false)
-            })
-        })()
-        return unsubscribe()
-    }, [])
 
     const next = () => {
         if (animating) return;
@@ -72,7 +58,7 @@ export default props => {
         if (animating) return;
         setActiveIndex(newIndex)
     }
-
+    
     const slides = items.map((item) => {
         return (
             <CarouselItem
@@ -83,8 +69,8 @@ export default props => {
                 <img src={item.src} alt={item.altText} style={{width: "100%", height: "100%"}} />
                 <CarouselCaption captionText={item.caption} />
             </CarouselItem>
-        );
-    });
+        )
+    })
 
     const urlToPurchase = `/events/${router.query.id}/purchase`
     const urlToEdit = `/events/${router.query.id}/edit`
@@ -134,8 +120,6 @@ export default props => {
         }
     }
 
-    if (loading) return <Loading />
-
     return (
         <Container>
             <Row style={{ marginTop: '1em', marginLeft: "0" }}>
@@ -182,3 +166,31 @@ export default props => {
     );
 }
 
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    const { query } = ctx
+    const { user } = await isLogin(ctx)
+    const { firestore } = await initFirebaseAdmin()
+    const result = await firestore.collection('events').doc(query.id as string).get()
+    const data = result.data() as event
+    const createdAt = data.createdAt.seconds
+    const updatedAt = data.updatedAt.seconds
+    const startDate = data.startDate.seconds
+    const photos:string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, user.user_id))) : [await getImg(null, user.user_id)]
+    const event = { ...data, createdAt, updatedAt, startDate, photos, id: result.id }
+    const {categories} = event
+    let status: string
+    if (event.createdUser == user.uid) {
+        status = 'organizer'
+    } else {
+        const payments = await firestore.collection('users').doc(user.uid).collection('payments').where("event", "==", result.id).get()
+        status = payments.size > 0 && 'bought'
+    }
+    const items = event.photos.map((url, i) => {
+        return {
+            src: url,
+            altText: '画像' + (i + 1),
+            caption: '画像' + (i + 1)
+        }
+    })
+    return { props: { user, event, categories, status, items } }
+}

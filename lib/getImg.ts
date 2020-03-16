@@ -1,11 +1,11 @@
 import initFirebase from '@/initFirebase'
 
-export default async (img:string, size?: string) => {
+export default async (img:string, uid: string, size?: string) => {
   const {firebase, storage} = await initFirebase()
   
   if (!img) return await storage.ref('event_default_360x360.jpg').getDownloadURL() as string
   
-  const ref = storage.ref(`${firebase.auth().currentUser.uid}/events`)
+  const ref = storage.ref(`${uid}/events`)
   
   if (size !== '800x800') {
 

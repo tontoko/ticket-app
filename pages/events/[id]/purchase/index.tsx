@@ -24,7 +24,7 @@ export const Purchase: React.FC = () => {
             const result = await firestore.collection('events').doc(router.query.id as string).get()
             if (!result.exists) router.push('/user')
             setEvent(result.data())
-            setImg(await getImg(result.data().photos[0]))
+            setImg(await getImg(result.data().photos[0], firebase.auth().currentUser.uid))
         })()
     }, [])
 

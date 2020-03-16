@@ -2,11 +2,11 @@ import {useState, useEffect, Dispatch} from 'react'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import UserLayouts from './layouts/userLayouts'
 import initFirebase from '@/initFirebase'
-import Router from 'next/router'
+import Router, {useRouter} from 'next/router'
 import { AppProps } from 'next/app'
 import {Spinner} from 'reactstrap'
 import NProgress from 'nprogress'
-import { positions, Provider } from "react-alert";
+import { positions, Provider, AlertPosition } from "react-alert";
 import AlertTemplate from '@/components/alert'
 import Loading from '@/components/loading'
 Router.events.on('routeChangeStart', url => {
@@ -17,12 +17,12 @@ Router.events.on('routeChangeComplete', () => NProgress.done())
 Router.events.on('routeChangeError', () => NProgress.done())
 
 const App = ({ Component, pageProps }: AppProps) => {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [user, setUser]: [null | firebase.User, Dispatch<firebase.User>] = useState(null)
 
-  let unsubscribe = () => void
-
   useEffect(() => {
+    let unsubscribe:firebase.Unsubscribe = () => void
     (async () => {
       const { firebase } = await initFirebase()
       unsubscribe = firebase.auth().onAuthStateChanged(async currentUser => {
@@ -31,8 +31,7 @@ const App = ({ Component, pageProps }: AppProps) => {
           await fetch('/api/login', {
             method: 'POST',
             headers: new Headers({
-              'Content-Type': 'application/json',
-              'Cache-Control': 'private'
+              'Content-Type': 'application/json'
             }),
             credentials: 'same-origin',
             body: JSON.stringify({
@@ -41,29 +40,28 @@ const App = ({ Component, pageProps }: AppProps) => {
           })
           setLoading(false)
           setUser(currentUser)
-          loading ? this.setState({ loading: false, currentUser }) : this.setState({ loading: this.state.loading, currentUser })
           if (!currentUser.emailVerified && currentUser.providerData[0].providerId === 'password') {
-            Router.push('/confirmEmail')
+            router.push('/confirmEmail')
             return
           }
-          if (Router.pathname === '/' || Router.pathname === '/login' || Router.pathname === '/register') {
-            Router.push(`/user`)
+          if (router.pathname === '/' || router.pathname === '/login' || router.pathname === '/register') {
+            router.push(`/user`)
           }
         } else {
+          setLoading(false)
+          setUser(currentUser)
           await fetch('/api/logout', {
             method: 'POST',
             credentials: 'same-origin'
           })
-          this.state.loading ? this.setState({ loading: false, currentUser: null }) : this.setState({ loading: this.state.loading, currentUser: null })
-          if (Router.pathname !== '/login' && Router.pathname !== '/register' && Router.pathname !== '/' && Router.pathname.match(/^\/user/)) {
-            Router.push('/login')
-          }
+          router.push('/login')
         }
       })
     })()
     return unsubscribe()
   }, [])
-  const position: 'top left' = 'top left'
+
+  const position:AlertPosition = 'top left'
   const options = {
     timeout: 4000,
     position
@@ -83,7 +81,7 @@ const App = ({ Component, pageProps }: AppProps) => {
   return (
     <Provider template={AlertTemplate} {...options}>
       <UserLayouts user={user} params={params} />
-      <Component {...pageProps} user={user} params={params} />
+      <Component {...pageProps} params={params} />
     </Provider>
   )
 }

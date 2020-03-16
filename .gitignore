@@ -68,7 +68,6 @@ node_modules/
 
 build
 
-ticket-app-dev.ts
 ticket-app-admin-dev.json
 
 .DS_Store

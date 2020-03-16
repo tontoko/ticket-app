@@ -1,4 +1,5 @@
 export default (e, method?) => {
+    console.log(e)
     switch (e.code) {
         case 'auth/cancelled-popup-request':
         case 'auth/popup-closed-by-user':
