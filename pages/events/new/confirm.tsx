@@ -4,6 +4,8 @@ import {
 } from 'reactstrap';
 import {useRouter} from 'next/router'
 import initFirebase from '@/initFirebase'
+import { GetServerSideProps } from 'next'
+import isLogin from '@/lib/isLogin'
 
 const Page = () => {
     const router = useRouter()
@@ -135,12 +137,15 @@ const Page = () => {
     );
 };
 
-Page.getInitialProps = async ({req, res}) => {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // リロード等でSSRした場合作成画面にリダイレクト
-    if (req) {
+    const {user} = await isLogin(ctx)
+    if (user) {
+        const {res} = ctx
         res.writeHead(302, { Location: '/events/new' })
         res.end()
     }
+    return {}
 }
 
 export default Page

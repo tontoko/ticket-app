@@ -4,6 +4,8 @@ import {
 } from 'reactstrap';
 import Link from 'next/link'
 import {useRouter} from 'next/router'
+import {GetServerSideProps} from 'next'
+import isLogin from '@/lib/isLogin'
 
 export default () => {
     const router = useRouter()
@@ -85,3 +87,8 @@ export default () => {
         </Container>
     );
 };
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    const user = await isLogin(ctx)
+    return {props: {user}}
+}

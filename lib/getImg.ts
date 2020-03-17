@@ -7,7 +7,7 @@ export default async (img:string, uid: string, size?: string) => {
   
   const ref = storage.ref(`${uid}/events`)
   
-  if (size !== '800x800') {
+  if (size !== '800') {
 
     try {
       const url: string = await ref.child(`${img}_360x360.jpg`).getDownloadURL()

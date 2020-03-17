@@ -5,40 +5,21 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import initFirebase from '@/initFirebase'
+import initFirebaseAdmin from '@/initFirebaseAdmin'
 import Loading from '@/components/loading'
-import getImg from '@/lib/getImg'
+import getImg from '@/lib/getImgSSR'
+import isLogin from '@/lib/isLogin'
+import { GetServerSideProps } from 'next'
+import {event} from 'events'
 
-export default () => {
+export default ({ user, event, photoUrls, dbStartDate, DbTime }) => {
     const router = useRouter()
     const [files, setFiles] = useState(['', '', ''])
-    const [dbPhotos, setDbPhotos] = useState([])
-    const [dbFiles, setDbFiles] = useState([])
-    const [eventName, setEventName] = useState('')
-    const [placeName, setPlaceName] = useState('')
-    const [eventDetail, setEventDetail] = useState('')
-    const [startDate, setStartDate] = useState('')
-    const [time, setTime] = useState('')
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        (async () => {
-            const {firestore} = await initFirebase()
-            const event = (await firestore.collection('events').doc(router.query.id as string).get()).data()
-            setEventName(event.name)
-            setPlaceName(event.placeName)
-            setEventDetail(event.eventDetail)
-            const date: Date = event.startDate.toDate()
-            setStartDate(date.toISOString().substr(0,10))
-            setTime(`${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`)
-            const photos: undefined|string[] = event.photos
-            setDbPhotos(photos)
-            if (photos) {
-                const photoUrls = await Promise.all(photos.map(async photo => getImg(photo, '360')))
-                setDbFiles(photoUrls)
-            }
-            setLoading(false)
-        })()
-    }, [])
+    const [eventName, setEventName] = useState(event.name)
+    const [placeName, setPlaceName] = useState(event.placeName)
+    const [eventDetail, setEventDetail] = useState(event.eventDetail)
+    const [startDate, setStartDate] = useState(dbStartDate)
+    const [time, setTime] = useState(DbTime)
 
     const changeFiles = async (inputFiles: FileList, i: 0 | 1 | 2) => {
         const fileReader = new FileReader()
@@ -68,9 +49,9 @@ export default () => {
     const updateEvent = async () => {
         const { firebase } = await initFirebase()
         let photos: string[] = []
-        photos[0] = files[0] ? await saveImages(files[0] as string, 1, firebase) : dbPhotos[0]
-        photos[1] = files[1] ? await saveImages(files[1] as string, 2, firebase) : dbPhotos[1]
-        photos[2] = files[2] ? await saveImages(files[2] as string, 3, firebase) : dbPhotos[2]
+        photos[0] = files[0] ? await saveImages(files[0] as string, 1, firebase) : event.photos[0]
+        photos[1] = files[1] ? await saveImages(files[1] as string, 2, firebase) : event.photos[1]
+        photos[2] = files[2] ? await saveImages(files[2] as string, 3, firebase) : event.photos[2]
         // 配列の空要素を削除して先頭から詰める
         photos = photos.filter(v => v)
         const firestore = firebase.firestore()
@@ -95,9 +76,9 @@ export default () => {
 
     const fileInput = (i:0|1|2) => (
         <div style={{ border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em" }}>
-            {(dbFiles[i]) && (<>
+            {(photoUrls[i]) && (<>
                 <p style={{margin:0,marginTop:'0.5em'}}>現在の画像</p>
-                <img src={dbFiles[i]} height="360px" width="auto" />
+                <img src={photoUrls[i]} height="360px" width="auto" />
             </>)}
             {(files[i]) && (<>
                 <p style={{margin:0,marginTop:'0.5em'}}>新しい画像</p>
@@ -106,8 +87,6 @@ export default () => {
             <Input type="file" name="file1" accept=".jpg" onChange={e => changeFiles(e.target.files, i)} />
         </div>
     )
-
-    if (loading) return <Loading />
 
     return (
         <Container>
@@ -150,3 +129,21 @@ export default () => {
         </Container>
     );
 };
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    const {user} = await isLogin(ctx)
+    const {firestore} = await initFirebaseAdmin()
+
+    const {query} = ctx
+    const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
+    const date: Date = data.startDate.toDate()
+    const dbStartDate = date.toISOString().substr(0, 10)
+    const DbTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+    const photos: undefined | string[] = data.photos
+    const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, user.user_id,'360'))) : undefined
+    const createdAt = data.createdAt.seconds
+    const updatedAt = data.updatedAt.seconds
+    const startDate = data.startDate.seconds
+
+    return { props: { user, event: { ...data, createdAt, updatedAt, startDate }, photoUrls, dbStartDate, DbTime } }
+}
