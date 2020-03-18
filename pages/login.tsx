@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import Router, { useRouter } from 'next/router'
 import React, {useState} from 'react'
-import { Dispatch, SetStateAction } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Container, Col } from 'reactstrap'
 import initFirebase from '@/initFirebase'
 import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -13,7 +12,6 @@ export const Login = () => {
     const alert = useAlert()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const router = useRouter()
     
     const loginWithEmail = async () => {
         try {
