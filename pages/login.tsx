@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 import React, {useState} from 'react'
 import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
@@ -13,6 +13,7 @@ export const Login = () => {
     const alert = useAlert()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const router = useRouter()
     
     const loginWithEmail = async () => {
         try {
@@ -27,21 +28,8 @@ export const Login = () => {
         try {
             const {firebase} = await initFirebase()
             const provider = new firebase.auth.FacebookAuthProvider()
-            const result = await firebase.auth().signInWithPopup(provider)
-            // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-            // const token = result.credential.accessToken
-            // The signed-in user info.
-            // const user = result.user
-            // ...
+            await firebase.auth().signInWithPopup(provider)
         } catch (e) {
-            // Handle Errors here.
-            const errorCode = e.code;
-            const errorMessage = e.message;
-            // The email of the user's account used.
-            const email = e.email;
-            // The firebase.auth.AuthCredential type that was used.
-            const credential = e.credential;
-            // ...
             alert.error(errorMsg(e, 'signin/popup'))
         }
     }
@@ -50,44 +38,18 @@ export const Login = () => {
         try {
             const {firebase} = await initFirebase()
             const provider = new firebase.auth.TwitterAuthProvider()
-            const result = await firebase.auth().signInWithPopup(provider)
-            // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-            // const token = result.credential.accessToken
-            // The signed-in user info.
-            // const user = result.user
-            // ...
+            await firebase.auth().signInWithPopup(provider)
         } catch (e) {
-            // Handle Errors here.
-            const errorCode = e.code;
-            const errorMessage = e.message;
-            // The email of the user's account used.
-            const email = e.email;
-            // The firebase.auth.AuthCredential type that was used.
-            const credential = e.credential;
-            // ...
-            alert.error(errorMsg(e, 'signin/popup'))        }
+            alert.error(errorMsg(e, 'signin/popup'))}
     }
 
     const loginWithGoogle = async () => {
         try {
             const {firebase} = await initFirebase()
             const provider = new firebase.auth.GoogleAuthProvider()
-            const result = await firebase.auth().signInWithPopup(provider)
-            // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-            // const token = result.credential.accessToken
-            // The signed-in user info.
-            // const user = result.user
-            // ...
+            await firebase.auth().signInWithPopup(provider)
         } catch (e) {
-            // Handle Errors here.
-            const errorCode = e.code;
-            const errorMessage = e.message;
-            // The email of the user's account used.
-            const email = e.email;
-            // The firebase.auth.AuthCredential type that was used.
-            const credential = e.credential;
-            // ...
-            alert.error(errorMsg(e, 'signin/popup'))        }
+            alert.error(errorMsg(e, 'signin/popup'))}
     }
 
     return (

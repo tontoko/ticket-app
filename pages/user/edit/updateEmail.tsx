@@ -6,6 +6,8 @@ import initFirebase from '@/initFirebase'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
 import errorMsg from '@/lib/errorMsg'
+import { GetServerSideProps } from 'next'
+import isLogin from '@/lib/isLogin'
 
 export const UpdateEmail: React.FC<any> = (props) => {
     const router = useRouter()
@@ -22,12 +24,12 @@ export const UpdateEmail: React.FC<any> = (props) => {
                 const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
                 await currentUser.reauthenticateAndRetrieveDataWithCredential(credential)
             } catch(e) {
-                alert.error(errorMsg(e))
+                return alert.error(errorMsg(e))
             }
         }
         try {
             await currentUser.updateEmail(email)
-            router.push({pathname: `/user/edit`, query: {msg: 'updateEmail'}},)
+            router.push({pathname: `/user/edit`, query: {msg: 'メールアドレスを変更しました'}}, '/user/edit')
         } catch (e) {
             alert.error(errorMsg(e))
         }
@@ -49,6 +51,11 @@ export const UpdateEmail: React.FC<any> = (props) => {
             </Form>
         </Container>
     )
+}
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    const {user} = await isLogin(ctx)
+    return {props: {user}}
 }
 
 export default UpdateEmail

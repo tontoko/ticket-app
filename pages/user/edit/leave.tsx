@@ -4,8 +4,10 @@ import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, 
 import errorMsg from '@/lib/errorMsg'
 import { useAlert } from "react-alert"
 import initFirebase from '@/initFirebase'
+import { GetServerSideProps } from 'next'
+import isLogin from '@/lib/isLogin'
 
-export const Leave = (props) => {
+export const Leave = ({user}) => {
     const alert = useAlert()
     const [checkBox, setCheckBox] = useState(false)
     const [pwd, setPwd] = useState('')
@@ -14,15 +16,15 @@ export const Leave = (props) => {
         if (!checkBox) return alert.error('チェックボックスが選択されていません。')
         const {firebase} = await initFirebase()
         const auth = firebase.auth()
-        const { sign_in_provider } = props.user.firebase
-        let credencial:any
+        const { sign_in_provider } = user.firebase
         try {
-            if (props.params.sign_in_provider === 'password') {
-                credencial = await auth.signInWithEmailAndPassword(auth.currentUser.email, pwd)
+            if (sign_in_provider === 'password') {
+                const credencial: firebase.auth.AuthCredential = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, pwd)
+                await auth.currentUser.reauthenticateWithCredential(credencial)
             } else { 
-                credencial = await auth.currentUser.reauthenticateWithPopup(sign_in_provider)
+                await auth.currentUser.reauthenticateWithPopup(sign_in_provider)
             }
-            await auth.currentUser.reauthenticateWithCredential(credencial)
+            
             await auth.currentUser.delete()
             alert.success('退会処理が完了しました。')
         } catch (e) {
@@ -41,7 +43,7 @@ export const Leave = (props) => {
                         上記の説明を理解しました
                     </Label>
                 </FormGroup>
-                {props.params.sign_in_provider === 'password' && (
+                {user.firebase.sign_in_provider === 'password' && (
                     <>
                     <Input type="password" placeholder="パスワード" value={pwd} onChange={e => setPwd(e.target.value)} />
                     </>
@@ -52,6 +54,11 @@ export const Leave = (props) => {
             </Form>
         </Container>
     )
+}
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    const { user } = await isLogin(ctx)
+    return { props: { user } }
 }
 
 export default Leave

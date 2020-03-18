@@ -9,7 +9,7 @@ import { useRouter } from 'next/router'
 import {GetServerSideProps} from 'next'
 import isLogin from '@/lib/isLogin'
 
-export const UserLayout: React.FC<any> = ({user}) => {
+const UserLayout: React.FC<any> = ({user, children}) => {
     const router = useRouter()
     const alert = useAlert()
     const [isOpen, toggle] = useState(false)
@@ -17,9 +17,10 @@ export const UserLayout: React.FC<any> = ({user}) => {
     useEffect(() => {
         const {msg} = router.query
         if (msg) alert.success(msg)
-    },[])
+    },[router.query])
 
     return (
+        <>
         <div>
             <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
                 <NavbarBrand href="/">ユーザーレイアウト</NavbarBrand>
@@ -52,10 +53,12 @@ export const UserLayout: React.FC<any> = ({user}) => {
                 }
             </Navbar>
         </div>
+        {children}
+        </>
     );
 }
 
-export const getServerSideProps = async ctx => {
+export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx)
     return { props: { user } }
 }

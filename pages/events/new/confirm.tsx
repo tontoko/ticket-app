@@ -140,12 +140,12 @@ const Page = () => {
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // リロード等でSSRした場合作成画面にリダイレクト
     const {user} = await isLogin(ctx)
-    if (user) {
-        const {res} = ctx
+    const {res} = ctx
+    if (user && !res) {
         res.writeHead(302, { Location: '/events/new' })
         res.end()
     }
-    return {}
+    return {props:{}}
 }
 
 export default Page

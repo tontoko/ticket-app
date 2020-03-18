@@ -1,3 +1,5 @@
+import admin from "firebase-admin"
+
 export default async (ctx) => {
     const { req, res, pathname, query } = ctx
     // SSR
@@ -11,9 +13,9 @@ export default async (ctx) => {
     const _res = { ...res }
     await micro_session(_req, _res)
     const session = _req.session
-    const uid = session.token ? session.token.uid : null
-    let user = null
-    let msg = null
+    const uid: string|null = session.token ? session.token.uid : null
+    let user: null|admin.auth.DecodedIdToken = null
+    let msg: null|string = null
     if (uid) {
       if (session.token.firebase.sign_in_provider === 'password' && !session.token.email_verified && pathname !== '/confirmEmail') {
         res.writeHead(302, {
@@ -29,7 +31,7 @@ export default async (ctx) => {
       user = session.token,
       msg = query?.msg
   } else {
-      if (pathname !== '/login' || pathname !== '/register' || pathname !== '/') {
+      if (pathname !== '/login' && pathname !== '/register' && pathname !== '/' && pathname !== '/__/auth/action') {
         res.writeHead(302, {
           Location: `/login`
         })

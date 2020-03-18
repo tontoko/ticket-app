@@ -1,25 +1,23 @@
 import {useState, useEffect, Dispatch} from 'react'
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
+import '@/node_modules/bootstrap/dist/css/bootstrap.min.css'
 import UserLayouts from './layouts/userLayouts'
 import initFirebase from '@/initFirebase'
 import Router, {useRouter} from 'next/router'
 import { AppProps } from 'next/app'
-import {Spinner} from 'reactstrap'
 import NProgress from 'nprogress'
-import { positions, Provider, AlertPosition } from "react-alert";
+import { Provider, AlertPosition } from "react-alert";
 import AlertTemplate from '@/components/alert'
-import Loading from '@/components/loading'
-Router.events.on('routeChangeStart', url => {
-  require('nprogress/nprogress.css')
-  NProgress.start()
-})
-Router.events.on('routeChangeComplete', () => NProgress.done())
-Router.events.on('routeChangeError', () => NProgress.done())
 
 const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [user, setUser]: [null | firebase.User, Dispatch<firebase.User>] = useState(null)
+  const [CSRUser, setCSRUser]: [null | firebase.User, Dispatch<firebase.User>] = useState(null)
+
+  router.events.on('routeChangeStart', url => {
+    require('nprogress/nprogress.css')
+    NProgress.start()
+  })
+  router.events.on('routeChangeComplete', () => NProgress.done())
+  router.events.on('routeChangeError', () => NProgress.done())
 
   useEffect(() => {
     let unsubscribe:firebase.Unsubscribe = () => void
@@ -28,6 +26,7 @@ const App = ({ Component, pageProps }: AppProps) => {
       unsubscribe = firebase.auth().onAuthStateChanged(async currentUser => {
         if (currentUser) {
           const token = await currentUser.getIdToken()
+          setCSRUser(currentUser)
           await fetch('/api/login', {
             method: 'POST',
             headers: new Headers({
@@ -38,23 +37,27 @@ const App = ({ Component, pageProps }: AppProps) => {
               token
             })
           })
-          setLoading(false)
-          setUser(currentUser)
-          if (!currentUser.emailVerified && currentUser.providerData[0].providerId === 'password') {
+          if (!currentUser.emailVerified && currentUser.providerData[0].providerId === 'password' && 
+              !router.pathname.match(/^\/__\/auth\/action/)) {
+            console.log('test3')
             router.push('/confirmEmail')
             return
           }
           if (router.pathname === '/' || router.pathname === '/login' || router.pathname === '/register') {
-            router.push(`/user`)
+            console.log('test1')
+            router.push({ pathname: '/user', query: { msg: 'ログインしました' } }, '/user')
           }
         } else {
-          setLoading(false)
-          setUser(currentUser)
+          setCSRUser(currentUser)
           await fetch('/api/logout', {
             method: 'POST',
             credentials: 'same-origin'
           })
-          router.push('/login')
+          if (router.pathname !== '/' && router.pathname !== '/login' && router.pathname !== '/register' &&
+            !router.pathname.match(/^\/__\/auth\/action/) ) {
+            console.log('test2')
+            router.push({ pathname: '/login', query: { msg: 'ログアウトしました' } }, '/login')
+          }
         }
       })
     })()
@@ -67,21 +70,11 @@ const App = ({ Component, pageProps }: AppProps) => {
     position
   }
 
-  let params = {}
-  if (user) {
-    const sign_in_provider = user.providerData ? user.providerData[0].providerId : 'password'
-    params = {
-      uid: user.uid,
-      email: user.email,
-      sign_in_provider,
-      picture: user.photoURL
-    }
-  }
-
   return (
     <Provider template={AlertTemplate} {...options}>
-      <UserLayouts user={user} params={params} />
-      <Component {...pageProps} params={params} />
+      <UserLayouts {...pageProps} CSRUser={CSRUser} >
+        <Component {...pageProps} CSRUser={CSRUser} />
+      </UserLayouts>
     </Provider>
   )
 }

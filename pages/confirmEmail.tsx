@@ -13,16 +13,16 @@ export default (props) => {
     useEffect(() => {
         (async() => {
             // クライアント側の認証を待つ
-            const auth = (await initFirebase()).firebase.auth()
-            if (!auth.currentUser) return
+            const CSRUser = props.CSRUser as firebase.User
+            if (!CSRUser) return
             if (!loading) return
-            sendEmail(auth)
+            sendEmail(CSRUser)
         })()
     })
 
-    const sendEmail = async(auth: firebase.auth.Auth) => {
+    const sendEmail = async (CSRUser: firebase.User) => {
         try {
-            await auth.currentUser.sendEmailVerification()
+            await CSRUser.sendEmailVerification()
             setLoading(false)
             setMsg('登録されたメールアドレスに認証用メールを送信しました。')
         } catch (e) {
@@ -31,8 +31,8 @@ export default (props) => {
             setMsg(errorMsg(e))
         }
         setTimeout(async() => {
-            await auth.signOut()
-            window.location.href = '/login'
+            await (await initFirebase()).firebase.auth().signOut()
+            router.push('/login')
         }, 5000)
     }
 

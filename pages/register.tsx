@@ -4,18 +4,21 @@ import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
 import initFirebase from '@/initFirebase'
 import { useAlert } from "react-alert"
 import errorMsg from '@/lib/errorMsg'
+import { useRouter } from 'next/router'
 
 export default () => {
     const alert = useAlert()
     const [email, setEmail] = useState('')
     const [pwd, setPwd] = useState('')
     const [pwdConfirm, setPwdConfirm] = useState('')
+    const router = useRouter()
 
     const sendEmail = async () => {
         if (pwd !== pwdConfirm) return alert.error('確認用パスワードが一致していません。')
         const {firebase} = await initFirebase()
         try {
             await firebase.auth().createUserWithEmailAndPassword(email, pwd)
+            router.push({ pathname: '/user', query: { msg: 'ログインしました' } }, '/user')
         } catch(e) {
             alert.error(errorMsg(e, 'signup'))
         }

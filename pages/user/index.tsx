@@ -8,8 +8,10 @@ import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-ic
 import initFirebase from '@/initFirebase'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/lib/isLogin'
+import { useRouter } from 'next/router'
 
 export const UserShow: React.FC<any> = (props) => {
+    const router = useRouter()
     return (
         <Container>
             <Form style={{marginTop: "1.5em"}}>
