@@ -15,11 +15,13 @@ import { GetServerSideProps } from 'next'
 import initFirebaseAdmin from '@/initFirebaseAdmin'
 import isLogin from '@/lib/isLogin'
 import { event } from 'events'
+import moment from 'moment'
 
 export default ({ user, event, categories, status, items }) => {
 
     const router = useRouter();
-    const startDate = new Date(event.startDate * 1000)
+    const startDate = moment(event.startDate * 1000)
+    const endDate = moment(event.endDate * 1000)
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false)
 
@@ -101,6 +103,16 @@ export default ({ user, event, categories, status, items }) => {
         }
     }
 
+    const returnCatetgories = () => categories.map((category, i) => {
+        const msg = `${category.name}: ${category.price} 円`
+        if (status == 'organizer' && !category.public) {
+            return <h6 key={i}>{`${msg} (非公開)`}</h6>
+        }
+        if (category.public) {
+            return <h6 key={i}>{msg}</h6>
+        }
+    })
+
     return (
         <Container>
             <Row style={{ marginTop: '1em', marginLeft: "0" }}>
@@ -126,14 +138,17 @@ export default ({ user, event, categories, status, items }) => {
                         <p style={{ marginLeft: '0.5em' }}>{event.placeName}</p>
                     </FormGroup>
                     <FormGroup>
-                        <h5>開始時間</h5>
-                        <p style={{ marginLeft: '0.5em' }}>{`${startDate.getFullYear()}/${startDate.getMonth() + 1}/${startDate.getDate()}`}<br/>
-                            {`${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2,'0')}`}</p>
+                        <h5>開始</h5>
+                        <p>{moment(startDate).format("YYYY M月d日 H:mm")}</p>
+                    </FormGroup>
+                    <FormGroup>
+                        <h5>終了</h5>
+                        <p>{moment(endDate).format("YYYY M月d日 H:mm")}</p>
                     </FormGroup>
                     <FormGroup style={{ marginTop: '2em' }}>
                         <h5>チケットカテゴリ</h5>
                         <FormGroup style={{marginLeft: '0.5em'}}>
-                            {categories && categories.map((category,i) => <h6 key={i}>{`${category.name}: ${category.price} 円`}</h6>)}
+                            {categories && returnCatetgories()}
                         </FormGroup>
                         {status == 'organizer' && <Link href={`/events/${router.query.id}/categories/edit`}><Button>カテゴリの編集</Button></Link>}
                     </FormGroup>
@@ -156,15 +171,16 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const createdAt = data.createdAt.seconds
     const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
+    const endDate = data.endDate.seconds
     const photos:string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, user.user_id))) : [await getImg(null, user.user_id)]
-    const event = { ...data, createdAt, updatedAt, startDate, photos, id: result.id }
-    const {categories} = event
+    const event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
+    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').get()).docs.map(category => category.data())
     let status: string
     if (event.createdUser == user.uid) {
         status = 'organizer'
     } else {
-        const payments = await firestore.collection('users').doc(user.uid).collection('payments').where("event", "==", result.id).get()
-        status = payments.size > 0 && 'bought'
+        const payments = (await firestore.collection('users').doc(user.uid).collection('payments').where("event", "==", result.id).get()).docs
+        status = payments.length > 0 && 'bought'
     }
     const items = event.photos.map((url, i) => {
         return {
@@ -173,5 +189,6 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             caption: '画像' + (i + 1)
         }
     })
+    console.log(categories)
     return { props: { user, event, categories, status, items } }
 }

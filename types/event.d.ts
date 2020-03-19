@@ -5,6 +5,7 @@ declare module 'events' {
     createdAt: FirebaseFirestore.Timestamp,
     updatedAt: FirebaseFirestore.Timestamp,
     startDate: FirebaseFirestore.Timestamp,
+    endDate: FirebaseFirestore.Timestamp,
     photos: string[],
     id: string,
     placeName: string,

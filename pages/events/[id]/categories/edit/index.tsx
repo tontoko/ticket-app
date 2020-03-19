@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
-import { Form, FormGroup, Button, Input, Container, Row, Col } from 'reactstrap'
+import { Form, FormGroup, Button, Input, Container, Row, Col, Label } from 'reactstrap'
 import initFirebaseAdmin from '@/initFirebaseAdmin'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
@@ -26,22 +26,49 @@ export default ({event, beforeCategories}) => {
       copyCategories[i] = {...copyCategories[i], price}
       setCategories(copyCategories)
     }
+    const setStock = (stock: string) => {
+      if (Number(stock) < 0) return
+      const copyCategories = [...categories]
+      copyCategories[i] = { ...copyCategories[i], stock }
+      setCategories(copyCategories)
+    }
+    const setPublic = (value: boolean) => {
+      const copyCategories = [...categories]
+      copyCategories[i] = { ...copyCategories[i], public: value }
+      setCategories(copyCategories)
+    }
     const deleteCategory = () => {
       const copyCategories = [...categories]
       copyCategories.splice(i,1)
       setCategories(copyCategories)
     }
     return (
-        <FormGroup key={i}>
-          <Row style={{margin: 0}}>
-            <Col style={{marginTop: '0.5em'}}>
-              <Input value={category.name} onChange={e => setName(e.target.value)} />
+        <FormGroup key={i} style={{ border: "solid 1px gray", padding: '0.3em'}}>
+          <Row style={{ margin: 0, marginTop: '0.5em' }}>
+            <Col xs="11">
+              <Input value={category.name} onChange={e => setName(e.target.value)} disabled={!category.new} placeholder="チケットカテゴリ名" />
             </Col>
+            <Col xs="1">
+              {category.new && 
+                <p style={{ margin: 'auto', marginLeft: '0.5em', opacity: '0.6' }} onClick={deleteCategory}>
+                  <FontAwesomeIcon icon={faTimesCircle} size="sm" style={{ color: "black" }} className="fa-2x" />
+                </p>
+              }
+            </Col>
+          </Row>
+          <Row style={{ margin: 0, marginTop: '0.5em' }}>
             <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em'}}>
-              <Input type='number' min='0' value={category.price} onChange={e => setPrice(e.target.value)} style={{textAlign: 'right'}} />
+              <Input type='number' min='0' value={category.price} onChange={e => setPrice(e.target.value)} style={{textAlign: 'right'}} disabled={!category.new} />
               <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
-            <p style={{ margin: 'auto', marginLeft: '0.5em', opacity: '0.6' }} onClick={deleteCategory}><FontAwesomeIcon icon={faTimesCircle} size="sm" style={{ color: "black" }} className="fa-2x" /></p>
             </Col>
+          <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
+            <Input type='number' min='0' value={category.stock} onChange={e => setStock(e.target.value)} style={{ textAlign: 'right' }} disabled={!category.new} />
+            <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}> 枚</p>
+          </Col>
+          <Col style={{display: "flex",alignItems: "center", marginTop: '0.5em'}}>
+            <Label for="public" style={{margin: 0, fontWeight: "bold"}}>公開する</Label>
+            <Input type="checkbox" name="public" checked={category.public} onChange={e => setPublic(e.target.checked)} style={{margin: 0, marginLeft: '0.3em', position: "initial"}}/>
+          </Col>
           </Row>
         </FormGroup>
       )
@@ -50,7 +77,7 @@ export default ({event, beforeCategories}) => {
 
   const addCategory = () => {
     const copyCategories = categories ? [...categories] : []
-    copyCategories.push({name: '', price: 0})
+    copyCategories.push({name: '', price: 0, public: false, stock: 0, new: true})
     setCategories(copyCategories)
   }
   
@@ -79,7 +106,14 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const createdAt = data.createdAt.seconds
   const updatedAt = data.updatedAt.seconds
   const startDate = data.startDate.seconds
-  const event = { ...data, createdAt, updatedAt, startDate, id: result.id }
-  const {categories} = event
+  const endDate = data.endDate.seconds
+  const event = { ...data, createdAt, updatedAt, startDate, endDate, id: result.id }
+  const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').get())
+  let categories: FirebaseFirestore.DocumentData[] = []
+  categoriesSnapShot.forEach(e => {
+    const id = e.id
+    const category = e.data()
+    categories.push({...category, id})
+  });
   return { props: { event, beforeCategories: categories }}
 }

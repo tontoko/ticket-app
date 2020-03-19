@@ -6,15 +6,12 @@ import {useRouter} from 'next/router'
 import initFirebase from '@/initFirebase'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/lib/isLogin'
+import moment from 'moment'
 
 const Page = () => {
     const router = useRouter()
 
-    window.onbeforeunload = e => {
-        e.returnValue = '本当に移動しますか？'
-    }
-
-    const { file1, file2, file3, eventName, placeName, eventDetail, startDate, time } = router.query
+    const { file1, file2, file3, eventName, placeName, eventDetail, startDate, endDate } = router.query
     const items = [file1, file2, file3].filter(v=>v).map((file,i) => {
         return {
             src: file as string,
@@ -84,9 +81,9 @@ const Page = () => {
             createdAt: new Date,
             createdUser: firebase.auth().currentUser.uid,
             eventDetail,
-            startDate: new Date(startDate as string),
-            updatedAt: new Date(startDate as string),
-            time
+            startDate: moment(startDate as string).toDate(),
+            endDate: moment(endDate as string).toDate(),
+            updatedAt: new Date
         })
         router.push('/user/myEvents')
     }
@@ -117,11 +114,12 @@ const Page = () => {
                     <p>{placeName}</p>
                 </FormGroup>
                 <FormGroup>
-                    <Label>開始日</Label>
-                    <Input type="date" value={startDate} disabled />
+                    <Label>開始</Label>
+                    <Input value={moment(startDate).format("YYYY M月d日 H:mm")} disabled />
                 </FormGroup>
                 <FormGroup>
-                    <Input type="time" value={time} disabled />
+                    <Label>終了</Label>
+                    <Input value={moment(endDate).format("YYYY M月d日 H:mm")} disabled />
                 </FormGroup>
                 <FormGroup>
                     <Label for="describe">イベント詳細</Label>
@@ -138,10 +136,10 @@ const Page = () => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    // リロード等でSSRした場合作成画面にリダイレクト
+    // クエリが渡って来ていない場合リダイレクト
     const {user} = await isLogin(ctx)
-    const {res} = ctx
-    if (user && !res) {
+    const {res, query} = ctx
+    if (user && !query) {
         res.writeHead(302, { Location: '/events/new' })
         res.end()
     }

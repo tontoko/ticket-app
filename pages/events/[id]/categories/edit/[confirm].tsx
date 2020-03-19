@@ -15,16 +15,29 @@ import isLogin from '@/lib/isLogin'
 
 const Confirmation= props => {
   const router = useRouter()
-  const [categories, setCategories] = useState([...JSON.parse(router.query.confirm as string)])
+  const categories:any[] = JSON.parse(props.categories)
 
   const submit = async () => {
-    const {firebase, firestore} = await initFirebase()
-    const eventRef = firestore.collection('events').doc(router.query.id as string)
+    const {firestore} = await initFirebase()
+    const categoriesRef = firestore.collection('events').doc(router.query.id as string).collection('categories')
+    let updateCategories: FirebaseFirestore.DocumentData[]
+    await Promise.all(categories.map(async category => {
+      if (category.new) {
+        const addCategory = { ...category, price: Number(category.price) }
+        delete addCategory.new
+        categoriesRef.add(addCategory)
+      } else {
+        const updateCategory = { ...category, price: Number(category.price) }
+        const { id } = updateCategory
+        delete updateCategory.id
+        updateCategories.push({ [id]: updateCategory})
+      }
+    }))
     try {
       await firestore.runTransaction(async transaction => {
-        const event = transaction.get(eventRef)
-        const conversionedCategories = [...categories].map(category => ({...category, price: Number(category.price)}))
-        transaction.set(eventRef, { ...(await event).data(), categories: conversionedCategories})
+        await Promise.all(Object.keys(updateCategories).map(async id => {
+          transaction.set(categoriesRef.doc(id), updateCategories[id])
+        }))
       })
     } catch(e) {
       errorMsg(e)
@@ -36,11 +49,14 @@ const Confirmation= props => {
     <Container>
       <Form style={{ marginTop: '5em' }}>
         <h5 style={{ marginBottom: '1em' }}>チケットカテゴリーを以下に更新します。<br/>よろしいですか？</h5>
-        {categories.map((category,i) => (
-          <FormGroup key={i}>
-            <p>{`${category.name}: ${category.price} 円`}</p>
-          </FormGroup>
-        ))}
+        {categories.map((category,i) => {
+          if (category.public) return (
+            <FormGroup key={i}>
+              <p>{`${category.name}: ${category.price} 円 (在庫: ${category.stock})`}</p>
+            </FormGroup>
+          )
+        }
+        )}
         <Row className="flex-row-reverse">
           <Button style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={submit} >設定</Button>
         </Row>
@@ -53,5 +69,6 @@ export default Confirmation
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { user } = await isLogin(ctx)
-  return { props: {user} }
+  const {confirm} = ctx.query
+  return { props: { user, categories: confirm} }
 }

@@ -2,19 +2,26 @@ import React, {useState} from 'react';
 import {
     Button, Container, Col, Row, Form, Input, FormGroup, Label
 } from 'reactstrap';
-import Link from 'next/link'
 import {useRouter} from 'next/router'
 import {GetServerSideProps} from 'next'
 import isLogin from '@/lib/isLogin'
+import DatePicker, { registerLocale } from "react-datepicker"
+import moment from 'moment'
+import ja from 'date-fns/locale/ja'
+registerLocale('ja', ja)
+import { toUtcIso8601str } from '@/lib/time'
+import { useAlert } from 'react-alert';
 
 export default () => {
     const router = useRouter()
+    const alert = useAlert()
     const [files, setFiles] = useState(['', '', ''])
     const [eventName, setEventName] = useState('')
     const [placeName, setPlaceName] = useState('')
     const [eventDetail, setEventDetail] = useState('')
-    const [startDate, setStartDate] = useState('')
-    const [time, setTime] = useState('')
+    
+    const [startDate, setStartDate] = useState(toUtcIso8601str(moment()))
+    const [endDate, setEndDate] = useState(toUtcIso8601str(moment()))
 
     const changeFiles = async (inputFiles:FileList, i:0|1|2) => {
         const fileReader = new FileReader()
@@ -27,8 +34,9 @@ export default () => {
     }
 
     const submit = () => {
+        if (eventName.length == 0 || placeName.length == 0) return alert.error('必須項目が入力されていません')
+        if (moment(startDate).isAfter(moment(endDate))) return  alert.error('終了時刻は開始時刻より早く設定できません')
         window.scrollTo(0, 0)
-        if (eventName.length == 0 || placeName.length == 0) return
         router.push({
             pathname: '/events/new/confirm',
             query: {
@@ -39,7 +47,7 @@ export default () => {
                 placeName,
                 eventDetail,
                 startDate,
-                time
+                endDate
             },
         },
         '/events/new/confirm'
@@ -62,11 +70,36 @@ export default () => {
                     <Input style={{ height: "20em" }} type="textarea" name="text" id="describe" onChange={e => setEventDetail(e.target.value)} value={eventDetail} />
                 </FormGroup>
                 <FormGroup>
-                    <Label>開始日</Label>
-                    <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                    <p style={{marginBottom: '.5rem'}}>開始</p>
+                    <DatePicker
+                        locale="ja"
+                        selected={moment(startDate).toDate()}
+                        selectsStart
+                        startDate={moment(startDate).toDate()}
+                        minDate={new Date()}
+                        onChange={selectedDate => setStartDate(toUtcIso8601str(moment(selectedDate)))}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        timeCaption="time"
+                        dateFormat="yyyy MMMd日 H:mm"
+                    />
                 </FormGroup>
                 <FormGroup>
-                    <Input type="time" value={time} onChange={e => setTime(e.target.value)} />
+                    <p style={{ marginBottom: '.5rem' }}>終了</p>
+                    <DatePicker
+                        locale="ja"
+                        selected={moment(endDate).toDate()}
+                        selectsEnd
+                        endDate={moment(endDate).toDate()}
+                        minDate={new Date()}
+                        onChange={selectedDate => setEndDate(toUtcIso8601str(moment(selectedDate)))}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        timeCaption="time"
+                        dateFormat="yyyy MMMd日 H:mm"
+                    />
                 </FormGroup>
                 <Label>添付する画像を選択(.jpgファイルのみ対応)</Label>
                 <FormGroup>

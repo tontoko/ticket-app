@@ -8,6 +8,7 @@ import getImg from '@/lib/getImgSSR'
 import initFirebaseAdmin from '@/initFirebaseAdmin'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/lib/isLogin'
+import moment from 'moment'
 
 export default ({user, events}) => {
 
@@ -23,10 +24,16 @@ export default ({user, events}) => {
 
   const renderUserEvents = async events => await Promise.all(
     events.map(async (event, i) => {
-      const date:Date = new Date(event.startDate * 1000)
-      const year = date.getFullYear()
-      const month = date.getMonth() + 1
-      const day = date.getDate()
+
+      const showDate = () => {
+        const startDate = moment(event.startDate * 1000)
+        const endDate = moment(event.endDate * 1000)
+        if (startDate.format("YYYYMd") === endDate.format("YYYYMd")) {
+          return startDate.format("YYYY M月d日 H:mm")
+        } else {
+          return `${startDate.format("YYYY M月d日 H:mm")} 〜 ${endDate.format("YYYY M月d日 H:mm")}`
+        }
+      }
 
       return (
         <Link key={i} href={`/events/${event.id}`}>
@@ -40,7 +47,7 @@ export default ({user, events}) => {
                   <Col xs="auto">
                     <CardTitle>{event.name}</CardTitle>
                     <CardSubtitle>{event.placeName}</CardSubtitle>
-                    <CardText>{`${year}/${month}/${day}`}</CardText>
+                    <CardText>{showDate()}</CardText>
                   </Col>
                 </Row>
               </CardBody>
@@ -74,8 +81,9 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const createdAt = data.createdAt.seconds
     const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
+    const endDate = data.endDate.seconds
     const photos = data.photos.length > 0 ? await getImg(data.photos[0], user.user_id) : await getImg(null, user.user_id)
-    return { ...data, createdAt, updatedAt, startDate, photos, id: doc.id }
+    return { ...data, createdAt, updatedAt, startDate, endDate, photos, id: doc.id }
   }))
   return {props: {user, events}}
 }
