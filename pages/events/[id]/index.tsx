@@ -133,7 +133,7 @@ export default ({ user, event, categories, status, items }) => {
                         <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
                         <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
                     </Carousel>
-                    <FormGroup>
+                    <FormGroup style={{marginTop: '1em'}}>
                         <h5>会場</h5>
                         <p style={{ marginLeft: '0.5em' }}>{event.placeName}</p>
                     </FormGroup>
@@ -189,6 +189,5 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             caption: '画像' + (i + 1)
         }
     })
-    console.log(categories)
     return { props: { user, event, categories, status, items } }
 }

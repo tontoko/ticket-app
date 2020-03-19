@@ -8,9 +8,11 @@ import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 import { GetServerSideProps } from 'next'
 import { event } from 'events'
 import isLogin from '@/lib/isLogin'
+import { useAlert } from 'react-alert'
 
 export default ({event, beforeCategories}) => {
-  const router = useRouter();
+  const router = useRouter()
+  const alert = useAlert()
 
   const [categories, setCategories] = useState(beforeCategories)
 
@@ -43,16 +45,16 @@ export default ({event, beforeCategories}) => {
       setCategories(copyCategories)
     }
     return (
-        <FormGroup key={i} style={{ border: "solid 1px gray", padding: '0.3em'}}>
+        <FormGroup key={i} style={{ border: "solid 1px gray", padding: '0.5em'}}>
           <Row style={{ margin: 0, marginTop: '0.5em' }}>
             <Col xs="11">
               <Input value={category.name} onChange={e => setName(e.target.value)} disabled={!category.new} placeholder="チケットカテゴリ名" />
             </Col>
-            <Col xs="1">
+            <Col xs="1" style={{ padding: 0, display: 'flex', alignItems: 'center'}}>
               {category.new && 
-                <p style={{ margin: 'auto', marginLeft: '0.5em', opacity: '0.6' }} onClick={deleteCategory}>
+                <div style={{ margin: 0, opacity: '0.6', display: 'flex', alignItems: 'center' }} onClick={deleteCategory}>
                   <FontAwesomeIcon icon={faTimesCircle} size="sm" style={{ color: "black" }} className="fa-2x" />
-                </p>
+                </div>
               }
             </Col>
           </Row>
@@ -80,6 +82,20 @@ export default ({event, beforeCategories}) => {
     copyCategories.push({name: '', price: 0, public: false, stock: 0, new: true})
     setCategories(copyCategories)
   }
+
+  const submit = () => {
+    let names = []
+    let valid = true
+    categories.filter(e => {
+      if (names.indexOf(e["name"]) === -1) {
+        names.push(e["name"])
+        return e
+      }
+      valid = false
+    })
+    if (!valid) return alert.error('チケット名が重複しています')
+    router.push(`/events/${router.query.id}/categories/edit/[confirm]`, `/events/${router.query.id}/categories/edit/${JSON.stringify(categories)}`)
+  }
   
   return (
     <Container>
@@ -88,9 +104,7 @@ export default ({event, beforeCategories}) => {
         {renderCategories()}
         <Button onClick={addCategory}>追加</Button>
         <Row className="flex-row-reverse" style={{marginTop: '2em'}}>
-          <Link href={`/events/${router.query.id}/categories/edit/[confirm]`} as={`/events/${router.query.id}/categories/edit/${JSON.stringify(categories)}`}>
-            <Button style={{ marginRight: '1em' }}>確認</Button>
-          </Link>
+          <Button style={{ marginRight: '1em' }} onClick={submit} >確認</Button>
         </Row>
       </Form>
     </Container>

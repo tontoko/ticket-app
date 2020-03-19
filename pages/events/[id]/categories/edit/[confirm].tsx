@@ -20,17 +20,17 @@ const Confirmation= props => {
   const submit = async () => {
     const {firestore} = await initFirebase()
     const categoriesRef = firestore.collection('events').doc(router.query.id as string).collection('categories')
-    let updateCategories: FirebaseFirestore.DocumentData[]
+    let updateCategories: {string?: FirebaseFirestore.DocumentData} = {}
     await Promise.all(categories.map(async category => {
       if (category.new) {
-        const addCategory = { ...category, price: Number(category.price) }
+        const addCategory = { ...category, price: Number(category.price), stock: Number(category.stock) }
         delete addCategory.new
         categoriesRef.add(addCategory)
       } else {
-        const updateCategory = { ...category, price: Number(category.price) }
-        const { id } = updateCategory
+        const updateCategory = { ...category, price: Number(category.price), stock: Number(category.stock) }
+        const id = { ...updateCategory}.id
         delete updateCategory.id
-        updateCategories.push({ [id]: updateCategory})
+        updateCategories[id] = updateCategory
       }
     }))
     try {
@@ -48,14 +48,18 @@ const Confirmation= props => {
   return (
     <Container>
       <Form style={{ marginTop: '5em' }}>
-        <h5 style={{ marginBottom: '1em' }}>チケットカテゴリーを以下に更新します。<br/>よろしいですか？</h5>
-        {categories.map((category,i) => {
-          if (category.public) return (
+        <h4 style={{ marginBottom: '1em' }}>
+          チケットカテゴリーを更新します。
+        </h4>
+        <h5>
+          一度登録したチケット情報は変更することができません。 (非公開に変更することはできます)
+        </h5>
+        <h5 style={{marginBottom: '2em'}}>よろしいですか？</h5>
+        {categories.map((category,i) => (
             <FormGroup key={i}>
-              <p>{`${category.name}: ${category.price} 円 (在庫: ${category.stock})`}</p>
+              <p>{`${category.name}: ${category.price} 円 (在庫: ${category.stock})${!category.public ? ' (非公開)' : ''}`}</p>
             </FormGroup>
           )
-        }
         )}
         <Row className="flex-row-reverse">
           <Button style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={submit} >設定</Button>

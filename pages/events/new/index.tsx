@@ -7,8 +7,6 @@ import {GetServerSideProps} from 'next'
 import isLogin from '@/lib/isLogin'
 import DatePicker, { registerLocale } from "react-datepicker"
 import moment from 'moment'
-import ja from 'date-fns/locale/ja'
-registerLocale('ja', ja)
 import { toUtcIso8601str } from '@/lib/time'
 import { useAlert } from 'react-alert';
 
@@ -82,7 +80,7 @@ export default () => {
                         timeFormat="HH:mm"
                         timeIntervals={15}
                         timeCaption="time"
-                        dateFormat="yyyy MMMd日 H:mm"
+                        dateFormat="yyyy年 M月d日 H:mm"
                     />
                 </FormGroup>
                 <FormGroup>
@@ -98,7 +96,7 @@ export default () => {
                         timeFormat="HH:mm"
                         timeIntervals={15}
                         timeCaption="time"
-                        dateFormat="yyyy MMMd日 H:mm"
+                        dateFormat="yyyy年 M月d日 H:mm"
                     />
                 </FormGroup>
                 <Label>添付する画像を選択(.jpgファイルのみ対応)</Label>

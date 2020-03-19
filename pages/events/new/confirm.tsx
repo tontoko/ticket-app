@@ -115,11 +115,11 @@ const Page = () => {
                 </FormGroup>
                 <FormGroup>
                     <Label>開始</Label>
-                    <Input value={moment(startDate).format("YYYY M月d日 H:mm")} disabled />
+                    <Input value={moment(startDate).format("YYYY年 M月d日 H:mm")} disabled />
                 </FormGroup>
                 <FormGroup>
                     <Label>終了</Label>
-                    <Input value={moment(endDate).format("YYYY M月d日 H:mm")} disabled />
+                    <Input value={moment(endDate).format("YYYY年 M月d日 H:mm")} disabled />
                 </FormGroup>
                 <FormGroup>
                     <Label for="describe">イベント詳細</Label>

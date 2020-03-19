@@ -11,15 +11,19 @@ import getImg from '@/lib/getImgSSR'
 import isLogin from '@/lib/isLogin'
 import { GetServerSideProps } from 'next'
 import {event} from 'events'
+import DatePicker, { registerLocale } from "react-datepicker"
+import moment from 'moment'
+import { toUtcIso8601str } from '@/lib/time'
+import { useAlert } from 'react-alert';
 
-export default ({ user, event, photoUrls, dbStartDate, DbTime }) => {
+export default ({ user, event, photoUrls }) => {
     const router = useRouter()
     const [files, setFiles] = useState(['', '', ''])
     const [eventName, setEventName] = useState(event.name)
     const [placeName, setPlaceName] = useState(event.placeName)
     const [eventDetail, setEventDetail] = useState(event.eventDetail)
-    const [startDate, setStartDate] = useState(dbStartDate)
-    const [time, setTime] = useState(DbTime)
+    const [startDate, setStartDate] = useState(toUtcIso8601str(moment(event.startDate * 1000)))
+    const [endDate, setEndDate] = useState(toUtcIso8601str(moment(event.endDate * 1000)))
 
     const changeFiles = async (inputFiles: FileList, i: 0 | 1 | 2) => {
         const fileReader = new FileReader()
@@ -62,11 +66,11 @@ export default ({ user, event, photoUrls, dbStartDate, DbTime }) => {
             createdAt: new Date,
             createdUser: firebase.auth().currentUser.uid,
             eventDetail,
-            startDate: new Date(startDate as string),
             updatedAt: new Date(startDate as string),
-            time
+            startDate: moment(startDate as string).toDate(),
+            endDate: moment(endDate as string).toDate(),
         })
-        router.push(`/events/${router.query.id}`)
+        router.push(`/events/${router.query.id}?msg=更新しました`)
     }
 
     const submit = () => {
@@ -104,11 +108,36 @@ export default ({ user, event, photoUrls, dbStartDate, DbTime }) => {
                     <Input style={{ height: "20em" }} type="textarea" name="text" id="describe" onChange={e => setEventDetail(e.target.value)} value={eventDetail} />
                 </FormGroup>
                 <FormGroup>
-                    <Label>開始日</Label>
-                    <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                    <p style={{ marginBottom: '.5rem' }}>開始</p>
+                    <DatePicker
+                        locale="ja"
+                        selected={moment(startDate).toDate()}
+                        selectsStart
+                        startDate={moment(startDate).toDate()}
+                        minDate={new Date()}
+                        onChange={selectedDate => setStartDate(toUtcIso8601str(moment(selectedDate)))}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        timeCaption="time"
+                        dateFormat="yyyy年 M月d日 H:mm"
+                    />
                 </FormGroup>
                 <FormGroup>
-                    <Input type="time" value={time} onChange={e => setTime(e.target.value)} />
+                    <p style={{ marginBottom: '.5rem' }}>終了</p>
+                    <DatePicker
+                        locale="ja"
+                        selected={moment(endDate).toDate()}
+                        selectsEnd
+                        endDate={moment(endDate).toDate()}
+                        minDate={new Date()}
+                        onChange={selectedDate => setEndDate(toUtcIso8601str(moment(selectedDate)))}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        timeCaption="time"
+                        dateFormat="yyyy年 M月d日 H:mm"
+                    />
                 </FormGroup>
                 <Label>添付する画像を選択(.jpgファイルのみ対応)</Label>
                 <FormGroup>
@@ -144,6 +173,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const createdAt = data.createdAt.seconds
     const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
+    const endDate = data.endDate.seconds
 
-    return { props: { user, event: { ...data, createdAt, updatedAt, startDate }, photoUrls, dbStartDate, DbTime } }
+    return { props: { user, event: { ...data, createdAt, updatedAt, startDate, endDate }, photoUrls, DbTime } }
 }
