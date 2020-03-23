@@ -1,39 +1,59 @@
 import Link from 'next/link'
 import {useRouter} from 'next/router'
 import React, {useEffect, useState} from 'react'
-import { Dispatch, SetStateAction } from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, FormFeedback } from 'reactstrap'
 import { useAlert } from 'react-alert'
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import {
     CardElement,
     Elements,
     useStripe,
     useElements,
 } from '@stripe/react-stripe-js';
+import { GetServerSideProps } from 'next'
+import isLogin from '@/lib/isLogin'
+import initFirebaseAdmin from '@/initFirebaseAdmin'
+import { event } from 'events'
+import getImg from '@/lib/getImgSSR'
 
 const CheckoutForm = () => {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter()
     const alert = useAlert()
-    const [ifAgree, setIfAgree] = useState(false)
-    const [require, setRequire] = useState(false)
+    const [agree, setAgree] = useState(false)
 
-    const [familyName, setFamilyName] = useState(router.query.familyName)
-    const [firstName, setFirstName] = useState(router.query.firstName)
-    const [email, setEmail] = useState(router.query.email)
+    const {familyName, firstName, email} = router.query
 
     const handleSubmit = async (event) => {
         event.preventDefault()
-        if (ifAgree) return setRequire(true)
+        if (agree) return alert.error("同意します が選択されていません")
 
-        const { error, paymentMethod } = await stripe.createPaymentMethod({
-            type: 'card',
-            card: elements.getElement(CardElement),
-        })
+        const result = await stripe.confirmCardPayment('{CLIENT_SECRET}', {
+            payment_method: {
+                card: elements.getElement(CardElement),
+                billing_details: {
+                    name: 'Jenny Rosen',
+                    email: 'test'
+                },
+            }
+        });
+
+        if (result.error) {
+            // Show error to your customer (e.g., insufficient funds)
+            console.log(result.error.message);
+        } else {
+            // The payment has been processed!
+            if (result.paymentIntent.status === 'succeeded') {
+                // Show a success message to your customer
+                // There's a risk of the customer closing the window before callback
+                // execution. Set up a webhook or plugin to listen for the
+                // payment_intent.succeeded event that handles any business critical
+                // post-payment actions.
+            }
+        }
     }
 
     return (
@@ -103,7 +123,7 @@ const CheckoutForm = () => {
                 <Row className="flex-row-reverse">
                     <FormGroup check style={{ marginRight: '1em' }}>
                         <Label check>
-                            <Input type="checkbox" checked={ifAgree} onChange={() => setIfAgree(!ifAgree)} invalid={!ifAgree} /> 同意します
+                            <Input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} invalid={!agree} /> 同意します
                         <FormFeedback>必須項目です</FormFeedback>
                         </Label>
                     </FormGroup>
@@ -117,13 +137,48 @@ const CheckoutForm = () => {
 };
 
 const Confirmation: React.FC = () => {
-    const stripePromise = loadStripe('api_key_test')
+    const stripePromise = loadStripe('publishable key')
 
     return (
         <Elements stripe={stripePromise}>
             <CheckoutForm />
         </Elements>
     );
+}
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    const { user } = await isLogin(ctx)
+    // const { firestore } = await initFirebaseAdmin()
+    // const { query } = ctx
+    // const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
+    // const photos: undefined | string[] = data.photos
+    // const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
+    // const createdAt = data.createdAt.seconds
+    // const updatedAt = data.updatedAt.seconds
+    // const startDate = data.startDate.seconds
+    // const endDate = data.endDate.seconds
+    // const event = { ...data, createdAt, updatedAt, startDate, endDate }
+    // const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').get())
+    // let categories: FirebaseFirestore.DocumentData[] = []
+    // categoriesSnapShot.forEach(e => {
+    //     const id = e.id
+    //     const category = e.data()
+    //     categories.push({ ...category, id })
+    // })
+    // return { props: { event, categories, photoUrls } }
+
+    const stripe = eval("require('stripe')({api_key_test})")
+
+    (async () => {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: 1099,
+            currency: 'jpy',
+            // Verify your integration in this guide by including this parameter
+            metadata: { integration_check: 'accept_a_payment' },
+        });
+    })();
+
+    return {}
 }
 
 export default Confirmation
