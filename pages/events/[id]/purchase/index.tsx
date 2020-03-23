@@ -5,28 +5,21 @@ import { Dispatch, SetStateAction } from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, } from 'reactstrap'
+import initFirebaseAdmin from '@/initFirebaseAdmin'
 import initFirebase from '@/initFirebase'
-import getImg from '@/lib/getImg'
+import getImg from '@/lib/getImgSSR'
+import { GetServerSideProps } from 'next'
+import isLogin from '@/lib/isLogin'
+import { event } from 'events'
 
-export const Purchase: React.FC = () => {
+export const Purchase = ({ event, categories, photoUrls }) => {
     const router = useRouter();
 
     const [familyName, setFamilyName] = useState('')
     const [firstName, setFirstName] = useState('')
     const [email, setEmail] = useState('')
     const [invalidEmail, setInvalidEmail] = useState(false)
-    const [event, setEvent]: [firebase.firestore.DocumentData, Dispatch<SetStateAction<firebase.firestore.DocumentData>>] = useState()
-    const [img, setImg]: [string, Dispatch<SetStateAction<string>>] = useState()
-
-    useEffect(() => {
-        (async () => {
-            const { firebase, firestore } = await initFirebase()
-            const result = await firestore.collection('events').doc(router.query.id as string).get()
-            if (!result.exists) router.push('/user')
-            setEvent(result.data())
-            setImg(await getImg(result.data().photos[0], firebase.auth().currentUser.uid))
-        })()
-    }, [])
+    const [selectedCategory, setSelectedCategory] = useState(categories[0].id)
 
     const changeEmail = (e) => {
         validationEmail()
@@ -42,7 +35,7 @@ export const Purchase: React.FC = () => {
         !firstName ||
         !familyName) return
         const pathname = `/events/${router.query.id}/purchase/confirm`
-        router.push({ pathname, query: { familyName, firstName, email } })
+        router.push({ pathname, query: { familyName, firstName, email, selectedCategory } })
     }
 
     return (
@@ -69,16 +62,25 @@ export const Purchase: React.FC = () => {
                         <CardBody>
                             <Row>
                                 <Col sm="2" xs="3">
-                                    <img width="100%" src={img} alt="image" />
+                                    <img width="100%" src={photoUrls[0]} alt="image" />
                                 </Col>
                                 <Col xs="auto">
-                                    <CardTitle>{event?.name}</CardTitle>
-                                    <CardSubtitle>{event?.placeName}</CardSubtitle>
-                                    <CardText>{event?.eventDetail}</CardText>
+                                    <CardTitle>{event.name}</CardTitle>
+                                    <CardSubtitle>開催地: {event.placeName}</CardSubtitle>
+                                </Col>
+                                <Col>
+                                    <Label>チケットカテゴリ</Label>
+                                    <Input type="select" value={selectedCategory} onChange={e =>  setSelectedCategory(e.target.value)}>
+                                        {categories.map(category => (
+                                            <option value={category.id} key={category.id}>{category.name}</option>
+                                        ))}
+                                    </Input>
                                 </Col>
                             </Row>
                             <Row className="flex-row-reverse">
-                                <h4 style={{ marginTop: '1em', marginRight: '1em' }}>テスト金額</h4>
+                                <h4 style={{ marginTop: '1em', marginRight: '1em' }}>
+                                    {categories.filter(category => category.id === selectedCategory)[0].price} 円
+                                </h4>
                             </Row>
                         </CardBody>
                     </Card>
@@ -89,6 +91,28 @@ export const Purchase: React.FC = () => {
             </Form>
         </Container>
     );
+}
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    const {user} = await isLogin(ctx)
+    const { firestore } = await initFirebaseAdmin()
+    const {query} = ctx
+    const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
+    const photos: undefined | string[] = data.photos
+    const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
+    const createdAt = data.createdAt.seconds
+    const updatedAt = data.updatedAt.seconds
+    const startDate = data.startDate.seconds
+    const endDate = data.endDate.seconds
+    const event = {...data, createdAt, updatedAt, startDate, endDate}
+    const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').get())
+    let categories: FirebaseFirestore.DocumentData[] = []
+    categoriesSnapShot.forEach(e => {
+        const id = e.id
+        const category = e.data()
+        categories.push({ ...category, id })
+    })
+    return {props: { event, categories, photoUrls }}
 }
 
 export default Purchase

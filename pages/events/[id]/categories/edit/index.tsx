@@ -128,6 +128,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const id = e.id
     const category = e.data()
     categories.push({...category, id})
-  });
+  })
   return { props: { event, beforeCategories: categories }}
 }

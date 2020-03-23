@@ -10,6 +10,8 @@ import 'nprogress/nprogress.css'
 import { Provider, AlertPosition } from "react-alert";
 import AlertTemplate from '@/components/alert'
 
+type stripeProps = stripe.StripeStatic | null
+
 const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter()
   const [CSRUser, setCSRUser]: [null | firebase.User, Dispatch<firebase.User>] = useState(null)

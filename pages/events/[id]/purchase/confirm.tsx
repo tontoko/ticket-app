@@ -5,60 +5,40 @@ import { Dispatch, SetStateAction } from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, FormFeedback } from 'reactstrap'
+import { useAlert } from 'react-alert'
+import { loadStripe } from '@stripe/stripe-js';
+import {
+    CardElement,
+    Elements,
+    useStripe,
+    useElements,
+} from '@stripe/react-stripe-js';
 
-const Confirmation: React.FC = () => {
-
+const CheckoutForm = () => {
+    const stripe = useStripe();
+    const elements = useElements();
     const router = useRouter()
-
-    useEffect(() => {
-        // ログインしてなければリダイレクト
-        if (false) {
-            router.push('/login')
-        }
-        if (ifAgree) {
-            setRequire(false)
-        }
-    })
-
+    const alert = useAlert()
     const [ifAgree, setIfAgree] = useState(false)
     const [require, setRequire] = useState(false)
-
-    const handleSubmit = () => {
-        if (ifAgree) {
-            router.push(`/events/${router.query.id}/purchase/checkout`)
-        } else {
-            setRequire(true)
-        }
-    }
 
     const [familyName, setFamilyName] = useState(router.query.familyName)
     const [firstName, setFirstName] = useState(router.query.firstName)
     const [email, setEmail] = useState(router.query.email)
 
-    let agreeCheckBox
-    if (require) {
-        agreeCheckBox = (
-            <FormGroup check style={{ marginRight: '1em' }}>
-                <Label check>
-                    <Input type="checkbox" checked={ifAgree} onChange={() => setIfAgree(!ifAgree)} invalid /> 同意します
-                        <FormFeedback>必須項目です</FormFeedback>
-                </Label>
-            </FormGroup>
-        )
-    } else {
-        agreeCheckBox = (
-            <FormGroup check style={{ marginRight: '1em' }}>
-                <Label check>
-                    <Input type="checkbox" checked={ifAgree} onChange={() => setIfAgree(!ifAgree)} /> 同意します
-                        <FormFeedback>必須項目です</FormFeedback>
-                </Label>
-            </FormGroup>
-        )
+    const handleSubmit = async (event) => {
+        event.preventDefault()
+        if (ifAgree) return setRequire(true)
+
+        const { error, paymentMethod } = await stripe.createPaymentMethod({
+            type: 'card',
+            card: elements.getElement(CardElement),
+        })
     }
 
     return (
         <Container>
-            <Form style={{ marginTop: '5em' }}>
+            <Form style={{ marginTop: '5em' }} onSubmit={handleSubmit}>
                 <FormGroup>
                     <Label>お名前</Label>
                     <FormGroup>
@@ -92,14 +72,57 @@ const Confirmation: React.FC = () => {
                         </CardBody>
                     </Card>
                 </FormGroup>
+                <FormGroup check style={{ margin: '2em' }}>
+                    <Row className="flex-row-reverse">
+                        <Col sm="12" md="6" style={{border: "solid 1px gray", padding: "1em"}}>
+                            <Label>クレジットカード情報を入力</Label>
+                            <CardElement
+                                options={{
+                                    style: {
+                                        base: {
+                                            fontSize: '16px',
+                                            color: '#424770',
+                                            '::placeholder': {
+                                                color: '#aab7c4',
+                                            },
+                                        },
+                                        invalid: {
+                                            color: '#9e2146',
+                                        },
+                                    },
+                                }}
+                            />
+                        </Col>
+                    </Row>
+                </FormGroup>
                 <Row className="flex-row-reverse">
-                    {agreeCheckBox}
+                    <FormGroup check style={{ marginRight: '1em' }}>
+                        <Label>何たらかんたらに同意する必要がある的な文言</Label>
+                    </FormGroup>
                 </Row>
                 <Row className="flex-row-reverse">
-                    <Button style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={handleSubmit} >購入</Button>
+                    <FormGroup check style={{ marginRight: '1em' }}>
+                        <Label check>
+                            <Input type="checkbox" checked={ifAgree} onChange={() => setIfAgree(!ifAgree)} invalid={!ifAgree} /> 同意します
+                        <FormFeedback>必須項目です</FormFeedback>
+                        </Label>
+                    </FormGroup>
+                </Row>
+                <Row className="flex-row-reverse">
+                    <Button disabled={!stripe} style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={handleSubmit} >購入</Button>
                 </Row>
             </Form>
         </Container>
+    );
+};
+
+const Confirmation: React.FC = () => {
+    const stripePromise = loadStripe('api_key_test')
+
+    return (
+        <Elements stripe={stripePromise}>
+            <CheckoutForm />
+        </Elements>
     );
 }
 
