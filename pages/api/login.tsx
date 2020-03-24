@@ -1,15 +1,11 @@
 import initFirebaseAdmin from '@/initFirebaseAdmin'
-const micro_session = require('micro-cookie-session')({
-    name: 'session',
-    keys: ['geheimnis'],
-    maxAge: 24 * 60 * 60 * 1000
-})
+import getSession from '@/lib/session'
 
 const endpoint = (async (req, res) => {
     if (!req.body) return res.sendStatus(400)
-    await micro_session(req, res)
+    // await micro_session(req, res)
+    let session = await (await getSession())(req, res)
     try {
-        let session = req.session
         const {firebase} = await initFirebaseAdmin()
         const decodedToken = await firebase.auth().verifyIdToken(req.body.token)
         session.token = decodedToken

@@ -1,5 +1,8 @@
 runtime: nodejs10
 
+includes:
+- secret.yml
+
 service: default
 handlers:
 - url: /.*
