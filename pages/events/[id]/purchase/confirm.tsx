@@ -19,7 +19,7 @@ import { event } from 'events'
 import getImg from '@/lib/getImgSSR'
 import { Stripe } from 'stripe'
 
-const CheckoutForm = () => {
+const CheckoutForm = ({ familyName, firstName, email, event, category, photoUrls, client_secret }) => {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter()
@@ -27,26 +27,26 @@ const CheckoutForm = () => {
     const [agree, setAgree] = useState(false)
     const [processing, setProcessing] = useState(false)
 
-    const {familyName, firstName, email} = router.query
-
     const handleSubmit = async (event) => {
         event.preventDefault()
         if (!stripe || !elements) return
-        if (agree) return alert.error("同意します が選択されていません")
+        if (!agree) return alert.error("同意します が選択されていません")
 
         setProcessing(true)
-        const result = await stripe.confirmCardPayment('{CLIENT_SECRET}', {
+        const result = await stripe.confirmCardPayment(client_secret, {
             payment_method: {
                 card: elements.getElement(CardElement),
                 billing_details: {
-                    name: 'Jenny Rosen',
-                    email: 'test'
+                    name: `${familyName} ${firstName}`,
+                    email
                 },
             }
         })
 
         if (result.error) {
             alert.error(result.error.message)
+            console.log(client_secret)
+            setProcessing(false)
         } else {
             // The payment has been processed!
             if (result.paymentIntent.status === 'succeeded') {
@@ -81,16 +81,15 @@ const CheckoutForm = () => {
                         <CardBody>
                             <Row>
                                 <Col sm="2" xs="3">
-                                    <img width="100%" src="https://cdn.pixabay.com/photo/2019/06/21/20/19/grapes-4290308_1280.jpg" alt="Card image cap" />
+                                    <img width="100%" src={photoUrls[0]} alt="Card image cap" />
                                 </Col>
                                 <Col xs="auto">
-                                    <CardTitle>テストイベント</CardTitle>
-                                    <CardSubtitle>テスト場所</CardSubtitle>
-                                    <CardText>テスト説明文</CardText>
+                                    <CardTitle>{event.name}</CardTitle>
+                                    <CardSubtitle>{event.placeName}</CardSubtitle>
                                 </Col>
                             </Row>
                             <Row className="flex-row-reverse">
-                                <h4 style={{ marginTop: '1em', marginRight: '1em' }}>テスト金額</h4>
+                                <h4 style={{ marginTop: '1em', marginRight: '1em' }}>{category.price} 円</h4>
                             </Row>
                         </CardBody>
                     </Card>
@@ -131,21 +130,22 @@ const CheckoutForm = () => {
                         </Label>
                     </FormGroup>
                 </Row>
-                <Row className="flex-row-reverse">
-                    <Spinner></Spinner>
-                    <Button disabled={!stripe || !elements || processing} style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={handleSubmit} >購入</Button>
+                <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
+                    <Button disabled={!stripe || !elements || processing} onClick={handleSubmit} >購入</Button>
+                    <Spinner style={{marginRight: '1em', display: processing ? 'inline-block' : 'none'}} />
                 </Row>
             </Form>
         </Container>
     );
 };
 
-const Confirmation: React.FC = () => {
-    const stripePromise = loadStripe('publishable key')
+const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret, env }) => {
+    const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
+    const stripePromise = loadStripe(publishableKey)
 
     return (
         <Elements stripe={stripePromise}>
-            <CheckoutForm />
+            <CheckoutForm familyName={familyName} firstName={firstName} email={email} event={event} category={category} photoUrls={photoUrls} client_secret={client_secret} />
         </Elements>
     );
 }
@@ -155,7 +155,8 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const { firestore } = await initFirebaseAdmin()
     const { query } = ctx
     const { familyName, firstName, email, selectedCategory, id } = query
-    const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
+    const eventSnapShot = (await firestore.collection('events').doc(query.id as string).get())
+    const data = eventSnapShot.data()
     const photos: undefined | string[] = data.photos
     const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
     const createdAt = data.createdAt.seconds
@@ -163,18 +164,24 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
     const event = { ...data, createdAt, updatedAt, startDate, endDate }
-    const category = (await firestore.collection('events').doc(query.id as string).collection('categories').doc(selectedCategory as string).get()).data()
+    const categorySnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').doc(selectedCategory as string).get())
+    const category = categorySnapShot.data()
 
-    const stripe = require('stripe')('api_key_test') as Stripe
+    const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
+    const stripeSecret = env === 'prod' ? process.env.STRIPE_PROD_SECRET : process.env.STRIPE_DEV_SECRET
+    const stripe = require('stripe')(stripeSecret) as Stripe
     const paymentIntent = await stripe.paymentIntents.create({
         amount: category.price,
         currency: 'jpy',
         payment_method_types: ['card'],
         // Verify your integration in this guide by including this parameter
-        metadata: { integration_check: 'accept_a_payment' },
-    });
-    const a = paymentIntent
-    return { props: { event, category, photoUrls } }
+        metadata: { 
+            event: eventSnapShot.id,
+            category: categorySnapShot.id
+        }
+    })
+    const { client_secret } = paymentIntent
+    return { props: { familyName, firstName, email, event, category, photoUrls, client_secret, env } }
 }
 
 export default Confirmation
