@@ -3,9 +3,9 @@ import {useRouter} from 'next/router'
 import React, {useEffect, useState} from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
-    CardTitle, CardSubtitle, FormFeedback } from 'reactstrap'
+    CardTitle, CardSubtitle, FormFeedback, Spinner } from 'reactstrap'
 import { useAlert } from 'react-alert'
-import { loadStripe, Stripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import {
     CardElement,
     Elements,
@@ -17,6 +17,7 @@ import isLogin from '@/lib/isLogin'
 import initFirebaseAdmin from '@/initFirebaseAdmin'
 import { event } from 'events'
 import getImg from '@/lib/getImgSSR'
+import { Stripe } from 'stripe'
 
 const CheckoutForm = () => {
     const stripe = useStripe();
@@ -24,13 +25,16 @@ const CheckoutForm = () => {
     const router = useRouter()
     const alert = useAlert()
     const [agree, setAgree] = useState(false)
+    const [processing, setProcessing] = useState(false)
 
     const {familyName, firstName, email} = router.query
 
     const handleSubmit = async (event) => {
         event.preventDefault()
+        if (!stripe || !elements) return
         if (agree) return alert.error("同意します が選択されていません")
 
+        setProcessing(true)
         const result = await stripe.confirmCardPayment('{CLIENT_SECRET}', {
             payment_method: {
                 card: elements.getElement(CardElement),
@@ -39,11 +43,10 @@ const CheckoutForm = () => {
                     email: 'test'
                 },
             }
-        });
+        })
 
         if (result.error) {
-            // Show error to your customer (e.g., insufficient funds)
-            console.log(result.error.message);
+            alert.error(result.error.message)
         } else {
             // The payment has been processed!
             if (result.paymentIntent.status === 'succeeded') {
@@ -129,7 +132,8 @@ const CheckoutForm = () => {
                     </FormGroup>
                 </Row>
                 <Row className="flex-row-reverse">
-                    <Button disabled={!stripe} style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={handleSubmit} >購入</Button>
+                    <Spinner></Spinner>
+                    <Button disabled={!stripe || !elements || processing} style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={handleSubmit} >購入</Button>
                 </Row>
             </Form>
         </Container>
@@ -148,37 +152,29 @@ const Confirmation: React.FC = () => {
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx)
-    // const { firestore } = await initFirebaseAdmin()
-    // const { query } = ctx
-    // const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
-    // const photos: undefined | string[] = data.photos
-    // const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
-    // const createdAt = data.createdAt.seconds
-    // const updatedAt = data.updatedAt.seconds
-    // const startDate = data.startDate.seconds
-    // const endDate = data.endDate.seconds
-    // const event = { ...data, createdAt, updatedAt, startDate, endDate }
-    // const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').get())
-    // let categories: FirebaseFirestore.DocumentData[] = []
-    // categoriesSnapShot.forEach(e => {
-    //     const id = e.id
-    //     const category = e.data()
-    //     categories.push({ ...category, id })
-    // })
-    // return { props: { event, categories, photoUrls } }
+    const { firestore } = await initFirebaseAdmin()
+    const { query } = ctx
+    const { familyName, firstName, email, selectedCategory, id } = query
+    const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
+    const photos: undefined | string[] = data.photos
+    const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
+    const createdAt = data.createdAt.seconds
+    const updatedAt = data.updatedAt.seconds
+    const startDate = data.startDate.seconds
+    const endDate = data.endDate.seconds
+    const event = { ...data, createdAt, updatedAt, startDate, endDate }
+    const category = (await firestore.collection('events').doc(query.id as string).collection('categories').doc(selectedCategory as string).get()).data()
 
-    const stripe = eval("require('stripe')({api_key_test})")
-
-    (async () => {
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: 1099,
-            currency: 'jpy',
-            // Verify your integration in this guide by including this parameter
-            metadata: { integration_check: 'accept_a_payment' },
-        });
-    })();
-
-    return {}
+    const stripe = require('stripe')('api_key_test') as Stripe
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: category.price,
+        currency: 'jpy',
+        payment_method_types: ['card'],
+        // Verify your integration in this guide by including this parameter
+        metadata: { integration_check: 'accept_a_payment' },
+    });
+    const a = paymentIntent
+    return { props: { event, category, photoUrls } }
 }
 
 export default Confirmation

@@ -28,6 +28,7 @@
     "react-dom": "^16.12.0",
     "react-qr-reader": "^2.2.1",
     "reactstrap": "^8.4.1",
+    "stripe": "^8.33.0",
     "typescript": "^3.8.3"
   },
   "devDependencies": {
