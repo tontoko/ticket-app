@@ -12,7 +12,6 @@ jobs:
         npm install
         cd src/functions && npm install
         cd ${GITHUB_WORKSPACE} && npm run build
-        npm install -g firebase
     - name: set env
       run: |
         echo secrets.ACCOUNT_KEY_PROD > ${GITHUB_WORKSPACE}/account_key.json
