@@ -19,9 +19,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: npm install, build
-      run: |
+      run: 
         npm install
-        npm run build
+        cd src/functions && npm install
+        cd ${HOME} && npm run build
     - name: set env
       run:
         echo ${{ secrets.account_setting_dev }} | ${HOME}/account_setting.json
