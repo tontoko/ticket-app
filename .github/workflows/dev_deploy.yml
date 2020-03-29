@@ -1,0 +1,34 @@
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.16.0]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run tests with ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install, build
+      run: |
+        npm install
+        npm run build
+    - name: set env
+      run:
+        echo ${{ secret.account_setting_dev }} | ${HOME}/account_setting.json
+        echo "export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/account_settingh.json" >> $BASH_ENV
+    - name: deploy
+      run:
+        npm run deploy
+
+      env:
+        CI: true

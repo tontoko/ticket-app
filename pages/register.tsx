@@ -36,6 +36,14 @@ export default () => {
                     <Input type="password" name="password" placeholder="パスワード" onChange={e => setPwd(e.target.value)} />
                     <Input type="password" name="password_confirmation" placeholder="パスワード再入力" style={{ marginTop: '0.7em' }} onChange={e => setPwdConfirm(e.target.value)} />
                 </FormGroup>
+                <FormGroup>
+                    {/* ToDo:サービス名が決まったら修正 */}
+                    <Label>
+                    このサービスにおける支払処理サービスは、Stripeが提供し、Stripe Connectアカウント契約（Stripe利用規約を含み、総称して「Stripeサービス契約」といいます。）に従うものとします。<br/>
+                    このサービスにおける電子チケット取引の継続により、お客様はStripeサービス契約（随時Stripeにより修正されることがあり、その場合には修正されたものを含みます。）に拘束されることに同意するものとします。 <br/>
+                    Stripeを通じた支払処理サービスをこのサービスが使用するための条件として、お客様は、このサービスに対してお客様及びお客様の事業に関する正確かつ完全な情報を提供することに同意し、このサービスが当該情報及びStripeが提供する支払処理サービスのお客様による使用に関連する取引情報を共有することを認めるものとします。
+                    </Label>
+                </FormGroup>
                 <Button onClick={() => sendEmail()}>登録</Button>
             </Form>
             <Link href="/login"><a>ログイン</a></Link>
