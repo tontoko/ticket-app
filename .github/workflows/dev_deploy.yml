@@ -2,34 +2,21 @@ on:
   push:
     branches:
       - develop
-
 jobs:
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [10.16.0]
-
     steps:
-    - uses: actions/checkout@v1
-    - name: Run tests with ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+    - uses: actions/checkout@v2
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
-        node-version: ${{ matrix.node-version }}
+        project_id: ${{ secrets.GCP_PROJECT_ID_DEV }}
+        service_account_email: ${{ secrets.GCP_SA_EMAIL_DEV }}
+        service_account_key: ${{ secrets.GCP_SA_KEY_DEV }}
     - name: npm install, build
-      run: 
-        npm install &&
-        cd src/functions && npm install &&
+      run: |
+        npm install
+        cd src/functions && npm install
         cd ${GITHUB_WORKSPACE} && npm run build
-    - name: set env
-      run:
-        echo ${{ secrets.account_setting_dev }} > ${GITHUB_WORKSPACE}/account_setting.json
-        echo "export GOOGLE_APPLICATION_CREDENTIALS=${GITHUB_WORKSPACE}/account_setting.json" >> $BASH_ENV
     - name: deploy
       run:
         npm run deploy
-
-      env:
-        CI: true
