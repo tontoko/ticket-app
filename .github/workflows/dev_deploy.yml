@@ -2,10 +2,10 @@ on:
   push:
     branches:
       - develop
+env:
+  FIREBASE_TOKEN: ${{ FIREBASE_TOKEN }}
 jobs:
   deploy:
-    env:
-      FIREBASE_TOKEN: ${{ FIREBASE_TOKEN }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
