@@ -17,7 +17,7 @@ jobs:
     - name: set env
       run: |
         echo ${{ secrets.ACCOUNT_KEY_PROD }} > ${GITHUB_WORKSPACE}/account_key.json
-        export GOOGLE_APPLICATION_CREDENTIALS="${GITHUB_WORKSPACE}/account_key.json"
+        echo "::set-env name=GOOGLE_APPLICATION_CREDENTIALS::${GITHUB_WORKSPACE}/account_key.json"
         npx firebase use dev
     - name: deploy
       run:
