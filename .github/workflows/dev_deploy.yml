@@ -16,6 +16,7 @@ jobs:
       run: |
         echo secrets.ACCOUNT_KEY_DEV > ${GITHUB_WORKSPACE}/account_key.json
         export GOOGLE_APPLICATION_CREDENTIALS="${GITHUB_WORKSPACE}/account_key.json"
+        firebase use dev
     - name: deploy
       run:
         npm run deploy
