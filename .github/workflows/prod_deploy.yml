@@ -24,7 +24,7 @@ jobs:
         npm run build
     - name: set env
       run:
-        echo ${{ secret.account_setting_prod }} | ${HOME}/account_setting.json
+        echo ${{ secrets.account_setting_prod }} | ${HOME}/account_setting.json
         echo "export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/account_settingh.json" >> $BASH_ENV
     - name: deploy
       run:
