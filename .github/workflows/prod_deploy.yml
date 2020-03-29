@@ -20,13 +20,13 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: npm install, build
       run: 
-        npm install
-        cd src/functions && npm install
+        npm install &&
+        cd src/functions && npm install &&
         cd ${HOME} && npm run build
     - name: set env
       run:
-        echo ${{ secrets.account_setting_prod }} | ${HOME}/account_setting.json
-        echo "export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/account_settingh.json" >> $BASH_ENV
+        echo ${{ secrets.account_setting_prod }} > ${HOME}/account_setting.json
+        echo "export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/account_setting.json" >> $BASH_ENV
     - name: deploy
       run:
         npm run deploy
