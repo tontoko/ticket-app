@@ -7,19 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: install pyopenssl
-      run: pip install pyopenssl
-    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-      with:
-        version: '270.0.0'
-        project_id: ${{ secrets.GCP_PROJECT_ID_DEV }}
-        service_account_email: ${{ secrets.GCP_SA_EMAIL_DEV }}
-        service_account_key: ${{ secrets.GCP_SA_KEY_DEV }}
     - name: npm install, build
       run: |
         npm install
         cd src/functions && npm install
         cd ${GITHUB_WORKSPACE} && npm run build
+    - name: set env
+      run: |
+        echo secrets.ACCOUNT_KEY_PROD > ${GITHUB_WORKSPACE}/account_key.json
+        export GOOGLE_APPLICATION_CREDENTIALS="${GITHUB_WORKSPACE}/account_key.json"
     - name: deploy
       run:
         npm run deploy
