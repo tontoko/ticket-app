@@ -4,17 +4,13 @@ on:
       - develop
 env:
   FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+  GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID_DEV }}
-        service_account_email: ${{ secrets.GCP_SA_EMAIL_DEV }}
-        service_account_key: ${{ secrets.GCP_SA_KEY_DEV }}
-        export_default_credentials: true
+    - uses: actions/gcloud/auth@master
     - name: npm install, build
       run: |
         npm install
@@ -24,5 +20,8 @@ jobs:
       run: |
         npx firebase use dev
     - name: deploy
-      run:
-        npm run deploy
+      uses: actions/gcloud/cli@master
+      with:
+        args: app deploy
+      env:
+        CLOUDSDK_CORE_PROJECT: ticket-app-dev-11346
