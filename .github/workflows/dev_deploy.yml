@@ -9,6 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID_DEV }}
+        service_account_email: ${{ secrets.GCP_SA_EMAIL_DEV }}
+        service_account_key: ${{ secrets.GCP_SA_KEY_DEV }}
+        export_default_credentials: true
     - name: npm install, build
       run: |
         npm install
@@ -16,8 +22,6 @@ jobs:
         cd ${GITHUB_WORKSPACE} && npm run build
     - name: set env
       run: |
-        echo ${{ secrets.ACCOUNT_KEY_DEV }} > ${GITHUB_WORKSPACE}/account_key.json
-        gcloud auth activate-service-account --key-file ${GITHUB_WORKSPACE}/account_key.json
         npx firebase use dev
     - name: deploy
       run:
