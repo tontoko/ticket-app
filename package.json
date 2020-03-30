@@ -51,6 +51,6 @@
     "dev": "next",
     "build": "next build",
     "start": "next start -p 8080",
-    "deploy": "gcloud app deploy -y"
+    "deploy": "gcloud --quiet app deploy"
   }
 }
