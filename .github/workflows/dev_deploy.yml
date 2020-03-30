@@ -4,7 +4,6 @@ on:
       - develop
 env:
   FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-  GCLOUD_AUTH: ${{ secrets.GCLOUD_AUTH }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,8 +24,5 @@ jobs:
       run: |
         npx firebase use dev
     - name: deploy
-      uses: actions/gcloud/cli@master
-      with:
-        args: app deploy
-      env:
-        CLOUDSDK_CORE_PROJECT: ticket-app-dev-11346
+      run:
+        npm run deploy
