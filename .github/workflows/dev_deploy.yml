@@ -22,6 +22,7 @@ jobs:
         cd ${GITHUB_WORKSPACE} && npm run build
     - name: set env
       run: |
+        echo secrets.ENV_DEV > secret.yml
         npx firebase use dev
     - name: deploy
       run:
