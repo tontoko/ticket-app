@@ -31,3 +31,4 @@ jobs:
         args: deploy --only functions
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_DEV }}
+        PROJECT_ID: ${{ GCP_PROJECT_ID_DEV }}
