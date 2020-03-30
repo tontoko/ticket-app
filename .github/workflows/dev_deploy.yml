@@ -16,7 +16,7 @@ jobs:
         cd ${GITHUB_WORKSPACE} && npm run build
     - name: set env
       run: |
-        echo ${{ secrets.ACCOUNT_KEY_PROD }} > ${GITHUB_WORKSPACE}/account_key.json
+        echo ${{ secrets.ACCOUNT_KEY_DEV }} > ${GITHUB_WORKSPACE}/account_key.json
         gcloud auth activate-service-account --key-file ${GITHUB_WORKSPACE}/account_key.json
         npx firebase use dev
     - name: deploy
