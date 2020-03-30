@@ -2,8 +2,6 @@ on:
   push:
     branches:
       - develop
-env:
-  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -27,3 +25,8 @@ jobs:
     - name: deploy
       run:
         npm run deploy
+      uses: w9jds/firebase-action@master
+      with:
+        args: deploy --only hosting
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
