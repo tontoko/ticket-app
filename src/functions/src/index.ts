@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 const admin = require('firebase-admin')
-admin.initializeApp()
+admin.initializeApp(functions.config().firebase)
 const fireStore = admin.firestore()
 
 exports.createUser = functions
