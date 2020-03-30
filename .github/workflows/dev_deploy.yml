@@ -18,15 +18,16 @@ jobs:
         npm install
         cd src/functions && npm install
         cd ${GITHUB_WORKSPACE} && npm run build
-    - name: set env
+    - name: set up
       run: |
         echo secrets.ENV_DEV > secret.yml
         npx firebase use dev
-    - name: deploy
+    - name: gae deploy
       run:
         npm run deploy
       uses: w9jds/firebase-action@master
+    - name: firebase deploy
       with:
-        args: deploy --only hosting
+        args: deploy --only functions
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
