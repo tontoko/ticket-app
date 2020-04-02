@@ -2,22 +2,33 @@ on:
   push:
     branches:
       - master
-env:
-  FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID_PROD }}
+        service_account_email: ${{ secrets.GCP_SA_EMAIL_PROD }}
+        service_account_key: ${{ secrets.GCP_SA_KEY_PROD }}
+        export_default_credentials: true
     - name: npm install, build
       run: |
         npm install
         cd src/functions && npm install
         cd ${GITHUB_WORKSPACE} && npm run build
-    - name: set env
+    - name: set up
       run: |
-        echo ${{ secrets.ACCOUNT_KEY_PROD }} > ${GITHUB_WORKSPACE}/account_key.json
-        echo "::set-env name=GOOGLE_APPLICATION_CREDENTIALS::${GITHUB_WORKSPACE}/account_key.json"
-    - name: deploy
+        echo secrets.GAE_SECRET_PROD > secret.yml
+        echo secrets.FUNCTIONS_SECRET_PROD > functions_secret.yml
+    - name: gae deploy
       run:
         npm run deploy
+    - name: firebase deploy
+      uses: w9jds/firebase-action@master
+      with:
+        args: deploy --only functions --env-vars-file functions_secret.yml
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_PROD }}
+        PROJECT_ID: ${{ secrets.GCP_PROJECT_ID_PROD }}

@@ -20,7 +20,8 @@ jobs:
         cd ${GITHUB_WORKSPACE} && npm run build
     - name: set up
       run: |
-        echo secrets.ENV_DEV > secret.yml
+        echo secrets.GAE_SECRET_DEV > secret.yml
+        echo secrets.FUNCTIONS_SECRET_DEV > functions_secret.yml
         npx firebase use dev
     - name: gae deploy
       run:
@@ -28,7 +29,7 @@ jobs:
     - name: firebase deploy
       uses: w9jds/firebase-action@master
       with:
-        args: deploy --only functions
+        args: deploy --only functions --env-vars-file functions_secret.yml
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_DEV }}
         PROJECT_ID: ${{ secrets.GCP_PROJECT_ID_DEV }}
