@@ -16,14 +16,14 @@ const fireStore = admin.firestore()
 
 exports.createUser = functions
 .region('asia-northeast1')
-.auth.user().onCreate((user) => {  
-  const stripeAccount = stripe.accounts.create({
+.auth.user().onCreate(async (user) => {  
+  const stripeAccount = await stripe.accounts.create({
     country: 'JP',
     type: 'custom',
     requested_capabilities: ['card_payments'],
   })
   const usersRef = fireStore.collection('users');
-  usersRef.doc(user.uid).set({
+  await usersRef.doc(user.uid).set({
     admin: false,
     stripeAccount
   })
