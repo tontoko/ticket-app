@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {
-    Button, Container, Col, Row, Form, Input, FormGroup, Label, CarouselItem, CarouselCaption, Carousel, CarouselControl, CarouselIndicators
+    Button, Container, Col, Row, Form, Input, FormGroup, Label, CarouselItem, CarouselCaption, Carousel, CarouselControl, CarouselIndicators, Spinner
 } from 'reactstrap';
 import {useRouter} from 'next/router'
 import initFirebase from '@/src/lib/initFirebase'
@@ -10,6 +10,7 @@ import moment from 'moment'
 
 const Page = () => {
     const router = useRouter()
+    const [loading, setLoading] = useState(false)
 
     const { file1, file2, file3, eventName, placeName, eventDetail, startDate, endDate } = router.query
     const items = [file1, file2, file3].filter(v=>v).map((file,i) => {
@@ -68,6 +69,8 @@ const Page = () => {
     }
 
     const createEvent = async() => {
+        if (loading) false
+        setLoading(true)
         const {firebase} = await initFirebase()
         let photos:string[] = []
         file1 && photos.push(await saveImages(file1 as string, 1, firebase))
@@ -90,7 +93,7 @@ const Page = () => {
 
     return (
         <Container>
-            <Form style={{ marginTop: "2em", marginBottom: "2em" }}>
+            <Form style={{ marginTop: "2em", marginBottom: "2em" }} onSubmit={createEvent}>
                 <FormGroup style={{ textAlign: 'center' }}>
                     <Carousel
                         activeIndex={activeIndex}
@@ -127,7 +130,7 @@ const Page = () => {
                 </FormGroup>
                 <FormGroup>
                     <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                        <Button className="ml-auto" onClick={() => createEvent()}>作成</Button>
+                        <Button disabled={loading} className="ml-auto" onClick={createEvent}>{loading ? <Spinner/> : '作成'}</Button>
                     </Row>
                 </FormGroup>
             </Form>

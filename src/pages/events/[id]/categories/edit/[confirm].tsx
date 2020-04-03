@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Dispatch, SetStateAction } from 'react'
 import {
   Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
-  CardTitle, CardSubtitle, FormFeedback
+  CardTitle, CardSubtitle, FormFeedback, Spinner
 } from 'reactstrap'
 import initFirebaseAdmin from '@/initFirebaseAdmin'
 import initFirebase from '@/src/lib/initFirebase'
@@ -16,8 +16,11 @@ import isLogin from '@/src/lib/isLogin'
 const Confirmation= props => {
   const router = useRouter()
   const categories:any[] = JSON.parse(props.categories)
+  const [loading, setLoading] = useState(false)
 
   const submit = async () => {
+    if (loading) return
+    setLoading(true)
     const {firestore} = await initFirebase()
     const categoriesRef = firestore.collection('events').doc(router.query.id as string).collection('categories')
     let updateCategories: {string?: FirebaseFirestore.DocumentData} = {}
@@ -39,15 +42,16 @@ const Confirmation= props => {
           transaction.set(categoriesRef.doc(id), updateCategories[id])
         }))
       })
+      router.push(`/events/${router.query.id}?msg=更新しました`)
     } catch(e) {
       errorMsg(e)
+      setLoading(false)
     }
-    router.push(`/events/${router.query.id}?msg=更新しました`)
   }
 
   return (
     <Container>
-      <Form style={{ marginTop: '5em' }}>
+      <Form style={{ marginTop: '5em' }} onSubmit={submit}>
         <h4 style={{ marginBottom: '1em' }}>
           チケットカテゴリーを更新します。
         </h4>
@@ -62,7 +66,7 @@ const Confirmation= props => {
           )
         )}
         <Row className="flex-row-reverse">
-          <Button style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={submit} >設定</Button>
+          <Button style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={submit}>{loading ? <Spinner/> : '設定'}</Button>
         </Row>
       </Form>
     </Container>

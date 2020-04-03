@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Router, { useRouter } from 'next/router'
 import React, {useState} from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Col } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Container, Col, Spinner } from 'reactstrap'
 import initFirebase from '@/src/lib/initFirebase'
 import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -12,47 +12,62 @@ export const Login = () => {
     const alert = useAlert()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [loading, setLoading] = useState(false)
     
     const loginWithEmail = async () => {
+        if (loading) return
+        setLoading(true)
         try {
             const {firebase} = await initFirebase()
             await firebase.auth().signInWithEmailAndPassword(email, password)
         } catch (e) {
             alert.error(errorMsg(e, 'signin'))
+            setLoading(false)
         }
     }
 
     const loginWithFacebook = async() => {
+        if (loading) return
+        setLoading(true)
         try {
             const {firebase} = await initFirebase()
             const provider = new firebase.auth.FacebookAuthProvider()
             await firebase.auth().signInWithPopup(provider)
         } catch (e) {
             alert.error(errorMsg(e, 'signin/popup'))
+            setLoading(false)
         }
     }
 
     const loginWithTwitter = async () => {
+        if (loading) return
+        setLoading(true)
         try {
             const {firebase} = await initFirebase()
             const provider = new firebase.auth.TwitterAuthProvider()
             await firebase.auth().signInWithPopup(provider)
         } catch (e) {
-            alert.error(errorMsg(e, 'signin/popup'))}
+            alert.error(errorMsg(e, 'signin/popup'))
+            setLoading(false)
+        }
     }
 
     const loginWithGoogle = async () => {
+        if (loading) return
+        setLoading(true)
         try {
             const {firebase} = await initFirebase()
             const provider = new firebase.auth.GoogleAuthProvider()
             await firebase.auth().signInWithPopup(provider)
         } catch (e) {
-            alert.error(errorMsg(e, 'signin/popup'))}
+            alert.error(errorMsg(e, 'signin/popup'))
+            setLoading(false)
+        }
     }
 
     return (
         <Container>
-            <Form style={{marginTop: '5em'}}>
+            <Form style={{ marginTop: '5em' }} onSubmit={loginWithEmail}>
                 <FormGroup>
                     <Label>メールアドレス</Label>
                     <Input type="email" name="email" placeholder="メールアドレス" onChange={e => setEmail(e.target.value)} />
@@ -61,7 +76,9 @@ export const Login = () => {
                     <Label>パスワード</Label>
                     <Input type="password" name="password" placeholder="パスワード" onChange={e => setPassword(e.target.value)} />
                 </FormGroup>
-                <Button onClick={() => loginWithEmail()}>ログイン</Button>
+                <Button onClick={() => loginWithEmail()}>{loading ? <Spinner/> : 'ログイン'}</Button>
+            </Form>
+            <Form>
                 <FormGroup style={{ marginTop: '1em' }}>
                     <Col style={{ display: 'flex', padding: 0 }}>
                         <p onClick={() => loginWithTwitter()}><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2", marginLeft: "0.5em", cursor: 'pointer' }} className='fa-2x' /></p>

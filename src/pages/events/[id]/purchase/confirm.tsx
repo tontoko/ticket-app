@@ -131,8 +131,7 @@ const CheckoutForm = ({ familyName, firstName, email, event, category, photoUrls
                     </FormGroup>
                 </Row>
                 <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
-                    <Button disabled={!stripe || !elements || processing} onClick={handleSubmit} >購入</Button>
-                    <Spinner style={{marginRight: '1em', display: processing ? 'inline-block' : 'none'}} />
+                    <Button disabled={!stripe || !elements || processing} onClick={handleSubmit} >{processing ? <Spinner/> : '購入'}</Button>
                 </Row>
             </Form>
         </Container>

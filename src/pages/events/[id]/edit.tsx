@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react';
 import {
-    Button, Container, Col, Row, Form, Input, FormGroup, Label
+    Button, Container, Col, Row, Form, Input, FormGroup, Label, Spinner
 } from 'reactstrap';
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -15,15 +15,18 @@ import DatePicker, { registerLocale } from "react-datepicker"
 import moment from 'moment'
 import { toUtcIso8601str } from '@/src/lib/time'
 import { useAlert } from 'react-alert';
+import errorMsg from '@/src/lib/errorMsg';
 
 export default ({ user, event, photoUrls }) => {
     const router = useRouter()
+    const alert = useAlert()
     const [files, setFiles] = useState(['', '', ''])
     const [eventName, setEventName] = useState(event.name)
     const [placeName, setPlaceName] = useState(event.placeName)
     const [eventDetail, setEventDetail] = useState(event.eventDetail)
     const [startDate, setStartDate] = useState(toUtcIso8601str(moment(event.startDate * 1000)))
     const [endDate, setEndDate] = useState(toUtcIso8601str(moment(event.endDate * 1000)))
+    const [loading, setLoading] = useState(false)
 
     const changeFiles = async (inputFiles: FileList, i: 0 | 1 | 2) => {
         const fileReader = new FileReader()
@@ -51,6 +54,7 @@ export default ({ user, event, photoUrls }) => {
     }
 
     const updateEvent = async () => {
+        setLoading(true)
         const { firebase } = await initFirebase()
         let photos: string[] = []
         photos[0] = files[0] ? await saveImages(files[0] as string, 1, firebase) : event.photos[0]
@@ -59,18 +63,23 @@ export default ({ user, event, photoUrls }) => {
         // 配列の空要素を削除して先頭から詰める
         photos = photos.filter(v => v)
         const firestore = firebase.firestore()
-        await firestore.collection('events').doc(router.query.id as string).update({
-            photos,
-            placeName,
-            name: eventName,
-            createdAt: new Date,
-            createdUser: firebase.auth().currentUser.uid,
-            eventDetail,
-            updatedAt: new Date(startDate as string),
-            startDate: moment(startDate as string).toDate(),
-            endDate: moment(endDate as string).toDate(),
-        })
-        router.push(`/events/${router.query.id}?msg=更新しました`)
+        try {
+            await firestore.collection('events').doc(router.query.id as string).update({
+                photos,
+                placeName,
+                name: eventName,
+                createdAt: new Date,
+                createdUser: firebase.auth().currentUser.uid,
+                eventDetail,
+                updatedAt: new Date(startDate as string),
+                startDate: moment(startDate as string).toDate(),
+                endDate: moment(endDate as string).toDate(),
+            })
+            router.push(`/events/${router.query.id}?msg=更新しました`)
+        } catch(e) { 
+            alert.error(errorMsg(e))
+            setLoading(false)
+        }
     }
 
     const submit = () => {
@@ -94,7 +103,7 @@ export default ({ user, event, photoUrls }) => {
 
     return (
         <Container>
-            <Form style={{ marginTop: "2em" }} >
+            <Form style={{ marginTop: "2em" }} onSubmit={submit}>
                 <FormGroup>
                     <Label className="mr-2">イベント名</Label>
                     <Input onChange={e => setEventName(e.target.value)} value={eventName} invalid={eventName.length == 0}></Input>
@@ -151,7 +160,7 @@ export default ({ user, event, photoUrls }) => {
                 </FormGroup>
                 <FormGroup>
                     <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                        <Button className="ml-auto" onClick={() => submit()}>確認</Button>
+                        <Button className="ml-auto" onClick={submit}>{loading ? <Spinner/> : '確認'}</Button>
                     </Row>
                 </FormGroup>
             </Form>
