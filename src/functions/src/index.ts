@@ -6,7 +6,7 @@ type stripeEnv = {
   },
   apikey: {
     prod: string,
-    de : string
+    dev : string
   }
 }
 
