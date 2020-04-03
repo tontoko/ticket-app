@@ -5,14 +5,15 @@ type stripeEnv = {
     dev: string
   }
 }
-const stripeEnv = functions.config().stripe as stripeEnv
-const stripeSecret = process.env.GCLOUD_PROJECT === 'ticket-app-d3f5a' ? stripeEnv.endpoint.prod : stripeEnv.endpoint.dev
-const stripe = require('stripe')(stripeSecret)
 
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin' 
 admin.initializeApp(functions.config().firebase)
 const fireStore = admin.firestore()
+
+const stripeEnv = functions.config().stripe as stripeEnv
+const stripeSecret = process.env.GCLOUD_PROJECT === 'ticket-app-d3f5a' ? stripeEnv.endpoint.prod : stripeEnv.endpoint.dev
+const stripe = require('stripe')(stripeSecret)
 
 exports.createUser = functions
 .region('asia-northeast1')
