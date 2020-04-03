@@ -30,6 +30,6 @@ exports.createUser = functions
   const usersRef = fireStore.collection('users');
   await usersRef.doc(user.uid).set({
     admin: false,
-    stripeAccount
+    stripeId: stripeAccount.id
   })
 });
