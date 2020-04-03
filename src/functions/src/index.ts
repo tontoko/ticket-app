@@ -3,6 +3,10 @@ type stripeEnv = {
   endpoint: {
     prod: string,
     dev: string
+  },
+  apikey: {
+    prod: string,
+    de : string
   }
 }
 
@@ -12,7 +16,7 @@ admin.initializeApp(functions.config().firebase)
 const fireStore = admin.firestore()
 
 const stripeEnv = functions.config().stripe as stripeEnv
-const stripeSecret = process.env.GCLOUD_PROJECT === 'ticket-app-d3f5a' ? stripeEnv.endpoint.prod : stripeEnv.endpoint.dev
+const stripeSecret = process.env.GCLOUD_PROJECT === 'ticket-app-d3f5a' ? stripeEnv.apikey.prod : stripeEnv.apikey.dev
 const stripe = require('stripe')(stripeSecret)
 
 exports.createUser = functions
