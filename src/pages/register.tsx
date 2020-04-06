@@ -40,7 +40,7 @@ export default () => {
                     <Input type="password" name="password_confirmation" placeholder="パスワード再入力" style={{ marginTop: '0.7em' }} onChange={e => setPwdConfirm(e.target.value)} />
                 </FormGroup>
                 <FormGroup>
-                    {/* ToDo:サービス名が決まったら修正 */}
+                    {/* ToDo:サービス名修正・追加情報入力のページに移動 */}
                     <p style={{ color: 'gray', fontSize: 10.5 }}>
                         このサービスにおける支払処理サービスは、Stripeが提供し、<a href="https://stripe.com/connect-account/legal">Stripe Connectアカウント契約</a>（<a href="https://stripe.com/legal">Stripe利用規約</a>を含み、総称して「Stripeサービス契約」といいます。）に従うものとします。<br/>
                     このサービスにおける電子チケット取引の継続により、お客様はStripeサービス契約（随時Stripeにより修正されることがあり、その場合には修正されたものを含みます。）に拘束されることに同意するものとします。 <br/>

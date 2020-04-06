@@ -1,9 +1,9 @@
 import initFirebaseAdmin from '@/initFirebaseAdmin'
 import getSession from '@/src/lib/session'
+import { NextApiHandler } from 'next'
 
-const endpoint = (async (req, res) => {
-    if (!req.body) return res.sendStatus(400)
-    // await micro_session(req, res)
+const endpoint: NextApiHandler = (async (req, res) => {
+    if (!req.body) return res.status(400).send({ body: 'body was empty' })    // await micro_session(req, res)
     let session = await (await getSession())(req, res)
     try {
         const {firebase} = await initFirebaseAdmin()
