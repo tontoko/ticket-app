@@ -49,8 +49,9 @@ jobs:
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           kubectl get services -o wide
       - name: firebase set up
-        run: |
-          npx firebase use dev
+        uses: w9jds/firebase-action@master
+        with:
+          args: use dev
       - name: firebase set env
         uses: w9jds/firebase-action@master
         with:
