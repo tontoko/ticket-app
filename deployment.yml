@@ -27,6 +27,5 @@ spec:
             configMapKeyRef:
               key: test
               name: ticket-app-dev-config-ht00
-        image: gcr.io/PROJECT_ID/IMAGE:TAG
         name: ticket-app-dev
         resources: {}
