@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-app-dev
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: ticket-app-dev
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ticket-app-dev
+    spec:
+      containers:
+      - env:
+        - name: test
+          valueFrom:
+            configMapKeyRef:
+              key: test
+              name: ticket-app-dev-config-ht00
+        image: gcr.io/PROJECT_ID/IMAGE:TAG
+        name: ticket-app-dev
+        resources: {}
