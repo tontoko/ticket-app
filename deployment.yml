@@ -20,12 +20,17 @@ spec:
       labels:
         app: ticket-app-dev
     spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: sa-dev
       containers:
-      - env:
-        - name: test
-          valueFrom:
-            configMapKeyRef:
-              key: test
-              name: ticket-app-dev-config-ht00
-        name: ticket-app-dev
-        resources: {}
+        - name: ticket-app-dev
+          image: app-image
+          volumeMounts:
+          - name: google-cloud-key
+            mountPath: /var/secrets/google
+          env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/secrets/google/ticket-app-admin-dev.json
+
