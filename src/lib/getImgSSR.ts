@@ -1,4 +1,4 @@
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 
 export default async (img:string, uid:string, size?: string) => {
   const { storage } = await initFirebaseAdmin()

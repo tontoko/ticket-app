@@ -1,4 +1,4 @@
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 
 export default async() => {
   const session = (await import('micro-session')).default

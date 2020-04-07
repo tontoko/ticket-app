@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction } from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, } from 'reactstrap'
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import initFirebase from '@/src/lib/initFirebase'
 import getImg from '@/src/lib/getImgSSR'
 import { GetServerSideProps } from 'next'

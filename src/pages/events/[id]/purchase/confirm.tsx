@@ -14,7 +14,7 @@ import {
 } from '@stripe/react-stripe-js';
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { event } from 'events'
 import getImg from '@/src/lib/getImgSSR'
 const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'

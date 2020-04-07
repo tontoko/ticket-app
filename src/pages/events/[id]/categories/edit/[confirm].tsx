@@ -6,7 +6,7 @@ import {
   Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
   CardTitle, CardSubtitle, FormFeedback, Spinner
 } from 'reactstrap'
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import initFirebase from '@/src/lib/initFirebase'
 import errorMsg from '@/src/lib/errorMsg'
 import { GetServerSideProps } from 'next'

@@ -13,7 +13,7 @@ import ja from 'date-fns/locale/ja'
 registerLocale('ja', ja)
 import moment, { Moment } from 'moment'
 import { toUtcIso8601str } from '@/src/lib/time'
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import admin from 'firebase-admin'
 
 export const UpdateUser: React.FC<any> = ({ user, from }: {user: admin.auth.DecodedIdToken, from: string}) => {

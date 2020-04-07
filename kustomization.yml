@@ -3,3 +3,7 @@ kind: Kustomization
 resources:
   - deployment.yml
   - service.yml
+secretGenerator:
+  - name: sa-dev
+    files:
+      - ticket-app-admin-dev.json 

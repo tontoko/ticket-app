@@ -1,4 +1,4 @@
-import { dev, prod } from './ticket-app'
+import { dev, prod } from '../../ticket-app'
 
 const initFirebaseAdmin = async () => {
     const firebase = await import('firebase-admin')

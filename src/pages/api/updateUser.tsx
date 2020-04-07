@@ -1,4 +1,4 @@
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
 const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
 const stripeSecret = env === 'prod' ? process.env.STRIPE_PROD_SECRET : process.env.STRIPE_DEV_SECRET

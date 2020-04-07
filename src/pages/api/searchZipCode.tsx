@@ -1,6 +1,6 @@
 import getSession from '@/src/lib/session'
 import { NextApiHandler } from 'next'
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { Client } from "@googlemaps/google-maps-services-js"
 const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
 const gMapKey = env === 'prod' ? process.env.GOOGLE_MAP_SERVER_KEY_PROD : process.env.GOOGLE_MAP_SERVER_KEY_DEV

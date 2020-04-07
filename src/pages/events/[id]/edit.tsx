@@ -5,7 +5,7 @@ import {
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import initFirebase from '@/src/lib/initFirebase'
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import Loading from '@/src/components/loading'
 import getImg from '@/src/lib/getImgSSR'
 import isLogin from '@/src/lib/isLogin'

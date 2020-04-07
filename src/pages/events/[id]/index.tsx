@@ -12,7 +12,7 @@ import {
 } from 'reactstrap';
 import getImg from '@/src/lib/getImgSSR'
 import { GetServerSideProps } from 'next'
-import initFirebaseAdmin from '@/initFirebaseAdmin'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import isLogin from '@/src/lib/isLogin'
 import { event } from 'events'
 import moment from 'moment'
