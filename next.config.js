@@ -1,8 +1,7 @@
 const path = require('path')
-const withCSS = require('@zeit/next-css')
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 
-module.exports = withCSS({
+module.exports = {
     cssModule: true,
     distDir: 'build',
     webpack: config => {
@@ -14,4 +13,4 @@ module.exports = withCSS({
         )
         return config;
     }
-})
+}
