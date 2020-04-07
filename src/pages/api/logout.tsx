@@ -6,7 +6,7 @@ const endpoint: NextApiHandler = (async (req, res) => {
     // テスト
     console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS)
     const file = fs.readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS)
-    console.log(file)
+    console.log(JSON.parse(file.toString()))
 
 
 
