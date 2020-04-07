@@ -23,10 +23,9 @@ jobs:
           service_account_email: ${{ secrets.GCP_SA_EMAIL_DEV }}
           service_account_key: ${{ secrets.GCP_SA_KEY_DEV }}
           export_default_credentials: true
-      - name: set up
+      - name: gcloud set up
         run: |
           gcloud auth configure-docker
-          npx firebase use dev
       - name: npm install, build
         run: |
           docker build -t "$REGISTRY_HOSTNAME"/"$GKE_PROJECT"/"$IMAGE":"$GITHUB_SHA" \
@@ -40,13 +39,16 @@ jobs:
         run: |
           curl -o kustomize --location https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
           chmod u+x ./kustomize
-      - name: Deploy
+      - name: GKE Deploy
         run: |
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           ./kustomize edit set image $REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
           ./kustomize build . | kubectl apply -f -
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           kubectl get services -o wide
+      - name: firebase set up
+        run: |
+          npx firebase use dev
       - name: firebase set env
         uses: w9jds/firebase-action@master
         with:
