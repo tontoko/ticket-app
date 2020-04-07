@@ -6,7 +6,7 @@ import { Table, Container, Row, Col, Label, Button, Input } from 'reactstrap';
 export default () => {
 
     return (
-        <Container>
+        <>
             <Row style={{margin: "0", marginTop: "1em"}}>
                 <h3>テストレポート</h3>
             </Row>
@@ -44,6 +44,6 @@ export default () => {
                     </tr>
                 </tbody>
             </Table>
-        </Container>
+        </>
     );
 }

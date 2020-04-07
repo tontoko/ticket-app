@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Container, Row } from 'reactstrap'
 import initFirebase from '@/src/lib/initFirebase'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
@@ -36,20 +36,20 @@ export const UpdateEmail: React.FC<any> = (props) => {
     }
 
     return (
-        <Container>
-            <Form style={{ marginTop: "1.5em" }}>
-                <h3>登録情報</h3>
-                <FormGroup style={{marginTop: "1em"}}>
-                    <Label for="email">新しいメールアドレス</Label>
-                    <Input type="email" name="email" id="email" onChange={e => setEmail(e.target.value)} />
-                </FormGroup>
-                <FormGroup>
-                    <Label for="password">現在のパスワード</Label>
-                    <Input type="password" name="password" id="password" onChange={e => setPwd(e.target.value)} />
-                </FormGroup>
+        <Form style={{ marginTop: "1.5em" }}>
+            <h3>登録情報</h3>
+            <FormGroup style={{marginTop: "1em"}}>
+                <Label for="email">新しいメールアドレス</Label>
+                <Input type="email" name="email" id="email" onChange={e => setEmail(e.target.value)} />
+            </FormGroup>
+            <FormGroup>
+                <Label for="password">現在のパスワード</Label>
+                <Input type="password" name="password" id="password" onChange={e => setPwd(e.target.value)} />
+            </FormGroup>
+            <Row style={{ margin: 0 }}>
                 <Button className="ml-auto" onClick={() => updateEmail()}>変更</Button>
-            </Form>
-        </Container>
+            </Row>
+        </Form>
     )
 }
 

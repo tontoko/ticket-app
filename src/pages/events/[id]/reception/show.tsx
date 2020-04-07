@@ -3,14 +3,10 @@ import {
     Button, Container, Col, Row
 } from 'reactstrap';
 
-export default () => {
-    return (
-        <Container>
-            <Row style={{marginTop: "2em"}}>
-                <Col sm={{ size: 10, offset: 1 }} lg={{ size: 6, offset: 3}}>
-                    <QRCode style={{width: "100%", height: "100%"}} value="/" />
-                </Col>
-            </Row>
-        </Container>
-    )
-}
+export default () => (
+    <Row style={{marginTop: "2em"}}>
+        <Col sm={{ size: 10, offset: 1 }} lg={{ size: 6, offset: 3}}>
+            <QRCode style={{width: "100%", height: "100%"}} value="/" />
+        </Col>
+    </Row>
+)

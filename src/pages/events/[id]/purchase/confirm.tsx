@@ -17,7 +17,9 @@ import isLogin from '@/src/lib/isLogin'
 import initFirebaseAdmin from '@/initFirebaseAdmin'
 import { event } from 'events'
 import getImg from '@/src/lib/getImgSSR'
-import { Stripe } from 'stripe'
+const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
+const stripeSecret = env === 'prod' ? process.env.STRIPE_PROD_SECRET : process.env.STRIPE_DEV_SECRET
+import Stripe from 'stripe'
 
 const CheckoutForm = ({ familyName, firstName, email, event, category, photoUrls, client_secret }) => {
     const stripe = useStripe();
@@ -27,8 +29,8 @@ const CheckoutForm = ({ familyName, firstName, email, event, category, photoUrls
     const [agree, setAgree] = useState(false)
     const [processing, setProcessing] = useState(false)
 
-    const handleSubmit = async (event) => {
-        event.preventDefault()
+    const handleSubmit = async (e) => {
+        e.preventDefault()
         if (!stripe || !elements) return
         if (!agree) return alert.error("同意します が選択されていません")
 
@@ -60,81 +62,79 @@ const CheckoutForm = ({ familyName, firstName, email, event, category, photoUrls
     }
 
     return (
-        <Container>
-            <Form style={{ marginTop: '5em' }} onSubmit={handleSubmit}>
+        <Form style={{ marginTop: '5em' }} onSubmit={handleSubmit}>
+            <FormGroup>
+                <Label>お名前</Label>
                 <FormGroup>
-                    <Label>お名前</Label>
-                    <FormGroup>
-                        <Label style={{ marginRight: '1em' }}>{familyName}</Label>
-                        <Label>{firstName}</Label>
-                    </FormGroup>
+                    <Label style={{ marginRight: '1em' }}>{familyName}</Label>
+                    <Label>{firstName}</Label>
                 </FormGroup>
+            </FormGroup>
+            <FormGroup>
+                <Label>メールアドレス</Label>
                 <FormGroup>
-                    <Label>メールアドレス</Label>
-                    <FormGroup>
-                        <Label>{email}</Label>
-                    </FormGroup>
+                    <Label>{email}</Label>
                 </FormGroup>
-                <FormGroup>
-                    <Label>イベント情報</Label>
-                    <Card>
-                        <CardBody>
-                            <Row>
-                                <Col sm="2" xs="3">
-                                    <img width="100%" src={photoUrls[0]} alt="Card image cap" />
-                                </Col>
-                                <Col xs="auto">
-                                    <CardTitle>{event.name}</CardTitle>
-                                    <CardSubtitle>{event.placeName}</CardSubtitle>
-                                </Col>
-                            </Row>
-                            <Row className="flex-row-reverse">
-                                <h4 style={{ marginTop: '1em', marginRight: '1em' }}>{category.price} 円</h4>
-                            </Row>
-                        </CardBody>
-                    </Card>
-                </FormGroup>
-                <FormGroup check style={{ margin: '2em' }}>
-                    <Row className="flex-row-reverse">
-                        <Col sm="12" md="6" style={{border: "solid 1px gray", padding: "1em"}}>
-                            <Label>クレジットカード情報を入力</Label>
-                            <CardElement
-                                options={{
-                                    style: {
-                                        base: {
-                                            fontSize: '16px',
-                                            color: '#424770',
-                                            '::placeholder': {
-                                                color: '#aab7c4',
-                                            },
-                                        },
-                                        invalid: {
-                                            color: '#9e2146',
+            </FormGroup>
+            <FormGroup>
+                <Label>イベント情報</Label>
+                <Card>
+                    <CardBody>
+                        <Row>
+                            <Col sm="2" xs="3">
+                                <img width="100%" src={photoUrls[0]} alt="Card image cap" />
+                            </Col>
+                            <Col xs="auto">
+                                <CardTitle>{event.name}</CardTitle>
+                                <CardSubtitle>{event.placeName}</CardSubtitle>
+                            </Col>
+                        </Row>
+                        <Row className="flex-row-reverse">
+                            <h4 style={{ marginTop: '1em', marginRight: '1em' }}>{category.price} 円</h4>
+                        </Row>
+                    </CardBody>
+                </Card>
+            </FormGroup>
+            <FormGroup check style={{ margin: '2em' }}>
+                <Row className="flex-row-reverse">
+                    <Col sm="12" md="6" style={{border: "solid 1px gray", padding: "1em"}}>
+                        <Label>クレジットカード情報を入力</Label>
+                        <CardElement
+                            options={{
+                                style: {
+                                    base: {
+                                        fontSize: '16px',
+                                        color: '#424770',
+                                        '::placeholder': {
+                                            color: '#aab7c4',
                                         },
                                     },
-                                }}
-                            />
-                        </Col>
-                    </Row>
+                                    invalid: {
+                                        color: '#9e2146',
+                                    },
+                                },
+                            }}
+                        />
+                    </Col>
+                </Row>
+            </FormGroup>
+            <Row className="flex-row-reverse">
+                <FormGroup check style={{ marginRight: '1em' }}>
+                    <Label>何たらかんたらに同意する必要がある的な文言</Label>
                 </FormGroup>
-                <Row className="flex-row-reverse">
-                    <FormGroup check style={{ marginRight: '1em' }}>
-                        <Label>何たらかんたらに同意する必要がある的な文言</Label>
-                    </FormGroup>
-                </Row>
-                <Row className="flex-row-reverse">
-                    <FormGroup check style={{ marginRight: '1em' }}>
-                        <Label check>
-                            <Input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} invalid={!agree} /> 同意します
-                        <FormFeedback>必須項目です</FormFeedback>
-                        </Label>
-                    </FormGroup>
-                </Row>
-                <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
-                    <Button disabled={!stripe || !elements || processing} onClick={handleSubmit} >{processing ? <Spinner/> : '購入'}</Button>
-                </Row>
-            </Form>
-        </Container>
+            </Row>
+            <Row className="flex-row-reverse">
+                <FormGroup check style={{ marginRight: '1em' }}>
+                    <Label check>
+                        <Input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} invalid={!agree} /> 同意します
+                    <FormFeedback>必須項目です</FormFeedback>
+                    </Label>
+                </FormGroup>
+            </Row>
+            <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
+                <Button disabled={!stripe || !elements || processing}>{processing ? <Spinner/> : '購入'}</Button>
+            </Row>
+        </Form>
     );
 };
 
@@ -165,10 +165,8 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const event = { ...data, createdAt, updatedAt, startDate, endDate }
     const categorySnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').doc(selectedCategory as string).get())
     const category = categorySnapShot.data()
-
-    const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
-    const stripeSecret = env === 'prod' ? process.env.STRIPE_PROD_SECRET : process.env.STRIPE_DEV_SECRET
-    const stripe = require('stripe')(stripeSecret) as Stripe
+    
+    const stripe = new Stripe(stripeSecret, { apiVersion: null })
     const paymentIntent = await stripe.paymentIntents.create({
         amount: category.price,
         currency: 'jpy',

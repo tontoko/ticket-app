@@ -33,26 +33,24 @@ export const Leave = ({user}) => {
     }
 
     return (
-        <Container>
-            <Form style={{ marginTop: "6.5em" }}>
-                <h5>本当に退会しますか？</h5>
-                <p>削除されたデータは復元することができません。</p>
-                <FormGroup check>
-                    <Label check>
-                        <Input type="checkbox" id="checkbox2" onChange={e => setCheckBox(e.target.checked)} checked={checkBox} />{' '}
-                        上記の説明を理解しました
-                    </Label>
-                </FormGroup>
-                {user.firebase.sign_in_provider === 'password' && (
-                    <>
-                    <Input type="password" placeholder="パスワード" value={pwd} onChange={e => setPwd(e.target.value)} />
-                    </>
-                )}
-                <Row style={{ margin: 0, marginTop: "10em" }}>
-                    <Button className="ml-auto" onClick={() => leave()}>退会する</Button>
-                </Row>
-            </Form>
-        </Container>
+        <Form style={{ marginTop: "6.5em" }}>
+            <h5>本当に退会しますか？</h5>
+            <p>削除されたデータは復元することができません。</p>
+            <FormGroup check>
+                <Label check>
+                    <Input type="checkbox" id="checkbox2" onChange={e => setCheckBox(e.target.checked)} checked={checkBox} />{' '}
+                    上記の説明を理解しました
+                </Label>
+            </FormGroup>
+            {user.firebase.sign_in_provider === 'password' && (
+                <>
+                <Input type="password" placeholder="パスワード" value={pwd} onChange={e => setPwd(e.target.value)} />
+                </>
+            )}
+            <Row style={{ margin: 0 }}>
+                <Button className="ml-auto" onClick={() => leave()}>退会する</Button>
+            </Row>
+        </Form>
     )
 }
 

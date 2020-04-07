@@ -18,16 +18,16 @@ export default (props: props) => {
   const [newPwdConfirm, setNewPwdConfirm] = useState('') 
 
   return (
-      <>
-        <FormGroup>
-          <Label for="password">新しいパスワード</Label>
-          <Input type="password" name="password" id="password" onChange={e => setNewPwd(e.target.value)} />
-        </FormGroup>
-        <FormGroup>
-          <Label for="password_confirm">パスワード確認</Label>
-          <Input type="password" name="password_confirm" id="password_confirm" onChange={e => setNewPwdConfirm(e.target.value)} />
-        </FormGroup>
-      <Button className="ml-auto" onClick={() => props.confirmResetPassword(newPwd, newPwdConfirm)}>変更</Button>
-      </>
+    <>
+      <FormGroup>
+        <Label for="password">新しいパスワード</Label>
+        <Input type="password" name="password" id="password" onChange={e => setNewPwd(e.target.value)} />
+      </FormGroup>
+      <FormGroup>
+        <Label for="password_confirm">パスワード確認</Label>
+        <Input type="password" name="password_confirm" id="password_confirm" onChange={e => setNewPwdConfirm(e.target.value)} />
+      </FormGroup>
+    <Button className="ml-auto" onClick={() => props.confirmResetPassword(newPwd, newPwdConfirm)}>変更</Button>
+    </>
   )
 }

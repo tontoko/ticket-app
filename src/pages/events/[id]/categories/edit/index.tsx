@@ -98,8 +98,7 @@ export default ({event, beforeCategories}) => {
   }
   
   return (
-    <Container>
-      <Form style={{ marginTop: '5em' }}>
+          <Form style={{ marginTop: '5em' }}>
         <h5 style={{marginBottom: '1em'}}>カテゴリ一覧</h5>
         {renderCategories()}
         <Button onClick={addCategory}>追加</Button>
@@ -107,8 +106,7 @@ export default ({event, beforeCategories}) => {
           <Button style={{ marginRight: '1em' }} onClick={submit} >確認</Button>
         </Row>
       </Form>
-    </Container>
-  );
+      );
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {

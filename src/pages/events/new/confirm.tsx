@@ -68,7 +68,8 @@ const Page = () => {
         return filename
     }
 
-    const createEvent = async() => {
+    const createEvent = async(e) => {
+        e.preventDefault()
         if (loading) false
         setLoading(true)
         const {firebase} = await initFirebase()
@@ -92,49 +93,47 @@ const Page = () => {
     }
 
     return (
-        <Container>
-            <Form style={{ marginTop: "2em", marginBottom: "2em" }} onSubmit={createEvent}>
-                <FormGroup style={{ textAlign: 'center' }}>
-                    <Carousel
-                        activeIndex={activeIndex}
-                        next={next}
-                        previous={previous}
-                        className="carousel-fade"
-                        interval="20000"
-                    >
-                        <CarouselIndicators items={items} activeIndex={activeIndex} onClickHandler={goToIndex} />
-                        {slides}
-                        <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
-                        <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
-                    </Carousel>
-                </FormGroup>
-                <FormGroup>
-                    <Label className="mr-2">イベント名</Label>
-                    <p>{eventName}</p>
-                </FormGroup>
-                <FormGroup>
-                    <Label className="mr-2">会場名</Label>
-                    <p>{placeName}</p>
-                </FormGroup>
-                <FormGroup>
-                    <Label>開始</Label>
-                    <Input value={moment(startDate).format("YYYY年 M月d日 H:mm")} disabled />
-                </FormGroup>
-                <FormGroup>
-                    <Label>終了</Label>
-                    <Input value={moment(endDate).format("YYYY年 M月d日 H:mm")} disabled />
-                </FormGroup>
-                <FormGroup>
-                    <Label for="describe">イベント詳細</Label>
-                    <Input disabled style={{ height: "40em" }} type="textarea" name="text" id="describe" value={router.query.eventDetail} />
-                </FormGroup>
-                <FormGroup>
-                    <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                        <Button disabled={loading} className="ml-auto" onClick={createEvent}>{loading ? <Spinner/> : '作成'}</Button>
-                    </Row>
-                </FormGroup>
-            </Form>
-        </Container>
+        <Form style={{ marginTop: "2em", marginBottom: "2em" }} onSubmit={createEvent}>
+            <FormGroup style={{ textAlign: 'center' }}>
+                <Carousel
+                    activeIndex={activeIndex}
+                    next={next}
+                    previous={previous}
+                    className="carousel-fade"
+                    interval="20000"
+                >
+                    <CarouselIndicators items={items} activeIndex={activeIndex} onClickHandler={goToIndex} />
+                    {slides}
+                    <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
+                    <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
+                </Carousel>
+            </FormGroup>
+            <FormGroup>
+                <Label className="mr-2">イベント名</Label>
+                <p>{eventName}</p>
+            </FormGroup>
+            <FormGroup>
+                <Label className="mr-2">会場名</Label>
+                <p>{placeName}</p>
+            </FormGroup>
+            <FormGroup>
+                <Label>開始</Label>
+                <Input value={moment(startDate).format("YYYY年 M月d日 H:mm")} disabled />
+            </FormGroup>
+            <FormGroup>
+                <Label>終了</Label>
+                <Input value={moment(endDate).format("YYYY年 M月d日 H:mm")} disabled />
+            </FormGroup>
+            <FormGroup>
+                <Label for="describe">イベント詳細</Label>
+                <Input disabled style={{ height: "40em" }} type="textarea" name="text" id="describe" value={router.query.eventDetail} />
+            </FormGroup>
+            <FormGroup>
+                <Row style={{ margin: 0, marginTop: "0.5em" }}>
+                    <Button disabled={loading} className="ml-auto">{loading ? <Spinner/> : '作成'}</Button>
+                </Row>
+            </FormGroup>
+        </Form>
     );
 };
 

@@ -52,7 +52,7 @@ export default () => {
     const readHref = `/events/${router.query.id}/reception/qrReader`
 
     return (
-        <Container>
+        <>
             <Row style={{marginTop: "1.5em"}}>
                 <Col>
                     <Link href={readHref}>
@@ -75,6 +75,6 @@ export default () => {
                     {state.map((e,i) => column(e,i))}
                 </tbody>
             </Table>
-        </Container>
+        </>
     );
 }

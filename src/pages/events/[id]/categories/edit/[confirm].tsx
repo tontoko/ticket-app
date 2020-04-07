@@ -18,7 +18,8 @@ const Confirmation= props => {
   const categories:any[] = JSON.parse(props.categories)
   const [loading, setLoading] = useState(false)
 
-  const submit = async () => {
+  const submit = async (e) => {
+    e.preventDefault()
     if (loading) return
     setLoading(true)
     const {firestore} = await initFirebase()
@@ -50,26 +51,24 @@ const Confirmation= props => {
   }
 
   return (
-    <Container>
-      <Form style={{ marginTop: '5em' }} onSubmit={submit}>
-        <h4 style={{ marginBottom: '1em' }}>
-          チケットカテゴリーを更新します。
-        </h4>
-        <h5>
-          一度登録したチケット情報は変更することができません。 (非公開にすることはできます)
-        </h5>
-        <h5 style={{marginBottom: '2em'}}>よろしいですか？</h5>
-        {categories.map((category,i) => (
-            <FormGroup key={i}>
-              <p>{`${category.name}: ${category.price} 円 (在庫: ${category.stock})${!category.public ? ' (非公開)' : ''}`}</p>
-            </FormGroup>
-          )
-        )}
-        <Row className="flex-row-reverse">
-          <Button style={{ marginRight: '1em', marginTop: '0.5em' }} onClick={submit}>{loading ? <Spinner/> : '設定'}</Button>
-        </Row>
-      </Form>
-    </Container>
+    <Form style={{ marginTop: '5em' }} onSubmit={submit}>
+      <h4 style={{ marginBottom: '1em' }}>
+        チケットカテゴリーを更新します。
+      </h4>
+      <h5>
+        一度登録したチケット情報は変更することができません。 (非公開にすることはできます)
+      </h5>
+      <h5 style={{marginBottom: '2em'}}>よろしいですか？</h5>
+      {categories.map((category,i) => (
+          <FormGroup key={i}>
+            <p>{`${category.name}: ${category.price} 円 (在庫: ${category.stock})${!category.public ? ' (非公開)' : ''}`}</p>
+          </FormGroup>
+        )
+      )}
+      <Row className="flex-row-reverse">
+        <Button style={{ marginRight: '1em', marginTop: '0.5em' }}>{loading ? <Spinner/> : '設定'}</Button>
+      </Row>
+    </Form>
   );
 }
 

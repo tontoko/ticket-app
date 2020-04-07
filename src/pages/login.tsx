@@ -14,7 +14,8 @@ export const Login = () => {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     
-    const loginWithEmail = async () => {
+    const loginWithEmail = async (e) => {
+        e.preventDefault()
         if (loading) return
         setLoading(true)
         try {
@@ -66,7 +67,7 @@ export const Login = () => {
     }
 
     return (
-        <Container>
+        <>
             <Form style={{ marginTop: '5em' }} onSubmit={loginWithEmail}>
                 <FormGroup>
                     <Label>メールアドレス</Label>
@@ -76,7 +77,7 @@ export const Login = () => {
                     <Label>パスワード</Label>
                     <Input type="password" name="password" placeholder="パスワード" onChange={e => setPassword(e.target.value)} />
                 </FormGroup>
-                <Button onClick={() => loginWithEmail()}>{loading ? <Spinner/> : 'ログイン'}</Button>
+                <Button>{loading ? <Spinner/> : 'ログイン'}</Button>
             </Form>
             <Form>
                 <FormGroup style={{ marginTop: '1em' }}>
@@ -93,7 +94,7 @@ export const Login = () => {
                     <Link href="/forgetPassword"><a>パスワード再設定</a></Link>
                 </FormGroup>
             </Form>
-        </Container>
+        </>
     );
 }
 

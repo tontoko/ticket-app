@@ -9,6 +9,7 @@ export const UserLayout: React.FC = () => {
     const [isOpen, toggle] = useState(false)
 
     return (
+        // 未実装
         <Navbar color="danger" dark>
             <NavbarBrand href="/">管理者ツール</NavbarBrand>
             <Link href="/user/1">

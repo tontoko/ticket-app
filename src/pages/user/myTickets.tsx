@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export default () => {
     return (
-        <Container>
+        <>
             <div style={{marginTop: "1em"}}>
                 <Link href="/events/1">
                     <div>
@@ -85,6 +85,6 @@ export default () => {
                     <PaginationLink last href="#" />
                 </PaginationItem>
             </Pagination>
-        </Container>
+        </>
     );
 };

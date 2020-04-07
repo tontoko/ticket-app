@@ -114,7 +114,7 @@ export default ({ user, event, categories, status, items }) => {
     })
 
     return (
-        <Container>
+        <>
             <Row style={{ marginTop: '1em', marginLeft: "0" }}>
                 <h4>{event.name}</h4>
             </Row>
@@ -158,7 +158,7 @@ export default ({ user, event, categories, status, items }) => {
                     {buttons()}
                 </Col>
             </Row>
-        </Container>
+        </>
     );
 }
 

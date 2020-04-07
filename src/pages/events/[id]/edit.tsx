@@ -12,6 +12,8 @@ import isLogin from '@/src/lib/isLogin'
 import { GetServerSideProps } from 'next'
 import {event} from 'events'
 import DatePicker, { registerLocale } from "react-datepicker"
+import ja from 'date-fns/locale/ja'
+registerLocale('ja', ja)
 import moment from 'moment'
 import { toUtcIso8601str } from '@/src/lib/time'
 import { useAlert } from 'react-alert';
@@ -82,7 +84,8 @@ export default ({ user, event, photoUrls }) => {
         }
     }
 
-    const submit = () => {
+    const submit = (e) => {
+        e.preventDefault()
         if (eventName.length == 0 || placeName.length == 0) return
         updateEvent()
     }
@@ -102,69 +105,67 @@ export default ({ user, event, photoUrls }) => {
     )
 
     return (
-        <Container>
-            <Form style={{ marginTop: "2em" }} onSubmit={submit}>
-                <FormGroup>
-                    <Label className="mr-2">イベント名</Label>
-                    <Input onChange={e => setEventName(e.target.value)} value={eventName} invalid={eventName.length == 0}></Input>
-                </FormGroup>
-                <FormGroup>
-                    <Label className="mr-2">会場名</Label>
-                    <Input onChange={e => setPlaceName(e.target.value)} value={placeName} invalid={placeName.length == 0}></Input>
-                </FormGroup>
-                <FormGroup>
-                    <Label for="describe">イベント詳細</Label>
-                    <Input style={{ height: "20em" }} type="textarea" name="text" id="describe" onChange={e => setEventDetail(e.target.value)} value={eventDetail} />
-                </FormGroup>
-                <FormGroup>
-                    <p style={{ marginBottom: '.5rem' }}>開始</p>
-                    <DatePicker
-                        locale="ja"
-                        selected={moment(startDate).toDate()}
-                        selectsStart
-                        startDate={moment(startDate).toDate()}
-                        minDate={new Date()}
-                        onChange={selectedDate => setStartDate(toUtcIso8601str(moment(selectedDate)))}
-                        showTimeSelect
-                        timeFormat="HH:mm"
-                        timeIntervals={15}
-                        timeCaption="time"
-                        dateFormat="yyyy年 M月d日 H:mm"
-                    />
-                </FormGroup>
-                <FormGroup>
-                    <p style={{ marginBottom: '.5rem' }}>終了</p>
-                    <DatePicker
-                        locale="ja"
-                        selected={moment(endDate).toDate()}
-                        selectsEnd
-                        endDate={moment(endDate).toDate()}
-                        minDate={new Date()}
-                        onChange={selectedDate => setEndDate(toUtcIso8601str(moment(selectedDate)))}
-                        showTimeSelect
-                        timeFormat="HH:mm"
-                        timeIntervals={15}
-                        timeCaption="time"
-                        dateFormat="yyyy年 M月d日 H:mm"
-                    />
-                </FormGroup>
-                <Label>添付する画像を選択(.jpgファイルのみ対応)</Label>
-                <FormGroup>
-                    {fileInput(0)}
-                </FormGroup>
-                <FormGroup>
-                    {fileInput(1)}
-               </FormGroup>
-                <FormGroup>
-                    {fileInput(2)}
-                </FormGroup>
-                <FormGroup>
-                    <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                        <Button className="ml-auto" onClick={submit}>{loading ? <Spinner/> : '確認'}</Button>
-                    </Row>
-                </FormGroup>
-            </Form>
-        </Container>
+        <Form style={{ marginTop: "2em" }} onSubmit={submit}>
+            <FormGroup>
+                <Label className="mr-2">イベント名</Label>
+                <Input onChange={e => setEventName(e.target.value)} value={eventName} invalid={eventName.length == 0}></Input>
+            </FormGroup>
+            <FormGroup>
+                <Label className="mr-2">会場名</Label>
+                <Input onChange={e => setPlaceName(e.target.value)} value={placeName} invalid={placeName.length == 0}></Input>
+            </FormGroup>
+            <FormGroup>
+                <Label for="describe">イベント詳細</Label>
+                <Input style={{ height: "20em" }} type="textarea" name="text" id="describe" onChange={e => setEventDetail(e.target.value)} value={eventDetail} />
+            </FormGroup>
+            <FormGroup>
+                <p style={{ marginBottom: '.5rem' }}>開始</p>
+                <DatePicker
+                    locale="ja"
+                    selected={moment(startDate).toDate()}
+                    selectsStart
+                    startDate={moment(startDate).toDate()}
+                    minDate={new Date()}
+                    onChange={selectedDate => setStartDate(toUtcIso8601str(moment(selectedDate)))}
+                    showTimeSelect
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    timeCaption="time"
+                    dateFormat="yyyy年 M月d日 H:mm"
+                />
+            </FormGroup>
+            <FormGroup>
+                <p style={{ marginBottom: '.5rem' }}>終了</p>
+                <DatePicker
+                    locale="ja"
+                    selected={moment(endDate).toDate()}
+                    selectsEnd
+                    endDate={moment(endDate).toDate()}
+                    minDate={new Date()}
+                    onChange={selectedDate => setEndDate(toUtcIso8601str(moment(selectedDate)))}
+                    showTimeSelect
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    timeCaption="time"
+                    dateFormat="yyyy年 M月d日 H:mm"
+                />
+            </FormGroup>
+            <Label>添付する画像を選択(.jpgファイルのみ対応)</Label>
+            <FormGroup>
+                {fileInput(0)}
+            </FormGroup>
+            <FormGroup>
+                {fileInput(1)}
+            </FormGroup>
+            <FormGroup>
+                {fileInput(2)}
+            </FormGroup>
+            <FormGroup>
+                <Row style={{ margin: 0, marginTop: "0.5em" }}>
+                    <Button className="ml-auto">{loading ? <Spinner/> : '確認'}</Button>
+                </Row>
+            </FormGroup>
+        </Form>
     );
 };
 

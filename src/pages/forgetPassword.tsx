@@ -22,18 +22,16 @@ export default () => {
     }
   }
   return (
-    <Container>
-      <Form style={{ marginTop: '5em' }}>
-        <h4>パスワード再設定</h4>
-        <FormGroup style={{ marginTop: '2em' }}>
-          <Label>登録メールアドレス</Label>
-          <Input type="email" name="email" placeholder="メールアドレス" onChange={e => setEmail(e.target.value)} />
-        </FormGroup>
-        <Button onClick={() => sendEmail()}>確認</Button>
-        <FormGroup style={{ marginTop: '1.5em' }}>
-          <Link href="/login"><a>ログイン画面へ</a></Link>
-        </FormGroup>
-      </Form>
-    </Container>
+    <Form style={{ marginTop: '5em' }}>
+      <h4>パスワード再設定</h4>
+      <FormGroup style={{ marginTop: '2em' }}>
+        <Label>登録メールアドレス</Label>
+        <Input type="email" name="email" placeholder="メールアドレス" onChange={e => setEmail(e.target.value)} />
+      </FormGroup>
+      <Button onClick={() => sendEmail()}>確認</Button>
+      <FormGroup style={{ marginTop: '1.5em' }}>
+        <Link href="/login"><a>ログイン画面へ</a></Link>
+      </FormGroup>
+    </Form>
   )
 }

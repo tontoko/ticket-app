@@ -93,8 +93,7 @@ export default ({user, mode, oobCode}) => {
         return <Loading/>
     }
     return (
-        <Container>
-            <Form style={{ marginTop: '5em' }}>
+        <Form style={{ marginTop: '5em' }}>
             {(() => {
                 if (!valid) {
                     return (
@@ -108,8 +107,7 @@ export default ({user, mode, oobCode}) => {
                 }
                 return view
             })()}
-            </Form>
-        </Container>
+        </Form>
     )
 }
 

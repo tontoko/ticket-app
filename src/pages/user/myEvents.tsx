@@ -59,7 +59,7 @@ export default ({user, events}) => {
   ))
 
   return (
-    <Container>
+    <>
       <div style={{ marginTop: "1em", minHeight: '4em' }}>
         {renderEvents}
       </div>
@@ -68,7 +68,7 @@ export default ({user, events}) => {
           <Button className="ml-auto">新しいイベントを作成</Button>
         </Link>
       </Row>
-    </Container>
+    </>
   );
 };
 

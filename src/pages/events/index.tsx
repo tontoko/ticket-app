@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export default () => {
     return (
-        <Container>
+        <>
             <Form inline style={{ marginTop: "1em" }}>
                 <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
                     <Label for="id" className="mr-sm-2">ID</Label>
@@ -94,6 +94,6 @@ export default () => {
                     <PaginationLink last href="#" />
                 </PaginationItem>
             </Pagination>
-        </Container>
+        </>
     );
 };

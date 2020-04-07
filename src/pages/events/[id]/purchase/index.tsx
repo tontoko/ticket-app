@@ -39,57 +39,55 @@ export const Purchase = ({ event, categories, photoUrls }) => {
     }
 
     return (
-        <Container>
-            <Form style={{ marginTop: '5em' }}>
-                <FormGroup>
-                    <Label>お名前</Label>
-                    <Row>
-                        <Col xs="3">
-                            <Input type="text" name="familyName" placeholder="性" onChange={e =>setFamilyName(e.target.value)} value={familyName} invalid={!familyName} />
-                        </Col>
-                        <Col xs="3">
-                            <Input type="text" name="firstName" placeholder="名" onChange={e => setFirstName(e.target.value)} value={firstName} invalid={!firstName} />
-                        </Col>
-                    </Row>
-                </FormGroup>
-                <FormGroup>
-                    <Label>メールアドレス</Label>
-                    <Input type="email" name="email" placeholder="メールアドレス" onChange={changeEmail} value={email} invalid={invalidEmail}/>
-                </FormGroup>
-                <FormGroup>
-                    <Label>イベント情報</Label>
-                    <Card>
-                        <CardBody>
-                            <Row>
-                                <Col sm="2" xs="3">
-                                    <img width="100%" src={photoUrls[0]} alt="image" />
-                                </Col>
-                                <Col xs="auto">
-                                    <CardTitle>{event.name}</CardTitle>
-                                    <CardSubtitle>開催地: {event.placeName}</CardSubtitle>
-                                </Col>
-                                <Col>
-                                    <Label>チケットカテゴリ</Label>
-                                    <Input type="select" value={selectedCategory} onChange={e =>  setSelectedCategory(e.target.value)}>
-                                        {categories.map(category => (
-                                            <option value={category.id} key={category.id}>{category.name}</option>
-                                        ))}
-                                    </Input>
-                                </Col>
-                            </Row>
-                            <Row className="flex-row-reverse">
-                                <h4 style={{ marginTop: '1em', marginRight: '1em' }}>
-                                    {categories.filter(category => category.id === selectedCategory)[0].price} 円
-                                </h4>
-                            </Row>
-                        </CardBody>
-                    </Card>
-                </FormGroup>
-                <Row className="flex-row-reverse">
-                    <Button style={{ marginRight: '1em' }} onClick={() => submit()}>確認</Button>
+        <Form style={{ marginTop: '5em' }}>
+            <FormGroup>
+                <Label>お名前</Label>
+                <Row>
+                    <Col xs="3">
+                        <Input type="text" name="familyName" placeholder="性" onChange={e =>setFamilyName(e.target.value)} value={familyName} invalid={!familyName} />
+                    </Col>
+                    <Col xs="3">
+                        <Input type="text" name="firstName" placeholder="名" onChange={e => setFirstName(e.target.value)} value={firstName} invalid={!firstName} />
+                    </Col>
                 </Row>
-            </Form>
-        </Container>
+            </FormGroup>
+            <FormGroup>
+                <Label>メールアドレス</Label>
+                <Input type="email" name="email" placeholder="メールアドレス" onChange={changeEmail} value={email} invalid={invalidEmail}/>
+            </FormGroup>
+            <FormGroup>
+                <Label>イベント情報</Label>
+                <Card>
+                    <CardBody>
+                        <Row>
+                            <Col sm="2" xs="3">
+                                <img width="100%" src={photoUrls[0]} alt="image" />
+                            </Col>
+                            <Col xs="auto">
+                                <CardTitle>{event.name}</CardTitle>
+                                <CardSubtitle>開催地: {event.placeName}</CardSubtitle>
+                            </Col>
+                            <Col>
+                                <Label>チケットカテゴリ</Label>
+                                <Input type="select" value={selectedCategory} onChange={e =>  setSelectedCategory(e.target.value)}>
+                                    {categories.map(category => (
+                                        <option value={category.id} key={category.id}>{category.name}</option>
+                                    ))}
+                                </Input>
+                            </Col>
+                        </Row>
+                        <Row className="flex-row-reverse">
+                            <h4 style={{ marginTop: '1em', marginRight: '1em' }}>
+                                {categories.filter(category => category.id === selectedCategory)[0].price} 円
+                            </h4>
+                        </Row>
+                    </CardBody>
+                </Card>
+            </FormGroup>
+            <Row className="flex-row-reverse">
+                <Button style={{ marginRight: '1em' }} onClick={() => submit()}>確認</Button>
+            </Row>
+        </Form>
     );
 }
 

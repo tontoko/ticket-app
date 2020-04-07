@@ -14,7 +14,8 @@ export default () => {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const register = async () => {
+    const register = async (e) => {
+        e.preventDefault()
         if (loading) return
         setLoading(true)
         if (pwd !== pwdConfirm) return alert.error('確認用パスワードが一致していません。')
@@ -28,7 +29,7 @@ export default () => {
     }
 
     return (
-        <Container>
+        <>
             <Form style={{ marginTop: '5em' }} onSubmit={register}>
                 <FormGroup>
                     <Label>メールアドレス</Label>
@@ -47,10 +48,9 @@ export default () => {
                     Stripeを通じた支払処理サービスをこのサービスが使用するための条件として、お客様は、このサービスに対してお客様及びお客様の事業に関する正確かつ完全な情報を提供することに同意し、このサービスが当該情報及びStripeが提供する支払処理サービスのお客様による使用に関連する取引情報を共有することを認めるものとします。
                     </p>
                 </FormGroup>
-                <Button onClick={register}>{loading ? <Spinner/> : '登録'}</Button>
+                <Button>{loading ? <Spinner/> : '登録'}</Button>
             </Form>
             <p style={{ marginTop: '0.7em' }}>既にアカウントをお持ちの方は<Link href="/login">ログイン</Link></p>
-            
-        </Container>
+        </>
     )
 }

@@ -27,7 +27,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         if (currentUser) {
           const token = await currentUser.getIdToken()
           setCSRUser(currentUser)
-          await fetch('/api/login', {
+          const res = await fetch('/api/login', {
             method: 'POST',
             headers: new Headers({
               'Content-Type': 'application/json'
@@ -37,6 +37,7 @@ const App = ({ Component, pageProps }: AppProps) => {
               token
             })
           })
+          if(res.status !== 200) return firebase.auth().signOut()
           if (!currentUser.emailVerified && currentUser.providerData[0].providerId === 'password' && 
               !window.location.href.match(/^\/__\/auth\/action/)) {
             router.push('/confirmEmail')
