@@ -50,6 +50,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
     gender: 'male'
   })
   const [birthDay, setBirthDay] = useState(toUtcIso8601str(moment()))
+  const [agree, setAgree] = useState(false)
 
   const setFormBirthDay = (moment: Moment) => {
     setBirthDay(toUtcIso8601str(moment))
@@ -61,6 +62,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
   
   const submit = async(e) => {
     e.preventDefault()
+    if (!agree && !userData.tos_acceptance) return alert.error('同意します がチェックされていません。')
     switch (from) {
       case '購入導線のアドレス':
 
@@ -212,7 +214,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
       <FormGroup check>
         <Row form>
           <Label className="ml-auto" check for="agree">
-            <Input id="agree" type="checkbox" />
+            <Input id="agree" type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} />
             同意します
           </Label>
         </Row>
