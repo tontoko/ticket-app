@@ -24,6 +24,7 @@ spec:
       - name: google-cloud-key
         secret:
           secretName: sa-dev
+          optional: true
       containers:
         - name: ticket-app-dev
           image: app-image
@@ -32,5 +33,5 @@ spec:
             mountPath: /var/secrets/google
           env:
           - name: GOOGLE_APPLICATION_CREDENTIALS
-            value: /var/secrets/google/ticket-app-admin-dev.json
+            value: /var/secrets/google/ticket-app-admin.json
 

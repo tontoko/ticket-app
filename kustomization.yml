@@ -6,6 +6,6 @@ resources:
 secretGenerator:
   - name: sa-dev
     files:
-      - ticket-app-admin-dev.json 
+      - ticket-app-admin.json 
 generatorOptions:
   disableNameSuffixHash: true
