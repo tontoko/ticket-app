@@ -8,6 +8,7 @@ const gMapKey = env === 'prod' ? process.env.GOOGLE_MAP_SERVER_KEY_PROD : proces
 const endpoint: NextApiHandler = (async (req, res) => {
   try {
     const { token, zip } = req.body
+    if (!zip) throw new Error('zipcode was not given')
     const { firebase } = await initFirebaseAdmin()
     await firebase.auth().verifyIdToken(token)
     
@@ -18,10 +19,9 @@ const endpoint: NextApiHandler = (async (req, res) => {
       key: gMapKey,
       language: 'ja'
     }})
-
-    console.log(result.data)
-
+    
     res.status(200).json({ address: result.data.results[0].address_components })
+
   } catch (error) {
     console.log(error)
     res.status(400).json({ error })
