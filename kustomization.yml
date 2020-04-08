@@ -6,9 +6,8 @@ resources:
 secretGenerator:
   - name: sa
     files:
-      - ticket-app-admin.json 
-  - name: env
-    files:
+      - ticket-app-admin.json
+    envs:
       - env.env
 generatorOptions:
   disableNameSuffixHash: true
