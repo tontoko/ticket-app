@@ -9,6 +9,9 @@ jobs:
       FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN_DEV }}
       GKE_PROJECT: ${{ secrets.GCP_PROJECT_ID_DEV }}
       GKE_EMAIL: ${{ secrets.GCP_SA_EMAIL_DEV }}
+      GOOGLE_MAP_SERVER_KEY_DEV: ${{ secrets.GOOGLE_MAP_SERVER_KEY_DEV }}
+      STRIPE_APIKEY_DEV: ${{ secrets.STRIPE_APIKEY_DEV }}
+      STRIPE_ENDPOINT_DEV: ${{ secrets.STRIPE_ENDPOINT_DEV }}
       GITHUB_SHA: ${{ github.sha }}
       GKE_ZONE: asia-northeast1-a
       GKE_CLUSTER: ticket-app-dev
@@ -40,9 +43,16 @@ jobs:
         run: |
           curl -o kustomize --location https://github.com/kubernetes-sigs/kustomize/releases/download/v3.1.0/kustomize_3.1.0_linux_amd64
           chmod u+x ./kustomize
+      - name: export env
+        run: |
+          echo "${{ secrets.SA_DEV }}" > ticket-app-admin.json
+          cat <<'EOF' > env.env
+          GOOGLE_MAP_SERVER_KEY_DEV=$GOOGLE_MAP_SERVER_KEY_DEV
+          STRIPE_APIKEY_DEV=$STRIPE_APIKEY_DEV
+          STRIPE_ENDPOINT_DEV=$STRIPE_ENDPOINT_DEV
+          EOF
       - name: GKE Deploy
         run: |
-          echo "${{ secrets.SA_DEV }}"" > ticket-app-admin.json
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           ./kustomize edit set image app-image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
           ./kustomize build . | kubectl apply -f -
