@@ -19,20 +19,21 @@ export const UserShow: React.FC<any> = ({user}) => {
                 <Label for="email">メールアドレス</Label>
                 <Input disabled type="email" name="email" id="email" value={user.email} />
             </FormGroup>
-            {user.sign_in_provider !== 'password' && 
+            {user.firebase.sign_in_provider !== 'password' && 
             <FormGroup>
                 <Label>連携済みサービス</Label>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
                     <Col style={{display: 'flex', padding: 0}}>
-                        {user.sign_in_provider === 'twitter.com' && 
+                        {user.firebase.sign_in_provider === 'twitter.com' &&
                             <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2" }} className="fa-2x" /></p>}
-                        {user.sign_in_provider === 'facebook.com' && 
+                        {user.firebase.sign_in_provider === 'facebook.com' && 
                             <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2" }} className="fa-2x" /></p>}
-                        {user.sign_in_provider === 'google.com' && 
+                        {user.firebase.sign_in_provider === 'google.com' && 
                             <p><FontAwesomeIcon icon={faGoogle} size="lg" style={{ color: "#DB4437" }} className="fa-2x" /></p>}
                     </Col>
                 </Row>
-            </FormGroup>}
+            </FormGroup>
+            }
             <Row style={{ margin: 0, marginTop: "0.5em" }}>
                 <Link href={`/user/edit`}>
                     <Button className="ml-auto">編集</Button>
