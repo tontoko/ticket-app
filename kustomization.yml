@@ -4,10 +4,10 @@ resources:
   - deployment.yml
   - service.yml
 secretGenerator:
-  - name: sa-dev
+  - name: sa
     files:
       - ticket-app-admin.json 
-  - name: env-dev
+  - name: env
     files:
       - env.env
 generatorOptions:

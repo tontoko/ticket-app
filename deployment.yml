@@ -23,7 +23,7 @@ spec:
       volumes:
       - name: google-cloud-key
         secret:
-          secretName: sa-dev
+          secretName: sa
           optional: true
       containers:
         - name: ticket-app-dev
