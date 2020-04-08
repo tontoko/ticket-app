@@ -34,4 +34,6 @@ spec:
           env:
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /var/secrets/google/ticket-app-admin.json
-
+          envFrom:
+            - secretRef:
+                name: env
