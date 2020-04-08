@@ -42,7 +42,7 @@ jobs:
           chmod u+x ./kustomize
       - name: GKE Deploy
         run: |
-          echo ${{ secrets.SA_DEV }} > ticket-app-admin.json
+          echo "${{ secrets.SA_DEV }}"" > ticket-app-admin.json
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           ./kustomize edit set image app-image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
           ./kustomize build . | kubectl apply -f -
