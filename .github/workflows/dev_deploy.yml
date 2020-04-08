@@ -48,7 +48,7 @@ jobs:
           cat <<'EOF' > ticket-app-admin.json
           ${{ secrets.SA_DEV }}
           EOF
-          cat <<'EOF' > env.env
+          cat << EOF > env.env
           GOOGLE_MAP_SERVER_KEY_DEV=$GOOGLE_MAP_SERVER_KEY_DEV
           STRIPE_APIKEY_DEV=$STRIPE_APIKEY_DEV
           STRIPE_ENDPOINT_DEV=$STRIPE_ENDPOINT_DEV
