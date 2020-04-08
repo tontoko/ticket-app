@@ -28,6 +28,7 @@ exports.createUser = functions
     country: 'JP',
     type: 'custom',
     requested_capabilities: ['card_payments', 'transfers'],
+    email: user.email
   })
   const usersRef = fireStore.collection('users');
   await usersRef.doc(user.uid).set({

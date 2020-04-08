@@ -21,11 +21,11 @@ const UserShow = ({user}) => {
             </>
             )}
 
-            <FormGroup>
-                <Link href={`/user/edit/updateUser`}><a>ユーザー情報を追加/修正する</a></Link>
+            <FormGroup style={{ marginTop: '2em' }}>
+                <Link href={`/user/edit/updateUser`}><a>ユーザー情報を追加・修正する</a></Link>
             </FormGroup>
             <FormGroup>
-                <Link href={`/user/edit/updateBankData`}><a>銀行口座を追加/修正する(販売者向け)</a></Link>
+                <Link href={`/user/edit/updateBankData`}><a>銀行口座を追加・修正する(イベント主催者向け)</a></Link>
             </FormGroup>
 
             {user.firebase.sign_in_provider !== 'password' &&

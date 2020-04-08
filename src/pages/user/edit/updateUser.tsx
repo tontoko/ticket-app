@@ -20,7 +20,6 @@ import Stripe from 'stripe'
 export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admin.auth.DecodedIdToken, userData: Stripe.AccountUpdateParams, from: string}) => {
   const router = useRouter()
   const alert = useAlert()
-  const [pwd, setPwd] = useState('')
   const [form, setForm] = useState(userData ? userData.individual : {
     first_name_kana: '',
     last_name_kana: '',
@@ -62,6 +61,18 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
   
   const submit = async(e) => {
     e.preventDefault()
+    let needParams: string[] = []
+    for (let [key1, value1] of Object.entries(form)) {
+      if (typeof value1 !== 'string') {
+        // 入れ子2段目の判定
+        for (let [key2, value2] of Object.entries(value1)) {
+          if (key2 !== 'line2' && !value2) needParams.push(key2)
+        }
+      } else {
+        if (key1 !== 'line2' && !value1) needParams.push(key1)
+      }
+    }
+    if (needParams.length > 0) return alert.error('項目に入力漏れがあります。')
     if (!agree && !userData.tos_acceptance) return alert.error('同意します がチェックされていません。')
     switch (from) {
       case '購入導線のアドレス':
