@@ -7,7 +7,7 @@ secretGenerator:
   - name: sa-dev
     files:
       - ticket-app-admin.json 
-  - env: env-dev
+  - name: env-dev
     files:
       - env.env
 generatorOptions:
