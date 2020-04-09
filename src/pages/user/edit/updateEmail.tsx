@@ -15,7 +15,8 @@ export const UpdateEmail: React.FC<any> = (props) => {
     const [email, setEmail] = useState('')
     const [pwd, setPwd] = useState('')
 
-    const updateEmail = async() => {
+    const updateEmail = async(e) => {
+        e.preventDefault()
         const {firebase} = await initFirebase()
         const { currentUser } = firebase.auth()
         if (email || pwd) {
@@ -36,7 +37,7 @@ export const UpdateEmail: React.FC<any> = (props) => {
     }
 
     return (
-        <Form style={{ marginTop: "1.5em" }}>
+        <Form style={{ marginTop: "1.5em" }} onSubmit={updateEmail}>
             <h3>登録情報</h3>
             <FormGroup style={{marginTop: "1em"}}>
                 <Label for="email">新しいメールアドレス</Label>
@@ -47,7 +48,7 @@ export const UpdateEmail: React.FC<any> = (props) => {
                 <Input type="password" name="password" id="password" onChange={e => setPwd(e.target.value)} />
             </FormGroup>
             <Row style={{ margin: 0 }}>
-                <Button className="ml-auto" onClick={() => updateEmail()}>変更</Button>
+                <Button className="ml-auto">変更</Button>
             </Row>
         </Form>
     )

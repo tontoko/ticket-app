@@ -176,7 +176,9 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
     const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').get()).docs.map(category => category.data())
     let status: string
-    if (event.createdUser == user.uid) {
+    if (!user) {
+        status = 'anonymous'
+    } else if (event.createdUser == user.uid) {
         status = 'organizer'
     } else {
         const payments = (await firestore.collection('users').doc(user.uid).collection('payments').where("event", "==", result.id).get()).docs

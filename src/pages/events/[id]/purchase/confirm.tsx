@@ -5,10 +5,8 @@ import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, FormFeedback, Spinner } from 'reactstrap'
 import { useAlert } from 'react-alert'
-import { loadStripe } from '@stripe/stripe-js';
 import {
     CardElement,
-    Elements,
     useStripe,
     useElements,
 } from '@stripe/react-stripe-js';
@@ -21,7 +19,7 @@ const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : '
 const stripeSecret = env === 'prod' ? process.env.STRIPE_PROD_SECRET : process.env.STRIPE_DEV_SECRET
 import Stripe from 'stripe'
 
-const CheckoutForm = ({ familyName, firstName, email, event, category, photoUrls, client_secret }) => {
+const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret }) => {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter()
@@ -135,17 +133,6 @@ const CheckoutForm = ({ familyName, firstName, email, event, category, photoUrls
                 <Button disabled={!stripe || !elements || processing}>{processing ? <Spinner/> : '購入'}</Button>
             </Row>
         </Form>
-    );
-};
-
-const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret, env }) => {
-    const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
-    const stripePromise = loadStripe(publishableKey)
-
-    return (
-        <Elements stripe={stripePromise}>
-            <CheckoutForm familyName={familyName} firstName={firstName} email={email} event={event} category={category} photoUrls={photoUrls} client_secret={client_secret} />
-        </Elements>
     );
 }
 

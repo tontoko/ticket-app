@@ -9,10 +9,18 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { Provider, AlertPosition } from "react-alert";
 import AlertTemplate from '@/src/components/alert'
+import Modal from '@/src/components/modal'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements } from '@stripe/react-stripe-js'
+const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
+const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
+const stripePromise = loadStripe(publishableKey)
 
 const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter()
   const [CSRUser, setCSRUser]: [null | firebase.User, Dispatch<firebase.User>] = useState(null)
+  const [modal, setModal] = useState(false)
+  const [modalInner, setModalInner] = useState()
 
   useEffect(() => {
     let unsubscribe:firebase.Unsubscribe = () => void
@@ -70,9 +78,12 @@ const App = ({ Component, pageProps }: AppProps) => {
 
   return (
     <Provider template={AlertTemplate} {...options}>
-      <UserLayouts {...pageProps} CSRUser={CSRUser} >
-        <Component {...pageProps} CSRUser={CSRUser} />
-      </UserLayouts>
+      <Elements stripe={stripePromise}>
+        <UserLayouts {...pageProps} CSRUser={CSRUser} >
+          <Modal modal={modal} setModal={setModal} modalInner={modalInner} />
+          <Component {...pageProps} CSRUser={CSRUser} setModal={setModal} setModalInner={setModalInner} />
+        </UserLayouts>
+      </Elements>
     </Provider>
   )
 }

@@ -22,14 +22,14 @@ export default ({event, beforeCategories}) => {
       copyCategories[i] = { ...copyCategories[i], name }
       setCategories(copyCategories)
     }
-    const setPrice = (price:string) => {
-      if (Number(price) < 0) return
+    const setPrice = (price:number) => {
+      if (price < 0) return
       const copyCategories = [...categories]
       copyCategories[i] = {...copyCategories[i], price}
       setCategories(copyCategories)
     }
-    const setStock = (stock: string) => {
-      if (Number(stock) < 0) return
+    const setStock = (stock: number) => {
+      if (stock < 0) return
       const copyCategories = [...categories]
       copyCategories[i] = { ...copyCategories[i], stock }
       setCategories(copyCategories)
@@ -60,11 +60,11 @@ export default ({event, beforeCategories}) => {
           </Row>
           <Row style={{ margin: 0, marginTop: '0.5em' }}>
             <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em'}}>
-              <Input type='number' min='0' value={category.price} onChange={e => setPrice(e.target.value)} style={{textAlign: 'right'}} disabled={!category.new} />
+              <Input type='number' min='0' value={category.price} onChange={e => setPrice(parseInt(e.target.value, 10))} style={{textAlign: 'right'}} disabled={!category.new} />
               <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
             </Col>
           <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
-            <Input type='number' min='0' value={category.stock} onChange={e => setStock(e.target.value)} style={{ textAlign: 'right' }} disabled={!category.new} />
+            <Input type='number' min='0' value={category.stock} onChange={e => setStock(parseInt(e.target.value, 10))} style={{ textAlign: 'right' }} disabled={!category.new} />
             <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}> 枚</p>
           </Col>
           <Col style={{display: "flex",alignItems: "center", marginTop: '0.5em'}}>
@@ -79,22 +79,27 @@ export default ({event, beforeCategories}) => {
 
   const addCategory = () => {
     const copyCategories = categories ? [...categories] : []
-    copyCategories.push({name: '', price: 0, public: false, stock: 0, new: true})
+    copyCategories.push({name: '', price: 500, public: false, stock: 1, new: true})
     setCategories(copyCategories)
   }
 
   const submit = () => {
-    let names = []
-    let valid = true
-    categories.filter(e => {
-      if (names.indexOf(e["name"]) === -1) {
-        names.push(e["name"])
-        return e
-      }
-      valid = false
-    })
-    if (!valid) return alert.error('チケット名が重複しています')
-    router.push(`/events/${router.query.id}/categories/edit/[confirm]`, `/events/${router.query.id}/categories/edit/${JSON.stringify(categories)}`)
+    try {
+      let names = []
+      categories.filter(e => {
+        if (!e.name) throw new Error('チケット名を入力してください。')
+        if (e.price < 500) throw new Error('チケットの価格は500円以上に設定してください。')
+        if (e.stock < 1) throw new Error('チケットの在庫は1枚以上に設定してください。')
+        if (names.indexOf(e["name"]) === -1) {
+          names.push(e["name"])
+          return e
+        }
+        throw new Error('チケット名が重複しています')
+      })
+      router.push(`/events/${router.query.id}/categories/edit/[confirm]`, `/events/${router.query.id}/categories/edit/${JSON.stringify(categories)}`)
+    } catch(e) {
+      alert.error(e.message)
+    }
   }
   
   return (
@@ -127,5 +132,5 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const category = e.data()
     categories.push({...category, id})
   })
-  return { props: { event, beforeCategories: categories }}
+  return { props: { user, event, beforeCategories: categories }}
 }

@@ -16,7 +16,8 @@ export const UpdatePassword: React.FC<any> = (props) => {
     const [newPwd, setNewPwd] = useState('')
     const [newPwdConfirm, setNewPwdConfirm] = useState('')
 
-    const updatePassword = async () => {
+    const updatePassword = async (e) => {
+        e.preventDefault()
         const {firebase} = await initFirebase()
         const { currentUser } = firebase.auth()
         if (pwd && newPwd && newPwdConfirm && newPwd === newPwdConfirm) {
@@ -37,7 +38,7 @@ export const UpdatePassword: React.FC<any> = (props) => {
     }
 
     return (
-        <Form style={{ marginTop: "1.5em" }}>
+        <Form style={{ marginTop: "1.5em" }} onSubmit={updatePassword}>
             <h3>登録情報</h3>
             <FormGroup>
                 <Label for="password">現在のパスワード</Label>
@@ -52,7 +53,7 @@ export const UpdatePassword: React.FC<any> = (props) => {
                 <Input type="password" onChange={e => setNewPwdConfirm(e.target.value)} />
             </FormGroup>
             <Row style={{ margin: 0 }}>
-                <Button className="ml-auto" onClick={() => updatePassword()}>変更</Button>
+                <Button className="ml-auto">変更</Button>
             </Row>
         </Form>
     )

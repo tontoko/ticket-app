@@ -16,9 +16,10 @@ import { toUtcIso8601str } from '@/src/lib/time'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import admin from 'firebase-admin'
 import Stripe from 'stripe'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 
 export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admin.auth.DecodedIdToken, userData: Stripe.AccountUpdateParams, from: string}) => {
-  const router = useRouter()
   const alert = useAlert()
   const [form, setForm] = useState(userData ? userData.individual : {
     first_name_kana: '',
@@ -50,6 +51,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
   })
   const [birthDay, setBirthDay] = useState(toUtcIso8601str(moment()))
   const [agree, setAgree] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const setFormBirthDay = (moment: Moment) => {
     setBirthDay(toUtcIso8601str(moment))
@@ -74,26 +76,26 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
     }
     if (needParams.length > 0) return alert.error('項目に入力漏れがあります。')
     if (!agree && !userData.tos_acceptance) return alert.error('同意します がチェックされていません。')
+    const { firebase } = await initFirebase()
+    const token = await firebase.auth().currentUser.getIdToken()
+    const res = await fetch('/api/updateUser', {
+      method: 'POST',
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      }),
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        token,
+        ...form
+      })
+    })
     switch (from) {
       case '購入導線のアドレス':
 
         break;
       default:
-        const { firebase } = await initFirebase()
-        const token = await firebase.auth().currentUser.getIdToken()
-        const res = await fetch('/api/updateUser', {
-          method: 'POST',
-          headers: new Headers({
-            'Content-Type': 'application/json'
-          }),
-          credentials: 'same-origin',
-          body: JSON.stringify({
-            token,
-            ...form
-          })
-        })
         if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
-        break;
+        return alert.success('ユーザー情報を更新しました。')
     }
   }
 
@@ -124,14 +126,14 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
         } 
       })
     } catch(e) {
-
+      alert.error('エラーが発生しました。しばらくしてからお試しください。')
     }
   }
 
   return (
     <Form style={{ marginTop: "1.5em" }} onSubmit={submit}>
       <h3>ユーザー情報</h3>
-      <p>請求に使用する情報を入力してください。</p>
+      <p>決済に必要な情報を入力してください。</p>
       <FormGroup>
         <Row form>
           <Col md="4">
@@ -212,28 +214,43 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
         </FormGroup>
       </FormGroup>
 
-      {!userData.tos_acceptance &&
-      <>
-      <FormGroup style={{ marginTop: '2em', marginBottom: 0 }}>
-        <Label>支払いに関する同意事項</Label>
-        <p style={{ fontSize: 12, marginBottom: 0 }}>
-          このサービスにおける支払処理サービスは、Stripeが提供し、<a href="https://stripe.com/connect-account/legal">Stripe Connectアカウント契約</a>（<a href="https://stripe.com/legal">Stripe利用規約</a>を含み、総称して「Stripeサービス契約」といいます。）に従うものとします。<br />
-          このサービスにおける電子チケット取引の継続により、お客様はStripeサービス契約（随時Stripeにより修正されることがあり、その場合には修正されたものを含みます。）に拘束されることに同意するものとします。 <br />
-          Stripeを通じた支払処理サービスをこのサービスが使用するための条件として、お客様は、このサービスに対してお客様及びお客様の事業に関する正確かつ完全な情報を提供することに同意し、このサービスが当該情報及びStripeが提供する支払処理サービスのお客様による使用に関連する取引情報を共有することを認めるものとします。
-        </p>
-      </FormGroup>
-      <FormGroup check>
-        <Row form>
-          <Label className="ml-auto" check for="agree">
-            <Input id="agree" type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} />
-            同意します
-          </Label>
-        </Row>
-      </FormGroup>
-      </>
-      }
+      {(() => {
+        if (!userData.tos_acceptance) {
+          return (
+            <>
+            <FormGroup style={{ marginTop: '2em', marginBottom: 0 }}>
+              <Label>決済に関する同意事項</Label>
+              <p style={{ fontSize: 12, marginBottom: 0 }}>
+                このサービスにおける支払処理サービスは、Stripeが提供し、<a href="https://stripe.com/connect-account/legal">Stripe Connectアカウント契約</a>（<a href="https://stripe.com/legal">Stripe利用規約</a>を含み、総称して「Stripeサービス契約」といいます。）に従うものとします。<br />
+                このサービスにおける電子チケット取引の継続により、お客様はStripeサービス契約（随時Stripeにより修正されることがあり、その場合には修正されたものを含みます。）に拘束されることに同意するものとします。 <br />
+                Stripeを通じた支払処理サービスをこのサービスが使用するための条件として、お客様は、このサービスに対してお客様及びお客様の事業に関する正確かつ完全な情報を提供することに同意し、このサービスが当該情報及びStripeが提供する支払処理サービスのお客様による使用に関連する取引情報を共有することを認めるものとします。
+              </p>
+            </FormGroup>
+            <FormGroup check>
+              <Row form>
+                <Label className="ml-auto" check for="agree">
+                  <Input id="agree" type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} />
+                  同意します
+                </Label>
+              </Row>
+            </FormGroup>
+            </>
+          )
+        } else {
+          return (
+            <>
+            <FormGroup style={{ marginTop: '2em', marginBottom: 0 }}>
+              <Label>決済に関する同意事項</Label>
+            </FormGroup>
+            <FormGroup>
+              <p style={{ marginLeft: "1em" }}><FontAwesomeIcon icon={faCheckSquare} style={{ color: "#00DD00" }} /> 同意済み</p>
+            </FormGroup>
+            </>
+          )
+        }
+      })()}
       <Row form style={{ marginTop: '2em' }}>
-        <Button className="ml-auto">変更</Button>
+        <Button className="ml-auto" >更新</Button>
       </Row>
     </Form>
   )
