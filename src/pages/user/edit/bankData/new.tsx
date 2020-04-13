@@ -33,7 +33,7 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
       //   account_holder_name,
       //   account_holder_type: 'individual',
       // })
-      const stripeToken = await stripe.createToken('bank_account', {
+      const stripeResult = await stripe.createToken('bank_account', {
         country: 'JP',
         currency: 'jpy',
         routing_number: '1100000',
@@ -41,6 +41,7 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
         account_holder_name,
         account_holder_type: 'individual',
       })
+      const stripeToken = stripeResult.token
       const { firebase } = await initFirebase()
       const firebaseToken = await firebase.auth().currentUser.getIdToken()
       const res = await fetch('/api/createBankAccount', {
