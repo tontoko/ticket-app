@@ -6,23 +6,23 @@ import Stripe from 'stripe'
 
 const endpoint: NextApiHandler = (async (req, res) => {
   try {
+    console.log('test')
+    const { firebaseToken, stripeToken } = req.body
+    if (!firebaseToken || !stripeToken) return res.status(500)
 
+    const { firebase, firestore } = await initFirebaseAdmin()
+    const decodedToken = await firebase.auth().verifyIdToken(firebaseToken)
 
-    // ToDo: 作る
-
+    const usersRef = firestore.collection('users').doc(decodedToken.uid)
+    const user = (await usersRef.get()).data()
 
     const stripe = new Stripe(stripeSecret, { apiVersion: null })
-    const { token, zip } = req.body
     const result = await stripe.accounts.createExternalAccount(
-      'acct_1GQU5TDromrZs6rB',
-      {
-        external_account: 'bank_account',
-        
-      }
-    );
+      user.stripeId,
+      stripeToken
+      )
 
-
-    res.status(200).json({  })
+    return res.status(200)
 
   } catch (error) {
     console.log(error)

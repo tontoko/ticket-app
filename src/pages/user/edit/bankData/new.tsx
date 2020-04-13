@@ -24,15 +24,42 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
 
   const submit = async(e) => {
     e.preventDefault()
-    const token = await stripe.createToken('bank_account', {
-      country: 'JP',
-      currency: 'jpy',
-      routing_number: `${routing_number1}${routing_number2}`, // 銀行コード+支店コード
-      account_number,
-      account_holder_name,
-      account_holder_type: 'individual',
-    })
-    console.log(token)
+    try {
+      // const token = await stripe.createToken('bank_account', {
+      //   country: 'JP',
+      //   currency: 'jpy',
+      //   routing_number: `${routing_number1}${routing_number2}`, // 銀行コード+支店コード
+      //   account_number,
+      //   account_holder_name,
+      //   account_holder_type: 'individual',
+      // })
+      const stripeToken = await stripe.createToken('bank_account', {
+        country: 'JP',
+        currency: 'jpy',
+        routing_number: '1100000',
+        account_number: '0001234',
+        account_holder_name,
+        account_holder_type: 'individual',
+      })
+      const { firebase } = await initFirebase()
+      const firebaseToken = firebase.auth().currentUser.getIdToken()
+      const res = await fetch('/api/createBankAccount', {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          firebaseToken,
+          stripeToken
+        })
+      })
+      if (res.status === 200) {
+        router.push({ pathname: '/user/edit/bankData', query: { msg: '新しい銀行口座を登録しました。' } }, '/user/edit/bankData')
+      }
+    } catch(e) {
+      
+    }
   }
 
   const searchBankCode = async() => {
@@ -119,6 +146,7 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
             </div>
           </Col>
         </Row>
+        <p><a href="https://www.jp-bank.japanpost.jp/kojin/sokin/furikomi/kouza/kj_sk_fm_kz_1.html" target="_blank">ゆうちょ銀行の支店コード・口座番号を調べる</a></p>
       </FormGroup>
       <FormGroup>
         <Label>口座番号</Label>
