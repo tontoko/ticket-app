@@ -42,7 +42,7 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
         account_holder_type: 'individual',
       })
       const { firebase } = await initFirebase()
-      const firebaseToken = firebase.auth().currentUser.getIdToken()
+      const firebaseToken = await firebase.auth().currentUser.getIdToken()
       const res = await fetch('/api/createBankAccount', {
         method: 'POST',
         headers: new Headers({
