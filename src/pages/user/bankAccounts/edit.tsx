@@ -1,16 +1,17 @@
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
+import { Form, FormGroup, Button, Label, Input, Container, Row, Card, CardTitle, CardText, Col } from 'reactstrap'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import Link from 'next/link'
+import { Stripe } from '@/src/lib/stripe'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 
-export const UpdateBankAccounts: React.FC<any> = (props) => {
+export const BankAccounts: React.FC<any> = ({ bankAccounts }) => {
   const router = useRouter()
   const alert = useAlert()
   const [email, setEmail] = useState('')
@@ -19,7 +20,18 @@ export const UpdateBankAccounts: React.FC<any> = (props) => {
   return (
     <Form style={{ marginTop: "1.5em" }}>
       <h3>口座情報</h3>
-      {/* 口座リスト */}
+      <Row style={{ margin: "2em 0" }}>
+        {bankAccounts.map((e: Stripe.BankAccount, i) => (
+          <Col md="4" key={i}>
+            <Card body>
+              <CardTitle>{e.bank_name}</CardTitle>
+              <CardText>最後の4桁: {e.last4}</CardText>
+              <Button>更新する</Button>
+            </Card>
+          </Col>
+        ))
+        }
+      </Row>
 
       <FormGroup>
         <Link href="/user/bankAccounts/new">
@@ -32,7 +44,9 @@ export const UpdateBankAccounts: React.FC<any> = (props) => {
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
   const { user } = await isLogin(ctx)
-  return { props: { user } }
+  const { firestore } = await initFirebaseAdmin()
+  const bankAccounts = (await firestore.collection('users').doc(user.uid).collection('bankAccounts').get()).docs.map(e => e.data())
+  return { props: { user, bankAccounts } }
 }
 
-export default UpdateBankAccounts
+export default BankAccounts
