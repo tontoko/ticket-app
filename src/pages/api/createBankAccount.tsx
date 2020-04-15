@@ -19,7 +19,9 @@ const endpoint: NextApiHandler = (async (req, res) => {
     const stripe = new Stripe(stripeSecret, { apiVersion: null })
     const result = await stripe.accounts.createExternalAccount(
       user.stripeId,
-      stripeToken
+        {
+          external_account: stripeToken,
+        }
       )
 
     return res.status(200)

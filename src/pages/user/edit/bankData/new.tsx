@@ -10,6 +10,8 @@ import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import Link from 'next/link'
 import { useStripe } from '@stripe/react-stripe-js'
+import zenginCode from 'zengin-code'
+import { setServers } from 'dns'
 
 export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
   const stripe = useStripe()
@@ -66,18 +68,16 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
 
   const searchBankCode = async() => {
     if (!searchBank) return
-    const res = await fetch(`https://bank.teraren.com/banks/search.json?name=${searchBank}`, {
-      method: 'GET',
-      credentials: 'same-origin'
-    })
-    if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
-    const result = await res.json()
+    const result = Object.keys(zenginCode).map(key => {
+        if (zenginCode[key].name.match(searchBank)) return zenginCode[key]
+      }
+    ).filter(Boolean)
     if (result.length === 0) return alert.error('検索結果は0件です。')
     setModalInner(() => (
       <ModalBody>
         <ListGroup>
-          {result.map(e => (
-            <ListGroupItem tag="button" action onClick={() => selectBankCode(e.code)}>{e.name}</ListGroupItem>
+          {result.map((e, i) => (
+            <ListGroupItem tag="button" action key={i} onClick={() => selectBankCode(e)}>{e.name}</ListGroupItem>
           ))}
         </ListGroup>
       </ModalBody>
@@ -85,25 +85,25 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
     setModal(true)
   }
 
-  const selectBankCode = (code) => {
-    setRouting_number1(code)
+  const selectBankCode = (bank) => {
+    setRouting_number1(bank.code)
+    setSearchBank(bank.name)
     setModal(false)
   }
 
   const searchBranchCode = async () => {
     if (!searchBranch) return
-    const res = await fetch(`https://bank.teraren.com/banks/${routing_number1}/branches/search.json?name=${searchBranch}`, {
-      method: 'GET',
-      credentials: 'same-origin'
-    })
-    if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
-    const result = await res.json()
+    const targetBankBranches = zenginCode[routing_number1].branches
+    const result = Object.keys(targetBankBranches).map(key => {
+      if (targetBankBranches[key].name.match(searchBranch)) return targetBankBranches[key]
+    }
+    ).filter(Boolean)
     if (result.length === 0) return alert.error('検索結果は0件です。')
     setModalInner(() => (
       <ModalBody>
         <ListGroup>
-          {result.map(e => (
-            <ListGroupItem tag="button" action onClick={() => selectBranchCode(e.code)}>{e.name}</ListGroupItem>
+          {result.map((e, i) => (
+            <ListGroupItem tag="button" action key={i} onClick={() => selectBranchCode(e)}>{e.name}</ListGroupItem>
           ))}
         </ListGroup>
       </ModalBody>
@@ -111,8 +111,9 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
     setModal(true)
   }
 
-  const selectBranchCode = (code) => {
-    setRouting_number2(code)
+  const selectBranchCode = (branch) => {
+    setRouting_number2(branch.code)
+    setSearchBranch(branch.name)
     setModal(false)
   }
 
