@@ -41,23 +41,24 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
         account_holder_name,
         account_holder_type: 'individual',
       })
-      const stripeToken = stripeResult.token
-      const { firebase } = await initFirebase()
-      const firebaseToken = await firebase.auth().currentUser.getIdToken()
-      const res = await fetch('/api/createBankAccount', {
-        method: 'POST',
-        headers: new Headers({
-          'Content-Type': 'application/json'
-        }),
-        credentials: 'same-origin',
-        body: JSON.stringify({
-          firebaseToken,
-          stripeToken
-        })
-      })
-      if (res.status === 200) {
-        router.push({ pathname: '/user/edit/bankData', query: { msg: '新しい銀行口座を登録しました。' } }, '/user/edit/bankData')
-      }
+      const stripeToken = stripeResult.token.id
+      console.log(stripeToken)
+      // const { firebase } = await initFirebase()
+      // const firebaseToken = await firebase.auth().currentUser.getIdToken()
+      // const res = await fetch('/api/createBankAccount', {
+      //   method: 'POST',
+      //   headers: new Headers({
+      //     'Content-Type': 'application/json'
+      //   }),
+      //   credentials: 'same-origin',
+      //   body: JSON.stringify({
+      //     firebaseToken,
+      //     stripeToken
+      //   })
+      // })
+      // if (res.status === 200) {
+      //   router.push({ pathname: '/user/edit/bankData', query: { msg: '新しい銀行口座を登録しました。' } }, '/user/edit/bankData')
+      // }
     } catch(e) {
       
     }
