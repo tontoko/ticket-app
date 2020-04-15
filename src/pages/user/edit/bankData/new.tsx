@@ -44,7 +44,6 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
         account_holder_type: 'individual',
       })
       const stripeToken = stripeResult.token.id
-      console.log(stripeToken)
       const { firebase } = await initFirebase()
       const firebaseToken = await firebase.auth().currentUser.getIdToken()
       const res = await fetch('/api/createBankAccount', {

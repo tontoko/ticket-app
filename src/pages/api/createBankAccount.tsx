@@ -6,7 +6,6 @@ import Stripe from 'stripe'
 
 const endpoint: NextApiHandler = (async (req, res) => {
   try {
-    console.log('test')
     const { firebaseToken, stripeToken } = req.body
     if (!firebaseToken || !stripeToken) return res.status(500)
 
@@ -24,8 +23,8 @@ const endpoint: NextApiHandler = (async (req, res) => {
         }
       )
 
-    return res.status(200)
-
+    return res.json({ status: true })
+    
   } catch (error) {
     console.log(error)
     res.status(400).json({ error })
