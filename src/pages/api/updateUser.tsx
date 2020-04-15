@@ -1,13 +1,10 @@
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
-const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
-const stripeSecret = env === 'prod' ? process.env.STRIPE_APIKEY_PROD : process.env.STRIPE_APIKEY_DEV
-import Stripe from 'stripe'
+import stripe, { Stripe } from '@/src/lib/stripe'
 
 const endpoint: NextApiHandler = (async (req, res) => {
   if (!req.body) return res.status(400).send({body: 'body was empty'})
   try {
-    const stripe = new Stripe(stripeSecret, { apiVersion: null})
     const {
       token,
       first_name_kana,

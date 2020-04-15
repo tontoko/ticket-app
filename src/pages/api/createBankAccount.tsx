@@ -1,8 +1,6 @@
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
-const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
-const stripeSecret = env === 'prod' ? process.env.STRIPE_APIKEY_PROD : process.env.STRIPE_APIKEY_DEV
-import Stripe from 'stripe'
+import stripe, { Stripe } from '@/src/lib/stripe'
 
 const endpoint: NextApiHandler = (async (req, res) => {
   try {
@@ -15,16 +13,23 @@ const endpoint: NextApiHandler = (async (req, res) => {
     const usersRef = firestore.collection('users').doc(decodedToken.uid)
     const user = (await usersRef.get()).data()
 
-    const stripe = new Stripe(stripeSecret, { apiVersion: null })
     const result = await stripe.accounts.createExternalAccount(
       user.stripeId,
         {
           external_account: stripeToken,
         }
-      )
+    ) as Stripe.BankAccount
+
+    const { id, bank_name, last4 } = result
+
+    await usersRef.collection('bankAccounts').add({
+      id, 
+      bank_name,
+      last4
+    })
 
     return res.json({ status: true })
-    
+
   } catch (error) {
     console.log(error)
     res.status(400).json({ error })

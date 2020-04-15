@@ -13,7 +13,7 @@ import { useStripe } from '@stripe/react-stripe-js'
 import zenginCode from 'zengin-code'
 import { setServers } from 'dns'
 
-export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
+export const UpdateBankAccounts: React.FC<any> = ({ setModal, setModalInner }) => {
   const stripe = useStripe()
   const router = useRouter()
   const alert = useAlert()
@@ -58,7 +58,7 @@ export const UpdateBankData: React.FC<any> = ({ setModal, setModalInner }) => {
         })
       })
       if (res.status === 200) {
-        router.push({ pathname: '/user/edit/bankData', query: { msg: '新しい銀行口座を登録しました。' } }, '/user/edit/bankData')
+        router.push({ pathname: '/user/bankAccounts', query: { msg: '新しい銀行口座を登録しました。' } }, '/user/bankAccounts')
       }
     } catch(e) {
       
@@ -172,4 +172,4 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   return { props: { user } }
 }
 
-export default UpdateBankData
+export default UpdateBankAccounts

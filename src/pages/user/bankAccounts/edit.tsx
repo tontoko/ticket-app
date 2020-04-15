@@ -10,7 +10,7 @@ import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import Link from 'next/link'
 
-export const UpdateBankData: React.FC<any> = (props) => {
+export const UpdateBankAccounts: React.FC<any> = (props) => {
   const router = useRouter()
   const alert = useAlert()
   const [email, setEmail] = useState('')
@@ -22,7 +22,7 @@ export const UpdateBankData: React.FC<any> = (props) => {
       {/* 口座リスト */}
 
       <FormGroup>
-        <Link href="/user/edit/bankData/new">
+        <Link href="/user/bankAccounts/new">
           <Button>新しい口座を登録</Button>
         </Link>
       </FormGroup>
@@ -35,4 +35,4 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   return { props: { user } }
 }
 
-export default UpdateBankData
+export default UpdateBankAccounts
