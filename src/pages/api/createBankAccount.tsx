@@ -19,15 +19,7 @@ const endpoint: NextApiHandler = (async (req, res) => {
           external_account: stripeToken,
         }
     ) as Stripe.BankAccount
-
-    const { id, bank_name, last4 } = result
-
-    await usersRef.collection('bankAccounts').add({
-      id, 
-      bank_name,
-      last4
-    })
-
+    
     return res.json({ status: true })
 
   } catch (error) {

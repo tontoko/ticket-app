@@ -13,7 +13,7 @@ import { useStripe } from '@stripe/react-stripe-js'
 import zenginCode from 'zengin-code'
 import { setServers } from 'dns'
 
-export const UpdateBankAccounts: React.FC<any> = ({ setModal, setModalInner }) => {
+export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) => {
   const stripe = useStripe()
   const router = useRouter()
   const alert = useAlert()
@@ -27,22 +27,23 @@ export const UpdateBankAccounts: React.FC<any> = ({ setModal, setModalInner }) =
   const submit = async(e) => {
     e.preventDefault()
     try {
-      // const token = await stripe.createToken('bank_account', {
-      //   country: 'JP',
-      //   currency: 'jpy',
-      //   routing_number: `${routing_number1}${routing_number2}`, // 銀行コード+支店コード
-      //   account_number,
-      //   account_holder_name,
-      //   account_holder_type: 'individual',
-      // })
       const stripeResult = await stripe.createToken('bank_account', {
         country: 'JP',
         currency: 'jpy',
-        routing_number: '1100000',
-        account_number: '0001234',
+        routing_number: `${routing_number1}${routing_number2}`, // 銀行コード+支店コード
+        account_number,
         account_holder_name,
         account_holder_type: 'individual',
       })
+      // テスト用
+      // const stripeResult = await stripe.createToken('bank_account', {
+      //   country: 'JP',
+      //   currency: 'jpy',
+      //   routing_number: '1100000',
+      //   account_number: '0001234',
+      //   account_holder_name,
+      //   account_holder_type: 'individual',
+      // })
       const stripeToken = stripeResult.token.id
       const { firebase } = await initFirebase()
       const firebaseToken = await firebase.auth().currentUser.getIdToken()
@@ -152,7 +153,7 @@ export const UpdateBankAccounts: React.FC<any> = ({ setModal, setModalInner }) =
       </FormGroup>
       <FormGroup>
         <Label>口座番号</Label>
-        <Input type="number" value={account_number} onChange={e => setAccount_number(e.target.value)} />
+        <Input value={account_number} onChange={e => setAccount_number(e.target.value)} />
       </FormGroup>
       <FormGroup>
         <Label>口座名義人</Label>
@@ -172,4 +173,4 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   return { props: { user } }
 }
 
-export default UpdateBankAccounts
+export default CreateBankAccount

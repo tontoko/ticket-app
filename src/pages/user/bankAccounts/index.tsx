@@ -5,13 +5,13 @@ import { Form, FormGroup, Button, Label, Input, Container, Row, Card, CardTitle,
 import 'firebase/storage'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
-import { GetServerSideProps } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import Link from 'next/link'
-import { Stripe } from '@/src/lib/stripe'
+import stripe, { Stripe } from '@/src/lib/stripe'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 
-export const BankAccounts: React.FC<any> = ({ bankAccounts }) => {
+export const BankAccounts: NextPage<{bankAccounts: Stripe.BankAccount[]}> = ({ bankAccounts }) => {
   const router = useRouter()
   const alert = useAlert()
   const [email, setEmail] = useState('')
@@ -27,8 +27,9 @@ export const BankAccounts: React.FC<any> = ({ bankAccounts }) => {
           <CardBody>
             <CardTitle>{e.bank_name}</CardTitle>
             <CardText>最後の4桁: {e.last4}</CardText>
-            <Button>更新する</Button>
-            <Button style={{ marginLeft: '0.5em' }} color="danger">削除</Button>
+              <Link href={{ pathname: "/user/bankAccounts/edit", query: { id: e.id } }} >
+                <Button color="danger">削除</Button>
+              </Link>
             </CardBody>
           </Card>
           </Col>
@@ -48,8 +49,13 @@ export const BankAccounts: React.FC<any> = ({ bankAccounts }) => {
 export const getServerSideProps: GetServerSideProps = async ctx => {
   const { user } = await isLogin(ctx)
   const { firestore } = await initFirebaseAdmin()
-  const bankAccounts = (await firestore.collection('users').doc(user.uid).collection('bankAccounts').get()).docs.map(e => e.data())
-  return { props: { user, bankAccounts } }
+  const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
+  const result: Stripe.ApiList<Stripe.BankAccount> = await stripe.accounts.listExternalAccounts(
+    stripeId,
+    // @ts-ignore
+    { object: 'bank_account' }
+  )
+  return { props: { user, bankAccounts: result.data } }
 }
 
 export default BankAccounts
