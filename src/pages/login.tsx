@@ -77,7 +77,7 @@ export const Login = () => {
                     <Label>パスワード</Label>
                     <Input type="password" name="password" placeholder="パスワード" onChange={e => setPassword(e.target.value)} />
                 </FormGroup>
-                <Button>{loading ? <Spinner/> : 'ログイン'}</Button>
+                <Button disabled={loading}>{loading ? <Spinner/> : 'ログイン'}</Button>
             </Form>
             <Form>
                 <FormGroup style={{ marginTop: '1em' }}>

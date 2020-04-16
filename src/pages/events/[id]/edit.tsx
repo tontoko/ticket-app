@@ -162,7 +162,7 @@ export default ({ user, event, photoUrls }) => {
             </FormGroup>
             <FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Button className="ml-auto">{loading ? <Spinner/> : '確認'}</Button>
+                    <Button className="ml-auto" disabled={loading}>{loading ? <Spinner/> : '確認'}</Button>
                 </Row>
             </FormGroup>
         </Form>

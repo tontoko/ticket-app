@@ -1,4 +1,4 @@
-import {useState, useEffect, Dispatch} from 'react'
+import {useState, useEffect, Dispatch, ReactElement, SetStateAction} from 'react'
 import '@/node_modules/bootstrap/dist/css/bootstrap.min.css'
 import "react-datepicker/dist/react-datepicker.css"
 import UserLayouts from './layouts/userLayouts'
@@ -20,7 +20,7 @@ const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter()
   const [CSRUser, setCSRUser]: [null | firebase.User, Dispatch<firebase.User>] = useState(null)
   const [modal, setModal] = useState(false)
-  const [modalInner, setModalInner] = useState()
+  const [modalInner, setModalInner]: [ReactElement, Dispatch<SetStateAction<ReactElement>>] = useState()
 
   useEffect(() => {
     let unsubscribe:firebase.Unsubscribe = () => void

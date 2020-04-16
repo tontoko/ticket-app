@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Row, Col, ModalBody, ListGroup, ListGroupItem } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Row, Col, ModalBody, ListGroup, ListGroupItem, Spinner } from 'reactstrap'
 import initFirebase from '@/src/lib/initFirebase'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
@@ -23,10 +23,12 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
   const [account_holder_name, setAccount_holder_name] = useState('')
   const [searchBank, setSearchBank] = useState('')
   const [searchBranch, setSearchBranch] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const submit = async(e) => {
     e.preventDefault()
     try {
+      setLoading(true)
       const stripeResult = await stripe.createToken('bank_account', {
         country: 'JP',
         currency: 'jpy',
@@ -44,6 +46,7 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
       //   account_holder_name,
       //   account_holder_type: 'individual',
       // })
+      if (stripeResult.error) throw stripeResult.error
       const stripeToken = stripeResult.token.id
       const { firebase } = await initFirebase()
       const firebaseToken = await firebase.auth().currentUser.getIdToken()
@@ -62,8 +65,9 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
         router.push({ pathname: '/user/bankAccounts', query: { msg: '新しい銀行口座を登録しました。' } }, '/user/bankAccounts')
       }
     } catch(e) {
-      
+      alert.error('エラーが発生しました。しばらくしてお試しください。')
     }
+    setLoading(false)
   }
 
   const searchBankCode = async() => {
@@ -156,12 +160,12 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
         <Input value={account_number} onChange={e => setAccount_number(e.target.value)} />
       </FormGroup>
       <FormGroup>
-        <Label>口座名義人</Label>
+        <Label>口座名義人 (カタカナ または ローマ字)</Label>
         <Input value={account_holder_name} onChange={e => setAccount_holder_name(e.target.value)} />
       </FormGroup>
       <FormGroup>
         <Row form style={{ margin: 0, marginTop: '2em' }}>
-          <Button className="ml-auto">登録</Button>
+          <Button className="ml-auto" disabled={loading}>{loading ? <Spinner /> : '登録'}</Button>
         </Row>
       </FormGroup>
     </Form>

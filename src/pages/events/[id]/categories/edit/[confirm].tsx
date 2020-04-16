@@ -66,7 +66,7 @@ const Confirmation= props => {
         )
       )}
       <Row className="flex-row-reverse">
-        <Button style={{ marginRight: '1em', marginTop: '0.5em' }}>{loading ? <Spinner/> : '設定'}</Button>
+        <Button style={{ marginRight: '1em', marginTop: '0.5em' }} disabled={loading}>{loading ? <Spinner/> : '設定'}</Button>
       </Row>
     </Form>
   );

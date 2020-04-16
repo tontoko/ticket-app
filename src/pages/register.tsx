@@ -40,7 +40,7 @@ export default () => {
                     <Input type="password" name="password" placeholder="パスワード" onChange={e => setPwd(e.target.value)} />
                     <Input type="password" name="password_confirmation" placeholder="パスワード再入力" style={{ marginTop: '0.7em' }} onChange={e => setPwdConfirm(e.target.value)} />
                 </FormGroup>
-                <Button>{loading ? <Spinner/> : '登録'}</Button>
+                <Button disabled={loading}>{loading ? <Spinner/> : '登録'}</Button>
             </Form>
             <p style={{ marginTop: '0.7em' }}>既にアカウントをお持ちの方は<Link href="/login">ログイン</Link></p>
         </>
