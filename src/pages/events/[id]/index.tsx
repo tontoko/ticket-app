@@ -91,7 +91,9 @@ export default ({ user, event, categories, status, items }) => {
                     </Link>
                 </div>
             )
-        } else {
+        } else if (categories.length === 0) {
+            return
+        }else {
             // 申し込み
             return (
                 <div style={{ marginTop: "1.5em" }}>
