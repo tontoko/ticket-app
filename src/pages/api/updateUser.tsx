@@ -47,8 +47,6 @@ const endpoint: NextApiHandler = (async (req, res) => {
       userData
     )
 
-    await usersRef.update({userData})
-
     return res.json({ status: true })
   } catch (error) {
     console.log(error)

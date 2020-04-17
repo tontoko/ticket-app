@@ -18,10 +18,13 @@ import admin from 'firebase-admin'
 import Stripe from 'stripe'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
+import stripe from '@/src/lib/stripe'
+import { Router } from 'express'
 
-export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admin.auth.DecodedIdToken, userData: Stripe.AccountUpdateParams, from: string}) => {
+export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, from }: { user: admin.auth.DecodedIdToken, individual: Stripe.Person, tos_acceptance: Stripe.Account.TosAcceptance, from: string}) => {
   const alert = useAlert()
-  const [form, setForm] = useState(userData ? userData.individual : {
+  const router = useRouter()
+  const [form, setForm] = useState(individual ? individual : {
     first_name_kana: '',
     last_name_kana: '',
     first_name_kanji: '',
@@ -32,6 +35,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
       year: moment().year()
     },
     address_kana: {
+      country: "JP",
       postal_code: '',
       state: '',
       city: '',
@@ -40,6 +44,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
       line2: ''
     },
     address_kanji: {
+      country: "JP",
       postal_code: '',
       state: '',
       city: '',
@@ -65,7 +70,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
     e.preventDefault()
     let needParams: string[] = []
     for (let [key1, value1] of Object.entries(form)) {
-      if (typeof value1 !== 'string') {
+      if (typeof value1 !== 'string' && (key1 === 'address_kana' || key1 === 'address_kanji')) {
         // 入れ子2段目の判定
         for (let [key2, value2] of Object.entries(value1)) {
           if (key2 !== 'line2' && !value2) needParams.push(key2)
@@ -75,7 +80,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
       }
     }
     if (needParams.length > 0) return alert.error('項目に入力漏れがあります。')
-    if (!agree && !userData.tos_acceptance) return alert.error('同意します がチェックされていません。')
+    if (!agree && !tos_acceptance.date) return alert.error('同意します がチェックされていません。')
     const { firebase } = await initFirebase()
     const token = await firebase.auth().currentUser.getIdToken()
     const res = await fetch('/api/updateUser', {
@@ -95,7 +100,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
         break;
       default:
         if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
-        return alert.success('ユーザー情報を更新しました。')
+        return router.push({ pathname: '/user/edit', query: { msg: 'ユーザー情報を更新しました。' }}, '/user/edit')
     }
   }
 
@@ -126,7 +131,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
         } 
       })
     } catch(e) {
-      alert.error('エラーが発生しました。しばらくしてからお試しください。')
+      alert.error('エラーが発生しました。入力項目が正しいか確認してください。')
     }
   }
 
@@ -201,7 +206,7 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
           <Input placeholder='区市町村（カナ）' value={form.address_kana.city} onChange={e => setForm({ ...form, address_kana: { ...form.address_kana, city: e.target.value } })} />
           <Input placeholder='町名(丁目まで、カナ)' value={form.address_kana.town} onChange={e => setForm({ ...form, address_kana: { ...form.address_kana, town: e.target.value } })} />
           <Input placeholder='番地、号（カナ）' value={form.address_kana.line1} onChange={e => setForm({ ...form, address_kana: { ...form.address_kana, line1: e.target.value } })} />
-          <Input placeholder='建物・部屋番号・その他 (任意、カナ)' value={form.address_kana.line2} onChange={e => setForm({ ...form, address_kana: { ...form.address_kana, line2: e.target.value } })} />
+          <Input placeholder='建物・部屋番号・その他 (任意、カナ)' value={form.address_kana.line2 ? form.address_kana.line2 : ''} onChange={e => setForm({ ...form, address_kana: { ...form.address_kana, line2: e.target.value } })} />
         </FormGroup>
 
         <FormGroup>
@@ -210,12 +215,12 @@ export const UpdateUser: React.FC<any> = ({ user, userData, from }: { user: admi
           <Input placeholder='区市町村（漢字）' value={form.address_kanji.city} onChange={e => setForm({ ...form, address_kanji: { ...form.address_kanji, city: e.target.value } })} />
           <Input placeholder='町名(丁目まで、漢字)' value={form.address_kanji.town} onChange={e => setForm({ ...form, address_kanji: { ...form.address_kanji, town: e.target.value } })} />
           <Input placeholder='番地、号（漢字）' value={form.address_kanji.line1} onChange={e => setForm({ ...form, address_kanji: { ...form.address_kanji, line1: e.target.value } })} />
-          <Input placeholder='建物・部屋番号・その他 (任意、漢字)' value={form.address_kanji.line2} onChange={e => setForm({ ...form, address_kanji: { ...form.address_kanji, line2: e.target.value } })} />
+          <Input placeholder='建物・部屋番号・その他 (任意、漢字)' value={form.address_kanji.line2 ? form.address_kanji.line2 : ''} onChange={e => setForm({ ...form, address_kanji: { ...form.address_kanji, line2: e.target.value } })} />
         </FormGroup>
       </FormGroup>
 
       {(() => {
-        if (!userData.tos_acceptance) {
+        if (!tos_acceptance.date) {
           return (
             <>
             <FormGroup style={{ marginTop: '2em', marginBottom: 0 }}>
@@ -261,8 +266,12 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   const { query } = ctx
   const from = query.from ? query.from : ''
   const { firestore } = await initFirebaseAdmin()
-  const { userData } = (await firestore.collection('users').doc(user.uid).get()).data()
-  return { props: { user, userData, from } }
+  const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
+  const result = await stripe.accounts.retrieve(
+    stripeId
+  )
+  const { individual, tos_acceptance } = result
+  return { props: { user, individual: individual ? individual : null, tos_acceptance, from } }
 }
 
 export default UpdateUser
