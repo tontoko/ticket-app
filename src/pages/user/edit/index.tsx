@@ -37,7 +37,7 @@ const UserShow = ({ user, verification }) => {
                 <FormGroup>
                     {(() => {
                         if (status === 'unverified') return <Link href={`/user/edit/identification`}><a>本人確認書類をアップロードする</a></Link>
-                        if (status === 'pending') return <p>本人確認書類:  <FontAwesomeIcon icon={faExclamationCircle} style={{ color: "orange", marginLeft: '0.5em' }} /> 提出済み (確認中)</p>
+                        if (status === 'pending') return <><p>本人確認書類:  </p><Link href={`/user/edit/identification`}><a><FontAwesomeIcon icon={faExclamationCircle} style={{ color: "red", marginLeft: '0.5em' }} /> 提出済み (再提出が必要です)</a></Link></>
                         if (status === 'verified') return <p>本人確認書類: <FontAwesomeIcon icon={faCheckSquare} style={{ color: "#00DD00", marginLeft: '0.5em' }} /> 提出済み (確認済)</p>
                     })()}
                 </FormGroup>

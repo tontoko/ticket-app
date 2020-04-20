@@ -63,6 +63,7 @@ export default ({event, beforeCategories}) => {
               <Input type='number' min='0' value={category.price} onChange={e => setPrice(parseInt(e.target.value, 10))} style={{textAlign: 'right'}} disabled={!category.new} />
               <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
             </Col>
+          // todo 売り上げと付き合わせて在庫変更できるようにする
           <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
             <Input type='number' min='0' value={category.stock} onChange={e => setStock(parseInt(e.target.value, 10))} style={{ textAlign: 'right' }} disabled={!category.new} />
             <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}> 枚</p>

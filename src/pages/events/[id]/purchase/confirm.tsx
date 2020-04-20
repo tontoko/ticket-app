@@ -15,9 +15,7 @@ import isLogin from '@/src/lib/isLogin'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { event } from 'events'
 import getImg from '@/src/lib/getImgSSR'
-const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
-const stripeSecret = env === 'prod' ? process.env.STRIPE_PROD_SECRET : process.env.STRIPE_DEV_SECRET
-import Stripe from 'stripe'
+import stripe from '@/src/lib/stripe'
 
 const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret }) => {
     const stripe = useStripe();
@@ -33,6 +31,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         if (!agree) return alert.error("同意します が選択されていません")
 
         setProcessing(true)
+        // TODO APIに変える
         const result = await stripe.confirmCardPayment(client_secret, {
             payment_method: {
                 card: elements.getElement(CardElement),
@@ -45,7 +44,6 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
 
         if (result.error) {
             alert.error(result.error.message)
-            console.log(client_secret)
             setProcessing(false)
         } else {
             // The payment has been processed!
@@ -118,6 +116,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
             </FormGroup>
             <Row className="flex-row-reverse">
                 <FormGroup check style={{ marginRight: '1em' }}>
+                    {/* TODO 利用規約作る */}
                     <Label>何たらかんたらに同意する必要がある的な文言</Label>
                 </FormGroup>
             </Row>
@@ -152,20 +151,26 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const event = { ...data, createdAt, updatedAt, startDate, endDate }
     const categorySnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').doc(selectedCategory as string).get())
     const category = categorySnapShot.data()
+    // @ts-ignore
+    const { stripeId }  = (await firestore.collection('users').doc(event.createdUser).get()).data()
     
-    const stripe = new Stripe(stripeSecret, { apiVersion: null })
     const paymentIntent = await stripe.paymentIntents.create({
         amount: category.price,
         currency: 'jpy',
         payment_method_types: ['card'],
-        // Verify your integration in this guide by including this parameter
+        on_behalf_of: stripeId,
+        application_fee_amount: category.price * 4.4 / 100,
         metadata: { 
             event: eventSnapShot.id,
-            category: categorySnapShot.id
+            category: categorySnapShot.id,
+            user: user.uid
+        },
+        transfer_data: {
+            destination: stripeId,
         }
     })
     const { client_secret } = paymentIntent
-    return { props: { familyName, firstName, email, event, category, photoUrls, client_secret, env } }
+    return { props: { familyName, firstName, email, event, category, photoUrls, client_secret } }
 }
 
 export default Confirmation
