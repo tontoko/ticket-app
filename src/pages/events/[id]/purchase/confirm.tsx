@@ -16,6 +16,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { event } from 'events'
 import getImg from '@/src/lib/getImgSSR'
 import stripe from '@/src/lib/stripe'
+import initFirebase from '@/src/lib/initFirebase'
 
 const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret }) => {
     const stripe = useStripe();
@@ -31,8 +32,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         if (!agree) return alert.error("同意します が選択されていません")
 
         setProcessing(true)
-        // TODO APIに変える
-        const result = await stripe.confirmCardPayment(client_secret, {
+        const res = await stripe.confirmCardPayment(client_secret, {
             payment_method: {
                 card: elements.getElement(CardElement),
                 billing_details: {
@@ -41,20 +41,10 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
                 },
             }
         })
-
-        if (result.error) {
-            alert.error(result.error.message)
-            setProcessing(false)
-        } else {
-            // The payment has been processed!
-            if (result.paymentIntent.status === 'succeeded') {
-                // Show a success message to your customer
-                // There's a risk of the customer closing the window before callback
-                // execution. Set up a webhook or plugin to listen for the
-                // payment_intent.succeeded event that handles any business critical
-                // post-payment actions.
-            }
+        if (res.error) {
+            alert.error('エラーが発生しました。')
         }
+        setProcessing(false)
     }
 
     return (
@@ -164,9 +154,6 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             event: eventSnapShot.id,
             category: categorySnapShot.id,
             user: user.uid
-        },
-        transfer_data: {
-            destination: stripeId,
         }
     })
     const { client_secret } = paymentIntent
