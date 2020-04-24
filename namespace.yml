@@ -1,6 +1,4 @@
-apiVersion: v1
+apiVersion: certmanager.k8s.io/disable-validation=true
 kind: Namespace
 metadata:
   name: cert-manager
-  labels:
-    cert-manager: certmanager.k8s.io/disable-validation=true
