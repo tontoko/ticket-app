@@ -58,6 +58,7 @@ jobs:
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           ./kustomize edit set image app-image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
           ./kustomize build . | kubectl apply -f -
+          kubectl create namespace cert-manager
           kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
           kubectl create clusterrolebinding cluster-admin-binding \
           --clusterrole=cluster-admin \
