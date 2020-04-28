@@ -59,10 +59,10 @@ jobs:
       - name: GKE Deploy
         run: |
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-          kubectl label --overwrite=true namespace cert-manager cert-manager.io
-          kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.2/cert-manager.yaml
           ./kustomize edit set image app-image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
           ./kustomize build . | kubectl apply -f -
+          kubectl label --overwrite namespace cert-manager cert-manager.io/disable-validation=true
+          kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.2/cert-manager.yaml
           kubectl create clusterrolebinding cluster-admin-binding \
           --clusterrole=cluster-admin \
           --user=$(gcloud config get-value core/account)
