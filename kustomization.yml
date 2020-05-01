@@ -6,6 +6,7 @@ resources:
   - namespace.yml
   - issuer.yml
   - certificate.yml
+  - clusterRoleBinding.uml
 secretGenerator:
   - name: env
     files:
