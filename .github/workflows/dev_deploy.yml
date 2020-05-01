@@ -60,9 +60,9 @@ jobs:
         run: |
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.3/cert-manager-legacy.yaml
-          kubectl create clusterrolebinding cluster-admin-binding \
+          kubectl apply clusterrolebinding cluster-admin-binding \
           --clusterrole=cluster-admin \
-          --user=$(gcloud config get-value core/account)¥
+          --user=$(gcloud config get-value core/account)
           ./kustomize edit set image app-image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
           ./kustomize build . | kubectl apply -f -
           kubectl rollout status deployment/$DEPLOYMENT_NAME
