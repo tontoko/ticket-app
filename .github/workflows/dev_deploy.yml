@@ -28,6 +28,7 @@ jobs:
           export_default_credentials: true
       - name: gcloud set up
         run: |
+          gcloud components update
           gcloud auth configure-docker
       - name: npm install, build
         run: |
