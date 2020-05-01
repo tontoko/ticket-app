@@ -28,7 +28,6 @@ jobs:
           export_default_credentials: true
       - name: gcloud set up
         run: |
-          gcloud components update
           gcloud auth configure-docker
       - name: npm install, build
         run: |
@@ -60,7 +59,7 @@ jobs:
       - name: GKE Deploy
         run: |
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-          kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.3/cert-manager.yaml
+          kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.3/cert-manager-legacy.yaml
           kubectl create clusterrolebinding cluster-admin-binding \
           --clusterrole=cluster-admin \
           --user=$(gcloud config get-value core/account)¥
