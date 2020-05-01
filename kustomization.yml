@@ -5,6 +5,7 @@ resources:
   - service.yml
   - namespace.yml
   - issuer.yml
+  - certificate.yml
 secretGenerator:
   - name: env
     files:
