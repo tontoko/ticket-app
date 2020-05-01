@@ -62,7 +62,7 @@ jobs:
           ./kustomize edit set image app-image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
           ./kustomize build . | kubectl apply -f -
           kubectl label --overwrite namespace cert-manager cert-manager.io/disable-validation=true
-          kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.2/cert-manager.yaml
+          kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.3/cert-manager.yaml
           kubectl create clusterrolebinding cluster-admin-binding \
           --clusterrole=cluster-admin \
           --user=$(gcloud config get-value core/account)
