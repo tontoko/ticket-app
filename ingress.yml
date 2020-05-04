@@ -9,5 +9,5 @@ spec:
   tls:
   - secretName: ticket-app-dev-certificate
   backend:
-    serviceName: nginx
+    serviceName: ticket-app-dev-service
     servicePort: 80
