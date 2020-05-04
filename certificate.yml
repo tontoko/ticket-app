@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: example-com-certificate
+  name: ticket-app-dev-certificate
   namespace: default
 spec:
   secretName: ticket-app-dev-certificate    # Ingressから参照するシークレット名
