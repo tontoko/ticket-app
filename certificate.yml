@@ -15,6 +15,7 @@ spec:
     config:
     - dns01:
         provider: clouddns  # Issuerのprovider名
+        ingress: ingress
       domains:
       - "*.ticket-app-dev.tk" # ワイルドカード
       - ticket-app-dev.tk  # ドメイン名
