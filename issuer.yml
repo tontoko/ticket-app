@@ -16,5 +16,5 @@ spec:
           clouddns:
             serviceAccountSecretRef:
               name: env
-              key: /var/secrets/ticket-app-dns.json
+              key: ticket-app-dns.json
             project: project
