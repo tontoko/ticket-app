@@ -60,7 +60,7 @@ jobs:
         run: |
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
           kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.14.3/cert-manager-legacy.yaml
-          sed 's/name: named/name: $(gcloud config get-value core/account)/' clusterRoleBinding.yml
+          sed -i -e "s/name: name/name: $(gcloud config get-value core/account)/" clusterRoleBinding.yml
           kubectl apply clusterrolebinding cluster-admin-binding \
           --clusterrole=cluster-admin \
           --user=$(gcloud config get-value core/account)
