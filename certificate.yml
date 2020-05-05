@@ -10,12 +10,11 @@ spec:
     kind: ClusterIssuer
   commonName: "*.ticket-app-dev.tk"  # ドメイン名
   dnsNames:
-  - ticket-app-dev.tk  # CloudDNSのDNS名
+  - ticket-app-dev.tk.  # CloudDNSのDNS名
   acme:
     config:
     - dns01:
         provider: clouddns  # Issuerのprovider名
-        ingress: ingress
       domains:
       - "*.ticket-app-dev.tk" # ワイルドカード
       - ticket-app-dev.tk  # ドメイン名
