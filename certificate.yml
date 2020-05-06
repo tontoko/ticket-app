@@ -4,17 +4,18 @@ metadata:
   name: ticket-app-dev-certificate
   namespace: default
 spec:
-  secretName: ticket-app-dev-certificate    # Ingressから参照するシークレット名
-  issuerRef:
-    name: letsencrypt-issuer  # Issuer名
-    kind: ClusterIssuer
-  commonName: "*.ticket-app-dev.tk"  # ドメイン名
-  dnsNames:
-  - ticket-app-dev.tk  # CloudDNSのDNS名
   acme:
-    config:
-    - dns01:
-        provider: clouddns  # Issuerのprovider名
-      domains:
-      - "*.ticket-app-dev.tk" # ワイルドカード
-      - ticket-app-dev.tk  # ドメイン名
+    secretName: ticket-app-dev-certificate    # Ingressから参照するシークレット名
+    issuerRef:
+      name: letsencrypt-issuer  # Issuer名
+      kind: ClusterIssuer
+    commonName: "*.ticket-app-dev.tk"  # ドメイン名
+    dnsNames:
+    - ticket-app-dev.tk  # CloudDNSのDNS名
+    solvers:
+    - selector:
+      dns01:
+        clouddns:  # Issuerのprovider名
+          domains:
+          - "*.ticket-app-dev.tk" # ワイルドカード
+          - ticket-app-dev.tk  # ドメイン名

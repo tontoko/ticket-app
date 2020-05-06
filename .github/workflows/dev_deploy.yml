@@ -59,7 +59,7 @@ jobs:
       - name: GKE Deploy
         run: |
           gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT
-          kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.15.0/cert-manager.yaml --validate=false
+          kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.0/cert-manager.yaml
           sed -i -e "s/name: name/name: $(gcloud config get-value core/account)/" clusterRoleBinding.yml
           sed -i -e "s/project: project/project: ${{ secrets.GKE_PROJECT }}/" issuer.yml
           ./kustomize edit set image app-image=$REGISTRY_HOSTNAME/$GKE_PROJECT/$IMAGE:${GITHUB_SHA}
