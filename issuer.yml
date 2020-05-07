@@ -10,11 +10,14 @@ spec:
     email: hirakitomohiko@gmail.com
     privateKeySecretRef:
       name: letsencrypt-issuer
-    dns01:
-      providers:
-        - name: clouddns
-          clouddns:
-            serviceAccountSecretRef:
-              name: env
-              key: ticket-app-dns.json
-            project: project
+    solvers:
+    - dns01:
+        clouddns:
+          serviceAccountSecretRef:
+            name: env
+            key: ticket-app-dns.json
+          project: project
+      selector:
+        dnsNames:
+        - "*.ticket-app-dev.tk" # ワイルドカード
+        - ticket-app-dev.tk  # ドメイン名

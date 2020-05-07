@@ -11,10 +11,3 @@ spec:
   commonName: "*.ticket-app-dev.tk"  # ドメイン名
   dnsNames:
   - ticket-app-dev.tk  # CloudDNSのDNS名
-  solvers:
-  - selector:
-    dns01:
-      clouddns:  # Issuerのprovider名
-        domains:
-        - "*.ticket-app-dev.tk" # ワイルドカード
-        - ticket-app-dev.tk  # ドメイン名
