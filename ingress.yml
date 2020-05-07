@@ -7,6 +7,7 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: ticket-app-dev
     cert-manager.io/cluster-issuer: letsencrypt-issuer
     kubernetes.io/ingress.class: gce
+    acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
   rules:
     - host: ticket-app-dev.tk
