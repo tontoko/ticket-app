@@ -3,9 +3,9 @@ kind: Ingress
 metadata:
   name: ingress
   annotations:
-    # kubernetes.io/ingress.allow-http: "false"
+    kubernetes.io/ingress.allow-http: "false"
     kubernetes.io/ingress.global-static-ip-name: ticket-app-dev
-    # networking.gke.io/managed-certificates: google-certificate
+    networking.gke.io/managed-certificates: google-certificate
     # cert-manager.io/cluster-issuer: letsencrypt-issuer
 spec:
   backend:
