@@ -19,7 +19,7 @@ spec:
   #           serviceName: ticket-app-dev-service
   #           servicePort: 80
   #         path: /
-  tls:
-  - hosts:
-    - ticket-app-dev.tk
+  # tls:
+  # - hosts:
+  #   - ticket-app-dev.tk
   #   secretName: google-certificate
