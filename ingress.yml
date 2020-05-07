@@ -8,18 +8,18 @@ metadata:
     networking.gke.io/managed-certificates: google-certificate
     # cert-manager.io/cluster-issuer: letsencrypt-issuer
 spec:
-  # backend:
-  #   serviceName: ticket-app-dev-service
-  #   servicePort: 80
-  rules:
-    - host: ticket-app-dev.tk
-      http:
-        paths:
-        - backend:
-            serviceName: ticket-app-dev-service
-            servicePort: 80
-          path: /
-  tls:
-  - hosts:
-    - ticket-app-dev.tk
-    secretName: google-certificate
+  backend:
+    serviceName: ticket-app-dev-service
+    servicePort: 80
+  # rules:
+  #   - host: ticket-app-dev.tk
+  #     http:
+  #       paths:
+  #       - backend:
+  #           serviceName: ticket-app-dev-service
+  #           servicePort: 80
+  #         path: /
+  # tls:
+  # - hosts:
+  #   - ticket-app-dev.tk
+  #   secretName: google-certificate
