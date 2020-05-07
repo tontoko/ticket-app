@@ -9,4 +9,4 @@ spec:
       targetPort: 3000
   selector:
     app: ticket-app-dev
-  type: NodePort
+  type: LoadBalancer
