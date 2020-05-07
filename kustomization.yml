@@ -8,7 +8,7 @@ resources:
   # - issuer.yml
   # - certificate.yml
   # - clusterRoleBinding.yml
-  - managedCertificate.yml
+  # - managedCertificate.yml
 secretGenerator:
   - name: env
     files:
