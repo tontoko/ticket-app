@@ -7,8 +7,15 @@ metadata:
     kubernetes.io/ingress.global-static-ip-name: ticket-app-dev
     cert-manager.io/cluster-issuer: letsencrypt-issuer
 spec:
+  rules:
+    - host: ticket-app-dev.tk
+      http:
+        paths:
+        - backend:
+            serviceName: ticket-app-dev-service
+            servicePort: 80
+          path: /
   tls:
-  - secretName: ticket-app-dev-certificate
-  backend:
-    serviceName: ticket-app-dev-service
-    servicePort: 80
+  - hosts:
+    - ticket-app-dev.tk
+    secretName: ticket-app-dev-certificate
