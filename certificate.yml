@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
-  name: ticket-app-dev-certificate
+  name: ticket-app-dev-tk
   namespace: default
 spec:
   secretName: ticket-app-dev-certificate    # Ingressから参照するシークレット名
@@ -10,4 +10,5 @@ spec:
     kind: ClusterIssuer
   commonName: "*.ticket-app-dev.tk"  # ドメイン名
   dnsNames:
-  - ticket-app-dev.tk  # CloudDNSのDNS名
+  - "*.ticket-app-dev.tk" # ワイルドカード
+  - ticket-app-dev.tk  # ドメイン名

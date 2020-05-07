@@ -17,7 +17,3 @@ spec:
             name: env
             key: ticket-app-dns.json
           project: project
-      selector:
-        dnsNames:
-        - "*.ticket-app-dev.tk" # ワイルドカード
-        - ticket-app-dev.tk  # ドメイン名
