@@ -45,7 +45,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
             alert.error('エラーが発生しました。')
             return setProcessing(false)
         }
-        router.push({ pathname: '/user/myTicket', query: { msg: 'チケットを購入しました。' } }, 'user/myTicket')
+        router.push({ pathname: '/user/myTicket', query: { msg: 'チケットを購入しました。' } }, '/user/myTicket')
     }
 
     return (
