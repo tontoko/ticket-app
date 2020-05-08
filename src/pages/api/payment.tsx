@@ -13,6 +13,7 @@ const Webhock: NextApiHandler = async (req, res) => {
     webhockEvent = stripe.webhooks.constructEvent(body, sig, endpointSecret);
   } catch (err) {
     // invalid signature
+    console.error(err)
     res.status(400).end();
     return;
   }
