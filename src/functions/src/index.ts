@@ -71,7 +71,7 @@ exports.payment = functions
             const stock = categoryResult && categoryResult.stock
             if (!stock || stock === 0) {
               // 在庫なしの返金処理
-              const refunds = await stripe.refunds.create({
+              await stripe.refunds.create({
                 payment_intent: intent.id,
                 refund_application_fee: true,
                 reverse_transfer: true
