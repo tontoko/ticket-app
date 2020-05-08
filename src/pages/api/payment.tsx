@@ -9,7 +9,7 @@ const Webhock: NextApiHandler = async (req, res) => {
   let webhockEvent: Stripe.Event
 
   try {
-    const endpointSecret = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? process.env.STRIPE_ENDPOINT_PROD : process.env.STRIPE_ENDPOINT_DEV
+    const endpointSecret = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD : process.env.STRIPE_PAYMENT_ENDPOINT_DEV
     webhockEvent = stripe.webhooks.constructEvent(body, sig, endpointSecret);
   } catch (err) {
     // invalid signature

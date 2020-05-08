@@ -51,7 +51,7 @@ jobs:
           cat << EOF > env.env
           GOOGLE_MAP_SERVER_KEY_DEV=${GOOGLE_MAP_SERVER_KEY_DEV}
           STRIPE_APIKEY_DEV=${STRIPE_APIKEY_DEV}
-          STRIPE_ENDPOINT_DEV=${STRIPE_ENDPOINT_DEV}
+          STRIPE_PAYMENT_ENDPOINT_DEV=${STRIPE_PAYMENT_ENDPOINT_DEV}
           EOF
       - name: GKE Deploy
         run: |
@@ -67,7 +67,7 @@ jobs:
       - name: firebase set env
         uses: w9jds/firebase-action@master
         with:
-          args: functions:config:set stripe.endpoint.dev=${{ secrets.STRIPE_ENDPOINT_DEV }} stripe.apikey.dev=${{ secrets.STRIPE_APIKEY_DEV }}
+          args: functions:config:set stripe.payment.endpoint.dev=${{ secrets.STRIPE_PAYMENT_ENDPOINT_DEV }} stripe.apikey.dev=${{ secrets.STRIPE_APIKEY_DEV }}
       - name: firebase deploy
         uses: w9jds/firebase-action@master
         with:
