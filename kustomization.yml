@@ -4,10 +4,6 @@ resources:
   - deployment.yml
   - ingress.yml
   - service.yml
-  # - namespace.yml
-  # - issuer.yml
-  # - certificate.yml
-  # - clusterRoleBinding.yml
   - managedCertificate.yml
 secretGenerator:
   - name: env
