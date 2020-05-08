@@ -43,8 +43,9 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         })
         if (res.error) {
             alert.error('エラーが発生しました。')
+            return setProcessing(false)
         }
-        setProcessing(false)
+        router.push({ pathname: 'user/myTicket', query: { msg: 'チケットを購入しました。' } }, 'user/myTicket')
     }
 
     return (
@@ -147,6 +148,9 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const paymentIntent = await stripe.paymentIntents.create({
         amount: category.price,
         currency: 'jpy',
+        transfer_data: {
+            destination: stripeId
+        },
         payment_method_types: ['card'],
         on_behalf_of: stripeId,
         application_fee_amount: category.price * 4.4 / 100,

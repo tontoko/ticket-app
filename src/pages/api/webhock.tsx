@@ -24,22 +24,29 @@ const Webhock: NextApiHandler = async (req, res) => {
         intent = webhockEvent.data.object as Stripe.PaymentIntent
         const { event, category } = intent.metadata
         const { firestore } = await initFirebaseAdmin()
-        firestore.runTransaction(async transaction => {
-          const categoryRef = firestore.collection('events').doc(event).collection('categories').doc(category)
-          const { stock } = (await transaction.get(categoryRef)).data()
-          if (stock === 0) {
-            // 在庫なしの返金処理
-            const refunds = await stripe.refunds.create({
-              payment_intent: intent.id,
-              refund_application_fee: true,
-              reverse_transfer: true
-            })
-          }
-          // 在庫を一つ減らす
-          transaction.set(categoryRef, {
-            stock: stock - 1
-          }, { merge: true })
-        })
+        try {
+          await firestore.runTransaction(async transaction => {
+            const categoryRef = firestore.collection('events').doc(event).collection('categories').doc(category)
+            const { stock } = (await transaction.get(categoryRef)).data()
+            if (stock === 0) {
+              // 在庫なしの返金処理
+              const refunds = await stripe.refunds.create({
+                payment_intent: intent.id,
+                refund_application_fee: true,
+                reverse_transfer: true
+              })
+              // Intentをキャンセル
+              await stripe.paymentIntents.cancel(intent.id);
+              throw Error('在庫がありませんでした。')
+            }
+            // 在庫を一つ減らす
+            transaction.set(categoryRef, {
+              stock: stock - 1
+            }, { merge: true })
+          })
+        } catch(e) {
+          console.log(`${e}:`, intent.id);
+        }
         console.log("Succeeded:", intent.id);
         break;
       case 'payment_intent.payment_failed':
