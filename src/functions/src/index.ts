@@ -43,7 +43,7 @@ exports.createUser = functions
 
 const app = express()
 app.post('/payment', bodyParser.raw({ type: 'application/json' }), async(req, res) => {
-  const sig = req.headers['stripe-signature'];
+  const sig = req.headers['Stripe-Signature'];
   let webhockEvent: Stripe.Event
 
   try {
@@ -75,8 +75,6 @@ app.post('/payment', bodyParser.raw({ type: 'application/json' }), async(req, re
                 refund_application_fee: true,
                 reverse_transfer: true
               })
-              // Intentをキャンセル
-              await stripe.paymentIntents.cancel(intent.id);
               throw Error('在庫がありませんでした。')
             }
             // 在庫を一つ減らす
