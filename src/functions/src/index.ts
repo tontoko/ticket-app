@@ -1,6 +1,8 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin' 
 import Stripe from 'stripe'
+import * as express from 'express'
+import * as bodyParser from 'body-parser'
 
 type stripeEnv = {
   payment: {
@@ -25,7 +27,6 @@ const stripePaymentSecret = process.env.GCLOUD_PROJECT === 'ticket-app-d3f5a' ? 
 const stripe = new Stripe(stripeSecret, { apiVersion: null })
 
 exports.createUser = functions
-.region('asia-northeast1')
 .auth.user().onCreate(async (user) => {  
   const stripeAccount = await stripe.accounts.create({
     country: 'JP',
@@ -40,16 +41,14 @@ exports.createUser = functions
   })
 });
 
-exports.payment = functions
-.region('asia-northeast1')
-.https.onRequest(async (req, res) => {
+const app = express()
+app.post('/payment', bodyParser.raw({ type: 'application/json' }), (req, res) => {
   const sig = req.headers['stripe-signature'];
-  const { body } = req
   let webhockEvent: Stripe.Event
 
   try {
     const endpointSecret = stripePaymentSecret
-    webhockEvent = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+    webhockEvent = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     // invalid signature
     console.error(err)
@@ -102,3 +101,5 @@ exports.payment = functions
 
   res.status(200).end()
 })
+
+exports.https = functions.https.onRequest(app)
