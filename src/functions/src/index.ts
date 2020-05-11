@@ -43,7 +43,7 @@ exports.createUser = functions
 
 const app = express()
 app.post('/payment', bodyParser.raw({ type: 'application/json' }), async(req, res) => {
-  const sig = req.headers['Stripe-Signature'];
+  const sig = req.headers['stripe-signature'];
   let webhockEvent: Stripe.Event
 
   try {
