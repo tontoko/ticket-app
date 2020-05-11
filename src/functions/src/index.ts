@@ -1,9 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin' 
 import Stripe from 'stripe'
-import * as express from 'express'
-import * as bodyParser from 'body-parser'
-import { Http2ServerRequest } from 'http2'
 
 type stripeEnv = {
   payment: {
