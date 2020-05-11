@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin'
 import Stripe from 'stripe'
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
+import { Http2ServerRequest } from 'http2'
 
 type stripeEnv = {
   payment: {
@@ -47,6 +48,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
 
   try {
     const endpointSecret = stripePaymentSecret
+    // @ts-ignore
     webhockEvent = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
   } catch (err) {
     // invalid signature
