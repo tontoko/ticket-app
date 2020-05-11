@@ -41,14 +41,13 @@ exports.createUser = functions
   })
 });
 
-const app = express()
-app.post('/payment', bodyParser.raw({ type: '*/*' }), async(req, res) => {
+exports.https = functions.https.onRequest(async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let webhockEvent: Stripe.Event
 
   try {
     const endpointSecret = stripePaymentSecret
-    webhockEvent = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    webhockEvent = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
   } catch (err) {
     // invalid signature
     console.error(err)
@@ -99,5 +98,3 @@ app.post('/payment', bodyParser.raw({ type: '*/*' }), async(req, res) => {
 
   res.status(200).end()
 })
-
-exports.https = functions.https.onRequest(app)
