@@ -83,6 +83,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
           firestore.collection('payment').add({
             event,
             category,
+            user,
             stripe: intent.id
           })
         } catch (e) {
