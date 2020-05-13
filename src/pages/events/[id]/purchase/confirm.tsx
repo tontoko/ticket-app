@@ -171,7 +171,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         }
     })
     const { client_secret } = paymentIntent
-    return { props: { familyName, firstName, email, event, category, photoUrls, client_secret } }
+    return { props: { familyName, firstName, email, event, category, photoUrls, client_secret, user } }
 }
 
 export default Confirmation

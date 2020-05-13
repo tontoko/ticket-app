@@ -110,7 +110,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         const category = e.data()
         categories.push({ ...category, id })
     })
-    return {props: { event, categories, photoUrls }}
+    return {props: { event, categories, photoUrls, user }}
 }
 
 export default Purchase
