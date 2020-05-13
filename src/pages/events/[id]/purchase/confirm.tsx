@@ -37,9 +37,10 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         if (ticket.stock === 0 || !ticket.public) {
             const msg = !ticket.stock ? '在庫がありませんでした。リダイレクトします。' : '非公開状態のチケットです。リダイレクトします。'
             alert.error(msg)
-            return setTimeout(() => {
+            setTimeout(() => {
                 router.push(`/events/${id}`)
             }, 3000);
+            return
         }
         const res = await stripe.confirmCardPayment(client_secret, {
             payment_method: {
