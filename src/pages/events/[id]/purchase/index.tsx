@@ -15,11 +15,12 @@ import { event } from 'events'
 export const Purchase = ({ event, categories, photoUrls }) => {
     const router = useRouter();
 
+    const validCategories = categories.filter(category => category.stock)
     const [familyName, setFamilyName] = useState('')
     const [firstName, setFirstName] = useState('')
     const [email, setEmail] = useState('')
     const [invalidEmail, setInvalidEmail] = useState(false)
-    const [selectedCategory, setSelectedCategory] = useState(categories[0].id)
+    const [selectedCategory, setSelectedCategory] = useState(validCategories[0].id)
 
     const changeEmail = (e) => {
         validationEmail()
@@ -70,8 +71,8 @@ export const Purchase = ({ event, categories, photoUrls }) => {
                             <Col>
                                 <Label>チケットカテゴリ</Label>
                                 <Input type="select" value={selectedCategory} onChange={e =>  setSelectedCategory(e.target.value)}>
-                                    {categories.map(category => (
-                                        category.stock && <option value={category.id} key={category.id}>{category.name}</option>
+                                    {validCategories.map(category => (
+                                        category && <option value={category.id} key={category.id}>{category.name}</option>
                                     ))}
                                 </Input>
                             </Col>
