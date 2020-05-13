@@ -32,7 +32,7 @@ exports.createUser = functions
     requested_capabilities: ['card_payments', 'transfers'],
     email: user.email
   })
-  const usersRef = firestore.collection('users');
+  const usersRef = firestore.collection('users')
   await usersRef.doc(user.uid).set({
     admin: false,
     stripeId: stripeAccount.id
@@ -59,7 +59,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
     switch (webhockEvent['type']) {
       case 'payment_intent.succeeded':
         intent = webhockEvent.data.object as Stripe.PaymentIntent
-        const { event, category } = intent.metadata
+        const { event, category, user } = intent.metadata
         const firestore = admin.firestore()
         try {
           await firestore.runTransaction(async transaction => {
@@ -79,6 +79,11 @@ exports.https = functions.https.onRequest(async (req, res) => {
             transaction.set(categoryRef, {
               stock: stock - 1
             }, { merge: true })
+          })
+          firestore.collection('payment').add({
+            event,
+            category,
+            stripe: intent.id
           })
         } catch (e) {
           console.log(`${e}:`, intent.id);

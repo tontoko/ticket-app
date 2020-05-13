@@ -30,8 +30,16 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         e.preventDefault()
         if (!stripe || !elements) return
         if (!agree) return alert.error("同意します が選択されていません")
-
+        const { firestore } = await initFirebase()
+        const { selectedCategory, id } = router.query
         setProcessing(true)
+        const { stock } = (await firestore.collection('events').doc(id as string).collection('categories').doc(selectedCategory as string).get()).data()
+        if (!stock) {
+            alert.error('在庫がありませんでした。リダイレクトします。')
+            setTimeout(() => {
+                router.push(`/events/${id}`)
+            }, 3000);
+        }
         const res = await stripe.confirmCardPayment(client_secret, {
             payment_method: {
                 card: elements.getElement(CardElement),
@@ -45,7 +53,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
             alert.error('エラーが発生しました。')
             return setProcessing(false)
         }
-        router.push({ pathname: '/user/myTicket', query: { msg: 'チケットを購入しました。' } }, '/user/myTicket')
+        router.push({ pathname: '/user/myTickets', query: { msg: 'チケットを購入しました。' } }, '/user/myTickets')
     }
 
     return (
