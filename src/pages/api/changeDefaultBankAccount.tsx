@@ -5,7 +5,10 @@ import stripe, { Stripe } from '@/src/lib/stripe'
 const endpoint: NextApiHandler = (async (req, res) => {
   try {
     const { firebaseToken, id } = req.body
-    if (!firebaseToken || !id) return res.status(500)
+    if (!firebaseToken || !id) {
+      res.status(500)
+      return 
+    }
 
     const { firebase, firestore } = await initFirebaseAdmin()
     const decodedToken = await firebase.auth().verifyIdToken(firebaseToken)
@@ -19,7 +22,7 @@ const endpoint: NextApiHandler = (async (req, res) => {
       { default_for_currency: true },
     ) as Stripe.BankAccount
 
-    return res.json({ status: true })
+    res.json({ status: true })
 
   } catch (error) {
     console.log(error)

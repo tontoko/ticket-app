@@ -1,14 +1,16 @@
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
 const { upload } = require('micro-upload')
-import fs from 'fs'
 import stripe, { Stripe } from '@/src/lib/stripe'
 
 const endpoint: NextApiHandler = upload(async (req, res) => {
   try {
 
     const { token } = req.body
-    if (!token) return res.status(500)
+    if (!token) {
+      res.status(500)
+      return 
+    }
     const { firebase, firestore } = await initFirebaseAdmin()
     const decodedToken = await firebase.auth().verifyIdToken(token)
 
@@ -54,7 +56,7 @@ const endpoint: NextApiHandler = upload(async (req, res) => {
       }
     );
 
-    return res.json({ status: true })
+    res.json({ status: true })
 
   } catch (error) {
     console.log(error)
