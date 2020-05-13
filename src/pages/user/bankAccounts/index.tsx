@@ -130,11 +130,11 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   const { user } = await isLogin(ctx)
   const { firestore } = await initFirebaseAdmin()
   const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
-  const result: Stripe.ApiList<Stripe.BankAccount> = await stripe.accounts.listExternalAccounts(
+  const result = await stripe.accounts.listExternalAccounts(
     stripeId,
     // @ts-ignore
     { object: 'bank_account', limit: 100 }
-  )
+  ) as Stripe.ApiList<Stripe.BankAccount>
   return { props: { user, bankAccounts: result.data } }
 }
 
