@@ -80,6 +80,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
               stock: stock - 1
             }, { merge: true })
           })
+          // 決済履歴追加
           firestore.collection('payment').add({
             event,
             category,
