@@ -108,9 +108,12 @@ export default ({ user, event, categories, status, items }) => {
     const returnCatetgories = () => categories.map((category, i) => {
         const msg = `${category.name}: ${category.price} 円`
         if (status == 'organizer' && !category.public) {
-            return <h6 key={i}>{`${msg} (非公開)`}</h6>
+            return <h6 key={i}>{`${msg} (非公開) 残り ${category.stock}枚`}</h6>
         }
         if (category.public) {
+            if (!category.stock) {
+                return <h6 key={i} style={{ textDecorationLine: 'line-through' }}>{`${msg}`}<span> 完売</span></h6>
+            }
             return <h6 key={i}>{msg}</h6>
         }
     })

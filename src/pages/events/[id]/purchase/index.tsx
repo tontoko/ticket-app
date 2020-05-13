@@ -71,7 +71,7 @@ export const Purchase = ({ event, categories, photoUrls }) => {
                                 <Label>チケットカテゴリ</Label>
                                 <Input type="select" value={selectedCategory} onChange={e =>  setSelectedCategory(e.target.value)}>
                                     {categories.map(category => (
-                                        <option value={category.id} key={category.id}>{category.name}</option>
+                                        category.stock && <option value={category.id} key={category.id}>{category.name}</option>
                                     ))}
                                 </Input>
                             </Col>
