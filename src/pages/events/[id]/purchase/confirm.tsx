@@ -33,10 +33,11 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         const { firestore } = await initFirebase()
         const { selectedCategory, id } = router.query
         setProcessing(true)
-        const { stock } = (await firestore.collection('events').doc(id as string).collection('categories').doc(selectedCategory as string).get()).data()
-        if (!stock) {
-            alert.error('在庫がありませんでした。リダイレクトします。')
-            setTimeout(() => {
+        const ticket = (await firestore.collection('events').doc(id as string).collection('categories').doc(selectedCategory as string).get()).data()
+        if (ticket.stock === 0 || !ticket.public) {
+            const msg = !ticket.stock ? '在庫がありませんでした。リダイレクトします。' : '非公開状態のチケットです。リダイレクトします。'
+            alert.error(msg)
+            return setTimeout(() => {
                 router.push(`/events/${id}`)
             }, 3000);
         }

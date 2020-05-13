@@ -52,9 +52,7 @@ export default ({event, beforeCategories}) => {
             </Col>
             <Col xs="1" style={{ padding: 0, display: 'flex', alignItems: 'center'}}>
               {category.new && 
-                <div style={{ margin: 0, opacity: '0.6', display: 'flex', alignItems: 'center' }} onClick={deleteCategory}>
-                  <FontAwesomeIcon icon={faTimesCircle} size="sm" style={{ color: "black" }} className="fa-2x" />
-                </div>
+                <FontAwesomeIcon icon={faTimesCircle} style={{ color: "gray", margin: 0, height: '60%', cursor: 'pointer' }} className="fa-2x" onClick={deleteCategory} />
               }
             </Col>
           </Row>
@@ -63,7 +61,7 @@ export default ({event, beforeCategories}) => {
               <Input type='number' min='0' value={category.price} onChange={e => setPrice(parseInt(e.target.value, 10))} style={{textAlign: 'right'}} disabled={!category.new} />
               <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
             </Col>
-          // todo 売り上げと付き合わせて在庫変更できるようにする
+          {/* todo #2 売り上げと付き合わせて在庫変更できるようにする */}
           <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
             <Input type='number' min='0' value={category.stock} onChange={e => setStock(parseInt(e.target.value, 10))} style={{ textAlign: 'right' }} disabled={!category.new} />
             <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}> 枚</p>
@@ -107,7 +105,7 @@ export default ({event, beforeCategories}) => {
           <Form style={{ marginTop: '5em' }}>
         <h5 style={{marginBottom: '1em'}}>カテゴリ一覧</h5>
         {renderCategories()}
-        <Button onClick={addCategory}>追加</Button>
+        <Button onClick={addCategory}>カテゴリ追加</Button>
         <Row className="flex-row-reverse" style={{marginTop: '2em'}}>
           <Button style={{ marginRight: '1em' }} onClick={submit} >確認</Button>
         </Row>
