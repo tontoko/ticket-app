@@ -59,7 +59,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
     switch (webhockEvent['type']) {
       case 'payment_intent.succeeded':
         intent = webhockEvent.data.object as Stripe.PaymentIntent
-        const { event, category, user } = intent.metadata
+        const { event, category, seller, buyer } = intent.metadata
         const firestore = admin.firestore()
         try {
           await firestore.runTransaction(async transaction => {
@@ -84,7 +84,8 @@ exports.https = functions.https.onRequest(async (req, res) => {
           firestore.collection('payments').add({
             event,
             category,
-            user,
+            seller,
+            buyer,
             stripe: intent.id
           })
         } catch (e) {

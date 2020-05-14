@@ -164,10 +164,11 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         },
         payment_method_types: ['card'],
         on_behalf_of: stripeId,
-        metadata: { 
+        metadata: {
             event: eventSnapShot.id,
             category: categorySnapShot.id,
-            user: user.uid
+            seller: data.createdUser,
+            buyer: user.uid,
         }
     })
     const { client_secret } = paymentIntent
