@@ -18,6 +18,9 @@ declare module 'events' {
   
   export type categories = {
     name: string,
-    price: number
+    price: number,
+    createdUser: string,
+    stock: number,
+    sold: number
   }
 }
