@@ -39,9 +39,9 @@ const Confirmation= props => {
     }))
     try {
       await firestore.runTransaction(async transaction => {
-        await Promise.all(Object.keys(updateCategories).map(async id => {
+        Object.keys(updateCategories).map(async id => {
           transaction.set(categoriesRef.doc(id), updateCategories[id])
-        }))
+        })
       })
       router.push(`/events/${router.query.id}?msg=更新しました`)
     } catch(e) {
