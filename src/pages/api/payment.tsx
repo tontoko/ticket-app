@@ -28,8 +28,8 @@ const Webhock: NextApiHandler = async (req, res) => {
         try {
           await firestore.runTransaction(async transaction => {
             const categoryRef = firestore.collection('events').doc(event).collection('categories').doc(category)
-            const { stock } = (await transaction.get(categoryRef)).data()
-            if (stock === 0) {
+            const { stock, sold } = (await transaction.get(categoryRef)).data()
+            if (stock - sold < 1) {
               // 在庫なしの返金処理
               const refunds = await stripe.refunds.create({
                 payment_intent: intent.id,
@@ -40,9 +40,9 @@ const Webhock: NextApiHandler = async (req, res) => {
               await stripe.paymentIntents.cancel(intent.id);
               throw Error('在庫がありませんでした。')
             }
-            // 在庫を一つ減らす
+            // 売り上げを一つ追加
             transaction.set(categoryRef, {
-              stock: stock - 1
+              sold: sold + 1
             }, { merge: true })
           })
         } catch(e) {

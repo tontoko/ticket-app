@@ -27,7 +27,7 @@ const Confirmation= props => {
     let updateCategories: {string?: FirebaseFirestore.DocumentData} = {}
     await Promise.all(categories.map(async category => {
       if (category.new) {
-        const addCategory = { ...category, price: Number(category.price), stock: Number(category.stock) }
+        const addCategory = { ...category, price: Number(category.price), stock: Number(category.stock), sold: 0, createdUser: props.user.id }
         delete addCategory.new
         categoriesRef.add(addCategory)
       } else {

@@ -61,7 +61,11 @@ export default ({event, beforeCategories}) => {
               <Input type='number' min='0' value={category.price} onChange={e => setPrice(parseInt(e.target.value, 10))} style={{textAlign: 'right'}} disabled={!category.new} />
               <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
             </Col>
-          {/* todo #2 売り上げと付き合わせて在庫変更できるようにする */}
+          {!category.new && 
+          <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
+            <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}>{category.sold} 枚 (残り {category.stock - category.sold} 枚)</p>
+          </Col>
+          }
           <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
             <Input type='number' min='0' value={category.stock} onChange={e => setStock(parseInt(e.target.value, 10))} style={{ textAlign: 'right' }} disabled={!category.new} />
             <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}> 枚</p>
@@ -88,7 +92,8 @@ export default ({event, beforeCategories}) => {
       categories.filter(e => {
         if (!e.name) throw new Error('チケット名を入力してください。')
         if (e.price < 500) throw new Error('チケットの価格は500円以上に設定してください。')
-        if (e.stock < 1) throw new Error('チケットの在庫は1枚以上に設定してください。')
+        if (e.stock < 1 && e.new) throw new Error('チケットの在庫は1枚以上に設定してください。')
+        if (!e.new && e.stock - e.sold < 1) throw new Error('チケットの在庫は売り上げ分を引いて1枚以上に設定してください。')
         if (names.indexOf(e["name"]) === -1) {
           names.push(e["name"])
           return e
