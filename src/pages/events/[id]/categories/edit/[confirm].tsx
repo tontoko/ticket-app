@@ -25,19 +25,19 @@ const Confirmation= props => {
     const {firestore} = await initFirebase()
     const categoriesRef = firestore.collection('events').doc(router.query.id as string).collection('categories')
     let updateCategories: {string?: FirebaseFirestore.DocumentData} = {}
-    await Promise.all(categories.map(async category => {
-      if (category.new) {
-        const addCategory = { ...category, price: Number(category.price), stock: Number(category.stock), sold: 0, createdUser: props.user }
-        delete addCategory.new
-        categoriesRef.add(addCategory)
-      } else {
-        const updateCategory = { ...category, price: Number(category.price), stock: Number(category.stock) }
-        const id = { ...updateCategory}.id
-        delete updateCategory.id
-        updateCategories[id] = updateCategory
-      }
-    }))
     try {
+      await Promise.all(categories.map(async category => {
+        if (category.new) {
+          const addCategory = { ...category, price: Number(category.price), stock: Number(category.stock), sold: 0, createdUser: props.user }
+          delete addCategory.new
+          categoriesRef.add(addCategory)
+        } else {
+          const updateCategory = { ...category, price: Number(category.price), stock: Number(category.stock) }
+          const id = { ...updateCategory}.id
+          delete updateCategory.id
+          updateCategories[id] = updateCategory
+        }
+      }))
       await firestore.runTransaction(async transaction => {
         Object.keys(updateCategories).map(async id => {
           transaction.set(categoriesRef.doc(id), updateCategories[id])
