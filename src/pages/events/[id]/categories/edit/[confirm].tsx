@@ -12,6 +12,7 @@ import errorMsg from '@/src/lib/errorMsg'
 import { GetServerSideProps } from 'next'
 import { event } from 'events'
 import isLogin from '@/src/lib/isLogin'
+import atob from 'atob'
 
 const Confirmation= props => {
   const router = useRouter()
@@ -77,5 +78,5 @@ export default Confirmation
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { user } = await isLogin(ctx)
   const {confirm} = ctx.query
-  return { props: { user, categories: confirm} }
+  return { props: { user, categories: decodeURIComponent(escape(atob(confirm as string)))} }
 }
