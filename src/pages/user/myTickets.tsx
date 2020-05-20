@@ -78,7 +78,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const myEvents = (await firestore.collection('payments').where('buyer', '==', user.user_id).get()).docs
     let events: FirebaseFirestore.DocumentData[] = []
     if (myEvents.length > 0) {
-        const myEventsIds = myEvents.map(myEvent => myEvent.data().buyer)
+        const myEventsIds = myEvents.map(myEvent => myEvent.data().event)
         const result = await firestore.collection('events').where(firebase.firestore.FieldPath.documentId(), 'in', myEventsIds).get()
         events = await Promise.all(result.docs.map(async doc => {
             const data = doc.data()
@@ -86,7 +86,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             const updatedAt = data.updatedAt.seconds
             const startDate = data.startDate.seconds
             const endDate = data.endDate.seconds
-            const photos = data.photos.length > 0 ? await getImg(data.photos[0], user.user_id) : await getImg(null, user.user_id)
+            const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser) : await getImg(null, data.createdUser)
             return { ...data, createdAt, updatedAt, startDate, endDate, photos, id: doc.id }
         }))
     }
