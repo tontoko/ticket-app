@@ -48,6 +48,8 @@ export default ({ user, events }) => {
                                         <CardTitle>{event.name}</CardTitle>
                                         <CardSubtitle>{event.placeName}</CardSubtitle>
                                         <CardText>{showDate()}</CardText>
+                                        <p>チケット</p>
+                                            {event.tickets.map(ticket => <p>{ticket.name}</p>)}
                                     </Col>
                                 </Row>
                             </CardBody>
@@ -75,19 +77,24 @@ export default ({ user, events }) => {
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx)
     const { firebase, firestore } = await initFirebaseAdmin()
-    const myEvents = (await firestore.collection('payments').where('buyer', '==', user.user_id).get()).docs
+    const myTickets = (await firestore.collection('payments').where('buyer', '==', user.user_id).get()).docs
     let events: FirebaseFirestore.DocumentData[] = []
-    if (myEvents.length > 0) {
-        const myEventsIds = myEvents.map(myEvent => myEvent.data().event)
+    if (myTickets.length > 0) {
+        let myEventsIds = myTickets.map(myEvent => myEvent.data().event)
+        myEventsIds = Array.from(new Set(myEventsIds)) // 重複除外
         const result = await firestore.collection('events').where(firebase.firestore.FieldPath.documentId(), 'in', myEventsIds).get()
         events = await Promise.all(result.docs.map(async doc => {
+            const tickets = await Promise.all(myTickets.filter(ticket => ticket.data().event === doc.id).map(async ticket => {
+                return (await firestore.collection('events').doc(doc.id).collection('categories').doc(ticket.data().category).get()).data()
+            }))
+            console.log(tickets)
             const data = doc.data()
             const createdAt = data.createdAt.seconds
             const updatedAt = data.updatedAt.seconds
             const startDate = data.startDate.seconds
             const endDate = data.endDate.seconds
             const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser) : await getImg(null, data.createdUser)
-            return { ...data, createdAt, updatedAt, startDate, endDate, photos, id: doc.id }
+            return { ...data, createdAt, updatedAt, startDate, endDate, tickets, photos, id: doc.id }
         }))
     }
     return { props: { user, events } }
