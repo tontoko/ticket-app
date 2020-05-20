@@ -36,26 +36,32 @@ export default ({ user, events }) => {
             }
 
             return (
-                <Link key={i} href={`/events/${event.id}`}>
-                    <div>
-                        <Card style={{ cursor: 'pointer' }}>
-                            <CardBody>
-                                <Row>
-                                    <Col sm="2" xs="3">
+                <div>
+                    <Card>
+                        <CardBody>
+                            <Row>
+                                <Link key={i} href={`/events/${event.id}`}>
+                                    <Col sm="2" xs="3" style={{ cursor: 'pointer' }}>
                                         <img width="100%" src={event.photos} alt="Card image cap" />
                                     </Col>
-                                    <Col xs="auto">
-                                        <CardTitle>{event.name}</CardTitle>
-                                        <CardSubtitle>{event.placeName}</CardSubtitle>
-                                        <CardText>{showDate()}</CardText>
-                                        <p>チケット</p>
-                                            {event.tickets.map(ticket => <p>{ticket.name}</p>)}
-                                    </Col>
-                                </Row>
-                            </CardBody>
-                        </Card>
-                    </div>
-                </Link>
+                                </Link>
+                                <Col xs="auto">
+                                    <CardTitle>{event.name}</CardTitle>
+                                    <CardSubtitle>{event.placeName}</CardSubtitle>
+                                    <CardText>{showDate()}</CardText>
+                                    <p>購入済みチケット:</p>
+                                    {event.tickets.map(ticket => 
+                                        <Card>
+                                            <CardBody>
+                                                <p>{ticket.name}: {ticket.price}円</p>
+                                            </CardBody>
+                                        </Card>
+                                    )}
+                                </Col>
+                            </Row>
+                        </CardBody>
+                    </Card>
+                </div>
             )
         }
         ))
@@ -87,7 +93,6 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             const tickets = await Promise.all(myTickets.filter(ticket => ticket.data().event === doc.id).map(async ticket => {
                 return (await firestore.collection('events').doc(doc.id).collection('categories').doc(ticket.data().category).get()).data()
             }))
-            console.log(tickets)
             const data = doc.data()
             const createdAt = data.createdAt.seconds
             const updatedAt = data.updatedAt.seconds

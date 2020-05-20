@@ -66,7 +66,9 @@ exports.https = functions.https.onRequest(async (req, res) => {
             const categoryRef = firestore.collection('events').doc(event).collection('categories').doc(category)
             const categoryResult = (await transaction.get(categoryRef)).data()
             const stock = categoryResult && categoryResult.stock
-            if (!stock || stock === 0) {
+            const sold = categoryResult && categoryResult.sold
+            
+            if (!stock || !sold || stock - sold < 1) {
               // 在庫なしの返金処理
               await stripe.refunds.create({
                 payment_intent: intent.id,
@@ -75,9 +77,9 @@ exports.https = functions.https.onRequest(async (req, res) => {
               })
               throw Error('在庫がありませんでした。')
             }
-            // 在庫を一つ減らす
+            // 売り上げを一つ増やす
             transaction.set(categoryRef, {
-              stock: stock - 1
+              sold: sold + 1
             }, { merge: true })
           })
           // 決済履歴追加
