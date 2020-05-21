@@ -26,6 +26,18 @@ const Confirmation= props => {
     const {firestore} = await initFirebase()
     const categoriesRef = firestore.collection('events').doc(router.query.id as string).collection('categories')
     let updateCategories: {string?: FirebaseFirestore.DocumentData} = {}
+    let names = []
+    categories.filter(e => {
+      if (!e.name) throw new Error('チケット名を入力してください。')
+      if (e.price < 500) throw new Error('チケットの価格は500円以上に設定してください。')
+      if (e.stock < 1 && e.new) throw new Error('チケットの在庫は1枚以上に設定してください。')
+      if (!e.new && e.stock - e.sold < 1) throw new Error('チケットの在庫は売り上げ分を引いて1枚以上に設定してください。')
+      if (names.indexOf(e["name"]) === -1) {
+        names.push(e["name"])
+        return e
+      }
+      throw new Error('チケット名が重複しています')
+    })
     try {
       await Promise.all(categories.map(async category => {
         if (category.new) {
