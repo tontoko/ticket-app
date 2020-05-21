@@ -82,7 +82,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
-    const photos = data.photos.length > 0 ? await getImg(data.photos[0], user.user_id) : await getImg(null, user.user_id)
+    const photos = data.photos.length > 0 ? await getImg(data.photos[0], user.user_id, '360') : await getImg(null, user.user_id, '360')
     return { ...data, createdAt, updatedAt, startDate, endDate, photos, id: doc.id }
   }))
   return {props: {user, events}}

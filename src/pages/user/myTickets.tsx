@@ -114,7 +114,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             const updatedAt = data.updatedAt.seconds
             const startDate = data.startDate.seconds
             const endDate = data.endDate.seconds
-            const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser) : await getImg(null, data.createdUser)
+            const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser, '360') : await getImg(null, data.createdUser, '360')
             return { ...data, createdAt, updatedAt, startDate, endDate, tickets, photos, id: doc.id }
         }))
     }

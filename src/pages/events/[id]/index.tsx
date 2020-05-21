@@ -157,7 +157,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
                         next={next}
                         previous={previous}
                         className="carousel-fade"
-                        style={{width: "100%"}}
+                        style={{ width: "100%" }}
                         interval="20000"
                     >
                         <CarouselIndicators items={items} activeIndex={activeIndex} onClickHandler={goToIndex} />
