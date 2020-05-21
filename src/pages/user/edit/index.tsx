@@ -26,11 +26,11 @@ const UserShow = ({ user, verification }) => {
             </>
             )}
 
-            <FormGroup style={{ marginTop: '2em' }}>
-                <Link href={`/user/edit/updateUser`}><a>ユーザー情報を追加・修正する</a></Link>
-            </FormGroup>
             <div style={{ marginTop: '2.5em' }}>
-                <h5>イベント主催者用</h5>
+                <h5>イベント主催者用の登録情報</h5>
+                <FormGroup style={{ marginTop: '2em' }}>
+                    <Link href={`/user/edit/updateUser`}><a>ユーザー情報を追加・修正する</a></Link>
+                </FormGroup>
                 <FormGroup style={{ marginTop: '1em' }}>
                     <Link href={`/user/bankAccounts`}><a>銀行口座を追加・修正する</a></Link>
                 </FormGroup>

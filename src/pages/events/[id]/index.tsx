@@ -8,7 +8,9 @@ import {
     CarouselControl,
     CarouselIndicators,
     CarouselCaption,
-    FormGroup
+    FormGroup,
+    Card,
+    CardBody
 } from 'reactstrap';
 import getImg from '@/src/lib/getImgSSR'
 import { GetServerSideProps } from 'next'
@@ -17,7 +19,7 @@ import isLogin from '@/src/lib/isLogin'
 import { event } from 'events'
 import moment from 'moment'
 
-export default ({ user, event, categories, status, items }) => {
+export default ({ user, event, categories, status, items, tickets }) => {
 
     const router = useRouter();
     const startDate = moment(event.startDate * 1000)
@@ -85,11 +87,36 @@ export default ({ user, event, categories, status, items }) => {
         } else if (status == 'bought') {
             // 申し込み後
             return (
-                <div style={{ marginTop: "1.5em" }}>
-                    <Link href="">
-                        <Button color="danger">チケットを購入済みです！</Button>
-                    </Link>
-                </div>
+                <Row style={{ marginTop: "1.5em" }}>
+                    <Col sm="12" style={{ margin: "0.2em" }}>
+                        <h5>購入済みチケット</h5>
+                        {tickets.map(ticket => (
+                            <Card>
+                                <CardBody>
+                                    <p>{ticket.name}: {ticket.price}円</p>
+                                    <p>{ticket.accepted ? '受付済み' : '未受付'}</p>
+                                    <Row>
+                                        {!ticket.accepted &&
+                                        <Col>
+                                            <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: new Buffer(unescape(encodeURIComponent(JSON.stringify(ticket)))).toString('base64') } }}>
+                                                <Button color="success">受付用のQRコードを表示</Button>
+                                            </Link>
+                                        </Col>
+                                        }
+                                        <Col>
+                                            <Button color="danger">返金申請</Button>
+                                        </Col>
+                                    </Row>
+                                </CardBody>
+                            </Card>
+                        ))}
+                    </Col>
+                    <Col sm="12" style={{ marginTop: "1.5em" }}>
+                        <Link href={urlToPurchase}>
+                            <Button color="primary">追加のチケットを購入する</Button>
+                        </Link>
+                    </Col>
+                </Row >
             )
         } else if (categories.length === 0) {
             return
@@ -179,14 +206,18 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const endDate = data.endDate.seconds
     const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser))) : [await getImg(null, data.createdUser)]
     const event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
-    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').get()).docs.map(category => category.data())
+    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').get()).docs.map(category => { return { ...category.data(), id: category.id } })
     let status: string
+    let tickets = []
     if (!user) {
         status = 'anonymous'
     } else if (event.createdUser == user.uid) {
         status = 'organizer'
     } else {
-        const payments = (await firestore.collection('users').doc(user.uid).collection('payments').where("event", "==", result.id).get()).docs
+        const payments = (await firestore.collection('payments').where("event", "==", result.id).where("buyer", "==", user.uid).get()).docs.map(ticket => ticket.data())
+        payments.forEach(payment => categories.forEach(category => {
+            category.id === payment.category && tickets.push(category)
+        }))
         status = payments.length > 0 && 'bought'
     }
     const items = event.photos.map((url, i) => {
@@ -196,5 +227,5 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             caption: '画像' + (i + 1)
         }
     })
-    return { props: { user, event, categories, status, items } }
+    return { props: { user, event, categories, status, items, tickets } }
 }

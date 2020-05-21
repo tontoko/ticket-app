@@ -88,6 +88,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
             category,
             seller,
             buyer,
+            accepted: false,
             stripe: intent.id
           })
         } catch (e) {

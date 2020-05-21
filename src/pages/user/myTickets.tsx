@@ -54,6 +54,19 @@ export default ({ user, events }) => {
                                         <Card>
                                             <CardBody>
                                                 <p>{ticket.name}: {ticket.price}円</p>
+                                                <p>{ticket.accepted ? '受付済み' : '未受付'}</p>
+                                                <Row>
+                                                    {!ticket.accepted &&
+                                                        <Col>
+                                                            <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: new Buffer(unescape(encodeURIComponent(JSON.stringify(ticket)))).toString('base64') } }}>
+                                                                <Button color="success">受付用のQRコードを表示</Button>
+                                                            </Link>
+                                                        </Col>
+                                                    }
+                                                    <Col>
+                                                        <Button color="danger">返金申請</Button>
+                                                    </Col>
+                                                </Row>
                                             </CardBody>
                                         </Card>
                                     )}
@@ -91,7 +104,10 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         const result = await firestore.collection('events').where(firebase.firestore.FieldPath.documentId(), 'in', myEventsIds).get()
         events = await Promise.all(result.docs.map(async doc => {
             const tickets = await Promise.all(myTickets.filter(ticket => ticket.data().event === doc.id).map(async ticket => {
-                return (await firestore.collection('events').doc(doc.id).collection('categories').doc(ticket.data().category).get()).data()
+                return { 
+                    ...(await firestore.collection('events').doc(doc.id).collection('categories').doc(ticket.data().category).get()).data(), 
+                    accepted: ticket.data().accepted
+                }
             }))
             const data = doc.data()
             const createdAt = data.createdAt.seconds
