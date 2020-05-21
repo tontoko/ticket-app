@@ -51,8 +51,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
                 onExited={() => setAnimating(false)}
                 key={item.src}
             >
-                <img src={item.src} alt={item.altText} style={{width: "100%", height: "100%"}} />
-                <CarouselCaption captionText={item.caption} />
+                <img src={item.src} style={{width: "100%", height: "100%"}} />
             </CarouselItem>
         )
     })
@@ -223,8 +222,6 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const items = event.photos.map((url, i) => {
         return {
             src: url,
-            altText: '画像' + (i + 1),
-            caption: '画像' + (i + 1)
         }
     })
     return { props: { user, event, categories, status, items, tickets } }
