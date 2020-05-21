@@ -40,11 +40,11 @@ export default ({ user, events }) => {
                     <Card>
                         <CardBody>
                             <Row>
-                                <Link key={i} href={`/events/${event.id}`}>
-                                    <Col sm="2" xs="3" style={{ cursor: 'pointer' }}>
-                                        <img width="100%" src={event.photos} alt="Card image cap" />
-                                    </Col>
-                                </Link>
+                                <Col sm="2" xs="3">
+                                    <Link key={i} href={`/events/${event.id}`}>
+                                        <img width="100%" src={event.photos} alt="Card image cap" style={{ cursor: 'pointer' }} />
+                                    </Link>
+                                </Col>
                                 <Col xs="auto">
                                     <CardTitle>{event.name}</CardTitle>
                                     <CardSubtitle>{event.placeName}</CardSubtitle>
@@ -80,16 +80,9 @@ export default ({ user, events }) => {
         ))
 
     return (
-        <>
-            <div style={{ marginTop: "1em", minHeight: '4em' }}>
-                {renderEvents}
-            </div>
-            {/* <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                <Link href="/events/new">
-                    <Button className="ml-auto">新しいイベントを作成</Button>
-                </Link>
-            </Row> */}
-        </>
+        <div style={{ marginTop: "1em", minHeight: '4em' }}>
+            {renderEvents}
+        </div>
     );
 };
 

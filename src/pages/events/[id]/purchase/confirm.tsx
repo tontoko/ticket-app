@@ -32,14 +32,13 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         if (!stripe || !elements) return
         if (!agree) return alert.error("同意します が選択されていません")
         const { firestore } = await initFirebase()
-        const { selectedCategory, id } = router.query
         setProcessing(true)
-        const ticket = (await firestore.collection('events').doc(id as string).collection('categories').doc(selectedCategory as string).get()).data()
+        const ticket = (await firestore.collection('events').doc(event.id).collection('categories').doc(category.id).get()).data()
         if (ticket.stock === 0 || !ticket.public) {
             const msg = !ticket.stock ? '在庫がありませんでした。リダイレクトします。' : '非公開状態のチケットです。リダイレクトします。'
             alert.error(msg)
             setTimeout(() => {
-                router.push(`/events/${id}`)
+                router.push(`/events/${event.id}`)
             }, 3000);
             return
         }
@@ -150,9 +149,9 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
-    const event = { ...data, createdAt, updatedAt, startDate, endDate }
+    const event = { ...data, createdAt, updatedAt, startDate, endDate, id: eventSnapShot.id }
     const categorySnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').doc(selectedCategory as string).get())
-    const category = categorySnapShot.data()
+    const category = { ...categorySnapShot.data(), id: categorySnapShot.id }
     // @ts-ignore
     const { stripeId }  = (await firestore.collection('users').doc(event.createdUser).get()).data()
     
