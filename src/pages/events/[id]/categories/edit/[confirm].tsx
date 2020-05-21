@@ -29,7 +29,7 @@ const Confirmation= props => {
     try {
       await Promise.all(categories.map(async category => {
         if (category.new) {
-          const addCategory = { ...category, price: Number(category.price), stock: Number(category.stock), sold: 0, createdUser: props.user }
+          const addCategory = { ...category, price: Number(category.price), stock: Number(category.stock), sold: 0, createdUser: props.user.uid }
           delete addCategory.new
           categoriesRef.add(addCategory)
         } else {
