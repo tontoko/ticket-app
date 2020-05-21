@@ -13,13 +13,12 @@ import {
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import { event } from 'events'
 import getImg from '@/src/lib/getImgSSR'
 import stripe from '@/src/lib/stripe'
 import initFirebase from '@/src/lib/initFirebase'
 import atob from 'atob'
 
-const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret }) => {
+const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret, categoryId, eventId }) => {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter()
@@ -33,12 +32,12 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         if (!agree) return alert.error("同意します が選択されていません")
         const { firestore } = await initFirebase()
         setProcessing(true)
-        const ticket = (await firestore.collection('events').doc(event.id).collection('categories').doc(category.id).get()).data()
+        const ticket = (await firestore.collection('events').doc(eventId).collection('categories').doc(categoryId).get()).data()
         if (ticket.stock === 0 || !ticket.public) {
             const msg = !ticket.stock ? '在庫がありませんでした。リダイレクトします。' : '非公開状態のチケットです。リダイレクトします。'
             alert.error(msg)
             setTimeout(() => {
-                router.push(`/events/${event.id}`)
+                router.push(`/events/${eventId}`)
             }, 3000);
             return
         }
@@ -149,9 +148,11 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
-    const event = { ...data, createdAt, updatedAt, startDate, endDate, id: eventSnapShot.id }
+    const event = { ...data, createdAt, updatedAt, startDate, endDate }
     const categorySnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').doc(selectedCategory as string).get())
-    const category = { ...categorySnapShot.data(), id: categorySnapShot.id }
+    const category = categorySnapShot.data()
+    const eventId = eventSnapShot.id
+    const categoryId = categorySnapShot.id
     // @ts-ignore
     const { stripeId }  = (await firestore.collection('users').doc(event.createdUser).get()).data()
     
@@ -172,7 +173,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         }
     })
     const { client_secret } = paymentIntent
-    return { props: { familyName, firstName, email, event, category, photoUrls, client_secret, user } }
+    return { props: { familyName, firstName, email, event, category, photoUrls, client_secret, user, categoryId, eventId } }
 }
 
 export default Confirmation
