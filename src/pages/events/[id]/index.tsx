@@ -125,7 +125,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
             return (
                 <div style={{ marginTop: "1.5em" }}>
                     <Link href={urlToPurchase}>
-                        <Button color="primary">このイベントに申し込む</Button>
+                        <Button color="primary">チケットを購入する</Button>
                     </Link>
                 </div>
             )
