@@ -68,7 +68,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
             const stock = categoryResult && categoryResult.stock
             const sold = categoryResult && categoryResult.sold
             
-            if (stock === 0 || sold === 0 || stock - sold < 1) {
+            if (stock === 0 || stock - sold < 1) {
               // 在庫なしの返金処理
               await stripe.refunds.create({
                 payment_intent: intent.id,
