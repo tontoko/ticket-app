@@ -62,6 +62,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
     const firestore = admin.firestore()
     switch (webhockEvent['type']) {
       case 'payment_intent.succeeded':
+        let error
         intent = webhockEvent.data.object as Stripe.PaymentIntent
         const { event, category, seller, buyer } = intent.metadata
         try {
@@ -85,35 +86,25 @@ exports.https = functions.https.onRequest(async (req, res) => {
               sold: sold + 1
             }, { merge: true })
           })
-          // 決済履歴追加
-          firestore.collection('payments').add({
-            event,
-            category,
-            seller,
-            buyer,
-            accepted: false,
-            stripe: intent.id,
-            error: null
-          })
+          console.log("Succeeded:", intent.id);
         } catch (e) {
-          let error
           if (e instanceof NoStockError) {
             error = e
           } else {
             error = '不明なエラーが発生しました。'
           }
-          firestore.collection('payments').add({
-            event,
-            category,
-            seller,
-            buyer,
-            accepted: false,
-            stripe: intent.id,
-            error
-          })
           console.log(`${e}:`, intent.id);
         }
-        console.log("Succeeded:", intent.id);
+        // 決済履歴追加
+        firestore.collection('payments').add({
+          event,
+          category,
+          seller,
+          buyer,
+          accepted: false,
+          stripe: intent.id,
+          error
+        })
         break;
       case 'payment_intent.payment_failed':
         intent = webhockEvent.data.object as Stripe.PaymentIntent
