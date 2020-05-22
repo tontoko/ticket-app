@@ -93,7 +93,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
           console.log("Succeeded:", intent.id);
         } catch (e) {
           if (e instanceof NoStockError) {
-            error = e
+            error = e.message
           } else {
             error = '不明なエラーが発生しました。'
           }
