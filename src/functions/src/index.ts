@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin' 
 import Stripe from 'stripe'
-import ExtensibleCustomError from 'extensible-custom-error'
 
 type stripeEnv = {
   payment: {
@@ -16,7 +15,12 @@ type stripeEnv = {
   }
 }
 
-class NoStockError extends ExtensibleCustomError {}
+class NoStockError extends Error {
+  constructor(message:string) {
+    super(message);
+    this.name = "NoStockError";
+  }
+}
 
 admin.initializeApp(functions.config().firebase)
 const firestore = admin.firestore()
