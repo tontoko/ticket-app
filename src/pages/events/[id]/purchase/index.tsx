@@ -15,7 +15,7 @@ import { event } from 'events'
 export const Purchase = ({ event, categories, photoUrls }) => {
     const router = useRouter();
 
-    const validCategories = categories.filter(category => category.stock)
+    const validCategories = categories.filter(category => category.stock - category.sold > 0)
     const [familyName, setFamilyName] = useState('')
     const [firstName, setFirstName] = useState('')
     const [email, setEmail] = useState('')
@@ -71,7 +71,7 @@ export const Purchase = ({ event, categories, photoUrls }) => {
                             </Col>
                             <Col>
                                 <Label>チケットカテゴリ</Label>
-                                <Input type="select" value={selectedCategory} onChange={e =>  setSelectedCategory(e.target.value)}>
+                                <Input type="select" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
                                     {validCategories.map(category => (
                                         category && <option value={category.id} key={category.id}>{category.name}</option>
                                     ))}

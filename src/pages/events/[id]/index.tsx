@@ -137,7 +137,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
             return <h6 key={i}>{`${msg} (非公開) 残り ${category.stock}枚`}</h6>
         }
         if (category.public) {
-            if (!category.stock) {
+            if (category.stock - category.sold < 1) {
                 return <h6 key={i} style={{ textDecorationLine: 'line-through' }}>{`${msg}`}<span> 完売</span></h6>
             }
             return <h6 key={i}>{msg}</h6>
