@@ -13,6 +13,7 @@
     "@zeit/next-css": "^1.0.1",
     "atob": "^2.1.2",
     "bootstrap": "^4.5.0",
+    "extensible-custom-error": "0.0.7",
     "firebase": "^7.14.4",
     "firebase-admin": "^8.12.1",
     "firestore-store": "^2.0.1",

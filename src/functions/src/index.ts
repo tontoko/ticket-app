@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin' 
 import Stripe from 'stripe'
+import ExtensibleCustomError from 'extensible-custom-error'
 
 type stripeEnv = {
   payment: {
@@ -14,6 +15,8 @@ type stripeEnv = {
     dev: string
   }
 }
+
+class NoStockError extends ExtensibleCustomError {}
 
 admin.initializeApp(functions.config().firebase)
 const firestore = admin.firestore()
@@ -56,11 +59,11 @@ exports.https = functions.https.onRequest(async (req, res) => {
 
   let intent: Stripe.PaymentIntent
   try {
+    const firestore = admin.firestore()
     switch (webhockEvent['type']) {
       case 'payment_intent.succeeded':
         intent = webhockEvent.data.object as Stripe.PaymentIntent
         const { event, category, seller, buyer } = intent.metadata
-        const firestore = admin.firestore()
         try {
           await firestore.runTransaction(async transaction => {
             const categoryRef = firestore.collection('events').doc(event).collection('categories').doc(category)
@@ -75,7 +78,7 @@ exports.https = functions.https.onRequest(async (req, res) => {
                 refund_application_fee: true,
                 reverse_transfer: true
               })
-              throw Error('在庫がありませんでした。')
+              throw new NoStockError('在庫がありませんでした。返金手続きが行われました。')
             }
             // 売り上げを一つ増やす
             transaction.set(categoryRef, {
@@ -89,9 +92,25 @@ exports.https = functions.https.onRequest(async (req, res) => {
             seller,
             buyer,
             accepted: false,
-            stripe: intent.id
+            stripe: intent.id,
+            error: null
           })
         } catch (e) {
+          let error
+          if (e instanceof NoStockError) {
+            error = e
+          } else {
+            error = '不明なエラーが発生しました。'
+          }
+          firestore.collection('payments').add({
+            event,
+            category,
+            seller,
+            buyer,
+            accepted: false,
+            stripe: intent.id,
+            error
+          })
           console.log(`${e}:`, intent.id);
         }
         console.log("Succeeded:", intent.id);
@@ -100,6 +119,15 @@ exports.https = functions.https.onRequest(async (req, res) => {
         intent = webhockEvent.data.object as Stripe.PaymentIntent
         const message = intent.last_payment_error && intent.last_payment_error.message;
         console.error('Failed:', intent.id, message);
+        firestore.collection('payments').add({
+          event,
+          category,
+          seller,
+          buyer,
+          accepted: false,
+          stripe: intent.id,
+          error: '支払いが拒否されました。他の支払い方法をお試しください。'
+        })
         break;
     }
   } catch (e) {

@@ -12,18 +12,7 @@ import moment from 'moment'
 
 export default ({user, events}) => {
 
-  const [renderEvents, setRenderEvents] = useState([])
-
-  useEffect(() => {
-    let unsubscribe = () => void
-    (async() => {
-      setRenderEvents(await renderUserEvents(events))
-    })()
-    return unsubscribe()
-  }, [])
-
-  const renderUserEvents = async events => await Promise.all(
-    events.map(async (event, i) => {
+  const renderUserEvents = () => events.map((event, i) => {
 
       const showDate = () => {
         const startDate = moment(event.startDate * 1000)
@@ -56,12 +45,13 @@ export default ({user, events}) => {
         </Link>
       )
     }
-  ))
+  )
 
   return (
     <>
       <div style={{ marginTop: "1em", minHeight: '4em' }}>
-        {renderEvents}
+        <h5>自分のイベント</h5>
+        {renderUserEvents()}
       </div>
       <Row style={{ margin: 0, marginTop: "0.5em" }}>
         <Link href="/events/new">

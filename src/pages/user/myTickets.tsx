@@ -12,18 +12,7 @@ import moment from 'moment'
 
 export default ({ user, events }) => {
 
-    const [renderEvents, setRenderEvents] = useState([])
-
-    useEffect(() => {
-        let unsubscribe = () => void
-            (async () => {
-                setRenderEvents(await renderUserEvents(events))
-            })()
-        return unsubscribe()
-    }, [])
-
-    const renderUserEvents = async events => await Promise.all(
-        events.map(async (event, i) => {
+    const renderUserEvents = () => events.map((event, i) => {
 
             const showDate = () => {
                 const startDate = moment(event.startDate * 1000)
@@ -45,27 +34,34 @@ export default ({ user, events }) => {
                                         <img width="100%" src={event.photos} alt="Card image cap" style={{ cursor: 'pointer' }} />
                                     </Link>
                                 </Col>
-                                <Col xs="auto">
+                                <Col>
                                     <CardTitle>{event.name}</CardTitle>
                                     <CardSubtitle>{event.placeName}</CardSubtitle>
                                     <CardText>{showDate()}</CardText>
-                                    <p>購入済みチケット:</p>
                                     {event.tickets.map(ticket => 
-                                        <Card>
+                                        <Card style={{ marginBottom: '0.5em' }}>
                                             <CardBody>
                                                 <p>{ticket.name}: {ticket.price}円</p>
                                                 <p>{ticket.accepted ? '受付済み' : '未受付'}</p>
                                                 <Row>
+                                                {ticket.error ?
+                                                    <Col>
+                                                        <p>購入失敗 ({ticket.error})</p>
+                                                    </Col>
+                                                :
+                                                <>
                                                     {!ticket.accepted &&
-                                                        <Col>
-                                                            <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: new Buffer(unescape(encodeURIComponent(JSON.stringify(ticket)))).toString('base64') } }}>
-                                                                <Button color="success">受付用のQRコードを表示</Button>
-                                                            </Link>
-                                                        </Col>
+                                                    <Col>
+                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: new Buffer(unescape(encodeURIComponent(JSON.stringify(ticket)))).toString('base64') } }}>
+                                                            <Button color="success">受付用のQRコードを表示</Button>
+                                                        </Link>
+                                                    </Col>
                                                     }
                                                     <Col>
                                                         <Button color="danger">返金申請</Button>
                                                     </Col>
+                                                </>
+                                                }
                                                 </Row>
                                             </CardBody>
                                         </Card>
@@ -77,11 +73,12 @@ export default ({ user, events }) => {
                 </div>
             )
         }
-        ))
+    )
 
     return (
         <div style={{ marginTop: "1em", minHeight: '4em' }}>
-            {renderEvents}
+            <h5>購入済みチケット</h5>
+            {renderUserEvents()}
         </div>
     );
 };
@@ -99,7 +96,8 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             const tickets = await Promise.all(myTickets.filter(ticket => ticket.data().event === doc.id).map(async ticket => {
                 return { 
                     ...(await firestore.collection('events').doc(doc.id).collection('categories').doc(ticket.data().category).get()).data(), 
-                    accepted: ticket.data().accepted
+                    accepted: ticket.data().accepted,
+                    error: ticket.data().error
                 }
             }))
             const data = doc.data()
