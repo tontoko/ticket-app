@@ -144,6 +144,8 @@ exports.ticketReception = functions.https.onCall(async(data, context) => {
       msg: '読み取りに成功しました。'
     }
   } catch(e) {
+    // TODO: エラー調査
+    console.error(e)
     throw new functions.https.HttpsError('internal', 'データの更新に失敗しました。しばらくしてお試しください。')
   }
 })
