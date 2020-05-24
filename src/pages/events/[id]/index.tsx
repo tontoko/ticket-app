@@ -90,22 +90,30 @@ export default ({ user, event, categories, status, items, tickets }) => {
                 <Row style={{ marginTop: "1.5em" }}>
                     <Col sm="12" style={{ margin: "0.2em" }}>
                         <h5>購入済みチケット</h5>
-                        {tickets.map(ticket => (
-                            <Card>
+                        {tickets.map((ticket, i) => (
+                            <Card style={{ marginBottom: '0.5em' }} key={i}>
                                 <CardBody>
                                     <p>{ticket.name}: {ticket.price}円</p>
                                     <p>{ticket.accepted ? '受付済み' : '未受付'}</p>
                                     <Row>
-                                        {!ticket.accepted &&
-                                        <Col>
-                                            <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: btoa(encodeURIComponent(JSON.stringify(ticket))) } }}>
-                                                <Button color="success">受付用のQRコードを表示</Button>
-                                            </Link>
-                                        </Col>
+                                        {ticket.error ?
+                                            <Col>
+                                                <p>購入失敗 ({ticket.error})</p>
+                                            </Col>
+                                            :
+                                            <>
+                                                {!ticket.accepted &&
+                                                    <Col>
+                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: btoa(encodeURIComponent(JSON.stringify(ticket))) } }}>
+                                                            <Button color="success">受付用のQRコードを表示</Button>
+                                                        </Link>
+                                                    </Col>
+                                                }
+                                                <Col>
+                                                    <Button color="danger">返金申請</Button>
+                                                </Col>
+                                            </>
                                         }
-                                        <Col>
-                                            <Button color="danger">返金申請</Button>
-                                        </Col>
                                     </Row>
                                 </CardBody>
                             </Card>
@@ -214,9 +222,16 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     } else if (event.createdUser == user.uid) {
         status = 'organizer'
     } else {
-        const payments = (await firestore.collection('payments').where("event", "==", result.id).where("buyer", "==", user.uid).get()).docs.map(ticket => ticket.data())
-        payments.forEach(payment => categories.forEach(category => {
-            category.id === payment.category && tickets.push(category)
+        const payments = (await firestore.collection('payments').where("event", "==", result.id).where("buyer", "==", user.uid).get()).docs
+        tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async ticket => {
+            const categorySnapShot = await firestore.collection('events').doc(event.id).collection('categories').doc(ticket.data().category).get()
+            return {
+                ...categorySnapShot.data(),
+                categoryId: categorySnapShot.id,
+                paymentId: ticket.id,
+                accepted: ticket.data().accepted,
+                error: ticket.data().error
+            }
         }))
         status = payments.length > 0 && 'bought'
     }

@@ -87,27 +87,30 @@ export default ({ user, events }) => {
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx)
     const { firebase, firestore } = await initFirebaseAdmin()
-    const myTickets = (await firestore.collection('payments').where('buyer', '==', user.user_id).get()).docs
+    const payments = (await firestore.collection('payments').where('buyer', '==', user.user_id).get()).docs
     let events: FirebaseFirestore.DocumentData[] = []
-    if (myTickets.length > 0) {
-        let myEventsIds = myTickets.map(myEvent => myEvent.data().event)
+    if (payments.length > 0) {
+        let myEventsIds = payments.map(myEvent => myEvent.data().event)
         myEventsIds = Array.from(new Set(myEventsIds)) // 重複除外
         const result = await firestore.collection('events').where(firebase.firestore.FieldPath.documentId(), 'in', myEventsIds).get()
-        events = await Promise.all(result.docs.map(async doc => {
-            const tickets = await Promise.all(myTickets.filter(ticket => ticket.data().event === doc.id).map(async ticket => {
-                return { 
-                    ...(await firestore.collection('events').doc(doc.id).collection('categories').doc(ticket.data().category).get()).data(), 
+        events = await Promise.all(result.docs.map(async event => {
+            const tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async ticket => {
+                const categorySnapShot = await firestore.collection('events').doc(event.id).collection('categories').doc(ticket.data().category).get()
+                return {
+                    ...categorySnapShot.data(),
+                    categoryId: categorySnapShot.id,
+                    paymentId: ticket.id,
                     accepted: ticket.data().accepted,
                     error: ticket.data().error
                 }
             }))
-            const data = doc.data()
+            const data = event.data()
             const createdAt = data.createdAt.seconds
             const updatedAt = data.updatedAt.seconds
             const startDate = data.startDate.seconds
             const endDate = data.endDate.seconds
             const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser, '360') : await getImg(null, data.createdUser, '360')
-            return { ...data, createdAt, updatedAt, startDate, endDate, tickets, photos, id: doc.id }
+            return { ...data, createdAt, updatedAt, startDate, endDate, tickets, photos, id: event.id }
         }))
     }
     return { props: { user, events } }

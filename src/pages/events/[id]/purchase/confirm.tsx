@@ -33,7 +33,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         const { firestore } = await initFirebase()
         setProcessing(true)
         const ticket = (await firestore.collection('events').doc(eventId).collection('categories').doc(categoryId).get()).data()
-        if (ticket.stock === 0 || !ticket.public) {
+        if (category.stock - category.sold < 1 || !ticket.public) {
             const msg = ticket.stock - ticket.sold < 1 ? '在庫がありませんでした。リダイレクトします。' : '対象のチケットは主催者によって非公開に設定されました。リダイレクトします。'
             alert.error(msg)
             setTimeout(() => {

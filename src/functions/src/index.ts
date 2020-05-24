@@ -46,7 +46,7 @@ exports.createUser = functions
   })
 });
 
-exports.https = functions.https.onRequest(async (req, res) => {
+exports.payment = functions.https.onRequest(async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let webhockEvent: Stripe.Event
 
@@ -130,4 +130,19 @@ exports.https = functions.https.onRequest(async (req, res) => {
   }
 
   res.status(200).end()
+})
+
+exports.ticketReception = functions.https.onCall(async(data, context) => {
+  if (!context.auth) throw new functions.https.HttpsError('failed-precondition', 'ログインしていません。')
+
+  try {
+    await firestore.collection('payments').doc(data.paymentId).update({
+      accepted: true
+    })
+    return {
+      msg: '読み取りに成功しました。'
+    }
+  } catch(e) {
+    throw new functions.https.HttpsError('internal', 'データの更新に失敗しました。しばらくしてお試しください。')
+  }
 })
