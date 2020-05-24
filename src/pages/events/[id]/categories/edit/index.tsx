@@ -100,7 +100,7 @@ export default ({event, beforeCategories}) => {
         }
         throw new Error('チケット名が重複しています')
       })
-      router.push(`/events/${router.query.id}/categories/edit/[confirm]`, `/events/${router.query.id}/categories/edit/${btoa(unescape(encodeURIComponent(JSON.stringify(categories))))}`)
+      router.push(`/events/${router.query.id}/categories/edit/[confirm]`, `/events/${router.query.id}/categories/edit/${btoa(encodeURIComponent(JSON.stringify(categories)))}`)
     } catch(e) {
       alert.error(e.message)
     }

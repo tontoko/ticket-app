@@ -139,7 +139,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx)
     const { firestore } = await initFirebaseAdmin()
     const { query } = ctx
-    const { familyName, firstName, email, selectedCategory } = JSON.parse(decodeURIComponent(escape(atob(query.query as string))))
+    const { familyName, firstName, email, selectedCategory } = JSON.parse(decodeURIComponent(atob(query.query as string)))
     const eventSnapShot = (await firestore.collection('events').doc(query.id as string).get())
     const data = eventSnapShot.data()
     const photos: undefined | string[] = data.photos

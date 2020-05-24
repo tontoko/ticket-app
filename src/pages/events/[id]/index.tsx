@@ -18,6 +18,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import isLogin from '@/src/lib/isLogin'
 import { event } from 'events'
 import moment from 'moment'
+import btoa from 'btoa'
 
 export default ({ user, event, categories, status, items, tickets }) => {
 
@@ -97,7 +98,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
                                     <Row>
                                         {!ticket.accepted &&
                                         <Col>
-                                            <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: new Buffer(unescape(encodeURIComponent(JSON.stringify(ticket)))).toString('base64') } }}>
+                                            <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: btoa(encodeURIComponent(JSON.stringify(ticket))) } }}>
                                                 <Button color="success">受付用のQRコードを表示</Button>
                                             </Link>
                                         </Col>

@@ -10,7 +10,8 @@ export default () => {
 
     const handleScan = (data) => {
         if (data) {
-            router.push(data)
+            // router.push(data)
+            console.log(data)
         }
     }
 

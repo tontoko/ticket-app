@@ -90,5 +90,5 @@ export default Confirmation
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { user } = await isLogin(ctx)
   const {confirm} = ctx.query
-  return { props: { user, categories: decodeURIComponent(escape(atob(confirm as string)))} }
+  return { props: { user, categories: decodeURIComponent(atob(confirm as string))} }
 }

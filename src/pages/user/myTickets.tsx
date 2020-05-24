@@ -9,6 +9,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
+import btoa from 'btoa'
 
 export default ({ user, events }) => {
 
@@ -25,7 +26,7 @@ export default ({ user, events }) => {
             }
 
             return (
-                <div>
+                <div key={i}>
                     <Card>
                         <CardBody>
                             <Row>
@@ -38,8 +39,8 @@ export default ({ user, events }) => {
                                     <CardTitle>{event.name}</CardTitle>
                                     <CardSubtitle>{event.placeName}</CardSubtitle>
                                     <CardText>{showDate()}</CardText>
-                                    {event.tickets.map(ticket => 
-                                        <Card style={{ marginBottom: '0.5em' }}>
+                                    {event.tickets.map((ticket, ticketIndex) => 
+                                        <Card style={{ marginBottom: '0.5em' }} key={ticketIndex}>
                                             <CardBody>
                                                 <p>{ticket.name}: {ticket.price}円</p>
                                                 <p>{ticket.accepted ? '受付済み' : '未受付'}</p>
@@ -52,7 +53,7 @@ export default ({ user, events }) => {
                                                 <>
                                                     {!ticket.accepted &&
                                                     <Col>
-                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: new Buffer(unescape(encodeURIComponent(JSON.stringify(ticket)))).toString('base64') } }}>
+                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: btoa(encodeURIComponent(JSON.stringify(ticket))) } }}>
                                                             <Button color="success">受付用のQRコードを表示</Button>
                                                         </Link>
                                                     </Col>

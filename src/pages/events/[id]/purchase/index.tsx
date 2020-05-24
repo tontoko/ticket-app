@@ -37,7 +37,7 @@ export const Purchase = ({ event, categories, photoUrls }) => {
         !familyName) return
         const pathname = `/events/${router.query.id}/purchase/confirm`
         // クエリーをまるごとbase64化
-        router.push({ pathname, query: { query: btoa(unescape(encodeURIComponent(JSON.stringify({ familyName, firstName, email, selectedCategory })))) }} )
+        router.push({ pathname, query: { query: btoa(encodeURIComponent(JSON.stringify({ familyName, firstName, email, selectedCategory }))) }} )
     }
 
     return (

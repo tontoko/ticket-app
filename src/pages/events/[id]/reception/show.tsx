@@ -8,7 +8,8 @@ import { GetServerSideProps } from "next";
 import isLogin from "@/src/lib/isLogin";
 
 export default ({query}) => {
-    const value = decodeURIComponent(escape(atob(query.ticket as string)))
+    const value = decodeURIComponent(atob(query.ticket as string))
+    console.log(value)
     return (
         <Row style={{marginTop: "2em"}}>
             <Col sm={{ size: 10, offset: 1 }} lg={{ size: 6, offset: 3}}>
