@@ -19,7 +19,7 @@ export default ({query}) => {
 
     useEffect(() => {
         if (query.params) {
-            const urlPref = `/events/${query.id}/reception/qrReader?params=`
+            const urlPref = `https://${document.domain}/events/${query.id}/reception/qrReader?params=`
             proccessQRCode(decodeURIComponent(atob(query.params.replace(urlPref, ''))))
         }
     })
