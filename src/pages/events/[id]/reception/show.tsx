@@ -1,14 +1,23 @@
 import QRCode from "qrcode.react"
 import {
-    Button, Container, Col, Row
+    Col, Row
 } from 'reactstrap';
-import { useRouter } from "next/router";
-import atob from 'atob'
 import { GetServerSideProps } from "next";
 import isLogin from "@/src/lib/isLogin";
+import { useState, useEffect } from "react";
+import Loading from '@/src/components/loading'
 
 export default ({query}) => {
-    const value = `https://${document.domain}/events/${query.id}/reception/qrReader?params=${query.ticket}`
+    const [loading, setLoading] = useState(true)
+    let value = ''
+    
+    useEffect(() => {
+        value = `https://${document.domain}/events/${query.id}/reception/qrReader?params=${query.ticket}`
+        setLoading(false)
+    }, [])
+
+    if (loading) return <Loading/>
+
     return (
         <Row style={{marginTop: "2em"}}>
             <Col sm={{ size: 10, offset: 1 }} lg={{ size: 6, offset: 3}}>
