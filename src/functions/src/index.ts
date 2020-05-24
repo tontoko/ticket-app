@@ -135,6 +135,7 @@ exports.payment = functions.https.onRequest(async (req, res) => {
 exports.ticketReception = functions.https.onCall(async(data, context) => {
   if (!context.auth) throw new functions.https.HttpsError('failed-precondition', 'ログインしていません。')
 
+  // TODO: ユーザーuid突き合わせ
   try {
     await firestore.collection('payments').doc(data.paymentId).update({
       accepted: true

@@ -12,6 +12,7 @@ export default ({query}) => {
     const [value, setValue] = useState('')
     
     useEffect(() => {
+        // TODO: 不要なデータ削ぎ落とし
         setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${query.ticket}`)
         setLoading(false)
     }, [])
