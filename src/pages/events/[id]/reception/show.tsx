@@ -8,8 +8,7 @@ import { GetServerSideProps } from "next";
 import isLogin from "@/src/lib/isLogin";
 
 export default ({query}) => {
-    const value = decodeURIComponent(atob(query.ticket as string))
-    console.log(value)
+    const value = `/events/${query.id}/reception/qrReader?params=${query.ticket}`
     return (
         <Row style={{marginTop: "2em"}}>
             <Col sm={{ size: 10, offset: 1 }} lg={{ size: 6, offset: 3}}>
