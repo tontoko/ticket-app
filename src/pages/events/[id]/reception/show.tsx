@@ -9,10 +9,10 @@ import Loading from '@/src/components/loading'
 
 export default ({query}) => {
     const [loading, setLoading] = useState(true)
-    let value = ''
+    const [value, setValue] = useState('')
     
     useEffect(() => {
-        value = `https://${document.domain}/events/${query.id}/reception/qrReader?params=${query.ticket}`
+        setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${query.ticket}`)
         setLoading(false)
     }, [])
 
