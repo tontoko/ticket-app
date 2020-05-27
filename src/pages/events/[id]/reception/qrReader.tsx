@@ -27,7 +27,7 @@ export default ({query}) => {
     const handleScan = (data: string) => {
         if (data) {
             setProccesing(true)
-            proccessQRCode(data)
+            proccessQRCode(data.split('params=')[1])
         }
     }
 
@@ -37,7 +37,7 @@ export default ({query}) => {
 
     const proccessQRCode = async (data: string) => {
         try {
-            const decededData = decodeQuery(data.split('params=')[1])
+            const decededData = decodeQuery(data)
             const { functions } = await initFirebase()
             const res = await functions.httpsCallable('ticketReception')(JSON.parse(decededData))
             router.push({pathname: `/events/${router.query.id}/reception`, query: { msg: encodeQuery(res.data.msg) }})
