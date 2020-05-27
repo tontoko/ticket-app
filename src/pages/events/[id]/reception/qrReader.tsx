@@ -20,16 +20,14 @@ export default ({query}) => {
 
     useEffect(() => {
         if (query.params) {
-            const urlPref = `https://${document.domain}/events/${query.id}/reception/qrReader?params=`
-            proccessQRCode(decodeQuery(query.params.replace(urlPref, '')))
+            proccessQRCode(query.params)
         }
-    })
+    }, [])
 
     const handleScan = (data: string) => {
         if (data) {
-            const receivedData = JSON.parse(data)
             setProccesing(true)
-            proccessQRCode(receivedData)
+            proccessQRCode(data)
         }
     }
 
@@ -37,10 +35,11 @@ export default ({query}) => {
         console.error(err);
     }
 
-    const proccessQRCode = async (receivedData) => {
+    const proccessQRCode = async (data: string) => {
         try {
+            const decededData = decodeQuery(data.split('params=')[1])
             const { functions } = await initFirebase()
-            const res = await functions.httpsCallable('ticketReception')({ ...receivedData })
+            const res = await functions.httpsCallable('ticketReception')(JSON.parse(decededData))
             router.push({pathname: `/events/${router.query.id}/reception`, query: { msg: encodeQuery(res.data.msg) }})
         } catch (e) {
             alert.error(e.message)

@@ -15,11 +15,9 @@ export default ({ query, CSRUser }) => {
     
     useEffect(() => {
         (async () => {
-            if (!CSRUser) return
             const decodedQuery = JSON.parse(decodeQuery(query.ticket))
             const { paymentId, seller, buyer } = decodedQuery
-            const buyerToken = await CSRUser.getIdToken()
-            const encodedQuery = encodeQuery(JSON.stringify({ paymentId, seller, buyer, buyerToken }))
+            const encodedQuery = encodeQuery(JSON.stringify({ paymentId, seller, buyer }))
             setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${encodedQuery}`)
             setLoading(false)
         })()

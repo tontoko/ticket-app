@@ -138,8 +138,6 @@ exports.ticketReception = functions.https.onCall(async(data, context) => {
   // ユーザーuid突き合わせ
   try {
     if (context.auth.uid !== data.seller) throw new Error
-    const decodedIdToken = await admin.auth().verifyIdToken(data.buyerToken)
-    if (decodedIdToken.uid !== data.buyer) throw new Error
   } catch(e) {
     throw new functions.https.HttpsError('unauthenticated', '認証に失敗しました。')
   }
