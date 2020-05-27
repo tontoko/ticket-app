@@ -28,7 +28,9 @@ export default ({ query, CSRUser }) => {
     return (
         <Row style={{marginTop: "2em"}}>
             <Col sm={{ size: 10, offset: 1 }} lg={{ size: 6, offset: 3}}>
-                <QRCode style={{width: "100%", height: "100%"}} value={value} />
+                <div style={{ margin: '1em' }}>
+                    <QRCode style={{ width: "100%", height: "100%" }} value={value} />
+                </div>
             </Col>
             <Col sm={{ size: 10, offset: 1 }} lg={{ size: 6, offset: 3 }} style={{ marginTop: '1.5em' }}>
                 <p>会場受付でQRコードをスキャンしてください。</p>
