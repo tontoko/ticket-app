@@ -19,8 +19,8 @@ export default ({ query, CSRUser }) => {
             const decodedQuery = JSON.parse(decodeQuery(query.ticket))
             const { paymentId, seller, buyer } = decodedQuery
             const buyerToken = await CSRUser.getIdToken()
-            const encodedQAuery = encodeQuery(JSON.stringify({ paymentId, seller, buyer, buyerToken }))
-            setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${encodedQAuery}`)
+            const encodedQuery = encodeQuery(JSON.stringify({ paymentId, seller, buyer, buyerToken }))
+            setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${encodedQuery}`)
             setLoading(false)
         })()
     }, [CSRUser])
