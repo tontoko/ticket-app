@@ -20,6 +20,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import stripe from '@/src/lib/stripe'
 import { Router } from 'express'
+import { encodeQuery } from '@/src/lib/parseQuery'
 
 export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, from }: { user: admin.auth.DecodedIdToken, individual: Stripe.Person, tos_acceptance: Stripe.Account.TosAcceptance, from: string}) => {
   const alert = useAlert()
@@ -100,7 +101,7 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
         break;
       default:
         if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
-        return router.push({ pathname: '/user/edit', query: { msg: 'ユーザー情報を更新しました。' }}, '/user/edit')
+        return router.push({ pathname: '/user/edit', query: { msg: encodeQuery('ユーザー情報を更新しました。') }}, '/user/edit')
     }
   }
 

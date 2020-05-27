@@ -41,7 +41,7 @@ export default ({query}) => {
         try {
             const { functions } = await initFirebase()
             const res = await functions.httpsCallable('ticketReception')({ ...receivedData })
-            router.push({pathname: `/events/${router.query.id}/reception`, query: { msg:  encodeQuery(res.data.msg) }})
+            router.push({pathname: `/events/${router.query.id}/reception`, query: { msg: encodeQuery(res.data.msg) }})
         } catch (e) {
             alert.error(e.message)
         }

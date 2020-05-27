@@ -8,6 +8,7 @@ import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
+import { encodeQuery } from '@/src/lib/parseQuery'
 
 export const UpdatePassword: React.FC<any> = (props) => {
     const router = useRouter()
@@ -31,7 +32,7 @@ export const UpdatePassword: React.FC<any> = (props) => {
         }
         try {
             await currentUser.updatePassword(newPwd)
-            router.push({ pathname: `/user/edit`, query: { msg: 'パスワードを変更しました' } }, '/user/edit')
+            router.push({ pathname: `/user/edit`, query: { msg: encodeQuery('パスワードを変更しました') } }, '/user/edit')
         } catch (e) {
             alert.error(errorMsg(e))
         }

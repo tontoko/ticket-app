@@ -10,6 +10,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import initFirebase from '@/src/lib/initFirebase'
 import { useAlert } from 'react-alert'
 import { useRouter } from 'next/router'
+import { encodeQuery } from '@/src/lib/parseQuery'
 
 const Identification = ({ user, verification }) => {
   const alert = useAlert()
@@ -33,7 +34,7 @@ const Identification = ({ user, verification }) => {
       body: formData
     })
     if (res.status === 200) {
-      router.push({ pathname: '/user/edit', query: { msg: '本人確認書類のアップロードに成功しました。' } }, 'user/edit')
+      router.push({ pathname: '/user/edit', query: { msg: encodeQuery('本人確認書類のアップロードに成功しました。') } }, 'user/edit')
     }
   }
 

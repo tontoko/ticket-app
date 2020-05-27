@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { useStripe } from '@stripe/react-stripe-js'
 import zenginCode from 'zengin-code'
 import { setServers } from 'dns'
+import { encodeQuery } from '@/src/lib/parseQuery'
 
 export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) => {
   const stripe = useStripe()
@@ -62,7 +63,7 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
         })
       })
       if (res.status === 200) {
-        router.push({ pathname: '/user/bankAccounts', query: { msg: '新しい銀行口座を登録しました。' } }, '/user/bankAccounts')
+        router.push({ pathname: '/user/bankAccounts', query: { msg: encodeQuery('新しい銀行口座を登録しました。') } }, '/user/bankAccounts')
       }
     } catch(e) {
       alert.error('エラーが発生しました。しばらくしてお試しください。')

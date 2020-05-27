@@ -12,6 +12,7 @@ import AlertTemplate from '@/src/components/alert'
 import Modal from '@/src/components/modal'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
+import { encodeQuery } from '../lib/parseQuery'
 const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
@@ -52,7 +53,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             return
           }
           if (window.location.pathname === '/' || window.location.pathname === '/login' || window.location.pathname === '/register') {
-            router.push({ pathname: '/user', query: { msg: 'ログインしました' } }, '/user')
+            router.push({ pathname: '/user', query: { msg: encodeQuery('ログインしました') } }, '/user')
           }
         } else {
           setCSRUser(currentUser)
@@ -62,7 +63,7 @@ const App = ({ Component, pageProps }: AppProps) => {
           })
           if (window.location.pathname !== '/' && window.location.pathname !== '/login' && window.location.pathname !== '/register' &&
             !window.location.pathname.match(/^\/__\/auth\/action/) ) {
-            router.push({ pathname: '/login', query: { msg: 'ログアウトしました' } }, '/login')
+            router.push({ pathname: '/login', query: { msg: encodeQuery('ログアウトしました') } }, '/login')
           }
         }
       })
