@@ -9,6 +9,7 @@ import { GetServerSideProps } from 'next'
 import { event } from 'events'
 import isLogin from '@/src/lib/isLogin'
 import { useAlert } from 'react-alert'
+import { encodeQuery } from '@/src/lib/parseQuery'
 
 export default ({event, beforeCategories}) => {
   const router = useRouter()
