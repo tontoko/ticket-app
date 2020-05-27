@@ -9,21 +9,21 @@ import Loading from '@/src/components/loading'
 import { decodeQuery, encodeQuery } from "@/src/lib/parseQuery";
 import initFirebase from "@/src/lib/initFirebase";
 
-export default ({query}) => {
+export default ({ query, CSRUser }) => {
     const [loading, setLoading] = useState(true)
     const [value, setValue] = useState('')
     
     useEffect(() => {
         (async () => {
+            if (!CSRUser) return
             const decodedQuery = JSON.parse(decodeQuery(query.ticket))
             const { paymentId, seller, buyer } = decodedQuery
-            const { firebase } = await initFirebase()
-            const buyerToken = firebase.auth().currentUser.getIdToken()
+            const buyerToken = await CSRUser.getIdToken()
             const encodedQAuery = encodeQuery(JSON.stringify({ paymentId, seller, buyer, buyerToken }))
             setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${encodedQAuery}`)
             setLoading(false)
         })()
-    }, [])
+    }, [CSRUser])
 
     if (loading) return <Loading/>
 
