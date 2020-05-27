@@ -11,6 +11,7 @@ import getImg from '@/src/lib/getImgSSR'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import { event } from 'events'
+import { encodeQuery } from '@/src/lib/parseQuery'
 
 export const Purchase = ({ event, categories, photoUrls }) => {
     const router = useRouter();
@@ -37,7 +38,7 @@ export const Purchase = ({ event, categories, photoUrls }) => {
         !familyName) return
         const pathname = `/events/${router.query.id}/purchase/confirm`
         // クエリーをまるごとbase64化
-        router.push({ pathname, query: { query: btoa(encodeURIComponent(JSON.stringify({ familyName, firstName, email, selectedCategory }))) }} )
+        router.push({ pathname, query: { query: encodeQuery(JSON.stringify({ familyName, firstName, email, selectedCategory })) }} )
     }
 
     return (

@@ -8,6 +8,7 @@ import Loading from '@/src/components/loading'
 import { Button } from 'reactstrap';
 import { GetServerSideProps } from 'next';
 import isLogin from '@/src/lib/isLogin';
+import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery';
 const QrReader = dynamic(() => import("react-qr-reader"), {
     loading: () => <p>loading...</p>, ssr: false
 })
@@ -20,7 +21,7 @@ export default ({query}) => {
     useEffect(() => {
         if (query.params) {
             const urlPref = `https://${document.domain}/events/${query.id}/reception/qrReader?params=`
-            proccessQRCode(decodeURIComponent(atob(query.params.replace(urlPref, ''))))
+            proccessQRCode(decodeQuery(query.params.replace(urlPref, '')))
         }
     })
 
@@ -40,7 +41,7 @@ export default ({query}) => {
         try {
             const { functions } = await initFirebase()
             const res = await functions.httpsCallable('ticketReception')({ ...receivedData })
-            router.push({pathname: `/events/${router.query.id}/reception`, query: { msg: res.data.msg }})
+            router.push({pathname: `/events/${router.query.id}/reception`, query: { msg:  encodeQuery(res.data.msg) }})
         } catch (e) {
             alert.error(e.message)
         }

@@ -13,6 +13,7 @@ import { GetServerSideProps } from 'next'
 import { event } from 'events'
 import isLogin from '@/src/lib/isLogin'
 import atob from 'atob'
+import { decodeQuery } from '@/src/lib/parseQuery'
 
 const Confirmation= props => {
   const router = useRouter()
@@ -90,5 +91,5 @@ export default Confirmation
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { user } = await isLogin(ctx)
   const {confirm} = ctx.query
-  return { props: { user, categories: decodeURIComponent(atob(confirm as string))} }
+  return { props: { user, categories: decodeQuery(confirm as string)} }
 }

@@ -17,6 +17,7 @@ import getImg from '@/src/lib/getImgSSR'
 import stripe from '@/src/lib/stripe'
 import initFirebase from '@/src/lib/initFirebase'
 import atob from 'atob'
+import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery'
 
 const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret, categoryId, eventId }) => {
     const stripe = useStripe();
@@ -54,7 +55,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
             alert.error('エラーが発生しました。')
             return setProcessing(false)
         }
-        router.push({ pathname: '/user/myTickets', query: { msg: 'チケットの購入処理を開始しました。\n処理が完了すると「購入済みチケット」に表示されます。' } }, '/user/myTickets')
+        router.push({ pathname: '/user/myTickets', query: { msg:  encodeQuery('チケットの購入処理を開始しました。\n処理が完了すると「購入済みチケット」に表示されます。') } }, '/user/myTickets')
     }
 
     return (
@@ -139,7 +140,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx)
     const { firestore } = await initFirebaseAdmin()
     const { query } = ctx
-    const { familyName, firstName, email, selectedCategory } = JSON.parse(decodeURIComponent(atob(query.query as string)))
+    const { familyName, firstName, email, selectedCategory } = JSON.parse(decodeQuery(query.query as string))
     const eventSnapShot = (await firestore.collection('events').doc(query.id as string).get())
     const data = eventSnapShot.data()
     const photos: undefined | string[] = data.photos

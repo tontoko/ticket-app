@@ -19,6 +19,7 @@ import isLogin from '@/src/lib/isLogin'
 import { event } from 'events'
 import moment from 'moment'
 import btoa from 'btoa'
+import { encodeQuery } from '@/src/lib/parseQuery';
 
 export default ({ user, event, categories, status, items, tickets }) => {
 
@@ -104,7 +105,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
                                             <>
                                                 {!ticket.accepted &&
                                                     <Col>
-                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: btoa(encodeURIComponent(JSON.stringify(ticket))) } }}>
+                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: encodeQuery(JSON.stringify(ticket)) } }}>
                                                             <Button color="success">受付用のQRコードを表示</Button>
                                                         </Link>
                                                     </Col>
@@ -223,14 +224,16 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         status = 'organizer'
     } else {
         const payments = (await firestore.collection('payments').where("event", "==", result.id).where("buyer", "==", user.uid).get()).docs
-        tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async ticket => {
-            const categorySnapShot = await firestore.collection('events').doc(event.id).collection('categories').doc(ticket.data().category).get()
+        tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async payment => {
+            const categorySnapShot = await firestore.collection('events').doc(event.id).collection('categories').doc(payment.data().category).get()
             return {
                 ...categorySnapShot.data(),
                 categoryId: categorySnapShot.id,
-                paymentId: ticket.id,
-                accepted: ticket.data().accepted,
-                error: ticket.data().error
+                paymentId: payment.id,
+                accepted: payment.data().accepted,
+                error: payment.data().error,
+                buyer: payment.data().buyer,
+                seller: payment.data().seller
             }
         }))
         status = payments.length > 0 && 'bought'

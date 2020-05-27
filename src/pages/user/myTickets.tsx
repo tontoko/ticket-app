@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, {  } from 'react';
 import {
     Card, CardText, CardBody,
-    CardTitle, CardSubtitle, Button, Container, Col, Row
+    CardTitle, CardSubtitle, Button, Col, Row
 } from 'reactstrap';
 import Link from 'next/link'
 import getImg from '@/src/lib/getImgSSR'
@@ -9,9 +9,9 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
-import btoa from 'btoa'
+import { encodeQuery } from '@/src/lib/parseQuery';
 
-export default ({ user, events }) => {
+export default ({ events }) => {
 
     const renderUserEvents = () => events.map((event, i) => {
 
@@ -53,7 +53,7 @@ export default ({ user, events }) => {
                                                 <>
                                                     {!ticket.accepted &&
                                                     <Col>
-                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: btoa(encodeURIComponent(JSON.stringify(ticket))) } }}>
+                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: encodeQuery(JSON.stringify(ticket)) } }}>
                                                             <Button color="success">受付用のQRコードを表示</Button>
                                                         </Link>
                                                     </Col>
@@ -94,14 +94,16 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         myEventsIds = Array.from(new Set(myEventsIds)) // 重複除外
         const result = await firestore.collection('events').where(firebase.firestore.FieldPath.documentId(), 'in', myEventsIds).get()
         events = await Promise.all(result.docs.map(async event => {
-            const tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async ticket => {
-                const categorySnapShot = await firestore.collection('events').doc(event.id).collection('categories').doc(ticket.data().category).get()
+            const tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async payment => {
+                const categorySnapShot = await firestore.collection('events').doc(event.id).collection('categories').doc(payment.data().category).get()
                 return {
                     ...categorySnapShot.data(),
                     categoryId: categorySnapShot.id,
-                    paymentId: ticket.id,
-                    accepted: ticket.data().accepted,
-                    error: ticket.data().error
+                    paymentId: payment.id,
+                    accepted: payment.data().accepted,
+                    error: payment.data().error,
+                    buyer: payment.data().buyer,
+                    seller: payment.data().seller
                 }
             }))
             const data = event.data()

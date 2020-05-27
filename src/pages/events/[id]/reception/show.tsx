@@ -6,15 +6,23 @@ import { GetServerSideProps } from "next";
 import isLogin from "@/src/lib/isLogin";
 import { useState, useEffect } from "react";
 import Loading from '@/src/components/loading'
+import { decodeQuery, encodeQuery } from "@/src/lib/parseQuery";
+import initFirebase from "@/src/lib/initFirebase";
 
 export default ({query}) => {
     const [loading, setLoading] = useState(true)
     const [value, setValue] = useState('')
     
     useEffect(() => {
-        // TODO: 不要なデータ削ぎ落とし
-        setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${query.ticket}`)
-        setLoading(false)
+        (async () => {
+            const decodedQuery = JSON.parse(decodeQuery(query.ticket))
+            const { paymentId, seller, buyer } = decodedQuery
+            const { firebase } = await initFirebase()
+            const buyerToken = firebase.auth().currentUser.getIdToken()
+            const encodedQAuery = encodeQuery(JSON.stringify({ paymentId, seller, buyer, buyerToken }))
+            setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${encodedQAuery}`)
+            setLoading(false)
+        })()
     }, [])
 
     if (loading) return <Loading/>

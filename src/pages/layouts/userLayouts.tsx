@@ -8,6 +8,7 @@ import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 import {GetServerSideProps} from 'next'
 import isLogin from '@/src/lib/isLogin'
+import { decodeQuery } from '@/src/lib/parseQuery'
 
 const UserLayout: React.FC<any> = ({user, children}) => {
     const router = useRouter()
@@ -15,8 +16,8 @@ const UserLayout: React.FC<any> = ({user, children}) => {
     const [isOpen, toggle] = useState(false)
 
     useEffect(() => {
-        const {msg} = router.query
-        if (msg) alert.success(msg)
+        const { msg } = router.query
+        if (msg) alert.success(decodeQuery(msg as string))
     },[router.query])
 
     return (
