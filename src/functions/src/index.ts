@@ -134,8 +134,16 @@ exports.payment = functions.https.onRequest(async (req, res) => {
 
 exports.ticketReception = functions.https.onCall(async(data, context) => {
   if (!context.auth) throw new functions.https.HttpsError('failed-precondition', 'ログインしていません。')
+  console.log(data)
+  // ユーザーuid突き合わせ
+  try {
+    if (context.auth.uid !== data.seller) throw new Error
+    const decodedIdToken = await admin.auth().verifyIdToken(data.buyerToken)
+    if (decodedIdToken.uid !== data.buyer) throw new Error
+  } catch(e) {
+    throw new functions.https.HttpsError('unauthenticated', '認証に失敗しました。')
+  }
 
-  // TODO: ユーザーuid突き合わせ
   try {
     await firestore.collection('payments').doc(data.paymentId).update({
       accepted: true
