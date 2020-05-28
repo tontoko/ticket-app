@@ -137,7 +137,7 @@ export default ({ events, categories, query, setModal, setModalInner }) => {
             <>
                 <ModalBody>
                     本当に削除しますか？
-            </ModalBody>
+                </ModalBody>
                 <ModalFooter>
                     <Button color="primary" onClick={() => submit(i)}>はい</Button>{' '}
                     <Button color="secondary" onClick={() => setModal(false)}>キャンセル</Button>
