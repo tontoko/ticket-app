@@ -8,6 +8,13 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import initFirebase from '@/src/lib/initFirebase';
 import { useAlert } from 'react-alert';
 
+class NoStockError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "NoStockError";
+    }
+}
+
 export default ({ events, categories, query }) => {
 
     const router = useRouter()
@@ -32,7 +39,7 @@ export default ({ events, categories, query }) => {
                 const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(newManualPayment.category)
                 const eventRef = firestore.collection('events').doc(query.id as string)
                 const targetCategory = (await transaction.get(categoryRef)).data()
-                if (targetCategory.stock - targetCategory.sold < 1) throw new Error('チケットの在庫がありません。')
+                if (targetCategory.stock - targetCategory.sold < 1) throw new NoStockError('チケットの在庫がありません。')
                 transaction.update(eventRef, {
                     manualPayments: firebase.firestore.FieldValue.arrayUnion(newManualPayment)
                 })
@@ -50,9 +57,9 @@ export default ({ events, categories, query }) => {
             alert.success('手動受付リストを更新しました。')
         } catch(e) {
             alert.error(e.message)
-            return setTimeout(() => {
+            if (!(e instanceof NoStockError)) setTimeout(() => {
                 location.reload()
-            }, 2000);
+            }, 1000);
         }
         setLoading(false)
     }
@@ -70,7 +77,7 @@ export default ({ events, categories, query }) => {
                 const targetCategory = (await transaction.get(categoryRef)).data()
                 const originalCategory = (await transaction.get(originalCategoryRef)).data()
 
-                if (targetCategory.stock - targetCategory.sold < 1) throw new Error('チケットの在庫がありません。')
+                if (targetCategory.stock - targetCategory.sold < 1) throw new NoStockError('チケットの在庫がありません。')
                 if (originalCategory.sold < 1) throw new Error('他の端末でリストが更新された可能性があります。リロードします。')
                 transaction.update(eventRef, {
                     manualPayments
@@ -86,9 +93,9 @@ export default ({ events, categories, query }) => {
             alert.success('手動受付リストを更新しました。')
         } catch (e) {
             alert.error(e.message)
-            return setTimeout(() => {
+            if (!(e instanceof NoStockError)) setTimeout(() => {
                 location.reload()
-            }, 2000);
+            }, 1000);
         }
         setLoading(false)
     }
@@ -117,7 +124,7 @@ export default ({ events, categories, query }) => {
             alert.success('項目を削除しました。')
         } catch (e) {
             alert.error(e.message)
-            return setTimeout(() => {
+            if (!(e instanceof NoStockError)) setTimeout(() => {
                 location.reload()
             }, 2000);
         }
