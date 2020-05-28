@@ -1,7 +1,7 @@
 import React, { Component, useState } from 'react';
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { Table, Container, Row, Col, Label, Button, Input, FormGroup, Form } from 'reactstrap';
+import { Table, Container, Row, Col, Label, Button, Input, FormGroup, Form, ModalBody, ModalFooter } from 'reactstrap';
 import { GetServerSideProps } from 'next';
 import isLogin from '@/src/lib/isLogin';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
@@ -15,7 +15,7 @@ class NoStockError extends Error {
     }
 }
 
-export default ({ events, categories, query }) => {
+export default ({ events, categories, query, setModal, setModalInner }) => {
 
     const router = useRouter()
     const alert = useAlert()
@@ -103,33 +103,48 @@ export default ({ events, categories, query }) => {
 
     const deleteManualPayment = async (i: number) => {
         if (loading) return
-        try {
-            setLoading(true)
-            const { firestore } = await initFirebase()
-            let copyManualPayments = [...manualPayments]
-            copyManualPayments.splice(i,1)
-            await firestore.runTransaction(async transaction => {
-                const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
-                const eventRef = firestore.collection('events').doc(query.id as string)
-                const targetCategory = (await transaction.get(categoryRef)).data()
-                if (targetCategory.sold < 1) throw new Error('他の端末でリストが更新された可能性があります。リロードします。')
-                transaction.update(eventRef, {
-                    manualPayments: copyManualPayments
+        const submit = async (i: number) => {
+            try {
+                setLoading(true)
+                setModal(false)
+                const { firestore } = await initFirebase()
+                let copyManualPayments = [...manualPayments]
+                copyManualPayments.splice(i,1)
+                await firestore.runTransaction(async transaction => {
+                    const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
+                    const eventRef = firestore.collection('events').doc(query.id as string)
+                    const targetCategory = (await transaction.get(categoryRef)).data()
+                    if (targetCategory.sold < 1) throw new Error('他の端末でリストが更新された可能性があります。リロードします。')
+                    transaction.update(eventRef, {
+                        manualPayments: copyManualPayments
+                    })
+                    transaction.update(categoryRef, {
+                        sold: targetCategory.sold - 1
+                    })
                 })
-                transaction.update(categoryRef, {
-                    sold: targetCategory.sold - 1
-                })
-            })
-            setManualPayments(copyManualPayments)
-            setOriginalManualPayments(copyManualPayments)
-            alert.success('項目を削除しました。')
-        } catch (e) {
-            alert.error(e.message)
-            if (!(e instanceof NoStockError)) setTimeout(() => {
-                location.reload()
-            }, 2000);
+                setManualPayments(copyManualPayments)
+                setOriginalManualPayments(copyManualPayments)
+                alert.success('項目を削除しました。')
+            } catch (e) {
+                alert.error(e.message)
+                if (!(e instanceof NoStockError)) setTimeout(() => {
+                    location.reload()
+                }, 2000);
+            }
+            setLoading(false)
         }
-        setLoading(false)
+        setModalInner((
+            <>
+                <ModalBody>
+                    本当に削除しますか？
+            </ModalBody>
+                <ModalFooter>
+                    <Button color="primary" onClick={() => submit(i)}>はい</Button>{' '}
+                    <Button color="secondary" onClick={() => setModal(false)}>キャンセル</Button>
+                </ModalFooter>
+            </>
+        ))
+        setModal(true)
     }
 
     const setValue = (v,i,key) => {
