@@ -174,7 +174,7 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user } = await isLogin(ctx)
+  const { user } = await isLogin(ctx, 'redirect')
   return { props: { user } }
 }
 

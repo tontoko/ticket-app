@@ -95,7 +95,7 @@ export const Purchase = ({ event, categories, photoUrls }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const {user} = await isLogin(ctx)
+    const {user} = await isLogin(ctx, 'redirect')
     const { firestore } = await initFirebaseAdmin()
     const {query} = ctx
     const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event

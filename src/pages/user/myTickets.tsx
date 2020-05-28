@@ -85,7 +85,7 @@ export default ({ events }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { user } = await isLogin(ctx)
+    const { user } = await isLogin(ctx, 'redirect')
     const { firebase, firestore } = await initFirebaseAdmin()
     const payments = (await firestore.collection('payments').where('buyer', '==', user.user_id).get()).docs
     let events: FirebaseFirestore.DocumentData[] = []

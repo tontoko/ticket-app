@@ -89,7 +89,7 @@ const Confirmation= props => {
 export default Confirmation
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { user } = await isLogin(ctx)
+  const { user } = await isLogin(ctx, 'redirect')
   const {confirm} = ctx.query
   return { props: { user, categories: decodeQuery(confirm as string)} }
 }

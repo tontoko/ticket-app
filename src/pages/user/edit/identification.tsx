@@ -73,7 +73,7 @@ const Identification = ({ user, verification }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user } = await isLogin(ctx)
+  const { user } = await isLogin(ctx, 'redirect')
   const { firestore } = await initFirebaseAdmin()
   const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
   const result = await stripe.accounts.retrieve(

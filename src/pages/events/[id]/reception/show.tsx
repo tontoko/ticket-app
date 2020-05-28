@@ -40,7 +40,7 @@ export default ({ query, CSRUser }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    const { user } = await isLogin(ctx)
+    const { user } = await isLogin(ctx, 'redirect')
 
     return { props: { user, query: ctx.query } }
 }

@@ -121,7 +121,7 @@ export default ({event, beforeCategories}) => {
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const {query} = ctx
-  const { user } = await isLogin(ctx)
+  const { user } = await isLogin(ctx, 'redirect')
   const { firestore } = await initFirebaseAdmin()
   const result = (await firestore.collection('events').doc(query.id as string).get())
   const data = result.data() as event

@@ -56,7 +56,7 @@ export const UpdateEmail: React.FC<any> = (props) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const {user} = await isLogin(ctx)
+    const {user} = await isLogin(ctx, 'redirect')
     return {props: {user}}
 }
 

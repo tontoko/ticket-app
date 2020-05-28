@@ -137,7 +137,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { user } = await isLogin(ctx)
+    const { user } = await isLogin(ctx, 'redirect')
     const { firestore } = await initFirebaseAdmin()
     const { query } = ctx
     const { familyName, firstName, email, selectedCategory } = JSON.parse(decodeQuery(query.query as string))

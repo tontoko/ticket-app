@@ -139,7 +139,7 @@ const Page = () => {
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // クエリが渡って来ていない場合リダイレクト
-    const {user} = await isLogin(ctx)
+    const {user} = await isLogin(ctx, 'redirect')
     const {res, query} = ctx
     if (user && !query) {
         res.writeHead(302, { Location: '/events/new' })

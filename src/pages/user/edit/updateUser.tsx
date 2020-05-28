@@ -263,7 +263,7 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user } = await isLogin(ctx)
+  const { user } = await isLogin(ctx, 'redirect')
   const { query } = ctx
   const from = query.from ? query.from : ''
   const { firestore } = await initFirebaseAdmin()
