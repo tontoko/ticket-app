@@ -18,6 +18,7 @@ import moment from 'moment'
 import { toUtcIso8601str } from '@/src/lib/time'
 import { useAlert } from 'react-alert';
 import errorMsg from '@/src/lib/errorMsg';
+import { encodeQuery } from '@/src/lib/parseQuery';
 
 export default ({ user, event, photoUrls }) => {
     const router = useRouter()
@@ -77,7 +78,7 @@ export default ({ user, event, photoUrls }) => {
                 startDate: moment(startDate as string).toDate(),
                 endDate: moment(endDate as string).toDate(),
             })
-            router.push(`/events/${router.query.id}?msg=更新しました`)
+            router.push({ pathname: `/events/${router.query.id}`, query: { msg: encodeQuery('更新しました') }})
         } catch(e) { 
             alert.error(errorMsg(e))
             setLoading(false)
@@ -90,6 +91,7 @@ export default ({ user, event, photoUrls }) => {
         updateEvent()
     }
 
+    // TODO: 画像の横幅調整
     const fileInput = (i:0|1|2) => (
         <div style={{ border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em" }}>
             {(photoUrls[i]) && (<>
