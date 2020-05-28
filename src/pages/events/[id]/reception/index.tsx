@@ -1,80 +1,219 @@
 import React, { Component, useState } from 'react';
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { Table, Container, Row, Col, Label, Button, Input } from 'reactstrap';
+import { Table, Container, Row, Col, Label, Button, Input, FormGroup, Form } from 'reactstrap';
+import { GetServerSideProps } from 'next';
+import isLogin from '@/src/lib/isLogin';
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
+import initFirebase from '@/src/lib/initFirebase';
+import { useAlert } from 'react-alert';
 
-export default () => {
+export default ({ events, categories, query }) => {
 
     const router = useRouter()
+    const alert = useAlert()
 
-    const [state, setState] = useState([
-        {
-            id: 1,
-            firstName: "テスト",
-            familyName: "太郎",
-            price: 1000,
-            confirmed: false,
-            paid: false
-        },
-        {
-            id: 2,
-            firstName: "テスト",
-            familyName: "二郎",
-            price: 2000,
-            confirmed: false,
-            paid: false
-        },
-        {
-            id: 3,
-            firstName: "テスト",
-            familyName: "三郎",
-            price: 3000,
-            confirmed: false,
-            paid: false
+    const [originalManualPayments, setOriginalManualPayments] = useState(events.manualPayments)
+    const [manualPayments, setManualPayments] = useState(events.manualPayments)
+    const [newManualPayment, setNewManualPayment] = useState({
+        name: '',
+        category: categories[0].id,
+        paid: true
+    })
+
+    const createManualPayment = async () => {
+        if (!newManualPayment.name) return alert.error('名前が入力されていません。')
+        try {
+            const { firebase, firestore } = await initFirebase()
+            await firestore.runTransaction(async transaction => {
+                const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(newManualPayment.category)
+                const eventRef = firestore.collection('events').doc(query.id as string)
+                const targetCategory = (await transaction.get(categoryRef)).data()
+                if (targetCategory.stock - targetCategory.sold < 1) throw new Error('チケットの在庫がありません。')
+                transaction.update(eventRef, {
+                    manualPayments: firebase.firestore.FieldValue.arrayUnion(newManualPayment)
+                })
+                transaction.update(categoryRef, {
+                    sold: targetCategory.sold + 1
+                })
+            })
+            setNewManualPayment({
+                ...newManualPayment,
+                name: ''
+            })
+            const newState = [...manualPayments, newManualPayment]
+            setManualPayments(newState)
+            setOriginalManualPayments(newState)
+            alert.success('手動受付リストを更新しました。')
+        } catch(e) {
+            alert.error(e.message)
         }
-    ])
+    }
+
+    const editManualPayment = async (i: number) => {
+        if (!manualPayments[i].name) return alert.error('名前が入力されていません。')
+        try {
+            const { firestore } = await initFirebase()
+            await firestore.runTransaction(async transaction => {
+                const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
+                const originalCategoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(originalManualPayments[i].category)
+                const eventRef = firestore.collection('events').doc(query.id as string)
+                const targetCategory = (await transaction.get(categoryRef)).data()
+                const originalCategory = (await transaction.get(originalCategoryRef)).data()
+
+                if (targetCategory.stock - targetCategory.sold < 1) throw new Error('チケットの在庫がありません。')
+                if (originalCategory.sold < 1) {
+                    alert.error('他の端末でリストが更新された可能性があります。リロードします。')
+                    return setTimeout(() => {
+                        return location.reload()
+                    }, 2000);
+                }
+                transaction.update(eventRef, {
+                    manualPayments
+                })
+                transaction.update(categoryRef, {
+                    sold: targetCategory.sold + 1
+                })
+                transaction.update(originalCategoryRef, {
+                    sold: originalCategory.sold - 1
+                })
+                setOriginalManualPayments(manualPayments)
+            })
+            alert.success('手動受付リストを更新しました。')
+        } catch (e) {
+            alert.error(e.message)
+        }
+    }
+
+    const deleteManualPayment = async (i: number) => {
+        try {
+            const { firestore } = await initFirebase()
+            let copyManualPayments = [...manualPayments]
+            copyManualPayments.splice(i,1)
+            await firestore.runTransaction(async transaction => {
+                const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
+                const eventRef = firestore.collection('events').doc(query.id as string)
+                const targetCategory = (await transaction.get(categoryRef)).data()
+                if (targetCategory.sold < 1) {
+                    alert.error('他の端末でリストが更新された可能性があります。リロードします。')
+                    return setTimeout(() => {
+                        return location.reload()
+                    }, 2000);
+                }
+                transaction.update(eventRef, {
+                    manualPayments: copyManualPayments
+                })
+                transaction.update(categoryRef, {
+                    sold: targetCategory.sold - 1
+                })
+            })
+            setManualPayments(copyManualPayments)
+            setOriginalManualPayments(copyManualPayments)
+            alert.success('項目を削除しました。')
+        } catch (e) {
+            alert.error(e.message)
+        }
+    }
+
+    const setValue = (v,i,key) => {
+        const copyManualPayments = [...manualPayments]
+        copyManualPayments.splice(i,1,{
+            ...manualPayments[i],
+            [key]: v
+        })
+        setManualPayments(copyManualPayments)
+    }
 
     const column = (e,i) => {
-        const editHref = `/events/${e.id}/reception/edit`
 
         return (
-            <tr key={e.id}>
-                <td>{state[i].confirmed ? "○" : "×"}</td>
-                <td>{e.firstName}</td>
-                <td>{e.familyName}</td>
-                <td>{e.price}</td>
-                <td>{state[i].paid ? "○" : "×"}</td>
-                <td><Button href={editHref}>編集</Button></td>
+            <tr key={i}>
+                <td><Input placeholder="お名前" value={e.name} onChange={e => setValue(e.target.value,i,'name')} /></td>
+                <td>
+                    <Input type="select" value={manualPayments[i].category} onChange={e => setValue(e.target.value, i, 'category')}>
+                        {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+                    </Input>
+                </td>
+                <td>
+                    <Input type="select" value={manualPayments[i].paid.toString()} onChange={e => setValue(e.target.value === 'true', i, 'paid')}>
+                        <option value='true'>○</option>
+                        <option value='false'>×</option>
+                    </Input>
+                </td>
+                <td style={{ width: '6em' }}>
+                    <Button style={{ margin: '0.1em' }} color="success" onClick={() => editManualPayment(i)}>編集</Button>
+                    <Button style={{ margin: '0.1em' }} color="danger" onClick={() => deleteManualPayment(i)}>削除</Button>
+                </td>
             </tr>
         );
     }
-
-    const readHref = `/events/${router.query.id}/reception/qrReader`
 
     return (
         <>
             <Row style={{marginTop: "1.5em"}}>
                 <Col>
-                    <Link href={readHref}>
+                    <Link href={`/events/${router.query.id}/reception/qrReader`}>
                         <Button color="success">QRリーダーを起動する</Button>
                     </Link>
                 </Col>
             </Row>
-            <Table striped style={{ marginTop: "1em" }}>
-                <thead>
-                    <tr>
-                        <th>確認</th>
-                        <th>性</th>
-                        <th>名</th>
-                        <th>金額</th>
-                        <th>支払い</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {state.map((e,i) => column(e,i))}
-                </tbody>
-            </Table>
+            <Row style={{ marginTop: "1.5em" }}>
+                <Col>
+                    <h4>手動受付リスト</h4>
+                    <Table striped style={{ marginTop: "1em" }}>
+                        <thead>
+                            <tr>
+                                <th>名前</th>
+                                <th>カテゴリ</th>
+                                <th>支払</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><Input placeholder="お名前" value={newManualPayment.name} onChange={e => setNewManualPayment({...newManualPayment, name: e.target.value})} /></td>
+                                <td><Input type="select" value={newManualPayment.category} onChange={e => setNewManualPayment({ ...newManualPayment, category: e.target.value })}>
+                                    {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+                                    </Input>
+                                </td>
+                                <td>
+                                    <Input type="select" value={newManualPayment.paid.toString()} onChange={e => setNewManualPayment({ ...newManualPayment, paid: e.target.value === 'true' })}>
+                                        <option value='true'>○</option>
+                                        <option value='false'>×</option>
+                                    </Input>
+                                </td>
+                                <td style={{ width: '6em' }}>
+                                    <Button color="primary" onClick={createManualPayment}>登録</Button>
+                                </td>
+                            </tr>
+                            {manualPayments.map((e,i) => column(e,i))}
+                        </tbody>
+                    </Table>
+                </Col>
+            </Row>
         </>
     );
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+    const { user } = await isLogin(ctx, 'redirect')
+
+    const { query } = ctx
+    const { firestore } = await initFirebaseAdmin()
+    const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').get())
+    let categories: FirebaseFirestore.DocumentData[] = []
+    categoriesSnapShot.forEach(e => {
+        const id = e.id
+        const category = e.data()
+        categories.push({ ...category, id })
+    })
+    const eventsSnapShot = (await firestore.collection('events').doc(query.id as string).get())
+    const data = eventsSnapShot.data()
+    const createdAt = data.createdAt.seconds
+    const updatedAt = data.updatedAt.seconds
+    const startDate = data.startDate.seconds
+    const endDate = data.endDate.seconds
+    const events = { ...data, createdAt, updatedAt, startDate, endDate, id: eventsSnapShot.id }
+
+    return { props: { user, query: ctx.query, categories, events } }
 }
