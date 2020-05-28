@@ -20,10 +20,13 @@ export default ({ events, categories, query }) => {
         category: categories[0].id,
         paid: true
     })
+    const [loading, setLoading] = useState(false)
 
     const createManualPayment = async () => {
+        if (loading) return
         if (!newManualPayment.name) return alert.error('名前が入力されていません。')
         try {
+            setLoading(true)
             const { firebase, firestore } = await initFirebase()
             await firestore.runTransaction(async transaction => {
                 const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(newManualPayment.category)
@@ -47,12 +50,18 @@ export default ({ events, categories, query }) => {
             alert.success('手動受付リストを更新しました。')
         } catch(e) {
             alert.error(e.message)
+            return setTimeout(() => {
+                location.reload()
+            }, 2000);
         }
+        setLoading(false)
     }
 
     const editManualPayment = async (i: number) => {
+        if (loading) return
         if (!manualPayments[i].name) return alert.error('名前が入力されていません。')
         try {
+            setLoading(true)
             const { firestore } = await initFirebase()
             await firestore.runTransaction(async transaction => {
                 const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
@@ -62,12 +71,7 @@ export default ({ events, categories, query }) => {
                 const originalCategory = (await transaction.get(originalCategoryRef)).data()
 
                 if (targetCategory.stock - targetCategory.sold < 1) throw new Error('チケットの在庫がありません。')
-                if (originalCategory.sold < 1) {
-                    alert.error('他の端末でリストが更新された可能性があります。リロードします。')
-                    return setTimeout(() => {
-                        return location.reload()
-                    }, 2000);
-                }
+                if (originalCategory.sold < 1) throw new Error('他の端末でリストが更新された可能性があります。リロードします。')
                 transaction.update(eventRef, {
                     manualPayments
                 })
@@ -82,11 +86,17 @@ export default ({ events, categories, query }) => {
             alert.success('手動受付リストを更新しました。')
         } catch (e) {
             alert.error(e.message)
+            return setTimeout(() => {
+                location.reload()
+            }, 2000);
         }
+        setLoading(false)
     }
 
     const deleteManualPayment = async (i: number) => {
+        if (loading) return
         try {
+            setLoading(true)
             const { firestore } = await initFirebase()
             let copyManualPayments = [...manualPayments]
             copyManualPayments.splice(i,1)
@@ -94,12 +104,7 @@ export default ({ events, categories, query }) => {
                 const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
                 const eventRef = firestore.collection('events').doc(query.id as string)
                 const targetCategory = (await transaction.get(categoryRef)).data()
-                if (targetCategory.sold < 1) {
-                    alert.error('他の端末でリストが更新された可能性があります。リロードします。')
-                    return setTimeout(() => {
-                        return location.reload()
-                    }, 2000);
-                }
+                if (targetCategory.sold < 1) throw new Error('他の端末でリストが更新された可能性があります。リロードします。')
                 transaction.update(eventRef, {
                     manualPayments: copyManualPayments
                 })
@@ -112,7 +117,11 @@ export default ({ events, categories, query }) => {
             alert.success('項目を削除しました。')
         } catch (e) {
             alert.error(e.message)
+            return setTimeout(() => {
+                location.reload()
+            }, 2000);
         }
+        setLoading(false)
     }
 
     const setValue = (v,i,key) => {
