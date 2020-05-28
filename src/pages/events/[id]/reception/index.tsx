@@ -20,17 +20,18 @@ export default ({ events, categories, query }) => {
     const router = useRouter()
     const alert = useAlert()
 
-    const [originalManualPayments, setOriginalManualPayments] = useState(events.manualPayments)
-    const [manualPayments, setManualPayments] = useState(events.manualPayments)
+    const [originalManualPayments, setOriginalManualPayments] = useState(events.manualPayments ? events.manualPayments : [])
+    const [manualPayments, setManualPayments] = useState(events.manualPayments ? events.manualPayments : [])
     const [newManualPayment, setNewManualPayment] = useState({
         name: '',
-        category: categories[0].id,
+        category: categories.length > 0 ? categories[0].id : '',
         paid: true
     })
     const [loading, setLoading] = useState(false)
 
     const createManualPayment = async () => {
         if (loading) return
+        if (!newManualPayment.category) return alert.error('先にチケットカテゴリを登録してください。')
         if (!newManualPayment.name) return alert.error('名前が入力されていません。')
         try {
             setLoading(true)
