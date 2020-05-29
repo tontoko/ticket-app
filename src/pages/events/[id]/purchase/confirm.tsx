@@ -161,7 +161,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         amount: category.price,
         currency: 'jpy',
         transfer_data: {
-            amount: category.price - category.price * 0.08,
+            amount: category.price - Math.floor(category.price * 0.05),
             destination: stripeId
         },
         payment_method_types: ['card'],
