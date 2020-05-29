@@ -91,17 +91,24 @@ export default ({ user, event, photoUrls }) => {
         updateEvent()
     }
 
-    // TODO: 画像の横幅調整
     const fileInput = (i:0|1|2) => (
         <div style={{ border: "1px solid gray", padding: "0.5em", borderRadius: "0.3em" }}>
-            {(photoUrls[i]) && (<>
-                <p style={{margin:0,marginTop:'0.5em'}}>現在の画像</p>
-                <img src={photoUrls[i]} height="360px" width="auto" />
-            </>)}
-            {(files[i]) && (<>
-                <p style={{margin:0,marginTop:'0.5em'}}>新しい画像</p>
-                <img src={files[i]} height="360px" width="auto" />
-            </>)}
+            {(photoUrls[i]) && (
+            <Row>
+                <Col xs="6" sm="4" md="2">
+                    <p style={{margin:0,marginTop:'0.5em'}}>現在の画像</p>
+                    <img src={photoUrls[i]} style={{ width: "100%" }} />
+                </Col>
+            </Row>
+            )}
+            {(files[i]) && (
+            <Row>
+                <Col xs="6" sm="4" md="2">
+                    <p style={{margin:0,marginTop:'0.5em'}}>新しい画像</p>
+                    <img src={files[i]} style={{ width: "100%" }} />
+                </Col>
+            </Row>
+            )}
             <Input type="file" name="file1" accept=".jpg" onChange={e => changeFiles(e.target.files, i)} />
         </div>
     )
