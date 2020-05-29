@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Button, Container, Col, Row, Form, Input, FormGroup, Label, CarouselItem, CarouselCaption, Carousel, CarouselControl, CarouselIndicators, Spinner
 } from 'reactstrap';
@@ -10,14 +10,22 @@ import moment from 'moment'
 
 const Page = () => {
     const router = useRouter()
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    
+    const query = router.query
+    const { file1, file2, file3, eventName, placeName, eventDetail, startDate, endDate } = query
 
-    const { file1, file2, file3, eventName, placeName, eventDetail, startDate, endDate } = router.query
-    const items = [file1, file2, file3].filter(v=>v).map((file,i) => {
+    useEffect(() => {
+        if (!eventName || !placeName) {
+            router.back()
+        } else {
+            setLoading(false)
+        }
+    }, [])
+
+    const items = [file1, file2, file3].filter(v=>v).map(file => {
         return {
-            src: file as string,
-            altText: '画像'+i,
-            caption: '画像'+i
+            src: file as string
         }
     })
     const [activeIndex, setActiveIndex] = useState(0)
@@ -45,10 +53,8 @@ const Page = () => {
             <CarouselItem
                 onExiting={() => setAnimating(true)}
                 onExited={() => setAnimating(false)}
-                key={i}
             >
-                <img src={item.src} alt={item.altText} height="360em" />
-                <CarouselCaption captionText={item.caption} captionHeader={item.caption} />
+                <img src={item.src} height="360em" />
             </CarouselItem>
         )
     })
@@ -126,7 +132,7 @@ const Page = () => {
             </FormGroup>
             <FormGroup>
                 <Label for="describe">イベント詳細</Label>
-                <Input disabled style={{ height: "40em" }} type="textarea" name="text" id="describe" value={router.query.eventDetail} />
+                <Input disabled style={{ height: "40em" }} type="textarea" name="text" id="describe" value={query.eventDetail} />
             </FormGroup>
             <FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
@@ -139,13 +145,8 @@ const Page = () => {
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // クエリが渡って来ていない場合リダイレクト
-    const {user} = await isLogin(ctx, 'redirect')
-    const {res, query} = ctx
-    if (user && !query) {
-        res.writeHead(302, { Location: '/events/new' })
-        res.end()
-    }
-    return {props:{}}
+    const { user } = await isLogin(ctx, 'redirect')
+    return {props:{ user }}
 }
 
 export default Page

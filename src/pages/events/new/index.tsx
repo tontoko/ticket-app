@@ -33,7 +33,8 @@ export default () => {
         fileReader.readAsDataURL(inputFiles[0])
     }
 
-    const submit = () => {
+    const submit = e => {
+        e.preventDefault()
         if (eventName.length == 0 || placeName.length == 0) return alert.error('必須項目が入力されていません')
         if (moment(startDate).isAfter(moment(endDate))) return  alert.error('終了時刻は開始時刻より早く設定できません')
         window.scrollTo(0, 0)
@@ -55,7 +56,7 @@ export default () => {
     }
 
     return (
-        <Form style={{ marginTop: "2em" }} >
+        <Form style={{ marginTop: "2em" }} onSubmit={submit} >
             <FormGroup>
                 <Label className="mr-2">イベント名</Label>
                 <Input onChange={e => setEventName(e.target.value)} value={eventName} invalid={eventName.length == 0}></Input>
@@ -112,7 +113,7 @@ export default () => {
             </FormGroup>
             <FormGroup>
                 <Row style={{ margin: 0, marginTop: "0.5em" }}>
-                    <Button className="ml-auto" onClick={() => submit()}>確認</Button>
+                    <Button className="ml-auto">確認</Button>
                 </Row>
             </FormGroup>
         </Form>
@@ -121,5 +122,5 @@ export default () => {
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const {user} = await isLogin(ctx, 'redirect')
-    return {props: {user}}
+    return {props: { user }}
 }
