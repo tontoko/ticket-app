@@ -46,7 +46,7 @@ export default ({user, events}) => {
       )
     }
   )
-
+  // TODO: 個人情報を入力していない場合はそちらに誘導する
   return (
     <>
       <div style={{ marginTop: "1em", minHeight: '4em' }}>

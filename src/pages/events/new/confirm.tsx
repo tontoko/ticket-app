@@ -75,6 +75,7 @@ const Page = () => {
     }
 
     const createEvent = async(e) => {
+        // TODO: 個人情報が入力済みかチェックする
         e.preventDefault()
         if (loading) false
         setLoading(true)
