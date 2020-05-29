@@ -13,7 +13,7 @@ import { GetServerSideProps } from 'next'
 import { event } from 'events'
 import isLogin from '@/src/lib/isLogin'
 import atob from 'atob'
-import { decodeQuery } from '@/src/lib/parseQuery'
+import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery'
 
 const Confirmation= props => {
   const router = useRouter()
@@ -26,13 +26,11 @@ const Confirmation= props => {
     setLoading(true)
     const {firestore} = await initFirebase()
     const categoriesRef = firestore.collection('events').doc(router.query.id as string).collection('categories')
-    let updateCategories: {string?: FirebaseFirestore.DocumentData} = {}
     let names = []
     categories.filter(e => {
       if (!e.name) throw new Error('チケット名を入力してください。')
       if (e.price < 500) throw new Error('チケットの価格は500円以上に設定してください。')
       if (e.stock < 1 && e.new) throw new Error('チケットの在庫は1枚以上に設定してください。')
-      if (!e.new && e.stock - e.sold < 1) throw new Error('チケットの在庫は売り上げ分を引いて1枚以上に設定してください。')
       if (names.indexOf(e["name"]) === -1) {
         names.push(e["name"])
         return e
@@ -40,24 +38,31 @@ const Confirmation= props => {
       throw new Error('チケット名が重複しています')
     })
     try {
+      let addCategories = []
+      let updateCategories: {string?: FirebaseFirestore.DocumentData} = {}
       await Promise.all(categories.map(async category => {
         if (category.new) {
           const addCategory = { ...category, price: Number(category.price), stock: Number(category.stock), sold: 0, createdUser: props.user.uid }
           delete addCategory.new
-          categoriesRef.add(addCategory)
+          addCategories.push(addCategory)
         } else {
           const updateCategory = { ...category, price: Number(category.price), stock: Number(category.stock) }
-          const id = { ...updateCategory}.id
-          delete updateCategory.id
-          updateCategories[id] = updateCategory
+          // @ts-ignore
+          delete updateCategories.new
+          updateCategories[updateCategory.id] = updateCategory
         }
       }))
+      // 既存カテゴリ編集
       await firestore.runTransaction(async transaction => {
         Object.keys(updateCategories).map(async id => {
+          const targetCategory = (await transaction.get(categoriesRef.doc(id))).data()
+          if (!targetCategory.new && targetCategory.stock - targetCategory.sold < 1) throw new Error('チケットの在庫は売り上げ分を引いて1枚以上に設定してください。')
           transaction.set(categoriesRef.doc(id), updateCategories[id])
         })
       })
-      router.push(`/events/${router.query.id}?msg=更新しました`)
+      // 新規カテゴリ登録
+      await Promise.all(addCategories.map(async addCategory => categoriesRef.add(addCategory)))
+      router.push({pathname: `/events/${router.query.id}`, query: { msg: encodeQuery('更新しました。') }})
     } catch(e) {
       errorMsg(e)
       setLoading(false)

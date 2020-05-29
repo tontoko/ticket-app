@@ -15,8 +15,8 @@ export default ({ user, event, categories, payments }) => {
 
     categories.map((category, i) => {
         const targetPayments = payments.filter(targetPayment => targetPayment.category === category.id)
-        const manualPaid = category.manualPayments.filter(manualPayment => manualPayment.paid).length
-        const manualUnpaid = category.manualPayments.length - manualPaid
+        const manualPaid = category.manualPayments ? category.manualPayments.filter(manualPayment => manualPayment.paid).length : 0
+        const manualUnpaid = (category.manualPayments ? category.manualPayments.length : 0) - manualPaid
         const visited = targetPayments.filter(targetPayment => targetPayment.accepted).length + manualPaid
         const sold = category.sold - manualUnpaid
         totalSalesProspect += category.stock * category.price
@@ -30,7 +30,7 @@ export default ({ user, event, categories, payments }) => {
                 <td>{category.stock - sold}</td>
                 <td>{Math.floor(sold / category.stock * 100)} %</td>
                 <td>{visited}</td>
-                <td>{Math.floor(visited / sold * 100)} %</td>
+                <td>{sold ? Math.floor(visited / sold * 100) : 0} %</td>
             </tr>
         )
     })
