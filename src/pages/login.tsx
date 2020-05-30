@@ -97,5 +97,5 @@ export const Login = () => {
         </>
     );
 }
-
+// TODO: ログイン済みの場合に403リダイレクトする
 export default Login

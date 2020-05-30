@@ -25,6 +25,8 @@ export default ({ events }) => {
                 }
             }
             // TODO: 返金フロー作成
+            // TODO: 最初のチケット購入の場合に購入処理についてのメッセージを表示する
+            // TODO: チケットのボタンを縦並びに表示する
             return (
                 <div key={i}>
                     <Card>

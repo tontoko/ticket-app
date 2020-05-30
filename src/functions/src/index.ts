@@ -66,7 +66,7 @@ exports.payment = functions.https.onRequest(async (req, res) => {
     const firestore = admin.firestore()
     switch (webhockEvent['type']) {
       case 'payment_intent.succeeded':
-        let error = ''
+        let error: string | null = null
         intent = webhockEvent.data.object as Stripe.PaymentIntent
         const { event, category, seller, buyer } = intent.metadata
         try {
