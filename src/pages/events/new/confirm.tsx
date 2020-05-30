@@ -7,8 +7,10 @@ import initFirebase from '@/src/lib/initFirebase'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
+import stripe from '@/src/lib/stripe';
 
-const Page = () => {
+const Page = ({ currently_due, errors, eventually_due, past_due }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
     
@@ -18,6 +20,8 @@ const Page = () => {
     useEffect(() => {
         if (!eventName || !placeName) {
             router.back()
+        } else if (currently_due.length || errors.length || eventually_due.length || past_due.length) {
+            router.push('/user/edit')
         } else {
             setLoading(false)
         }
@@ -75,7 +79,6 @@ const Page = () => {
     }
 
     const createEvent = async(e) => {
-        // TODO: 個人情報が入力済みかチェックする
         e.preventDefault()
         if (loading) false
         setLoading(true)
@@ -147,7 +150,15 @@ const Page = () => {
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // クエリが渡って来ていない場合リダイレクト
     const { user } = await isLogin(ctx, 'redirect')
-    return {props:{ user }}
+
+    const { firestore } = await initFirebaseAdmin()
+    const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
+    const { individual } = await stripe.accounts.retrieve(
+        stripeId
+    )
+    const { currently_due, errors, eventually_due, past_due } = individual.requirements
+    
+    return { props: { user, currently_due, errors, eventually_due, past_due }}
 }
 
 export default Page

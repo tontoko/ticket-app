@@ -9,9 +9,9 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
+import stripe from '@/src/lib/stripe';
 
-export default ({user, events}) => {
-
+export default ({ user, events, currently_due, errors, eventually_due, past_due }) => {
   const renderUserEvents = () => events.map((event, i) => {
 
       const showDate = () => {
@@ -46,21 +46,38 @@ export default ({user, events}) => {
       )
     }
   )
-  // TODO: 個人情報を入力していない場合はそちらに誘導する
+
   return (
     <>
       <div style={{ marginTop: "1em", minHeight: '4em' }}>
         <h5>自分のイベント</h5>
         {renderUserEvents()}
       </div>
-      <Row style={{ margin: 0, marginTop: "0.5em" }}>
-        <Link href="/events/new">
-          <Button className="ml-auto">新しいイベントを作成</Button>
-        </Link>
-      </Row>
+      {(() => {
+        if (currently_due.length && errors.length && past_due.length && eventually_due) {
+          return (
+            <Row style={{ margin: 0, marginTop: "0.5em" }}>
+              <Link href="/events/new">
+                <Button className="ml-auto">新しいイベントを作成</Button>
+              </Link>
+            </Row>
+          )
+        } else {
+          return (
+            <>
+              <h5>開催するイベントを作成し、チケット販売を開始するにはユーザー情報を登録してください。</h5>
+              <Row style={{ margin: 0, marginTop: "0.5em" }}>
+                <Link href="/user/edit">
+                  <Button className="ml-auto">ユーザー情報を登録する</Button>
+                </Link>
+              </Row>
+            </>
+          )
+        }
+      })()}
     </>
-  );
-};
+  )
+}
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
   const {user} = await isLogin(ctx, 'redirect')
@@ -75,5 +92,12 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const photos = data.photos.length > 0 ? await getImg(data.photos[0], user.user_id, '360') : await getImg(null, user.user_id, '360')
     return { ...data, createdAt, updatedAt, startDate, endDate, photos, id: doc.id }
   }))
-  return {props: {user, events}}
+
+  const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
+  const { individual } = await stripe.accounts.retrieve(
+    stripeId
+  )
+  const { currently_due, errors, eventually_due, past_due } = individual.requirements
+
+  return { props: { user, events, currently_due, errors, eventually_due, past_due }}
 }
