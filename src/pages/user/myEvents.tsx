@@ -11,7 +11,7 @@ import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
 import stripe from '@/src/lib/stripe';
 
-export default ({ user, events, currently_due, errors, eventually_due, past_due }) => {
+export default ({ user, events, requirements }) => {
   const renderUserEvents = () => events.map((event, i) => {
 
       const showDate = () => {
@@ -54,7 +54,7 @@ export default ({ user, events, currently_due, errors, eventually_due, past_due 
         {renderUserEvents()}
       </div>
       {(() => {
-        if (currently_due.length && errors.length && past_due.length && eventually_due) {
+        if (requirements && !requirements.currently_due.length && !requirements.errors.length && !requirements.past_due.length && !requirements.eventually_due.length) {
           return (
             <Row style={{ margin: 0, marginTop: "0.5em" }}>
               <Link href="/events/new">
@@ -97,7 +97,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   const { individual } = await stripe.accounts.retrieve(
     stripeId
   )
-  const { currently_due, errors, eventually_due, past_due } = individual.requirements
+  const requirements = individual ? individual.requirements : null
 
-  return { props: { user, events, currently_due, errors, eventually_due, past_due }}
+  return { props: { user, events, requirements }}
 }

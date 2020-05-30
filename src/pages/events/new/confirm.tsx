@@ -10,7 +10,7 @@ import moment from 'moment'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import stripe from '@/src/lib/stripe';
 
-const Page = ({ currently_due, errors, eventually_due, past_due }) => {
+const Page = ({ requirements }) => {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
     
@@ -20,7 +20,7 @@ const Page = ({ currently_due, errors, eventually_due, past_due }) => {
     useEffect(() => {
         if (!eventName || !placeName) {
             router.back()
-        } else if (currently_due.length || errors.length || eventually_due.length || past_due.length) {
+        } else if (requirements && (requirements.currently_due.length || requirements.errors.length || requirements.eventually_due.length || requirements.past_due.length)) {
             router.push('/user/edit')
         } else {
             setLoading(false)
@@ -156,9 +156,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const { individual } = await stripe.accounts.retrieve(
         stripeId
     )
-    const { currently_due, errors, eventually_due, past_due } = individual.requirements
+    const requirements = individual ? individual.requirements : null
     
-    return { props: { user, currently_due, errors, eventually_due, past_due }}
+    return { props: { user, requirements }}
 }
 
 export default Page
