@@ -63,6 +63,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
     const urlToReception = `/events/${router.query.id}/reception`
     const urlToReport = `/events/${router.query.id}/report`
     
+    // TODO: ボタンを右揃えにする
     const buttons = () => {
         if (status == 'organizer') {
             // 主催者
@@ -155,6 +156,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
         }
     })
 
+    // TODO: タイトルに日付を入れる
     return (
         <>
             <Row style={{ marginTop: '1em', marginLeft: "0" }}>

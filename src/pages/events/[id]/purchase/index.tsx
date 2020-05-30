@@ -40,7 +40,9 @@ export const Purchase = ({ event, categories, photoUrls }) => {
         // クエリーをまるごとbase64化
         router.push({ pathname, query: { query: encodeQuery(JSON.stringify({ familyName, firstName, email, selectedCategory })) }} )
     }
-
+    // TODO: スマホビューの名前入力欄のCSS調整
+    // TODO: チケットカテゴリを一段で表示
+    // TODO: 確認ボタンを購入手続きへに変更
     return (
         <Form style={{ marginTop: '5em' }}>
             <FormGroup>
@@ -113,6 +115,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         const category = e.data()
         categories.push({ ...category, id })
     })
+    // TODO: 非公開カテゴリの除外
     return {props: { event, categories, photoUrls, user }}
 }
 

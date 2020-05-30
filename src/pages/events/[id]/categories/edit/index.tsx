@@ -106,7 +106,7 @@ export default ({event, beforeCategories}) => {
       alert.error(e.message)
     }
   }
-  
+  // TODO: チケットの並び替え機能
   return (
           <Form style={{ marginTop: '5em' }}>
         <h5 style={{marginBottom: '1em'}}>カテゴリ一覧</h5>
