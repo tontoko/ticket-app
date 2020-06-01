@@ -225,7 +225,6 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser))) : [await getImg(null, data.createdUser)]
     const event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
     const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
-    console.log(categories)
     let status: string
     let tickets = []
     if (!user) {
