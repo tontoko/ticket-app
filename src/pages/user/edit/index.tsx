@@ -27,12 +27,10 @@ const UserShow = ({ user, verification }) => {
             )}
 
             <div style={{ marginTop: '2.5em' }}>
-                <h5>イベント主催者用の登録情報</h5>
-                <FormGroup style={{ marginTop: '2em' }}>
-                    <Link href={`/user/edit/updateUser`}><a>ユーザー情報を追加・修正する</a></Link>
-                </FormGroup>
+                <h5>主催者用の登録情報</h5>
+                <p>イベントを開催するには、ユーザー情報と本人確認書類を登録する必要があります。</p>
                 <FormGroup style={{ marginTop: '1em' }}>
-                    <Link href={`/user/bankAccounts`}><a>銀行口座を追加・修正する</a></Link>
+                    <Link href={`/user/edit/updateUser`}><a>ユーザー情報を追加・修正する</a></Link>
                 </FormGroup>
                 <FormGroup>
                     {(() => {
@@ -40,6 +38,9 @@ const UserShow = ({ user, verification }) => {
                         if (status === 'pending') return <><p>本人確認書類:  </p><Link href={`/user/edit/identification`}><a><FontAwesomeIcon icon={faExclamationCircle} style={{ color: "red", marginLeft: '0.5em' }} /> 提出済み (再提出が必要です)</a></Link></>
                         if (status === 'verified') return <p>本人確認書類: <FontAwesomeIcon icon={faCheckSquare} style={{ color: "#00DD00", marginLeft: '0.5em' }} /> 提出済み (確認済)</p>
                     })()}
+                </FormGroup>
+                <FormGroup style={{ marginTop: '1em' }}>
+                    <Link href={`/user/bankAccounts`}><a>振り込み用 銀行口座を追加・修正する</a></Link>
                 </FormGroup>
             </div>
 

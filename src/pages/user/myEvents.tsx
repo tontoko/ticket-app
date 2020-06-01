@@ -65,8 +65,8 @@ export default ({ user, events, requirements }) => {
         } else {
           return (
             <>
-              <h5>開催するイベントを作成し、チケット販売を開始するにはユーザー情報を登録してください。</h5>
-              <Row style={{ margin: 0, marginTop: "0.5em" }}>
+              <p>開催するイベントを作成し、チケット販売を開始するには必要なユーザー情報を登録してください。</p>
+              <Row style={{ margin: 0, marginTop: "2em" }}>
                 <Link href="/user/edit">
                   <Button className="ml-auto">ユーザー情報を登録する</Button>
                 </Link>
