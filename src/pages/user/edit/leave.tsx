@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, FormText, Row, Col } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Row } from 'reactstrap'
 import errorMsg from '@/src/lib/errorMsg'
 import { useAlert } from "react-alert"
 import initFirebase from '@/src/lib/initFirebase'
@@ -31,7 +31,7 @@ export const Leave = ({user}) => {
             alert.error(errorMsg(e))
         }
     }
-
+    // TODO: 退会時のフロー作成
     return (
         <Form style={{ marginTop: "6.5em" }}>
             <h5>本当に退会しますか？</h5>
@@ -43,9 +43,9 @@ export const Leave = ({user}) => {
                 </Label>
             </FormGroup>
             {user.firebase.sign_in_provider === 'password' && (
-                <>
-                <Input type="password" placeholder="パスワード" value={pwd} onChange={e => setPwd(e.target.value)} />
-                </>
+                <FormGroup>
+                    <Input type="password" placeholder="パスワードを入力してください" value={pwd} onChange={e => setPwd(e.target.value)} />
+                </FormGroup>
             )}
             <Row style={{ margin: 0 }}>
                 <Button className="ml-auto" onClick={() => leave()}>退会する</Button>

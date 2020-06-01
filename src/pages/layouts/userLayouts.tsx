@@ -53,19 +53,18 @@ const UserLayout: React.FC<any> = ({user, children}) => {
             }
             {!user &&
                 <>
-                <div style={{ marginLeft: "auto" }}>
-                    <NavbarToggler onClick={() => toggle(!isOpen)} />
-                    <Collapse isOpen={isOpen} navbar className="mr-auto">
-                        <Nav navbar>
-                            <NavItem>
-                                <NavLink href={`/register`}>新規登録する</NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink href={`/login`}>ログイン</NavLink>
-                            </NavItem>
-                        </Nav>
-                    </Collapse>
-                </div>
+                <div style={{ marginLeft: "auto" }} />
+                <NavbarToggler onClick={() => toggle(!isOpen)} />
+                <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">
+                    <Nav navbar>
+                        <NavItem>
+                            <NavLink href={`/register`}>新規登録する</NavLink>
+                        </NavItem>
+                        <NavItem>
+                            <NavLink href={`/login`}>ログイン</NavLink>
+                        </NavItem>
+                    </Nav>
+                </Collapse>
                 </>
             }
         </Navbar>
