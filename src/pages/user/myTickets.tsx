@@ -31,18 +31,21 @@ export default ({ events }) => {
                 <div key={i}>
                     <Card>
                         <CardBody>
-                            <Row>
+                            <Row style={{ marginBottom: '0.5em' }}>
                                 <Col sm="2" xs="3">
                                     <Link key={i} href={`/events/${event.id}`}>
                                         <img width="100%" src={event.photos} alt="Card image cap" style={{ cursor: 'pointer' }} />
                                     </Link>
                                 </Col>
-                            </Row>
-                            <Row>
                                 <Col>
                                     <CardTitle>{event.name}</CardTitle>
                                     <CardSubtitle>{event.placeName}</CardSubtitle>
                                     <CardText>{showDate()}</CardText>
+                                    </Col>
+                            </Row>
+                            <Row>
+                                <Col>
+                                    
                                     {event.tickets.map((ticket, ticketIndex) => 
                                         <Card style={{ marginBottom: '0.5em' }} key={ticketIndex}>
                                             <CardBody>
