@@ -160,7 +160,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const startDate = data.startDate.seconds
   const endDate = data.endDate.seconds
   const event = { ...data, createdAt, updatedAt, startDate, endDate, id: result.id }
-  const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').get())
+  const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get())
   let categories: FirebaseFirestore.DocumentData[] = []
   categoriesSnapShot.forEach(e => {
     const id = e.id

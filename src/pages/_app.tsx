@@ -1,6 +1,7 @@
 import {useState, useEffect, Dispatch, ReactElement, SetStateAction} from 'react'
 import '@/node_modules/bootstrap/dist/css/bootstrap.min.css'
 import "react-datepicker/dist/react-datepicker.css"
+import '@fortawesome/fontawesome-svg-core/styles.css'
 import UserLayouts from './layouts/userLayouts'
 import initFirebase from '@/src/lib/initFirebase'
 import {useRouter} from 'next/router'

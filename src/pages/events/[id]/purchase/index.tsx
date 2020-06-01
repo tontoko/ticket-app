@@ -13,13 +13,13 @@ import isLogin from '@/src/lib/isLogin'
 import { event } from 'events'
 import { encodeQuery } from '@/src/lib/parseQuery'
 
-export const Purchase = ({ event, categories, photoUrls }) => {
+export const Purchase = ({ user, event, categories, photoUrls }) => {
     const router = useRouter();
 
     const validCategories = categories.filter(category => category.stock - category.sold > 0)
     const [familyName, setFamilyName] = useState('')
     const [firstName, setFirstName] = useState('')
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useState(user.email)
     const [invalidEmail, setInvalidEmail] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState(validCategories[0].id)
 
@@ -40,18 +40,16 @@ export const Purchase = ({ event, categories, photoUrls }) => {
         // クエリーをまるごとbase64化
         router.push({ pathname, query: { query: encodeQuery(JSON.stringify({ familyName, firstName, email, selectedCategory })) }} )
     }
-    // TODO: スマホビューの名前入力欄のCSS調整
-    // TODO: チケットカテゴリを一段で表示
-    // TODO: 確認ボタンを購入手続きへに変更
+
     return (
         <Form style={{ marginTop: '5em' }}>
             <FormGroup>
                 <Label>お名前</Label>
                 <Row>
-                    <Col xs="3">
+                    <Col xs="6">
                         <Input type="text" name="familyName" placeholder="性" onChange={e =>setFamilyName(e.target.value)} value={familyName} invalid={!familyName} />
                     </Col>
-                    <Col xs="3">
+                    <Col xs="6">
                         <Input type="text" name="firstName" placeholder="名" onChange={e => setFirstName(e.target.value)} value={firstName} invalid={!firstName} />
                     </Col>
                 </Row>
@@ -72,6 +70,8 @@ export const Purchase = ({ event, categories, photoUrls }) => {
                                 <CardTitle>{event.name}</CardTitle>
                                 <CardSubtitle>開催地: {event.placeName}</CardSubtitle>
                             </Col>
+                        </Row>
+                        <Row style={{ marginTop: '0.5em' }}>
                             <Col>
                                 <Label>チケットカテゴリ</Label>
                                 <Input type="select" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
@@ -90,7 +90,7 @@ export const Purchase = ({ event, categories, photoUrls }) => {
                 </Card>
             </FormGroup>
             <Row className="flex-row-reverse">
-                <Button style={{ marginRight: '1em' }} onClick={() => submit()}>確認</Button>
+                <Button style={{ marginRight: '1em' }} onClick={() => submit()}>購入手続きへ</Button>
             </Row>
         </Form>
     );
@@ -108,14 +108,14 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
     const event = {...data, createdAt, updatedAt, startDate, endDate}
-    const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').get())
+    const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get())
     let categories: FirebaseFirestore.DocumentData[] = []
     categoriesSnapShot.forEach(e => {
         const id = e.id
         const category = e.data()
-        categories.push({ ...category, id })
+        category.public && categories.push({ ...category, id })
     })
-    // TODO: 非公開カテゴリの除外
+
     return {props: { event, categories, photoUrls, user }}
 }
 

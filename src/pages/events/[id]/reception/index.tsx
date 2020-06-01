@@ -232,7 +232,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
     const { query } = ctx
     const { firestore } = await initFirebaseAdmin()
-    const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').get())
+    const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get())
     let categories: FirebaseFirestore.DocumentData[] = []
     categoriesSnapShot.forEach(e => {
         const id = e.id

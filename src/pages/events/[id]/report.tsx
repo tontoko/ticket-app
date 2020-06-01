@@ -90,7 +90,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const endDate = data.endDate.seconds
     const event = { ...data, createdAt, updatedAt, startDate, endDate, id: result.id }
 
-    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').get()).docs.map(category => { return { ...category.data(), id: category.id } })
+    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
     const payments = (await firestore.collection('payments').where("event", "==", result.id).get()).docs.map(payment => payment.data())
 
     return { props: { user, event, categories, payments } }

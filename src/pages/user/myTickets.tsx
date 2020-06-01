@@ -9,6 +9,8 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { encodeQuery } from '@/src/lib/parseQuery';
 
 export default ({ events }) => {
@@ -25,8 +27,6 @@ export default ({ events }) => {
                 }
             }
             // TODO: 返金フロー作成
-            // TODO: 最初のチケット購入の場合に購入処理についてのメッセージを表示する
-            // TODO: チケットのボタンを縦並びに表示する
             return (
                 <div key={i}>
                     <Card>
@@ -37,6 +37,8 @@ export default ({ events }) => {
                                         <img width="100%" src={event.photos} alt="Card image cap" style={{ cursor: 'pointer' }} />
                                     </Link>
                                 </Col>
+                            </Row>
+                            <Row>
                                 <Col>
                                     <CardTitle>{event.name}</CardTitle>
                                     <CardSubtitle>{event.placeName}</CardSubtitle>
@@ -45,7 +47,11 @@ export default ({ events }) => {
                                         <Card style={{ marginBottom: '0.5em' }} key={ticketIndex}>
                                             <CardBody>
                                                 <p>{ticket.name}: {ticket.price}円</p>
-                                                <p>{ticket.accepted ? '受付済み' : '未受付'}</p>
+                                                {ticket.accepted ? (
+                                                    <p><FontAwesomeIcon icon={faCheckSquare} style={{ color: "#00DD00" }} /> 受付済み</p>
+                                                    ): (
+                                                    <p><FontAwesomeIcon icon={faExclamationCircle} style={{ color: "orange" }} /> 未受付</p>
+                                                )}
                                                 <Row>
                                                 {ticket.error ?
                                                     <Col>
@@ -54,13 +60,13 @@ export default ({ events }) => {
                                                 :
                                                 <>
                                                     {!ticket.accepted &&
-                                                    <Col>
-                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: encodeQuery(JSON.stringify(ticket)) } }}>
-                                                            <Button color="success">受付用のQRコードを表示</Button>
-                                                        </Link>
-                                                    </Col>
+                                                        <Col xs="12" style={{ marginBottom: '0.2em' }}>
+                                                            <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: encodeQuery(JSON.stringify(ticket)) } }}>
+                                                                <Button color="success">受付用QRコードを表示</Button>
+                                                            </Link>
+                                                        </Col>
                                                     }
-                                                    <Col>
+                                                    <Col xs="12">
                                                         <Button color="danger">返金申請</Button>
                                                     </Col>
                                                 </>
@@ -81,7 +87,13 @@ export default ({ events }) => {
     return (
         <div style={{ marginTop: "1em", minHeight: '4em' }}>
             <h5>購入済みチケット</h5>
-            {renderUserEvents()}
+            {events.length === 0 ?
+            <>
+                <p>チケットを購入した場合、ここに表示されます。</p>
+                <p>購入処理に時間がかかる場合があります。購入したチケットが表示されていない場合は<a href="#" onClick={() => location.reload()}>画面を更新</a>してください。</p>
+            </>
+            :
+            renderUserEvents()}
         </div>
     );
 };

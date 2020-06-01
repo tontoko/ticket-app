@@ -20,6 +20,8 @@ import { event } from 'events'
 import moment from 'moment'
 import btoa from 'btoa'
 import { encodeQuery } from '@/src/lib/parseQuery';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 
 export default ({ user, event, categories, status, items, tickets }) => {
 
@@ -95,7 +97,11 @@ export default ({ user, event, categories, status, items, tickets }) => {
                             <Card style={{ marginBottom: '0.5em' }} key={i}>
                                 <CardBody>
                                     <p>{ticket.name}: {ticket.price}円</p>
-                                    <p>{ticket.accepted ? '受付済み' : '未受付'}</p>
+                                    {ticket.accepted ? (
+                                        <p><FontAwesomeIcon icon={faCheckSquare} style={{ color: "#00DD00" }} /> 受付済み</p>
+                                    ) : (
+                                        <p><FontAwesomeIcon icon={faExclamationCircle} style={{ color: "orange" }} /> 未受付</p>
+                                    )}
                                     <Row>
                                         {ticket.error ?
                                             <Col>
@@ -104,13 +110,13 @@ export default ({ user, event, categories, status, items, tickets }) => {
                                             :
                                             <>
                                                 {!ticket.accepted &&
-                                                    <Col>
+                                                    <Col xs="12" style={{ marginBottom: '0.2em' }}>
                                                         <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: encodeQuery(JSON.stringify(ticket)) } }}>
-                                                            <Button color="success">受付用のQRコードを表示</Button>
+                                                            <Button color="success">受付用QRコードを表示</Button>
                                                         </Link>
                                                     </Col>
                                                 }
-                                                <Col>
+                                                <Col xs="12">
                                                     <Button color="danger">返金申請</Button>
                                                 </Col>
                                             </>
@@ -218,7 +224,8 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const endDate = data.endDate.seconds
     const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser))) : [await getImg(null, data.createdUser)]
     const event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
-    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').get()).docs.map(category => { return { ...category.data(), id: category.id } })
+    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
+    console.log(categories)
     let status: string
     let tickets = []
     if (!user) {
@@ -228,10 +235,10 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     } else {
         const payments = (await firestore.collection('payments').where("event", "==", result.id).where("buyer", "==", user.uid).get()).docs
         tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async payment => {
-            const categorySnapShot = await firestore.collection('events').doc(event.id).collection('categories').doc(payment.data().category).get()
+            const targetCategory = categories.filter(catgegory => catgegory.id === payment.data().category)[0]
             return {
-                ...categorySnapShot.data(),
-                categoryId: categorySnapShot.id,
+                ...targetCategory,
+                categoryId: targetCategory.id,
                 paymentId: payment.id,
                 accepted: payment.data().accepted,
                 error: payment.data().error,
