@@ -63,7 +63,6 @@ export default ({ user, event, categories, status, items, tickets }) => {
     const urlToReception = `/events/${router.query.id}/reception`
     const urlToReport = `/events/${router.query.id}/report`
     
-    // TODO: ボタンを右揃えにする
     const buttons = () => {
         if (status == 'organizer') {
             // 主催者
@@ -123,7 +122,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
                     </Col>
                     <Col sm="12" style={{ marginTop: "1.5em" }}>
                         <Link href={urlToPurchase}>
-                            <Button color="primary">追加のチケットを購入する</Button>
+                            <Button block color="primary">追加のチケットを購入する</Button>
                         </Link>
                     </Col>
                 </Row >
@@ -133,11 +132,13 @@ export default ({ user, event, categories, status, items, tickets }) => {
         }else {
             // 申し込み
             return (
-                <div style={{ marginTop: "1.5em" }}>
-                    <Link href={urlToPurchase}>
-                        <Button color="primary">チケットを購入する</Button>
-                    </Link>
-                </div>
+                <Row style={{ marginTop: "1.5em" }}>
+                    <Col sm="12" style={{ margin: "0.2em" }}>
+                        <Link href={urlToPurchase}>
+                            <Button block color="primary">チケットを購入する</Button>
+                        </Link>
+                    </Col>
+                </Row>
             )
         }
     }
@@ -156,11 +157,10 @@ export default ({ user, event, categories, status, items, tickets }) => {
         }
     })
 
-    // TODO: タイトルに日付を入れる
     return (
         <>
             <Row style={{ marginTop: '1em', marginLeft: "0" }}>
-                <h4>{event.name}</h4>
+                <h3>【{moment(startDate).format("d/M")}】{event.name}</h3>
             </Row>
             <Row style={{ marginTop: '1em' }}>
                 <Col xs="12" md="6" lg="4">

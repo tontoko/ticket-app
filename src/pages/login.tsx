@@ -7,6 +7,8 @@ import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-ic
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
+import isLogin from '../lib/isLogin'
+import { GetServerSideProps } from 'next'
 
 export const Login = () => {
     const alert = useAlert()
@@ -97,5 +99,10 @@ export const Login = () => {
         </>
     );
 }
-// TODO: ログイン済みの場合に403リダイレクトする
+
 export default Login
+
+export const getServerSideProps: GetServerSideProps = async ctx => {
+    await isLogin(ctx, 'redirect')
+    return { props: { } }
+}

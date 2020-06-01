@@ -30,7 +30,7 @@ export default async (ctx: GetServerSidePropsContext, mode?: mode) => {
         Location: '/confirmEmail'
       })
       res.end()
-    } else if (url === '/login' || url === '/register' || url === '/') {
+    } else if (url === '/login' || url === '/register') {
       res.writeHead(302, {
         Location: `/user`
       })

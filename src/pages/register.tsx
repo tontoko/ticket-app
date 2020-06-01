@@ -42,7 +42,7 @@ export default () => {
                 </FormGroup>
                 <Button disabled={loading}>{loading ? <Spinner/> : '登録'}</Button>
             </Form>
-            <p style={{ marginTop: '0.7em' }}>既にアカウントをお持ちの方は<Link href="/login">ログイン</Link></p>
+            <p style={{ marginTop: '0.7em' }}>既にアカウントをお持ちの方は<Link href="/login"><a>ログイン</a></Link></p>
         </>
     )
 }

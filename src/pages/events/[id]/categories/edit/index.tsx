@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Form, FormGroup, Button, Input, Container, Row, Col, Label } from 'reactstrap'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
+import { faTimesCircle, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
 import { GetServerSideProps } from 'next'
 import { event } from 'events'
 import isLogin from '@/src/lib/isLogin'
@@ -45,36 +45,66 @@ export default ({event, beforeCategories}) => {
       copyCategories.splice(i,1)
       setCategories(copyCategories)
     }
+    const moveArrayElementToPrev = () => {
+      const copyCategory = [...categories]
+      const reversedCategories = [copyCategory[i], copyCategory[i-1]]
+      const beginCategories = i-1 > 0 ? copyCategory.slice(0, i-1) : []
+      const endCategories = i < categories.length-1 ? copyCategory.slice(i+1) : []
+      setCategories([...beginCategories, ...reversedCategories, ...endCategories])
+    }
+    const moveArrayElementToNext = () => {
+      const copyCategory = [...categories]
+      const reversedCategories = [copyCategory[i+1], copyCategory[i]]
+      const beginCategories = i !== 0 ? copyCategory.slice(0, i) : []
+      const endCategories = i < categories.length-2 ? copyCategory.slice(i+2) : []
+      setCategories([...beginCategories, ...reversedCategories, ...endCategories])
+    }
     return (
-        <FormGroup key={i} style={{ border: "solid 1px gray", padding: '0.5em'}}>
-          <Row style={{ margin: 0, marginTop: '0.5em' }}>
-            <Col xs="11">
-              <Input value={category.name} onChange={e => setName(e.target.value)} disabled={!category.new} placeholder="チケットカテゴリ名" />
-            </Col>
-            <Col xs="1" style={{ padding: 0, display: 'flex', alignItems: 'center'}}>
-              {category.new && 
-                <FontAwesomeIcon icon={faTimesCircle} style={{ color: "gray", margin: 0, height: '60%', cursor: 'pointer' }} className="fa-2x" onClick={deleteCategory} />
+        <FormGroup key={i} style={{ border: "solid 1px gray", borderRadius: '8px', padding: '0.8em' }}>
+          <Row form>
+            <div style={{ width: '1em' }}>
+              <Row form style={{ height: '50%', position: 'relative' }}>
+                {i !== 0 &&
+                <FontAwesomeIcon icon={faSortUp} style={{ color: "gray", margin: 0, height: '60%', cursor: 'pointer', position: 'absolute', top: '0.1em', left: '0.25em' }} className="fa-2x" onClick={moveArrayElementToPrev} />
+                }
+              </Row>
+              <Row form style={{ height: '50%', position: 'relative' }}>
+                {i !== categories.length - 1 && 
+                <FontAwesomeIcon icon={faSortDown} style={{ color: "gray", margin: 0, height: '60%', cursor: 'pointer', position: 'absolute', bottom: '0.1em', left: '0.25em' }} className="fa-2x" onClick={moveArrayElementToNext} />
+                }
+              </Row>
+            </div>
+            <Col>
+              <Row style={{ margin: 0, marginTop: '0.5em' }}>
+                  <Col xs="11">
+                    <Input value={category.name} onChange={e => setName(e.target.value)} disabled={!category.new} placeholder="チケットカテゴリ名" />
+                  </Col>
+                  <Col xs="1" style={{ padding: 0, display: 'flex', alignItems: 'center'}}>
+                    {category.new && 
+                      <FontAwesomeIcon icon={faTimesCircle} style={{ color: "gray", margin: 0, height: '60%', cursor: 'pointer' }} className="fa-2x" onClick={deleteCategory} />
+                    }
+                  </Col>
+              </Row>
+              <Row style={{ margin: 0, marginTop: '0.5em' }}>
+                <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em'}}>
+                  <Input type='number' min='0' value={category.price} onChange={e => setPrice(parseInt(e.target.value, 10))} style={{textAlign: 'right'}} disabled={!category.new} />
+                  <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
+                </Col>
+              {!category.new && 
+              <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
+                <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}>{category.sold} 枚 (残り {(category.stock - category.sold) ? (category.stock - category.sold) : 0} 枚)</p>
+              </Col>
               }
+              <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
+                <Input type='number' min='0' value={category.stock} onChange={e => setStock(parseInt((e.target.value ? e.target.value : '0'), 10))} style={{ textAlign: 'right' }} />
+                <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}> 枚</p>
+              </Col>
+              <Col style={{display: "flex",alignItems: "center", marginTop: '0.5em'}}>
+                <Label for="public" style={{margin: 0, fontWeight: "bold"}}>公開する</Label>
+                <Input type="checkbox" name="public" checked={category.public} onChange={e => setPublic(e.target.checked)} style={{margin: 0, marginLeft: '0.3em', position: "initial"}}/>
+              </Col>
+              </Row>
             </Col>
-          </Row>
-          <Row style={{ margin: 0, marginTop: '0.5em' }}>
-            <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em'}}>
-              <Input type='number' min='0' value={category.price} onChange={e => setPrice(parseInt(e.target.value, 10))} style={{textAlign: 'right'}} disabled={!category.new} />
-              <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
-            </Col>
-          {!category.new && 
-          <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
-            <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}>{category.sold} 枚 (残り {(category.stock - category.sold) ? (category.stock - category.sold) : 0} 枚)</p>
-          </Col>
-          }
-          <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
-            <Input type='number' min='0' value={category.stock} onChange={e => setStock(parseInt((e.target.value ? e.target.value : '0'), 10))} style={{ textAlign: 'right' }} />
-            <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}> 枚</p>
-          </Col>
-          <Col style={{display: "flex",alignItems: "center", marginTop: '0.5em'}}>
-            <Label for="public" style={{margin: 0, fontWeight: "bold"}}>公開する</Label>
-            <Input type="checkbox" name="public" checked={category.public} onChange={e => setPublic(e.target.checked)} style={{margin: 0, marginLeft: '0.3em', position: "initial"}}/>
-          </Col>
           </Row>
         </FormGroup>
       )
@@ -106,7 +136,7 @@ export default ({event, beforeCategories}) => {
       alert.error(e.message)
     }
   }
-  // TODO: チケットの並び替え機能
+
   return (
           <Form style={{ marginTop: '5em' }}>
         <h5 style={{marginBottom: '1em'}}>カテゴリ一覧</h5>

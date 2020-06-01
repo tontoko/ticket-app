@@ -7,7 +7,7 @@ export const Index: React.FC = () => {
     const router = useRouter()
 
     // トップページ作る
-    return <Login/>
+    return <div>トップページ</div>
 }
 
 export default Index

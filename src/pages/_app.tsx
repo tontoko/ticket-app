@@ -52,7 +52,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             router.push('/confirmEmail')
             return
           }
-          if (window.location.pathname === '/' || window.location.pathname === '/login' || window.location.pathname === '/register') {
+          if (window.location.pathname === '/login' || window.location.pathname === '/register') {
             router.push({ pathname: '/user', query: { msg: encodeQuery('ログインしました') } }, '/user')
           }
         } else {
