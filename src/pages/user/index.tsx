@@ -10,12 +10,7 @@ export const UserShow: React.FC<any> = ({user}) => {
         <>
         <h2>ようこそ{user.name && ` ${user.name} さん`}</h2>
         <Form style={{marginTop: "1.5em"}}>
-            <h4>登録情報</h4>
-            <FormGroup style={{marginTop: "1em"}}>
-                <Label for="email">メールアドレス</Label>
-                <Input disabled type="email" name="email" id="email" value={user.email} />
-            </FormGroup>
-            <Row style={{ margin: 0, marginTop: "0.5em" }}>
+            <Row style={{ margin: 0, marginTop: "2em" }}>
                 <Link href={`/user/edit`}>
                     <Button className="ml-auto">登録情報の編集</Button>
                 </Link>

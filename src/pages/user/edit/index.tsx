@@ -27,7 +27,7 @@ const UserShow = ({ user, verification }) => {
             )}
 
             <div style={{ marginTop: '2.5em' }}>
-                <h4>主催者用の登録情報</h4>
+                <h5>主催者用の登録情報</h5>
                 <p>イベントを開催するには、ユーザー情報と本人確認書類を登録する必要があります。</p>
                 <FormGroup style={{ marginTop: '1em' }}>
                     <Link href={`/user/edit/updateUser`}><a>ユーザー情報を追加・修正する</a></Link>
@@ -44,8 +44,12 @@ const UserShow = ({ user, verification }) => {
                 </FormGroup>
             </div>
 
+            <FormGroup style={{ marginTop: "2em" }}>
+                <Label for="email">メールアドレス</Label>
+                <Input disabled type="email" name="email" id="email" value={user.email} />
+            </FormGroup>
             {user.firebase.sign_in_provider !== 'password' &&
-            <FormGroup style={{marginTop: '3em'}}>
+            <FormGroup style={{marginTop: '1em'}}>
                 <Label>連携済みサービス</Label>
                 <Row style={{ margin: 0 }}>
                     <Col style={{ display: 'flex', padding: 0 }}>
