@@ -23,7 +23,7 @@ const UserLayout: React.FC<any> = ({user, children}) => {
     return (
         <>
         <Navbar style={{ backgroundColor: "#A0522D"}} expand="md" dark>
-            <NavbarBrand href="/">Ticket-App</NavbarBrand>
+            <NavbarBrand href="/login">Ticket-App</NavbarBrand>
             {user && user.email && 
                 <>
                 <div style={{marginLeft: "auto"}}>

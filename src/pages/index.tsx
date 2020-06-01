@@ -6,8 +6,12 @@ import {useRouter} from 'next/router'
 export const Index: React.FC = () => {
     const router = useRouter()
 
+    useEffect(() => {
+        location.replace('/login')
+    }, [])
+
     // トップページ作る
-    return <div>トップページ</div>
+    return <div>リダイレクトします...</div>
 }
 
 export default Index
