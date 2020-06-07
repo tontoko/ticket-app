@@ -21,9 +21,9 @@ export default ({ events }) => {
                 const startDate = moment(event.startDate * 1000)
                 const endDate = moment(event.endDate * 1000)
                 if (startDate.format("YYYYMd") === endDate.format("YYYYMd")) {
-                    return `${startDate.format("YYYY年 M月d日  H:mm")} 〜 ${endDate.format("H:mm")}`
+                    return `${startDate.format("YYYY年 M月d日  H:mm")} - ${endDate.format("H:mm")}`
                 } else {
-                    return `${startDate.format("YYYY年 M月d日  H:mm")} 〜 ${endDate.format("YYYY年  M月d日 H:mm")}`
+                    return `${startDate.format("YYYY年 M月d日  H:mm")} - ${endDate.format("YYYY年  M月d日 H:mm")}`
                 }
             }
             // TODO: 返金フロー作成
@@ -93,7 +93,7 @@ export default ({ events }) => {
             {events.length === 0 ?
             <>
                 <p>チケットを購入した場合、ここに表示されます。</p>
-                <p>購入処理に時間がかかる場合があります。購入したチケットが表示されていない場合は<a href="#" onClick={() => location.reload()}>画面を更新</a>してください。</p>
+                <p>購入処理に時間がかかる場合があります。<br/>購入したチケットが表示されていない場合は<a href="#" onClick={() => location.reload()}>画面を更新</a>してください。</p>
             </>
             :
             renderUserEvents()}

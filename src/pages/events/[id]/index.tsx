@@ -215,8 +215,9 @@ export default ({ user, event, categories, status, items, tickets }) => {
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { query } = ctx
     const { user } = await isLogin(ctx, 'redirect')
-    const { firestore } = await initFirebaseAdmin()
-    const result = await firestore.collection('events').doc(query.id as string).get()
+    const { firebase, firestore } = await initFirebaseAdmin()
+    const eventRef = firestore.collection('events').doc(query.id as string)
+    const result = await eventRef.get()
     const data = result.data() as event
     const createdAt = data.createdAt.seconds
     const updatedAt = data.updatedAt.seconds
@@ -246,6 +247,10 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             }
         }))
         status = payments.length > 0 && 'bought'
+        // ログイン済みで主催者以外の場合に履歴に追加
+        data && await firestore.collection('users').doc(user.uid).update({
+            eventHistory: firebase.firestore.FieldValue.arrayUnion(eventRef)
+        })
     }
     const items = event.photos.map((url, i) => {
         return {
