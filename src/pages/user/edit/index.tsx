@@ -15,6 +15,25 @@ const UserShow = ({ user, verification }) => {
     return (
         <div style={{marginTop: "1.5em"}}>
             <h4>登録情報の変更</h4>
+            <FormGroup style={{ marginTop: "2em" }}>
+                <Label for="email">メールアドレス</Label>
+                <Input disabled type="email" name="email" id="email" value={user.email} />
+            </FormGroup>
+            {user.firebase.sign_in_provider !== 'password' &&
+                <FormGroup style={{ marginTop: '1em' }}>
+                    <Label>連携済みサービス</Label>
+                    <Row style={{ margin: 0 }}>
+                        <Col style={{ display: 'flex', padding: 0 }}>
+                            {user.firebase.sign_in_provider === 'twitter.com' &&
+                                <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2" }} className="fa-2x" /></p>}
+                            {user.firebase.sign_in_provider === 'facebook.com' &&
+                                <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2" }} className="fa-2x" /></p>}
+                            {user.firebase.sign_in_provider === 'google.com' &&
+                                <p><FontAwesomeIcon icon={faGoogle} size="lg" style={{ color: "#DB4437" }} className="fa-2x" /></p>}
+                        </Col>
+                    </Row>
+                </FormGroup>
+            }
             {user.firebase.sign_in_provider === 'password' && (
             <>
             <FormGroup style={{ marginTop: '2em' }}>
@@ -26,7 +45,7 @@ const UserShow = ({ user, verification }) => {
             </>
             )}
 
-            <div style={{ marginTop: '2.5em' }}>
+            <div style={{ marginTop: '1.5em' }}>
                 <h5>主催者用の登録情報</h5>
                 <p>イベントを開催するには、ユーザー情報と本人確認書類を登録する必要があります。</p>
                 <FormGroup style={{ marginTop: '1em' }}>
@@ -44,25 +63,6 @@ const UserShow = ({ user, verification }) => {
                 </FormGroup>
             </div>
 
-            <FormGroup style={{ marginTop: "2em" }}>
-                <Label for="email">メールアドレス</Label>
-                <Input disabled type="email" name="email" id="email" value={user.email} />
-            </FormGroup>
-            {user.firebase.sign_in_provider !== 'password' &&
-            <FormGroup style={{marginTop: '1em'}}>
-                <Label>連携済みサービス</Label>
-                <Row style={{ margin: 0 }}>
-                    <Col style={{ display: 'flex', padding: 0 }}>
-                        {user.firebase.sign_in_provider === 'twitter.com' &&
-                        <p><FontAwesomeIcon icon={faTwitter} size="lg" style={{ color: "#1da1f2" }} className="fa-2x" /></p>}
-                        {user.firebase.sign_in_provider === 'facebook.com' &&
-                        <p><FontAwesomeIcon icon={faFacebook} size="lg" style={{ color: "#4267b2" }} className="fa-2x" /></p>}
-                        {user.firebase.sign_in_provider === 'google.com' &&
-                        <p><FontAwesomeIcon icon={faGoogle} size="lg" style={{ color: "#DB4437" }} className="fa-2x" /></p>}
-                    </Col>
-                </Row>
-            </FormGroup>
-            }
             <Row style={{ margin: 0, marginTop: "5em" }}>
                 <Link href={`/user/edit/leave`}>
                     <Button className="ml-auto">退会</Button>

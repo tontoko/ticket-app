@@ -91,7 +91,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         const updatedAt = data.updatedAt.seconds
         const startDate = data.startDate.seconds
         const endDate = data.endDate.seconds
-        const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser))) : [await getImg(null, data.createdUser)]
+        const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser) : await getImg(null, data.createdUser)
         event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
     }
     return { props: { user, event } }

@@ -141,8 +141,18 @@ export default ({ user, event, categories, status, items, tickets, setModal, set
             )
         } else if (categories.length === 0) {
             return
+        } else if (status == 'anonymous') {
+            return (
+                <Row style={{ marginTop: "2em" }}>
+                    <Col sm="12" style={{ margin: "0.2em" }}>
+                        <p>チケットの購入にはログインが必要です</p>
+                        <Link href='/login'>
+                            <Button block color="info">ログイン / 会員登録する</Button>
+                        </Link>
+                    </Col>
+                </Row>
+            )
         }else {
-            // 申し込み
             return (
                 <Row style={{ marginTop: "1.5em" }}>
                     <Col sm="12" style={{ margin: "0.2em" }}>
