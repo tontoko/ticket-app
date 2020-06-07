@@ -25,6 +25,7 @@ export const UserShow: React.FC<any> = ({user, event}) => {
         return (
             <Link href={`/events/${event.id}`}>
                 <div>
+                    <h5>このイベントに興味がありますか？</h5>
                     <Card style={{ cursor: 'pointer' }}>
                         <CardBody>
                             <Row>
@@ -50,7 +51,6 @@ export const UserShow: React.FC<any> = ({user, event}) => {
         <Form style={{marginTop: "1.5em"}}>
             {event &&
             <Row form>
-                <h5>このイベントに興味がありますか？</h5>
                 {renderUserEvent()}
             </Row>
             }
