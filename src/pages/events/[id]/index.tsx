@@ -24,7 +24,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { setCookie } from 'nookies'
 
-export default ({ user, event, categories, status, items, tickets }) => {
+export default ({ user, event, categories, status, items, tickets, setModal, setModalInner }) => {
 
     const router = useRouter();
     const startDate = moment(event.startDate * 1000)
@@ -56,10 +56,15 @@ export default ({ user, event, categories, status, items, tickets }) => {
                 onExited={() => setAnimating(false)}
                 key={item.src}
             >
-                <img src={item.src} style={{width: "100%", height: "100%"}} />
+                <img src={item.src} style={{ width: "100%", height: "100%" }} onClick={() => callModalForImg(item.src)} />
             </CarouselItem>
         )
     })
+
+    const callModalForImg = (src) => {
+        setModalInner(<img src={src} style={{ width: "100%", height: "100%" }} onClick={() => setModal(false)} />)
+        setModal(true)
+    }
 
     const urlToPurchase = `/events/${router.query.id}/purchase`
     const urlToEdit = `/events/${router.query.id}/edit`
@@ -224,7 +229,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
-    const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser))) : [await getImg(null, data.createdUser)]
+    const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser, '800'))) : [await getImg(null, data.createdUser)]
     const event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
     const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
     let status: string

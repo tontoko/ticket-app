@@ -1,6 +1,6 @@
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 
-export default async (img:string, uid:string, size?: string) => {
+export default async (img:string, uid:string, size?: '360'|'800') => {
   const { storage } = await initFirebaseAdmin()
   const date = new Date
   
