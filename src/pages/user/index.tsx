@@ -6,8 +6,8 @@ import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
-import { firestore } from 'firebase-admin'
 import moment from 'moment'
+import { parseCookies } from 'nookies'
 
 export const UserShow: React.FC<any> = ({user, event}) => {
 
@@ -76,9 +76,16 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx, 'redirect')
     const { firestore } = await initFirebaseAdmin()
     const history: string[] = await (await firestore.collection('users').doc(user.uid).get()).data().eventHistory
+    const cookie = parseCookies(ctx)
     let event = null
-    if (history) {
-        const result = await firestore.collection('events').doc(history.slice(-1)[0]).get()
+    if (history || cookie.lastVisitedEvent) {
+        let doc: string
+        if (history) {
+            doc = history.slice(-1)[0]
+        } else {
+            doc = cookie.lastVisitedEvent
+        }
+        const result = await firestore.collection('events').doc(doc).get()
         const data = result.data()
         const createdAt = data.createdAt.seconds
         const updatedAt = data.updatedAt.seconds

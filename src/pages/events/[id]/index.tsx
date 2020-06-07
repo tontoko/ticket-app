@@ -22,6 +22,7 @@ import btoa from 'btoa'
 import { encodeQuery } from '@/src/lib/parseQuery';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+import { setCookie } from 'nookies'
 
 export default ({ user, event, categories, status, items, tickets }) => {
 
@@ -214,7 +215,7 @@ export default ({ user, event, categories, status, items, tickets }) => {
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { query } = ctx
-    const { user } = await isLogin(ctx, 'redirect')
+    const { user } = await isLogin(ctx)
     const { firebase, firestore } = await initFirebaseAdmin()
     const eventRef = firestore.collection('events').doc(query.id as string)
     const result = await eventRef.get()
@@ -230,6 +231,10 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     let tickets = []
     if (!user) {
         status = 'anonymous'
+        setCookie(ctx, 'lastVisitedEvent', event.id, {
+            maxAge: 30 * 24 * 60 * 60,
+            path: '/',
+        })
     } else if (event.createdUser == user.uid) {
         status = 'organizer'
     } else {
