@@ -75,10 +75,10 @@ export const UserShow: React.FC<any> = ({user, event}) => {
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx, 'redirect')
     const { firestore } = await initFirebaseAdmin()
-    const history: firestore.DocumentReference[] = await (await firestore.collection('users').doc(user.uid).get()).data().eventHistory
+    const history: string[] = await (await firestore.collection('users').doc(user.uid).get()).data().eventHistory
     let event = null
     if (history) {
-        const result = await history.slice(-1)[0].get()
+        const result = await firestore.collection('events').doc(history.slice(-1)[0]).get()
         const data = result.data()
         const createdAt = data.createdAt.seconds
         const updatedAt = data.updatedAt.seconds

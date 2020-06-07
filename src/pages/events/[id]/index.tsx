@@ -249,7 +249,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         status = payments.length > 0 && 'bought'
         // ログイン済みで主催者以外の場合に履歴に追加
         data && await firestore.collection('users').doc(user.uid).update({
-            eventHistory: firebase.firestore.FieldValue.arrayUnion(eventRef)
+            eventHistory: firebase.firestore.FieldValue.arrayUnion(result.id)
         })
     }
     const items = event.photos.map((url, i) => {
