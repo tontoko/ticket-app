@@ -228,6 +228,8 @@ export default ({ user, event, categories, status, items, tickets, setModal, set
     );
 }
 
+// TODO: snsシェアボタンを作成
+
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { query } = ctx
     const { user } = await isLogin(ctx)
