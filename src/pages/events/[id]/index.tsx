@@ -18,7 +18,6 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import isLogin from '@/src/lib/isLogin'
 import { event } from 'events'
 import moment from 'moment'
-import btoa from 'btoa'
 import { encodeQuery } from '@/src/lib/parseQuery';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
@@ -123,7 +122,9 @@ export default ({ user, event, categories, status, items, tickets, setModal, set
                                                     </Col>
                                                 }
                                                 <Col xs="12">
-                                                    <Button color="danger">返金申請</Button>
+                                                    <Link href={`/events/${event.id}/refund`}>
+                                                        <Button color="danger">返金申請</Button>
+                                                    </Link>
                                                 </Col>
                                             </>
                                         }

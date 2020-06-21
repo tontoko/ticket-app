@@ -69,7 +69,9 @@ export default ({ events }) => {
                                                         </Col>
                                                     }
                                                     <Col xs="12">
-                                                        <Button color="danger">返金申請</Button>
+                                                        <Link href={`/events/${event.id}/refund`}>
+                                                            <Button color="danger">返金申請</Button>
+                                                        </Link>
                                                     </Col>
                                                 </>
                                                 }
