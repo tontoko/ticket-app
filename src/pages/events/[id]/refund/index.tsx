@@ -6,6 +6,7 @@ import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import { useAlert } from 'react-alert';
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 
 export default () => {
   const router = useRouter()
@@ -76,6 +77,14 @@ export default () => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user } = await isLogin(ctx, 'redirect')
+  const { user, query, res } = await isLogin(ctx, 'redirect')
+  const { firestore } = await initFirebaseAdmin()
+  const eventData = (await firestore.collection("events").doc(query.id as string).get()).data()
+  if (user && user.uid === eventData.createdUser) {
+    res.writeHead(302, {
+      Location: "/",
+    });
+    res.end();
+  }
   return { props: { user } }
 }

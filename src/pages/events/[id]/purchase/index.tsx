@@ -97,9 +97,8 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const {user} = await isLogin(ctx, 'redirect')
+    const { user, query, res } = await isLogin(ctx, "redirect");
     const { firestore } = await initFirebaseAdmin()
-    const {query} = ctx
     const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
     const photos: undefined | string[] = data.photos
     const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
@@ -115,6 +114,13 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         const category = e.data()
         category.public && categories.push({ ...category, id })
     })
+
+    if (user && user.uid === data.createdUser) {
+      res.writeHead(302, {
+        Location: "/",
+      });
+      res.end();
+    }
 
     return {props: { event, categories, photoUrls, user }}
 }

@@ -137,7 +137,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { user } = await isLogin(ctx, 'redirect')
+    const { user, res } = await isLogin(ctx, 'redirect')
     const { firestore } = await initFirebaseAdmin()
     const { query } = ctx
     const { familyName, firstName, email, selectedCategory } = JSON.parse(decodeQuery(query.query as string))
@@ -174,6 +174,14 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         }
     })
     const { client_secret } = paymentIntent
+
+    if (user && user.uid === data.createdUser) {
+      res.writeHead(302, {
+        Location: "/",
+      });
+      res.end();
+    }
+
     return { props: { familyName, firstName, email, event, category, photoUrls, client_secret, user, categoryId, eventId } }
 }
 

@@ -5,6 +5,8 @@ import initFirebase from '@/src/lib/initFirebase'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { useRouter } from 'next/router'
+import { GetServerSideProps } from 'next'
+import isLogin from '../lib/isLogin'
 
 export default () => {
     const alert = useAlert()
@@ -46,3 +48,8 @@ export default () => {
         </>
     )
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  await isLogin(ctx);
+  return { props: {} };
+};
