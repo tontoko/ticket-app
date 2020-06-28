@@ -22,6 +22,14 @@ import { encodeQuery } from '@/src/lib/parseQuery';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { setCookie } from 'nookies'
+import {
+  LineShareButton,
+  FacebookShareButton,
+  TwitterShareButton,
+  FacebookIcon,
+  LineIcon,
+  TwitterIcon,
+} from "react-share";
 
 export default ({ user, event, categories, status, items, tickets, setModal, setModalInner }) => {
 
@@ -29,7 +37,35 @@ export default ({ user, event, categories, status, items, tickets, setModal, set
     const startDate = moment(event.startDate * 1000)
     const endDate = moment(event.endDate * 1000)
     const [activeIndex, setActiveIndex] = useState(0)
-    const [animating, setAnimating] = useState(false)
+    const [animating, setAnimating] = useState(false);
+
+    const [twitterShareProps, setTwitterShareProps] = useState({
+      url: "",
+      title: "",
+    });
+    const [facebookShareProps, setFacebookShareProps] = useState({
+      url: "",
+      quote: "",
+    });
+    const [lineShareProps, setLineShareProps] = useState({
+      url: "",
+      title: "",
+    });
+
+    useEffect(() => {
+        setTwitterShareProps({
+            url: location.href,
+            title: event.name,
+        })
+        setFacebookShareProps({
+          url: location.href,
+          quote: event.name,
+        });
+        setLineShareProps({
+          url: location.href,
+          title: event.name,
+        });
+    },[])
 
     const next = () => {
         if (animating) return;
@@ -181,55 +217,82 @@ export default ({ user, event, categories, status, items, tickets, setModal, set
     })
 
     return (
-        <>
-            <Row style={{ marginTop: '1em', marginLeft: "0" }}>
-                <h3>【{moment(startDate).format("d/M")}】{event.name}</h3>
-            </Row>
-            <Row style={{ marginTop: '1em' }}>
-                <Col xs="12" md="6" lg="4">
-                    <Carousel
-                        activeIndex={activeIndex}
-                        next={next}
-                        previous={previous}
-                        className="carousel-fade"
-                        style={{ width: "100%" }}
-                        interval="20000"
-                    >
-                        <CarouselIndicators items={items} activeIndex={activeIndex} onClickHandler={goToIndex} />
-                        {slides}
-                        <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
-                        <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
-                    </Carousel>
-                    <FormGroup style={{marginTop: '1em'}}>
-                        <h5>会場</h5>
-                        <p style={{ marginLeft: '0.5em' }}>{event.placeName}</p>
-                    </FormGroup>
-                    <FormGroup>
-                        <h5>開始</h5>
-                        <p>{moment(startDate).format("YYYY M月d日 H:mm")}</p>
-                    </FormGroup>
-                    <FormGroup>
-                        <h5>終了</h5>
-                        <p>{moment(endDate).format("YYYY M月d日 H:mm")}</p>
-                    </FormGroup>
-                    <FormGroup style={{ marginTop: '2em' }}>
-                        <h5>チケットカテゴリ</h5>
-                        <FormGroup style={{marginLeft: '0.5em'}}>
-                            {categories && returnCatetgories()}
-                        </FormGroup>
-                        {status == 'organizer' && <Link href={`/events/${router.query.id}/categories/edit`}><Button>カテゴリの編集</Button></Link>}
-                    </FormGroup>
-                </Col>
-                <Col xs="12" md="6" lg="8" style={{marginTop: '2em'}}>
-                    <h6>{event.eventDetail}</h6>
-                    {buttons()}
-                </Col>
-            </Row>
-        </>
+      <>
+        <Row style={{ marginTop: "1em", marginLeft: "0" }}>
+          <h3>
+            【{moment(startDate).format("d/M")}】{event.name}
+          </h3>
+        </Row>
+        <Row style={{ marginTop: "1em" }}>
+          <Col xs="12" md="6" lg="4">
+            <Carousel
+              activeIndex={activeIndex}
+              next={next}
+              previous={previous}
+              className="carousel-fade"
+              style={{ width: "100%" }}
+              interval="20000"
+            >
+              <CarouselIndicators
+                items={items}
+                activeIndex={activeIndex}
+                onClickHandler={goToIndex}
+              />
+              {slides}
+              <CarouselControl
+                direction="prev"
+                directionText="Previous"
+                onClickHandler={previous}
+              />
+              <CarouselControl
+                direction="next"
+                directionText="Next"
+                onClickHandler={next}
+              />
+            </Carousel>
+            <FormGroup style={{ marginTop: "1em" }}>
+              <h5>会場</h5>
+              <p style={{ marginLeft: "0.5em" }}>{event.placeName}</p>
+            </FormGroup>
+            <FormGroup>
+              <h5>開始</h5>
+              <p>{moment(startDate).format("YYYY M月d日 H:mm")}</p>
+            </FormGroup>
+            <FormGroup>
+              <h5>終了</h5>
+              <p>{moment(endDate).format("YYYY M月d日 H:mm")}</p>
+            </FormGroup>
+            <FormGroup>
+              <TwitterShareButton {...twitterShareProps} style={{ marginRight: "1em" }}>
+                <TwitterIcon size={40} />
+              </TwitterShareButton>
+              <FacebookShareButton {...facebookShareProps} style={{ marginRight: "1em" }}>
+                <FacebookIcon size={40} />
+              </FacebookShareButton>
+              <LineShareButton {...lineShareProps}>
+                <LineIcon size={40} />
+              </LineShareButton>
+            </FormGroup>
+            <FormGroup style={{ marginTop: "2em" }}>
+              <h5>チケットカテゴリ</h5>
+              <FormGroup style={{ marginLeft: "0.5em" }}>
+                {categories && returnCatetgories()}
+              </FormGroup>
+              {status == "organizer" && (
+                <Link href={`/events/${router.query.id}/categories/edit`}>
+                  <Button>カテゴリの編集</Button>
+                </Link>
+              )}
+            </FormGroup>
+          </Col>
+          <Col xs="12" md="6" lg="8" style={{ marginTop: "2em" }}>
+            <h6>{event.eventDetail}</h6>
+            {buttons()}
+          </Col>
+        </Row>
+      </>
     );
 }
-
-// TODO: snsシェアボタンを作成
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { query } = ctx
