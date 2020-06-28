@@ -41,6 +41,7 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
         router.push({ pathname, query: { query: encodeQuery(JSON.stringify({ familyName, firstName, email, selectedCategory })) }} )
     }
 
+    // TODO: 確認ページを統合
     return (
         <Form style={{ marginTop: '5em' }}>
             <FormGroup>
