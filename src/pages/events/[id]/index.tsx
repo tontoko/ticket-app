@@ -30,6 +30,7 @@ import {
   LineIcon,
   TwitterIcon,
 } from "react-share";
+import Tickets from '@/src/components/tickets';
 
 export default ({ user, event, categories, status, items, tickets, setModal, setModalInner }) => {
 
@@ -131,51 +132,20 @@ export default ({ user, event, categories, status, items, tickets, setModal, set
         } else if (status == 'bought') {
             // 申し込み後
             return (
-                <Row style={{ marginTop: "1.5em" }}>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <h5>購入済みチケット</h5>
-                        {tickets.map((ticket, i) => (
-                            <Card style={{ marginBottom: '0.5em' }} key={i}>
-                                <CardBody>
-                                    <p>{ticket.name}: {ticket.price}円</p>
-                                    {ticket.accepted ? (
-                                        <p><FontAwesomeIcon icon={faCheckSquare} style={{ color: "#00DD00" }} /> 受付済み</p>
-                                    ) : (
-                                        <p><FontAwesomeIcon icon={faExclamationCircle} style={{ color: "orange" }} /> 未受付</p>
-                                    )}
-                                    <Row>
-                                        {ticket.error ?
-                                            <Col>
-                                                <p>購入失敗 ({ticket.error})</p>
-                                            </Col>
-                                            :
-                                            <>
-                                                {!ticket.accepted &&
-                                                    <Col xs="12" style={{ marginBottom: '0.2em' }}>
-                                                        <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: encodeQuery(JSON.stringify(ticket)) } }}>
-                                                            <Button color="success">受付用QRコードを表示</Button>
-                                                        </Link>
-                                                    </Col>
-                                                }
-                                                <Col xs="12">
-                                                    <Link href={`/events/${event.id}/refund`}>
-                                                        <Button color="danger">返金申請</Button>
-                                                    </Link>
-                                                </Col>
-                                            </>
-                                        }
-                                    </Row>
-                                </CardBody>
-                            </Card>
-                        ))}
-                    </Col>
-                    <Col sm="12" style={{ marginTop: "1.5em" }}>
-                        <Link href={urlToPurchase}>
-                            <Button block color="primary">追加のチケットを購入する</Button>
-                        </Link>
-                    </Col>
-                </Row >
-            )
+              <Row style={{ marginTop: "1.5em" }}>
+                <Col sm="12" style={{ margin: "0.2em" }}>
+                  <h5>購入済みチケット</h5>
+                  {tickets.map((ticket, i) => <Tickets ticket={ticket} event={event} key={i} />)}
+                </Col>
+                <Col sm="12" style={{ marginTop: "1.5em" }}>
+                  <Link href={urlToPurchase}>
+                    <Button block color="primary">
+                      追加のチケットを購入する
+                    </Button>
+                  </Link>
+                </Col>
+              </Row>
+            );
         } else if (categories.length === 0) {
             return
         } else if (status == 'anonymous') {

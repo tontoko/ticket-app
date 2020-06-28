@@ -12,6 +12,7 @@ import moment from 'moment'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { encodeQuery } from '@/src/lib/parseQuery';
+import Tickets from '@/src/components/tickets';
 
 export default ({ events }) => {
 
@@ -28,63 +29,43 @@ export default ({ events }) => {
             }
             // TODO: 返金フロー作成
             return (
-                <div key={i}>
-                    <Card>
-                        <CardBody>
-                            <Link key={i} href={`/events/${event.id}`}>
-                                <Row style={{ marginBottom: '1em', cursor: 'pointer' }}>
-                                    <Col sm="2" xs="3">
-                                        <img width="100%" src={event.photos} alt="Card image cap" style={{ cursor: 'pointer' }} />
-                                    </Col>
-                                    <Col>
-                                        <CardTitle>{event.name}</CardTitle>
-                                        <CardSubtitle>{event.placeName}</CardSubtitle>
-                                        <CardText>{showDate()}</CardText>
-                                    </Col>
-                                </Row>
-                            </Link>
-                            <Row>
-                                <Col style={{ padding: '0 0.5em' }}> 
-                                    {event.tickets.map((ticket, ticketIndex) => 
-                                        <Card style={{ marginBottom: '0.5em' }} key={ticketIndex}>
-                                            <CardBody>
-                                                <p>{ticket.name}: {ticket.price}円</p>
-                                                {ticket.accepted ? (
-                                                    <p><FontAwesomeIcon icon={faCheckSquare} style={{ color: "#00DD00" }} /> 受付済み</p>
-                                                    ): (
-                                                    <p><FontAwesomeIcon icon={faExclamationCircle} style={{ color: "orange" }} /> 未受付</p>
-                                                )}
-                                                <Row>
-                                                {ticket.error ?
-                                                    <Col>
-                                                        <p>購入失敗 ({ticket.error})</p>
-                                                    </Col>
-                                                :
-                                                <>
-                                                    {!ticket.accepted &&
-                                                        <Col xs="12" style={{ marginBottom: '0.2em' }}>
-                                                            <Link href={{ pathname: `/events/${event.id}/reception/show`, query: { ticket: encodeQuery(JSON.stringify(ticket)) } }}>
-                                                                <Button color="success">受付用QRコードを表示</Button>
-                                                            </Link>
-                                                        </Col>
-                                                    }
-                                                    <Col xs="12">
-                                                        <Link href={`/events/${event.id}/refund`}>
-                                                            <Button color="danger">返金申請</Button>
-                                                        </Link>
-                                                    </Col>
-                                                </>
-                                                }
-                                                </Row>
-                                            </CardBody>
-                                        </Card>
-                                    )}
-                                </Col>
-                            </Row>
-                        </CardBody>
-                    </Card>
-                </div>
-            )
+              <div key={i}>
+                <Card>
+                  <CardBody>
+                    <Link href={`/events/${event.id}`}>
+                      <div>
+                        <Row style={{ marginBottom: "1em", cursor: "pointer" }}>
+                          <Col sm="2" xs="3">
+                            <img
+                              width="100%"
+                              src={event.photos}
+                              alt="Card image cap"
+                              style={{ cursor: "pointer" }}
+                            />
+                          </Col>
+                          <Col>
+                            <CardTitle>{event.name}</CardTitle>
+                            <CardSubtitle>{event.placeName}</CardSubtitle>
+                            <CardText>{showDate()}</CardText>
+                          </Col>
+                        </Row>
+                      </div>
+                    </Link>
+                    <Row>
+                      <Col style={{ padding: "0 0.5em" }}>
+                        {event.tickets.map((ticket, ticketIndex) => (
+                          <Tickets
+                            ticket={ticket}
+                            event={event}
+                            key={ticketIndex}
+                          />
+                        ))}
+                      </Col>
+                    </Row>
+                  </CardBody>
+                </Card>
+              </div>
+            );
         }
     )
 
