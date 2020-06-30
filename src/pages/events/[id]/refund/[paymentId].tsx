@@ -47,12 +47,11 @@ export default ({ user, createdUser, query }) => {
       await firestore.collection("messages").add({
         sendUser: user.uid,
         receivedUser,
-        text: reasonText + '\n' + detailText,
+        text: `返金申請理由: ${reasonText}\n` + detailText,
       });
-      await firestore.collection("refunds").add({
-        payment: query.paymentId,
+      await firestore.collection("payment").doc(query.paymentId).collection('refund').add({
         reason,
-        createdAt: Date.now()
+        createdAt: Date.now(),
       });
       router.push({ pathname: `/user/myTickets`, query: { msg: encodeQuery('問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。') } });
     } catch(e) {
@@ -63,7 +62,6 @@ export default ({ user, createdUser, query }) => {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!sentTo) return;
     switch (select) {
       case "mistake":
         alert.error(
@@ -72,12 +70,12 @@ export default ({ user, createdUser, query }) => {
         break;
       case "fraud":
         if (!detailText) return alert.error("詳細を記入してください");
-        sentMessage();
+        sentMessage(select);
         break;
       case "other":
         if (!problem) return alert.error("選択肢から選択してください");
         if (!detailText) return alert.error("詳細を記入してください");
-        sentMessage();
+        sentMessage(problem);
         break;
       default:
         alert.error("返金理由を選択してください");
@@ -179,7 +177,8 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   const { user, query, res } = await isLogin(ctx, 'redirect')
   const { firestore } = await initFirebaseAdmin()
   const eventData = (await firestore.collection("events").doc(query.id as string).get()).data()
-  if (user && user.uid === eventData.createdUser) {
+  const paymentData = (await firestore.collection("payments").doc(query.paymentId as string).get()).data()
+  if ((user && user.uid === eventData.createdUser) || paymentData.refund) {
     res.writeHead(302, {
       Location: "/",
     });

@@ -30,31 +30,47 @@ const Tickets = ({ticket, event: event}) => {
             </p>
           )}
           <Row>
-            {ticket.error ? (
-              <Col>
-                <p>購入失敗 ({ticket.error})</p>
-              </Col>
-            ) : (
-              <>
-                {!ticket.accepted && (
-                  <Col xs="12" style={{ marginBottom: "0.2em" }}>
-                    <Link
-                      href={{
-                        pathname: `/events/${event.id}/reception/show`,
-                        query: { ticket: encodeQuery(JSON.stringify(ticket)) },
-                      }}
-                    >
-                      <Button color="success">受付用QRコードを表示</Button>
-                    </Link>
+            {(() => {
+              if (ticket.error) {
+                return (
+                  <Col>
+                    <p>購入失敗 ({ticket.error})</p>
                   </Col>
-                )}
-                <Col xs="12">
-                  <Link href={`/events/${event.id}/refund/${ticket.paymentId}`}>
-                    <Button color="danger">返金申請</Button>
-                  </Link>
-                </Col>
-              </>
-            )}
+                );
+              } else if (ticket.refund) {
+                return (
+                  <Col>
+                    <p>返金処理が行われました</p>
+                  </Col>
+                );
+              } else {
+                return (
+                  <>
+                    {!ticket.accepted && (
+                      <Col xs="12" style={{ marginBottom: "0.2em" }}>
+                        <Link
+                          href={{
+                            pathname: `/events/${event.id}/reception/show`,
+                            query: {
+                              ticket: encodeQuery(JSON.stringify(ticket)),
+                            },
+                          }}
+                        >
+                          <Button color="success">受付用QRコードを表示</Button>
+                        </Link>
+                      </Col>
+                    )}
+                    <Col xs="12">
+                      <Link
+                        href={`/events/${event.id}/refund/${ticket.paymentId}`}
+                      >
+                        <Button color="danger">返金申請</Button>
+                      </Link>
+                    </Col>
+                  </>
+                );
+              }
+            })()}
           </Row>
         </CardBody>
       </Card>
