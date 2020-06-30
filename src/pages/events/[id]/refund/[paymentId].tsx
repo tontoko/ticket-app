@@ -10,7 +10,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import initFirebase from '@/src/lib/initFirebase';
 import { encodeQuery } from '@/src/lib/parseQuery';
 
-export default ({ user, createdUser }) => {
+export default ({ user, createdUser, query }) => {
   const router = useRouter();
   const alert = useAlert();
   type select = "" | "mistake" | "fraud" | "other";
@@ -21,19 +21,43 @@ export default ({ user, createdUser }) => {
   const [detailText, setDetailText] = useState("");
   const [sentTo, setSentTo] = useState("" as sentTo);
 
-  const sentMessage = async () => {
-    console.log(detailText);
+  const sentMessage = async (reason: string) => {
     const { firestore } = await initFirebase();
     const receivedUser = sentTo === 'user' ? createdUser : 'admin';
     try {
+      let reasonText = ''
+      switch (reason) {
+        case "fraud":
+          reasonText = '詐欺・事実と異なるイベント内容'
+          break;
+        case "event":
+          reasonText = "その他イベントについて";
+          break;
+        case "payment":
+          reasonText = "決済処理について";
+          break;
+        case "system":
+          reasonText = "その他システム関連";
+          break;
+        default:
+          throw new Error
+      }
+      // TODO: メッセージ画面を作成
+      // TODO: 自分の返金申請画面を作成
       await firestore.collection("messages").add({
         sendUser: user.uid,
         receivedUser,
-        text: detailText,
+        text: reasonText + '\n' + detailText,
       });
-      router.push({ pathname: `/user/myTickets`, query: { msg: encodeQuery('問い合わせを行いました。三日以内に対応されない場合は自動的に返金されます。') } });
+      await firestore.collection("refunds").add({
+        payment: query.paymentId,
+        reason,
+        createdAt: Date.now()
+      });
+      router.push({ pathname: `/user/myTickets`, query: { msg: encodeQuery('問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。') } });
     } catch(e) {
-      alert.error('エラーが発生しました。しばらくしてお試しください。')
+      console.error(e.message)
+      alert.error('エラーが発生しました。しばらくしてお試しください。');
     }
   };
 
@@ -94,9 +118,7 @@ export default ({ user, createdUser }) => {
         >
           <option value="">選択してください</option>
           <option value="mistake">間違ったチケットを購入してしまった</option>
-          <option value="fraud">
-            実際のイベント内容が記載内容と大きく異なった
-          </option>
+          <option value="fraud">詐欺・事実と異なるイベント内容</option>
           <option value="other">その他</option>
         </Input>
       </FormGroup>
