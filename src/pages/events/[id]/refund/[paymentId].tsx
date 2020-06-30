@@ -7,49 +7,65 @@ import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import { useAlert } from 'react-alert';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
+import initFirebase from '@/src/lib/initFirebase';
+import { encodeQuery } from '@/src/lib/parseQuery';
 
-export default () => {
-  const router = useRouter()
-  const alert = useAlert()
-  type select = '' | 'mistake' | 'fraud' | "other"
-  type problem = '' | 'event' | 'payment' | 'system'
-  type sentTo = '' | 'user' | 'system'
-  const [select, setSelect] = useState('' as select)
-  const [problem, setProblem] = useState('' as problem)
-  const [fraudText, setFraudText] = useState('')
-  const [otherText, setOtherText] = useState('')
-  const [sentTo, setSentTo] = useState('' as sentTo);
+export default ({ user, createdUser }) => {
+  const router = useRouter();
+  const alert = useAlert();
+  type select = "" | "mistake" | "fraud" | "other";
+  type problem = "" | "event" | "payment" | "system";
+  type sentTo = "" | "user" | "system";
+  const [select, setSelect] = useState("" as select);
+  const [problem, setProblem] = useState("" as problem);
+  const [detailText, setDetailText] = useState("");
+  const [sentTo, setSentTo] = useState("" as sentTo);
 
-  const sentMessage = () => {
-    
-  }
-  
-  const submit = async e => {
-    e.preventDefault()
+  const sentMessage = async () => {
+    console.log(detailText);
+    const { firestore } = await initFirebase();
+    const receivedUser = sentTo === 'user' ? createdUser : 'admin';
+    try {
+      await firestore.collection("messages").add({
+        sendUser: user.uid,
+        receivedUser,
+        text: detailText,
+      });
+      router.push({ pathname: `/user/myTickets`, query: { msg: encodeQuery('問い合わせを行いました。三日以内に対応されない場合は自動的に返金されます。') } });
+    } catch(e) {
+      alert.error('エラーが発生しました。しばらくしてお試しください。')
+    }
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!sentTo) return;
     switch (select) {
-      case 'mistake':
-        alert.error('購入したチケットは販売者に責任がある場合を除き返金できません。詳しくは利用規約をご確認ください。')
+      case "mistake":
+        alert.error(
+          "購入したチケットは販売者に責任がある場合を除き返金できません。詳しくは利用規約をご確認ください。"
+        );
         break;
-      case 'fraud':
-        if (!fraudText) return alert.error('詳細を記入してください')
+      case "fraud":
+        if (!detailText) return alert.error("詳細を記入してください");
         sentMessage();
         break;
-      case 'other':
-        if (!problem) return alert.error('選択肢から選択してください')
-        if (!otherText) return alert.error('詳細を記入してください')
+      case "other":
+        if (!problem) return alert.error("選択肢から選択してください");
+        if (!detailText) return alert.error("詳細を記入してください");
         sentMessage();
         break;
       default:
-        alert.error('返金理由を選択してください')
+        alert.error("返金理由を選択してください");
         break;
     }
-  }
+  };
 
   useEffect(() => {
-    if (select === 'other') {
+    if (select === "other") {
       switch (problem) {
         case "event":
-          return setSentTo('user')
+          return setSentTo("user");
         case "payment":
           return setSentTo("system");
         case "system":
@@ -89,8 +105,8 @@ export default () => {
           <Input
             type="textarea"
             placeholder="詳細を記入してください"
-            value={fraudText}
-            onChange={(e) => setFraudText(e.target.value)}
+            value={detailText}
+            onChange={(e) => setDetailText(e.target.value)}
           />
         </FormGroup>
       )}
@@ -113,27 +129,29 @@ export default () => {
             <Input
               type="textarea"
               placeholder="詳細を記入してください"
-              value={otherText}
-              onChange={(e) => setOtherText(e.target.value)}
+              value={detailText}
+              onChange={(e) => setDetailText(e.target.value)}
             />
           </FormGroup>
         </>
       )}
       <Row form>
-        <Button className="ml-auto">{(() => {
-          switch (sentTo) {
-            case "user":
-              return '主催者に問い合わせる'
-            case "system":
-              return '調査を依頼する'
-            default:
-              return '送信'
-          }
-        })()}</Button>
+        <Button className="ml-auto">
+          {(() => {
+            switch (sentTo) {
+              case "user":
+                return "主催者に問い合わせる";
+              case "system":
+                return "調査を依頼する";
+              default:
+                return "送信";
+            }
+          })()}
+        </Button>
       </Row>
     </Form>
   );
-}
+};
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
   const { user, query, res } = await isLogin(ctx, 'redirect')
@@ -145,5 +163,5 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     });
     res.end();
   }
-  return { props: { user, query } }
+  return { props: { user, query, createdUser: eventData.createdUser } };
 }
