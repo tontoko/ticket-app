@@ -6,18 +6,24 @@ import {
 import Avater from 'react-avatar'
 import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
-import {GetServerSideProps} from 'next'
-import isLogin from '@/src/lib/isLogin'
 import { decodeQuery } from '@/src/lib/parseQuery'
+import initFirebase from '@/src/lib/initFirebase'
 
 const UserLayout: React.FC<any> = ({user, children}) => {
     const router = useRouter()
     const alert = useAlert()
     const [isOpen, toggle] = useState(false)
+    const [messagesLength, setMessagesLength] = useState(0)
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        const { msg } = router.query
-        if (msg) alert.success(decodeQuery(msg as string))
+        (async() => {
+            const { msg } = router.query
+            if (msg) alert.success(decodeQuery(msg as string))
+            const { firestore } = await initFirebase()
+            setMessagesLength((await firestore.collection('messages').where('receivedUser', '==', user.uid).get()).size)
+            setIsLoading(false)
+        })()
     },[router.query])
 
     return (
@@ -38,6 +44,13 @@ const UserLayout: React.FC<any> = ({user, children}) => {
                         </div>
                     </Link>
                 </div>
+                <Link href={`/user/messages`}>
+                    <div className="mr-2" style={{ borderRadius: '50%', backgroundColor: messagesLength > 0 ? 'red' : 'gray', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
+                        <div style={{ borderRadius: '50%', backgroundColor: 'white', width: '32px', height: '32px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <div style={{ fontWeight: 'bold' }}>{messagesLength}</div>
+                        </div>
+                    </div>
+                </Link>
                 <NavbarToggler onClick={() => toggle(!isOpen)} />
                 <Collapse isOpen={isOpen} navbar className="justify-content-end flex-grow-0">
                     <Nav navbar>

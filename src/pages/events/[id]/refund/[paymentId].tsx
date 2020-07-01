@@ -53,7 +53,9 @@ export default ({ user, createdUser, query }) => {
         reason,
         createdAt: Date.now(),
       });
-      router.push({ pathname: `/user/myTickets`, query: { msg: encodeQuery('問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。') } });
+      router.push({ pathname: `/user/myTickets`, query: { 
+        msg: encodeQuery('問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。') 
+      }});
     } catch(e) {
       console.error(e.message)
       alert.error('エラーが発生しました。しばらくしてお試しください。');
@@ -120,7 +122,22 @@ export default ({ user, createdUser, query }) => {
           <option value="other">その他</option>
         </Input>
       </FormGroup>
-      {select === "fraud" && (
+      {select === "other" && (
+        <FormGroup>
+          <Label>問題はどこで発生していますか？</Label>
+          <Input
+            type="select"
+            value={problem}
+            onChange={(e) => setProblem(e.target.value as problem)}
+          >
+            <option value="">選択してください</option>
+            <option value="event">このイベントについて</option>
+            <option value="payment">決済について</option>
+            <option value="system">不具合・その他</option>
+          </Input>
+        </FormGroup>
+      )}
+      {(select === "fraud" || select === "other") && (
         <FormGroup>
           <Input
             type="textarea"
@@ -129,31 +146,6 @@ export default ({ user, createdUser, query }) => {
             onChange={(e) => setDetailText(e.target.value)}
           />
         </FormGroup>
-      )}
-      {select === "other" && (
-        <>
-          <FormGroup>
-            <Label>問題はどこで発生していますか？</Label>
-            <Input
-              type="select"
-              value={problem}
-              onChange={(e) => setProblem(e.target.value as problem)}
-            >
-              <option value="">選択してください</option>
-              <option value="event">このイベントについて</option>
-              <option value="payment">決済について</option>
-              <option value="system">不具合・その他</option>
-            </Input>
-          </FormGroup>
-          <FormGroup>
-            <Input
-              type="textarea"
-              placeholder="詳細を記入してください"
-              value={detailText}
-              onChange={(e) => setDetailText(e.target.value)}
-            />
-          </FormGroup>
-        </>
       )}
       <Row form>
         <Button className="ml-auto">
