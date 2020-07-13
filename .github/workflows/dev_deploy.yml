@@ -71,4 +71,4 @@ jobs:
       - name: firebase deploy
         uses: w9jds/firebase-action@master
         with:
-          args: deploy --only functions firestore:rules storage:rules
+          args: deploy --only functions firestore:rules storage
