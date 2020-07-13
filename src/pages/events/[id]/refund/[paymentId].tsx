@@ -10,7 +10,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import initFirebase from '@/src/lib/initFirebase';
 import { encodeQuery } from '@/src/lib/parseQuery';
 
-export default ({ user, createdUser, query }) => {
+export default ({ user, createdUser, query, refunds }) => {
   const router = useRouter();
   const alert = useAlert();
   type select = "" | "mistake" | "fraud" | "other";
@@ -23,12 +23,12 @@ export default ({ user, createdUser, query }) => {
 
   const sentMessage = async (reason: string) => {
     const { firestore } = await initFirebase();
-    const receivedUser = sentTo === 'user' ? createdUser : 'admin';
+    const receivedUser = sentTo === "user" ? createdUser : "admin";
     try {
-      let reasonText = ''
+      let reasonText = "";
       switch (reason) {
         case "fraud":
-          reasonText = '詐欺・事実と異なるイベント内容'
+          reasonText = "詐欺・事実と異なるイベント内容";
           break;
         case "event":
           reasonText = "その他イベントについて";
@@ -40,25 +40,35 @@ export default ({ user, createdUser, query }) => {
           reasonText = "その他システム関連";
           break;
         default:
-          throw new Error
+          throw new Error();
       }
       // TODO: メッセージ画面を作成
       // TODO: 自分の返金申請画面を作成
       await firestore.collection("messages").add({
         sendUser: user.uid,
         receivedUser,
+        relatedUsers: [user.uid, receivedUser],
         text: `返金申請理由: ${reasonText}\n` + detailText,
       });
-      await firestore.collection("payment").doc(query.paymentId).collection('refund').add({
-        reason,
-        createdAt: Date.now(),
+      await firestore
+        .collection("payment")
+        .doc(query.paymentId)
+        .collection("refund")
+        .add({
+          reason,
+          createdAt: Date.now(),
+        });
+      router.push({
+        pathname: `/user/myTickets`,
+        query: {
+          msg: encodeQuery(
+            "問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。"
+          ),
+        },
       });
-      router.push({ pathname: `/user/myTickets`, query: { 
-        msg: encodeQuery('問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。') 
-      }});
-    } catch(e) {
-      console.error(e.message)
-      alert.error('エラーが発生しました。しばらくしてお試しください。');
+    } catch (e) {
+      console.error(e.message);
+      alert.error("エラーが発生しました。しばらくしてお試しください。");
     }
   };
 
@@ -176,5 +186,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     });
     res.end();
   }
-  return { props: { user, query, createdUser: eventData.createdUser } };
+  const refundsSnapShot = (await firestore.collection('payments').doc(query.paymentId as string).collection('refunds').get()).docs
+  const refunds = refundsSnapShot.map((snapshot) => snapshot.data());
+  return { props: { user, query, createdUser: eventData.createdUser, refunds } };
 }

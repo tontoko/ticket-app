@@ -71,3 +71,5 @@ build
 ticket-app-admin-dev.json
 
 .DS_Store
+
+.runtimeconfig.json

@@ -13,6 +13,13 @@ const initFirebase = async () => {
     const firestore = firebase.firestore()
     const storage = firebase.storage()
     const functions = firebase.functions()
+    if (location.hostname === "localhost") {
+      firestore.settings({
+        host: "localhost:8080",
+        ssl: false,
+      });
+      functions.useFunctionsEmulator("http://localhost:5002");
+    }
     return { firebase, firestore, storage, functions}
 }
 
