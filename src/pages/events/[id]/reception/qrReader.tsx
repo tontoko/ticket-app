@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
-import initFirebase from '@/src/lib/initFirebase';
-import { query } from 'express';
 import { useAlert } from 'react-alert';
 import Loading from '@/src/components/loading'
-import { Button } from 'reactstrap';
 import { GetServerSideProps } from 'next';
 import isLogin from '@/src/lib/isLogin';
 import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery';
@@ -38,7 +35,6 @@ export default ({query}) => {
     const proccessQRCode = async (data: string) => {
         try {
             const decededData = decodeQuery(data)
-            const { functions } = await initFirebase()
             const res = await fetch("/api/ticketReception", {
               method: "POST",
               credentials: "same-origin",
@@ -57,7 +53,7 @@ export default ({query}) => {
             <div>
                 <p>動作推奨環境はPC版Chrome・FireFoxです。<br/>スマホで動作しない場合はサードパーティーのQRコードスキャナをご使用ください。</p>
                 <QrReader
-                    delay={1000}
+                    delay={300}
                     onError={handleError}
                     onScan={handleScan}
                     style={{ width: '100%', marginTop: '0.5em' }}
