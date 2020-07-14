@@ -6,6 +6,9 @@ module.exports = withMDX({
   target: "serverless",
   cssModule: true,
   webpack: (config) => {
+    config.node = {
+      fs: 'empty'
+    }
     config.plugins.push(
       new MomentLocalesPlugin({
         localesToKeep: ["ja"],

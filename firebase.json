@@ -1,6 +1,6 @@
 {
   "functions": {
-    "source": ".",
+    "source": "functions",
     "predeploy": [
       "npm --prefix \"$PROJECT_DIR\" install",
       "npm --prefix \"$PROJECT_DIR\" run build"
@@ -12,19 +12,5 @@
   },
   "storage": {
     "rules": "storage.rules"
-  },
-  "emulators": {
-    "functions": {
-      "port": 5002
-    },
-    "firestore": {
-      "port": 8080
-    },
-    "pubsub": {
-      "port": 8085
-    },
-    "ui": {
-      "enabled": true
-    }
   }
 }

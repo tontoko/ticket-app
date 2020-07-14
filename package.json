@@ -64,17 +64,16 @@
     "eslint": "^6.8.0",
     "eslint-plugin-react-hooks": "^1.6.1",
     "firebase-functions-test": "^0.1.6",
-    "firebase-tools": "^8.5.0"
+    "firebase-tools": "^8.5.0",
+    "vercel": "^19.1.2"
   },
-  "main": "firebaseFunctions.js",
   "scripts": {
     "predev": "vercel env pull .env.local",
     "dev": "next",
     "build": "next build",
     "now-build": "next build",
     "start": "next start ",
-    "serve": "npm run build && firebase emulators:start --only functions,firestore",
-    "shell": "npm run build && firebase functions:shell",
+    "shell": "firebase functions:shell",
     "logs": "firebase functions:log",
     "deploy-preview": "vercel",
     "deploy-prod": "vercel --prod"
