@@ -2,7 +2,7 @@ import getSession from '@/src/lib/session'
 import { NextApiHandler } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { Client } from "@googlemaps/google-maps-services-js"
-const env = process.env.VERCEL_GITHUB_COMMIT_REF === 'master' ? 'prod' : 'dev'
+const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const gMapKey = env === 'prod' ? process.env.GOOGLE_MAP_SERVER_KEY_PROD : process.env.GOOGLE_MAP_SERVER_KEY_DEV
 
 const endpoint: NextApiHandler = (async (req, res) => {

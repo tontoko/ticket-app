@@ -7,7 +7,7 @@ const initFirebase = async () => {
         await import('firebase/firestore')
         await import('firebase/storage')
         await import('firebase/functions')
-        const params = process.env.VERCEL_GITHUB_COMMIT_REF === 'master' ? prod : dev
+        const params = process.env.ENV === 'prod' ? prod : dev
         firebase.initializeApp(params);
         const firestore = firebase.firestore()
         const storage = firebase.storage()
