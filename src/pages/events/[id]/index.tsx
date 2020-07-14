@@ -307,7 +307,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         if (data) {
           let { eventHistory } = (await firestore.collection('users').doc(user.uid).get()).data()
           if (!eventHistory) eventHistory = []
-          eventHistory.push(result.id)
+          eventHistory = Array.from(new Set([...eventHistory, result.id]));
           eventHistory.length > 10 && eventHistory.shift()
           await firestore.collection('users').doc(user.uid).update({ eventHistory })
         }
