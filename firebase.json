@@ -1,14 +1,30 @@
 {
-  "hosting": {
-    "public": "src/public",
-    "rewrites": [
-      {
-        "source": "**/**",
-        "function": "nextApp"
-      }
+  "functions": {
+    "source": ".",
+    "predeploy": [
+      "npm --prefix \"$PROJECT_DIR\" install",
+      "npm --prefix \"$PROJECT_DIR\" run build"
     ]
   },
-  "functions": {
-    "source": "src/functions"
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5002
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "pubsub": {
+      "port": 8085
+    },
+    "ui": {
+      "enabled": true
+    }
   }
 }

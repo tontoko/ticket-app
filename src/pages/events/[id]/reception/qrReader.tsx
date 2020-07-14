@@ -1,0 +1,73 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
+import initFirebase from '@/src/lib/initFirebase';
+import { query } from 'express';
+import { useAlert } from 'react-alert';
+import Loading from '@/src/components/loading'
+import { Button } from 'reactstrap';
+import { GetServerSideProps } from 'next';
+import isLogin from '@/src/lib/isLogin';
+import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery';
+const QrReader = dynamic(() => import("react-qr-reader"), {
+    loading: () => <p>loading...</p>, ssr: false
+})
+
+export default ({query}) => {
+    const router = useRouter()
+    const alert = useAlert()
+    const [proccessing, setProccesing] = useState(false)
+
+    useEffect(() => {
+        if (query.params) {
+            proccessQRCode(query.params)
+        }
+    }, [])
+
+    const handleScan = (data: string) => {
+        if (data) {
+            setProccesing(true)
+            proccessQRCode(data.split('params=')[1])
+        }
+    }
+
+    const handleError = (err) => {
+        console.error(err);
+    }
+
+    const proccessQRCode = async (data: string) => {
+        try {
+            const decededData = decodeQuery(data)
+            const { functions } = await initFirebase()
+            const res = await fetch("/api/ticketReception", {
+              method: "POST",
+              credentials: "same-origin",
+              body: JSON.parse(decededData),
+            });
+            if (res.status !== 200) return alert.error((await res.json()).msg);
+            router.push({ pathname: `/events/${router.query.id}/reception`, query: { msg: encodeQuery((await res.json()).msg) }})
+        } catch (e) {
+            alert.error('エラーが発生しました。しばらくしてお試しください。')
+        }
+    }
+
+    return proccessing ? <Loading />
+        :
+            (
+            <div>
+                <p>動作推奨環境はPC版Chrome・FireFoxです。<br/>スマホで動作しない場合はサードパーティーのQRコードスキャナをご使用ください。</p>
+                <QrReader
+                    delay={1000}
+                    onError={handleError}
+                    onScan={handleScan}
+                    style={{ width: '100%', marginTop: '0.5em' }}
+                />
+            </div>
+            )
+}
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+    const { user } = await isLogin(ctx, 'redirect')
+
+    return { props: { user, query: ctx.query } }
+}

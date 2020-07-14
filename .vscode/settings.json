@@ -1,0 +1,5 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "svn.ignoreMissingSvnWarning": true,
+  "now.instance.host.url": ""
+}
