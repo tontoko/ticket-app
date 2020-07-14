@@ -3,8 +3,8 @@ const withMDX = require('@next/mdx')()
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 
 module.exports = withMDX({
+  target: "serverless",
   cssModule: true,
-  distDir: "../.next",
   webpack: (config) => {
     config.plugins.push(
       new MomentLocalesPlugin({

@@ -16,7 +16,7 @@ const Webhock: NextApiHandler = async (req, res) => {
   let webhockEvent: Stripe.Event;
   
   try {
-    const endpointSecret = process.env.VERCEL_GITHUB_COMMIT_REF === 'master' ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD : process.env.STRIPE_PAYMENT_ENDPOINT_DEV
+    const endpointSecret = process.env.ENV === 'prod' ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD : process.env.STRIPE_PAYMENT_ENDPOINT_DEV
     // TODO: rawBodyが取れているか動作確認
     webhockEvent = stripe.webhooks.constructEvent(
       req.body,
