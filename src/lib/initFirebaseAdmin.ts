@@ -3,6 +3,7 @@ import admin from "firebase-admin";
 
 const initFirebaseAdmin = async () => {
     const firebase = await import('firebase-admin')
+    const params = process.env.ENV === 'prod' ? prod : dev
 
     if (!firebase.apps.length) {
         firebase.initializeApp({
@@ -13,7 +14,6 @@ const initFirebaseAdmin = async () => {
             ).toString()
           ),
         )});
-        const params = process.env.ENV === 'prod' ? prod : dev
         const firestore = firebase.firestore();
         const storage = firebase.storage().bucket(params.storageBucket);
         if (process.env.ENV === "local") {
@@ -25,7 +25,11 @@ const initFirebaseAdmin = async () => {
         return { firebase, firestore, storage }
     }
 
-    return { firebase, firestore: firebase.firestore(), storage: firebase.storage().bucket() };
+    return {
+      firebase,
+      firestore: firebase.firestore(),
+      storage: firebase.storage().bucket(params.storageBucket)
+    };
     
 }
 
