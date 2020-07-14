@@ -1,7 +1,8 @@
 on:
   push:
     branches:
-      - develop
+      # - develop
+      - dammy
 jobs:
   deploy:
     runs-on: ubuntu-latest

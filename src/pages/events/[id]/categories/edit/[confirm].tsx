@@ -1,18 +1,11 @@
-import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
-import { Dispatch, SetStateAction } from 'react'
+import React, { useState } from 'react'
 import {
-  Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
-  CardTitle, CardSubtitle, FormFeedback, Spinner
+  Form, FormGroup, Button, Row, Spinner
 } from 'reactstrap'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import initFirebase from '@/src/lib/initFirebase'
-import errorMsg from '@/src/lib/errorMsg'
 import { GetServerSideProps } from 'next'
-import { event } from 'events'
 import isLogin from '@/src/lib/isLogin'
-import atob from 'atob'
 import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery'
 import { useAlert } from 'react-alert'
 

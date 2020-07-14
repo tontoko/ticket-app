@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckSquare, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { encodeQuery } from "../lib/parseQuery";
-import { event } from "events";
 
 const Tickets = ({ticket, event: event}) => {
     return (

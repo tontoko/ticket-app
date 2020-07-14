@@ -1,5 +1,5 @@
 import {useState, useEffect, Dispatch, ReactElement, SetStateAction} from 'react'
-import '@/node_modules/bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import "react-datepicker/dist/react-datepicker.css"
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import UserLayouts from './layouts/userLayouts'
@@ -14,7 +14,7 @@ import Modal from '@/src/components/modal'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { encodeQuery } from '../lib/parseQuery'
-const env = process.env.GOOGLE_CLOUD_PROJECT === 'ticket-app-d3f5a' ? 'prod' : 'dev'
+const env = process.env.VERCEL_GITHUB_COMMIT_REF === 'master' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
 

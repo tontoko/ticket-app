@@ -39,10 +39,15 @@ export default ({query}) => {
         try {
             const decededData = decodeQuery(data)
             const { functions } = await initFirebase()
-            const res = await functions.httpsCallable('ticketReception')(JSON.parse(decededData))
-            router.push({pathname: `/events/${router.query.id}/reception`, query: { msg: encodeQuery(res.data.msg) }})
+            const res = await fetch("/api/ticketReception", {
+              method: "POST",
+              credentials: "same-origin",
+              body: JSON.parse(decededData),
+            });
+            if (res.status !== 200) return alert.error((await res.json()).msg);
+            router.push({ pathname: `/events/${router.query.id}/reception`, query: { msg: encodeQuery((await res.json()).msg) }})
         } catch (e) {
-            alert.error(e.message)
+            alert.error('エラーが発生しました。しばらくしてお試しください。')
         }
     }
 
