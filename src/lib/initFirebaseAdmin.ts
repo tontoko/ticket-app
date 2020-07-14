@@ -14,23 +14,13 @@ const initFirebaseAdmin = async () => {
             ).toString()
           ),
         )});
-        const firestore = firebase.firestore();
-        const storage = firebase.storage().bucket(params.storageBucket);
-        if (process.env.ENV === "local") {
-          firestore.settings({
-            host: "localhost:8080",
-            ssl: false,
-          });
-        }
-        return { firebase, firestore, storage }
     }
-
-    return {
-      firebase,
-      firestore: firebase.firestore(),
-      storage: firebase.storage().bucket(params.storageBucket)
-    };
     
+    const firestore = firebase.firestore();
+    const storage = firebase.storage().bucket(params.storageBucket);
+    
+    return { firebase, firestore, storage }
+
 }
 
 export default initFirebaseAdmin
