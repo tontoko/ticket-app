@@ -304,9 +304,13 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         }))
         status = payments.length > 0 && 'bought'
         // ログイン済みで主催者以外の場合に履歴に追加
-        data && await firestore.collection('users').doc(user.uid).update({
-            eventHistory: firebase.firestore.FieldValue.arrayUnion(result.id)
-        })
+        if (data) {
+          let { eventHistory } = (await firestore.collection('users').doc(user.uid).get()).data()
+          if (!eventHistory) eventHistory = []
+          eventHistory.push(result.id)
+          eventHistory.length > 10 && eventHistory.shift()
+          await firestore.collection('users').doc(user.uid).update({ eventHistory })
+        }
     }
     const items = event.photos.map((url, i) => {
         return {
