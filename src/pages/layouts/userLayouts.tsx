@@ -21,7 +21,7 @@ const UserLayout: React.FC<any> = ({user, children}) => {
             const { msg } = router.query
             if (msg) alert.success(decodeQuery(msg as string))
             const { firestore } = await initFirebase()
-            setMessagesLength((await firestore.collection('messages').where('receivedUser', '==', user.uid).get()).size)
+            user && setMessagesLength((await firestore.collection('messages').where('receivedUser', '==', user.uid).get()).size)
             setIsLoading(false)
         })()
     },[router.query])
