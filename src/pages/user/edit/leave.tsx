@@ -31,27 +31,42 @@ export const Leave = ({user}) => {
             alert.error(errorMsg(e))
         }
     }
-    // TODO: 退会時のフロー作成
+    // TODO: お問い合わせページ作成
     return (
-        <Form style={{ marginTop: "6.5em" }}>
-            <h5>本当に退会しますか？</h5>
-            <p>削除されたデータは復元することができません。</p>
-            <FormGroup check>
-                <Label check>
-                    <Input type="checkbox" id="checkbox2" onChange={e => setCheckBox(e.target.checked)} checked={checkBox} />{' '}
-                    上記の説明を理解しました
-                </Label>
-            </FormGroup>
-            {user.firebase.sign_in_provider === 'password' && (
-                <FormGroup>
-                    <Input type="password" placeholder="パスワードを入力してください" value={pwd} onChange={e => setPwd(e.target.value)} />
-                </FormGroup>
-            )}
-            <Row style={{ margin: 0 }}>
-                <Button className="ml-auto" onClick={() => leave()}>退会する</Button>
-            </Row>
-        </Form>
-    )
+      <Form style={{ marginTop: "6.5em" }}>
+        <h5>本当に退会しますか？</h5>
+        <ul>
+          <li>削除されたアカウントは復元できません。</li>
+          <li>決済履歴などの情報は保管されます。削除を希望される場合はお手数ですがお問い合わせからご連絡ください。</li>
+        </ul>
+        <FormGroup check>
+          <Label check>
+            <Input
+              type="checkbox"
+              id="checkbox2"
+              onChange={(e) => setCheckBox(e.target.checked)}
+              checked={checkBox}
+            />{" "}
+            上記の説明を理解しました
+          </Label>
+        </FormGroup>
+        {user.firebase.sign_in_provider === "password" && (
+          <FormGroup>
+            <Input
+              type="password"
+              placeholder="パスワードを入力してください"
+              value={pwd}
+              onChange={(e) => setPwd(e.target.value)}
+            />
+          </FormGroup>
+        )}
+        <Row style={{ margin: 0 }}>
+          <Button className="ml-auto" onClick={() => leave()}>
+            退会する
+          </Button>
+        </Row>
+      </Form>
+    );
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {

@@ -42,7 +42,6 @@ export default ({ user, createdUser, query, refunds }) => {
         default:
           throw new Error();
       }
-      // TODO: メッセージ画面を作成
       // TODO: 自分の返金申請画面を作成
       await firestore.collection("messages").add({
         sendUser: user.uid,

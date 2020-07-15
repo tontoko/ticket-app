@@ -5,6 +5,8 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import { buffer } from "micro";
 import Cors from "micro-cors";
 
+const endpointSecret = process.env.ENV === 'prod' ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD : process.env.STRIPE_PAYMENT_ENDPOINT_DEV
+
 class NoStockError extends Error {
   constructor(message: string) {
     super(message);
@@ -31,8 +33,6 @@ const Webhock: NextApiHandler = async (req, res) => {
   let webhockEvent: Stripe.Event;
   
   try {
-    const endpointSecret = process.env.ENV === 'prod' ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD : process.env.STRIPE_PAYMENT_ENDPOINT_DEV
-    // TODO: rawBodyが取れているか動作確認
     const buf = await buffer(req);
     webhockEvent = stripe.webhooks.constructEvent(
       buf.toString(),
