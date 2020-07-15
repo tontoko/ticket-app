@@ -105,10 +105,14 @@ export const BankAccounts: NextPage<props> = ({ bankAccounts, setModal, setModal
               {bankAccount.default_for_currency ?
               <Button disabled>既定の口座</Button>
               :
-              <>
-              <Button color="info" onClick={e => changeDefaultBankAccount(bankAccount.id, i)}>既定の口座に変更</Button>
-              <Button color="danger" onClick={e => deleteBankAccount(bankAccount.id, i)} style={{ marginLeft: '0.5em' }}>削除</Button>
-              </>
+              <Row>
+                <Col xl='6' lg='7' md='12'>
+                  <Button color="success" onClick={e => changeDefaultBankAccount(bankAccount.id, i)} style={{ marginBottom: '0.2em' }}>既定に変更</Button>
+                </Col>
+                <Col xl='6' lg='5' md='12'>
+                  <Button color="danger" onClick={e => deleteBankAccount(bankAccount.id, i)} style={{ marginBottom: '0.2em' }}>削除</Button>
+                </Col>
+              </Row>
               }
             </CardBody>
           </Card>

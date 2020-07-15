@@ -59,80 +59,100 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
     }
 
     return (
-        <Form style={{ marginTop: '5em' }} onSubmit={handleSubmit}>
-            <FormGroup>
-                <Label>お名前</Label>
-                <FormGroup>
-                    <Label style={{ marginRight: '1em' }}>{familyName}</Label>
-                    <Label>{firstName}</Label>
-                </FormGroup>
-            </FormGroup>
-            <FormGroup>
-                <Label>メールアドレス</Label>
-                <FormGroup>
-                    <Label>{email}</Label>
-                </FormGroup>
-            </FormGroup>
-            <FormGroup>
-                <Label>イベント情報</Label>
-                <Card>
-                    <CardBody>
-                        <Row>
-                            <Col sm="2" xs="3">
-                                <img width="100%" src={photoUrls[0]} alt="Card image cap" />
-                            </Col>
-                            <Col xs="auto">
-                                <CardTitle>{event.name}</CardTitle>
-                                <CardSubtitle>{event.placeName}</CardSubtitle>
-                            </Col>
-                        </Row>
-                        <Row className="flex-row-reverse">
-                            <h4 style={{ marginTop: '1em', marginRight: '1em' }}>{category.price} 円</h4>
-                        </Row>
-                    </CardBody>
-                </Card>
-            </FormGroup>
-            <FormGroup check style={{ margin: '2em' }}>
-                <Row className="flex-row-reverse">
-                    <Col sm="12" md="6" style={{border: "solid 1px gray", padding: "1em"}}>
-                        <Label>クレジットカード情報を入力</Label>
-                        <CardElement
-                            options={{
-                                style: {
-                                    base: {
-                                        fontSize: '16px',
-                                        color: '#424770',
-                                        '::placeholder': {
-                                            color: '#aab7c4',
-                                        },
-                                    },
-                                    invalid: {
-                                        color: '#9e2146',
-                                    },
-                                },
-                            }}
-                        />
-                    </Col>
-                </Row>
-            </FormGroup>
-            <Row className="flex-row-reverse">
-                <FormGroup check style={{ marginRight: '1em' }}>
-                    {/* TODO 利用規約作る */}
-                    <Label>何たらかんたらに同意する必要がある的な文言</Label>
-                </FormGroup>
-            </Row>
-            <Row className="flex-row-reverse">
-                <FormGroup check style={{ marginRight: '1em' }}>
-                    <Label check>
-                        <Input type="checkbox" checked={agree} onChange={() => setAgree(!agree)} invalid={!agree} /> 同意します
-                    <FormFeedback>必須項目です</FormFeedback>
-                    </Label>
-                </FormGroup>
-            </Row>
-            <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
-                <Button disabled={!stripe || !elements || processing}>{processing ? <Spinner/> : '購入'}</Button>
-            </Row>
-        </Form>
+      <Form style={{ marginBottom: "2em" }} onSubmit={handleSubmit}>
+        <FormGroup>
+          <Label>お名前</Label>
+          <FormGroup>
+            <Label style={{ marginRight: "1em" }}>{familyName}</Label>
+            <Label>{firstName}</Label>
+          </FormGroup>
+        </FormGroup>
+        <FormGroup>
+          <Label>メールアドレス</Label>
+          <FormGroup>
+            <Label>{email}</Label>
+          </FormGroup>
+        </FormGroup>
+        <FormGroup style={{ marginBottom: "1.5em" }}>
+          <Label>イベント情報</Label>
+          <Card>
+            <CardBody>
+              <Row>
+                <Col sm="2" xs="3">
+                  <img width="100%" src={photoUrls[0]} alt="Card image cap" />
+                </Col>
+                <Col xs="auto">
+                  <CardTitle>{event.name}</CardTitle>
+                  <CardSubtitle>{event.placeName}</CardSubtitle>
+                </Col>
+              </Row>
+              <Row className="flex-row-reverse">
+                <h4 style={{ marginTop: "1em", marginRight: "1em" }}>
+                  {category.price} 円
+                </h4>
+                <h4 style={{ marginTop: "1em", marginRight: "1em" }}>
+                  {category.name}
+                </h4>
+              </Row>
+            </CardBody>
+          </Card>
+        </FormGroup>
+        <FormGroup style={{ marginBottom: "2em" }}>
+          <Row form className="flex-row-reverse">
+            <Col sm="6">
+              <Card>
+                <CardBody>
+                  <Label>クレジットカード情報を入力</Label>
+                  <CardElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "16px",
+                          color: "#424770",
+                          "::placeholder": {
+                            color: "#aab7c4",
+                          },
+                        },
+                        invalid: {
+                          color: "#9e2146",
+                        },
+                      },
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+        </FormGroup>
+        <Row className="flex-row-reverse">
+          <FormGroup check style={{ marginRight: "1em" }}>
+            {/* TODO 利用規約作る */}
+            <Label>何たらかんたらに同意する必要がある的な文言</Label>
+          </FormGroup>
+        </Row>
+        <Row className="flex-row-reverse">
+          <FormGroup check style={{ marginRight: "1em" }}>
+            <Label check>
+              <Input
+                type="checkbox"
+                checked={agree}
+                onChange={() => setAgree(!agree)}
+                invalid={!agree}
+              />{" "}
+              同意します
+              <FormFeedback>必須項目です</FormFeedback>
+            </Label>
+          </FormGroup>
+        </Row>
+        <Row
+          className="flex-row-reverse"
+          style={{ marginRight: "1em", marginTop: "0.5em" }}
+        >
+          <Button disabled={!stripe || !elements || processing}>
+            {processing ? <Spinner /> : "購入"}
+          </Button>
+        </Row>
+      </Form>
     );
 }
 
