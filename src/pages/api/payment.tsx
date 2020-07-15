@@ -11,6 +11,12 @@ class NoStockError extends Error {
   }
 }
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const Webhock: NextApiHandler = async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let webhockEvent: Stripe.Event;
