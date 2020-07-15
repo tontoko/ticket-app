@@ -2,7 +2,8 @@ import { Stripe } from 'stripe'
 import { NextApiHandler } from 'next';
 import stripe from '@/src/lib/stripe';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import * as functions from "firebase-functions";
+import { buffer } from "micro";
+import Cors from "micro-cors";
 
 class NoStockError extends Error {
   constructor(message: string) {
@@ -17,22 +18,31 @@ export const config = {
   },
 };
 
+const cors = Cors({
+  allowMethods: ["POST", "HEAD"],
+});
+
 const Webhock: NextApiHandler = async (req, res) => {
+  if (req.method !== 'POST') {
+    res.setHeader("Allow", "POST");
+    res.status(405).end("Method Not Allowed");
+  }
   const sig = req.headers['stripe-signature'];
   let webhockEvent: Stripe.Event;
   
   try {
     const endpointSecret = process.env.ENV === 'prod' ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD : process.env.STRIPE_PAYMENT_ENDPOINT_DEV
     // TODO: rawBodyが取れているか動作確認
+    const buf = await buffer(req);
     webhockEvent = stripe.webhooks.constructEvent(
-      req.body,
+      buf.toString(),
       sig,
       endpointSecret
     );
   } catch (err) {
     // invalid signature
-    console.error(err);
-    res.status(400).end();
+    console.error(`Error message: ${err.message}`);
+    res.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
 
@@ -115,7 +125,7 @@ const Webhock: NextApiHandler = async (req, res) => {
     console.error(e);
   }
 
-  res.status(200).end();
+  res.json({ received: true });
 }
 
-export default Webhock
+export default cors(Webhock)
