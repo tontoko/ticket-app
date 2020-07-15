@@ -51,7 +51,7 @@ export default ({query}) => {
         :
             (
             <div>
-                <p>動作推奨環境はPC版Chrome・FireFoxです。<br/>スマホで動作しない場合はサードパーティーのQRコードスキャナをご使用ください。</p>
+                <p>推奨環境はChrome・FireFoxです。iOSはSafariのみ対応しています。<br/>動作しない場合はサードパーティーのQRコードスキャナをご利用ください。</p>
                 <QrReader
                     delay={300}
                     onError={handleError}

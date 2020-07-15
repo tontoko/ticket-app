@@ -74,3 +74,6 @@ ticket-app-admin-dev.json
 
 .runtimeconfig.json
 .vercel
+
+sw.js*
+workbox-*
