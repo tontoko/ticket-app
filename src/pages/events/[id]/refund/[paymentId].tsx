@@ -23,7 +23,19 @@ export default ({ user, createdUser, query, refunds }) => {
 
   const sentMessage = async (reason: string) => {
     const { firestore } = await initFirebase();
-    const receivedUser = sentTo === "user" ? createdUser : "admin";
+    let receivedUser
+    if (sentTo === "user") {
+      const createdUserData = (await firestore.collection('users').doc(createdUser).get()).data()
+      receivedUser = {
+        uid: createdUser,
+        email: createdUserData.email
+      };
+    } else {
+      receivedUser = {
+        uid: 'admin',
+        email: 'admin'
+      }
+    }
     try {
       let reasonText = "";
       switch (reason) {
@@ -42,13 +54,7 @@ export default ({ user, createdUser, query, refunds }) => {
         default:
           throw new Error();
       }
-      // TODO: 自分の返金申請画面を作成
-      await firestore.collection("messages").add({
-        sendUser: user.uid,
-        receivedUser,
-        relatedUsers: [user.uid, receivedUser],
-        text: `返金申請理由: ${reasonText}\n` + detailText,
-      });
+      // TODO: 購入履歴画面を作成
       await firestore
         .collection("payment")
         .doc(query.paymentId)

@@ -2,8 +2,8 @@
   "functions": {
     "source": "functions",
     "predeploy": [
-      "npm --prefix \"$PROJECT_DIR\" install",
-      "npm --prefix \"$PROJECT_DIR\" run build"
+      "npm --prefix \"$PROJECT_DIR/functions\" install",
+      "npm --prefix \"$PROJECT_DIR/functions\" run build"
     ]
   },
   "firestore": {

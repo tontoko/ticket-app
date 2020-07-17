@@ -39,3 +39,22 @@ exports.createUser = functions.auth.user().onCreate(async (user) => {
     stripeId: stripeAccount.id,
   });
 });
+
+type payment = {
+    seller: string
+    buyer: string
+}
+// TODO: paymentsページ作成
+exports.refundNotify = functions.firestore.document('payments/{payment}/refunds/{refund}').onCreate(async (_snap, context) => {
+    const { seller } = (await firestore.collection('payments').doc(context.params.payment).get()).data() as payment
+    firestore
+      .collection("users")
+      .doc(seller)
+      .collection("notifies")
+      .doc(context.params.refund)
+      .set({
+        text: `あなたが主催するイベントに対して返金が申請されました。3日以内に対処しない場合、自動的に返金されます。`,
+        url: `/payments/${context.params.payment}`,
+        read: false,
+      });
+})
