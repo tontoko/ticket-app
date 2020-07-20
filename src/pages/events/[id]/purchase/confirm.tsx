@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import {useRouter} from 'next/router'
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useRef} from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, FormFeedback, Spinner } from 'reactstrap'
@@ -18,6 +18,8 @@ import stripe from '@/src/lib/stripe'
 import initFirebase from '@/src/lib/initFirebase'
 import atob from 'atob'
 import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 
 const Confirmation = ({ familyName, firstName, email, event, category, photoUrls, client_secret, categoryId, eventId }) => {
     const stripe = useStripe();
@@ -26,6 +28,9 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
     const alert = useAlert()
     const [agree, setAgree] = useState(false)
     const [processing, setProcessing] = useState(false)
+    const [complete, setComplete] = useState(false)
+    const [redirectTimer, setRedirectTimer] = useState(5)
+    const timerRef = useRef(redirectTimer)
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -55,11 +60,39 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
             alert.error('エラーが発生しました。')
             return setProcessing(false)
         }
-        router.push({ pathname: '/user/myTickets', query: { msg: encodeQuery('チケットの購入処理を開始しました。\n処理が完了すると「購入済みチケット」に表示されます。') } }, '/user/myTickets')
+        paymentComplete();
     }
 
+    const paymentComplete = () => {
+        setComplete(true);
+        let timer = timerRef.current;
+        let count: NodeJS.Timeout
+        count = setInterval(() => {
+            console.log(timer);
+            if (timer <= 1) {
+              clearInterval(count);
+              router.push("/user/myTickets");
+            }
+            setRedirectTimer(timer--);
+        }, 1000);
+    }
+
+    if (complete) return (
+        <>
+        <h4>
+            <FontAwesomeIcon
+            icon={faCheckSquare}
+            style={{ color: "#00DD00" }}
+            />
+            ご購入ありがとうございました。
+        </h4>
+        <h4>購入処理が完了すると「購入済みチケット」に表示されます。</h4>
+        <p>{redirectTimer} 秒後にリダイレクトします...</p>
+        </>
+        );
+
     return (
-      <Form style={{ marginBottom: "2em" }} onSubmit={handleSubmit}>
+        <Form style={{ marginBottom: "2em" }} onSubmit={handleSubmit}>
         <FormGroup>
           <Label>お名前</Label>
           <FormGroup>
