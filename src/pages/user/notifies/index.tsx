@@ -48,39 +48,31 @@ const Notifies = ({user}) => {
     router.push(url)
   }
 
+  const renderNotifies = () => {
+    if (!notifies.length) return <p>表示される通知はありません。</p>;
+
+    return notifies.map((notify, i) => {
+      return (
+        <Row
+          onClick={() => clickLinkWithsaveAsRead(notify.id, notify.url)}
+          key={i}
+        >
+          <Col xs="12" style={{ padding: "0", cursor: "pointer" }}>
+            <Card style={{ height: "100%", width: "100%" }}>
+              <CardBody>{notify.text}</CardBody>
+            </Card>
+          </Col>
+        </Row>
+      );
+    });
+  }
+
   if (isLoading) return <Loading />
 
   return (
     <>
-      <h4>通知</h4>
-      <div
-        style={{
-          minHeight: "80vh",
-          border: "solid 1px gray",
-          borderRadius: "5px",
-        }}
-      >
-        {notifies.map((notify, i) => {
-          return (
-            <Row
-              style={{
-                width: "100%",
-                margin: "0",
-                border: "solid 1px gray",
-                borderRadius: "5px",
-              }}
-              onClick={() => clickLinkWithsaveAsRead(notify.id, notify.url)}
-              key={i}
-            >
-              <Col xs="12" style={{ padding: "0", cursor: "pointer" }}>
-                <Card style={{ height: "100%", width: "100%" }}>
-                  <CardBody>{notify.text}</CardBody>
-                </Card>
-              </Col>
-            </Row>
-          );
-        })}
-      </div>
+      <h4 style={{ marginBottom: "1em" }}>通知</h4>
+      {renderNotifies()}
     </>
   );
 }

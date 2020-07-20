@@ -40,21 +40,20 @@ exports.createUser = functions.auth.user().onCreate(async (user) => {
   });
 });
 
-type payment = {
-    seller: string
-    buyer: string
-}
-// TODO: paymentsページ作成
-exports.refundNotify = functions.firestore.document('payments/{payment}/refunds/{refund}').onCreate(async (_snap, context) => {
-    const { seller } = (await firestore.collection('payments').doc(context.params.payment).get()).data() as payment
+exports.refundNotify = functions.firestore.document('payments/{payment}/refunds/{refund}').onCreate(async (snap, context) => {
+    const { targetUser } = snap.data();
+    const text =
+      targetUser === "admin"
+        ? "ユーザーから調査依頼がありました。"
+        : "あなたが主催するイベントに対して返金が申請されました。3日以内に対処しない場合、自動的に返金されます。";
     firestore
       .collection("users")
-      .doc(seller)
+      .doc(targetUser)
       .collection("notifies")
       .doc(context.params.refund)
       .set({
-        text: `あなたが主催するイベントに対して返金が申請されました。3日以内に対処しない場合、自動的に返金されます。`,
-        url: `/payments/${context.params.payment}`,
+        text,
+        url: `/user/payments/${context.params.payment}`,
         read: false,
       });
 })

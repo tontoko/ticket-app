@@ -1,15 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Button, Container, Col, Row, Form, Input, FormGroup, Label, InputGroup
-} from 'reactstrap';
-import { useRouter } from 'next/router'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
-import { useAlert } from 'react-alert';
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import initFirebase from '@/src/lib/initFirebase';
-import { encodeQuery } from '@/src/lib/parseQuery';
+  Button,
+  Container,
+  Col,
+  Row,
+  Form,
+  Input,
+  FormGroup,
+  Label,
+  InputGroup,
+} from "reactstrap";
+import { useRouter } from "next/router";
+import { GetServerSideProps } from "next";
+import isLogin from "@/src/lib/isLogin";
+import { useAlert } from "react-alert";
+import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
+import initFirebase from "@/src/lib/initFirebase";
+import { encodeQuery } from "@/src/lib/parseQuery";
 
+
+// TODO: WIP
 export default ({ user, createdUser, query, refunds }) => {
   const router = useRouter();
   const alert = useAlert();
@@ -23,8 +33,8 @@ export default ({ user, createdUser, query, refunds }) => {
 
   const sentMessage = async (reason: string) => {
     const { firestore } = await initFirebase();
-    let targetUser = sentTo === "user" ? createdUser : "admin";
-    
+    let receivedUser = sentTo === "user" ? createdUser : "admin";
+
     try {
       let reasonText = "";
       switch (reason) {
@@ -43,14 +53,14 @@ export default ({ user, createdUser, query, refunds }) => {
         default:
           throw new Error();
       }
-      // TODO: 購入履歴画面を作成
       await firestore
         .collection("payment")
         .doc(query.paymentId)
         .collection("refund")
         .add({
           reason,
-          targetUser,
+          receivedUser,
+          createdAt: Date.now(),
         });
       router.push({
         pathname: `/user/myTickets`,
@@ -169,18 +179,38 @@ export default ({ user, createdUser, query, refunds }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user, query, res } = await isLogin(ctx, 'redirect')
-  const { firestore } = await initFirebaseAdmin()
-  const eventData = (await firestore.collection("events").doc(query.id as string).get()).data()
-  const paymentData = (await firestore.collection("payments").doc(query.paymentId as string).get()).data()
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { user, query, res } = await isLogin(ctx, "redirect");
+  const { firestore } = await initFirebaseAdmin();
+  const eventData = (
+    await firestore
+      .collection("events")
+      .doc(query.id as string)
+      .get()
+  ).data();
+  const paymentData = (
+    await firestore
+      .collection("payments")
+      .doc(query.paymentId as string)
+      .get()
+  ).data();
   if ((user && user.uid === eventData.createdUser) || paymentData.refund) {
     res.writeHead(302, {
       Location: "/",
     });
     res.end();
   }
-  const refundsSnapShot = (await firestore.collection('payments').doc(query.paymentId as string).collection('refunds').get()).docs
-  const refunds = refundsSnapShot.map((snapshot) => { return { ...snapshot.data(), id: snapshot.id } });
-  return { props: { user, query, createdUser: eventData.createdUser, refunds } };
-}
+  const refundsSnapShot = (
+    await firestore
+      .collection("payments")
+      .doc(query.paymentId as string)
+      .collection("refunds")
+      .get()
+  ).docs;
+  const refunds = refundsSnapShot.map((snapshot) => {
+    return { ...snapshot.data(), id: snapshot.id };
+  });
+  return {
+    props: { user, query, createdUser: eventData.createdUser, refunds },
+  };
+};
