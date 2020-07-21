@@ -103,11 +103,9 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
     const photos: undefined | string[] = data.photos
     const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
-    const createdAt = data.createdAt.seconds
-    const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
-    const event = {...data, createdAt, updatedAt, startDate, endDate}
+    const event = {...data, startDate, endDate}
     const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get())
     let categories: FirebaseFirestore.DocumentData[] = []
     categoriesSnapShot.forEach(e => {

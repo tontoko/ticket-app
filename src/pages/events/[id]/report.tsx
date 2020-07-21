@@ -5,6 +5,7 @@ import { Table, Container, Row, Col, Label, Button, Input } from 'reactstrap';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import isLogin from '@/src/lib/isLogin';
 import { GetServerSideProps } from 'next';
+import { event } from 'events';
 
 export default ({ user, event, categories, payments }) => {
     let totalSalesProspect = 0
@@ -83,12 +84,10 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const { firestore } = await initFirebaseAdmin()
     
     const result = await firestore.collection('events').doc(query.id as string).get()
-    const data = result.data()
-    const createdAt = data.createdAt.seconds
-    const updatedAt = data.updatedAt.seconds
+    const data = result.data() as event
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
-    const event = { ...data, createdAt, updatedAt, startDate, endDate, id: result.id }
+    const event = { ...data, startDate, endDate, id: result.id }
 
     const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
     const payments = (await firestore.collection('payments').where("event", "==", result.id).get()).docs.map(payment => payment.data())

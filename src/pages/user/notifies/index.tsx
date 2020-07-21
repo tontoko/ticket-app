@@ -58,7 +58,13 @@ const Notifies = ({user}) => {
           key={i}
         >
           <Col xs="12" style={{ padding: "0", cursor: "pointer" }}>
-            <Card style={{ height: "100%", width: "100%" }}>
+            <Card
+              style={{
+                height: "100%",
+                width: "100%",
+                backgroundColor: notify.read ? "gainsboro" : null,
+              }}
+            >
               <CardBody>{notify.text}</CardBody>
             </Card>
           </Col>

@@ -57,7 +57,7 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
                   style={{
                     border: "solid 1px gray",
                     borderRadius: "50%",
-                    backgroundColor: notifiesLength > 0 ? "red" : "gray",
+                    backgroundColor: notifiesLength > 0 ? "orange" : "gray",
                     width: "40px",
                     height: "40px",
                     display: "flex",

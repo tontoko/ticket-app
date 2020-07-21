@@ -92,12 +92,10 @@ const Page = ({ requirements }) => {
             photos,
             placeName,
             name: eventName,
-            createdAt: new Date,
             createdUser: firebase.auth().currentUser.uid,
             eventDetail,
             startDate: moment(startDate as string).toDate(),
             endDate: moment(endDate as string).toDate(),
-            updatedAt: new Date
         })
         router.push('/user/myEvents')
     }

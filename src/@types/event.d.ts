@@ -2,8 +2,6 @@ declare module 'events' {
   export type events = event[]
   
   export type event = {
-    createdAt: FirebaseFirestore.Timestamp,
-    updatedAt: FirebaseFirestore.Timestamp,
     startDate: FirebaseFirestore.Timestamp,
     endDate: FirebaseFirestore.Timestamp,
     photos: string[],

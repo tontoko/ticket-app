@@ -8,6 +8,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
 import moment from 'moment'
 import { parseCookies } from 'nookies'
+import { event } from 'events'
 
 export const UserShow: React.FC<any> = ({user, event}) => {
 
@@ -46,30 +47,36 @@ export const UserShow: React.FC<any> = ({user, event}) => {
     }
 
     return (
-        <>
+      <>
         <h2>ようこそ{user.name && ` ${user.name} さん`}</h2>
-        <Form style={{marginTop: "1.5em"}}>
-            {event &&
-            <Row form>
-                {renderUserEvent()}
+        <Form style={{ marginTop: "1.5em" }}>
+          {event && (
+            <Row form style={{ marginBottom: "2em" }}>
+              {renderUserEvent()}
             </Row>
-            }
-            <Row form style={{ marginTop: "2em" }}>
-                <Link href={`/user/edit`}>
-                    <Button className="ml-auto">登録情報の編集</Button>
-                </Link>
-            </Row>
-            <Row form style={{ marginTop: "2em" }}>
-                <Button className="ml-auto" onClick={async() => {
-                    const {firebase} = await initFirebase()
-                    await firebase.auth().signOut()
-                }}>
-                    ログアウト
-                </Button>
-            </Row>
+          )}
+          <Row form style={{ marginBottom: "1em" }}>
+            <Button className="ml-auto">購入履歴</Button>
+          </Row>
+          <Row form style={{ marginBottom: "1em" }}>
+            <Link href={`/user/edit`}>
+              <Button className="ml-auto">登録情報の編集</Button>
+            </Link>
+          </Row>
+          <Row form style={{ marginBottom: "2em" }}>
+            <Button
+              className="ml-auto"
+              onClick={async () => {
+                const { firebase } = await initFirebase();
+                await firebase.auth().signOut();
+              }}
+            >
+              ログアウト
+            </Button>
+          </Row>
         </Form>
-        </>
-    )
+      </>
+    );
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
@@ -86,13 +93,11 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
             doc = cookie.lastVisitedEvent
         }
         const result = await firestore.collection('events').doc(doc).get()
-        const data = result.data()
-        const createdAt = data.createdAt.seconds
-        const updatedAt = data.updatedAt.seconds
+        const data = result.data() as event
         const startDate = data.startDate.seconds
         const endDate = data.endDate.seconds
         const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser) : await getImg(null, data.createdUser)
-        event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
+        event = { ...data, startDate, endDate, photos, id: result.id }
     }
     return { props: { user, event } }
 }
