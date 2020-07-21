@@ -6,6 +6,7 @@ import { useAlert } from "react-alert"
 import initFirebase from '@/src/lib/initFirebase'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
+import Link from 'next/link'
 
 export const Leave = ({user}) => {
     const alert = useAlert()
@@ -33,13 +34,18 @@ export const Leave = ({user}) => {
     }
     // TODO: お問い合わせページ作成
     // TODO: イベント主催者がイベント開催まで退会できないような条件付け
-    // TODO: 保管される情報の明確化
     return (
       <Form style={{ marginTop: "6.5em" }}>
         <h5>本当に退会しますか？</h5>
         <ul>
           <li>削除されたアカウントは復元できません。</li>
-          <li>決済履歴などの情報は保管されます。削除を希望される場合はお手数ですがお問い合わせからご連絡ください。</li>
+          <li>
+            決済履歴などの情報は保管されます。詳しくは
+            <Link href='/termsOfUse'>
+              <a>利用規約</a>
+            </Link>
+            をご確認ください。
+          </li>
         </ul>
         <FormGroup check>
           <Label check>

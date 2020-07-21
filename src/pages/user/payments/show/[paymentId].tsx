@@ -1,31 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, {  } from "react";
 import {
-  Button,
-  Container,
-  Col,
-  Row,
-  Form,
-  Input,
   FormGroup,
-  Label,
-  InputGroup,
 } from "reactstrap";
-import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
 import isLogin from "@/src/lib/isLogin";
-import { useAlert } from "react-alert";
 import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
-import initFirebase from "@/src/lib/initFirebase";
-import { encodeQuery } from "@/src/lib/parseQuery";
-import { event } from "events";
 import moment from "moment";
 import Link from "next/link";
 
-
-// TODO: WIP
-export default ({ user, query, payment, event, category, refunded }) => {
-  const router = useRouter();
-  const alert = useAlert();
+export default ({ payment, event, category, refunded }) => {
 
   return (
     <>
@@ -50,7 +33,7 @@ export default ({ user, query, payment, event, category, refunded }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { user, query, res } = await isLogin(ctx, "redirect");
+  const { user, query } = await isLogin(ctx, "redirect");
   const { firestore } = await initFirebaseAdmin();
   const paymentSnapShot = await firestore.collection('payments').doc(query.paymentId as string).get()
   const payment = { ...paymentSnapShot.data(), createdAt: paymentSnapShot.createTime.seconds*1000 } as any

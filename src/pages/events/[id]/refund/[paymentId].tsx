@@ -43,7 +43,7 @@ export default ({ user, createdUser, query, refunds }) => {
         default:
           throw new Error();
       }
-      // TODO: 購入履歴画面を作成
+
       await firestore
         .collection("payment")
         .doc(query.paymentId)

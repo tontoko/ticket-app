@@ -20,6 +20,7 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
         (async() => {
             const { msg } = router.query
             if (msg) alert.success(decodeQuery(msg as string))
+            if (!user) return
             const { firestore } = await initFirebase()
             cancelListner = firestore
               .collection("users")
@@ -94,6 +95,9 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
                   <NavItem>
                     <NavLink href={`/user/myTickets`}>購入済みチケット</NavLink>
                   </NavItem>
+                  <NavItem>
+                    <NavLink href={`/termsOfUse`}>利用規約</NavLink>
+                  </NavItem>
                 </Nav>
               </Collapse>
             </>
@@ -113,6 +117,9 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
                   </NavItem>
                   <NavItem>
                     <NavLink href={`/login`}>ログイン</NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink href={`/termsOfUse`}>利用規約</NavLink>
                   </NavItem>
                 </Nav>
               </Collapse>

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Router, { useRouter } from 'next/router'
 import React, {useState} from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Col, Spinner } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Container, Col, Spinner, Row } from 'reactstrap'
 import initFirebase from '@/src/lib/initFirebase'
 import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -89,14 +89,16 @@ export const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </FormGroup>
-          <Button disabled={loading} className="ml-auto">
-            {loading ? <Spinner /> : "ログイン"}
-          </Button>
+          <Row form>
+            <Button disabled={loading} className="ml-auto">
+              {loading ? <Spinner /> : "ログイン"}
+            </Button>
+          </Row>
         </Form>
         <Form>
           <FormGroup style={{ marginTop: "1em" }}>
             <Col style={{ display: "flex", padding: 0 }}>
-              <p onClick={() => loginWithTwitter()}>
+              <p className="ml-auto" onClick={() => loginWithTwitter()}>
                 <FontAwesomeIcon
                   icon={faTwitter}
                   size="lg"
@@ -134,12 +136,12 @@ export const Login = () => {
               </p>
             </Col>
           </FormGroup>
-          <FormGroup>
+          <FormGroup style={{ textAlign: "right" }}>
             <Link href="/register">
               <a>ユーザー登録</a>
             </Link>
           </FormGroup>
-          <FormGroup>
+          <FormGroup style={{ textAlign: "right" }}>
             <Link href="/forgetPassword">
               <a>パスワード再設定</a>
             </Link>

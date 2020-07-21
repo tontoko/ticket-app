@@ -62,10 +62,22 @@ const App = ({ Component, pageProps }: AppProps) => {
             method: 'POST',
             credentials: 'same-origin'
           })
-          if (window.location.pathname !== '/' && window.location.pathname !== '/login' && window.location.pathname !== '/register' &&
-            !window.location.pathname.match(/^\/__\/auth\/action/) && !window.location.pathname.match(/^\/events\/[^\/]+\/*/) &&
-            window.location.pathname !== '/termsOfUse' ) {
-            router.push({ pathname: '/login', query: { msg: encodeQuery('ログアウトしました') } }, '/login')
+          if (
+            window.location.pathname !== "/" &&
+            window.location.pathname !== "/login" &&
+            window.location.pathname !== "/register" &&
+            window.location.pathname !== "/termsOfUse" &&
+            window.location.pathname !== "/forgetPassword" &&
+            !window.location.pathname.match(/^\/__\/auth\/action/) &&
+            !window.location.pathname.match(/^\/events\/[^\/]+\/*/)
+          ) {
+            router.push(
+              {
+                pathname: "/login",
+                query: { msg: encodeQuery("ログアウトしました") },
+              },
+              "/login"
+            );
           }
         }
       })
