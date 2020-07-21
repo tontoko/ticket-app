@@ -71,14 +71,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           const data = (
             await firestore.collection("events").doc(eventId).get()
           ).data();
-          const createdAt = data.createdAt.seconds;
-          const updatedAt = data.updatedAt.seconds;
           const startDate = data.startDate.seconds;
           const endDate = data.endDate.seconds;
           events[eventId] = {
             ...data,
-            createdAt,
-            updatedAt,
             startDate,
             endDate,
           };

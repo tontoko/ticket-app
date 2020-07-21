@@ -56,7 +56,9 @@ export const UserShow: React.FC<any> = ({user, event}) => {
             </Row>
           )}
           <Row form style={{ marginBottom: "1em" }}>
-            <Button className="ml-auto">購入履歴</Button>
+            <Link href={`/user/payments`}>
+              <Button className="ml-auto">購入履歴</Button>
+            </Link>
           </Row>
           <Row form style={{ marginBottom: "1em" }}>
             <Link href={`/user/edit`}>
