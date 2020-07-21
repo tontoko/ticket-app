@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { encodeQuery } from '@/src/lib/parseQuery';
 import Tickets from '@/src/components/tickets';
+import { event } from 'events';
 
 export default ({ events }) => {
 
@@ -105,13 +106,11 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
                     seller: payment.data().seller
                 }
             }))
-            const data = event.data()
-            const createdAt = data.createdAt.seconds
-            const updatedAt = data.updatedAt.seconds
+            const data = event.data() as event
             const startDate = data.startDate.seconds
             const endDate = data.endDate.seconds
             const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser, '360') : await getImg(null, data.createdUser, '360')
-            return { ...data, createdAt, updatedAt, startDate, endDate, tickets, photos, id: event.id }
+            return { ...data,  startDate, endDate, tickets, photos, id: event.id }
         }))
     }
     return { props: { user, events } }

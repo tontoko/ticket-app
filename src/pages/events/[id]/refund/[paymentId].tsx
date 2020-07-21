@@ -23,7 +23,8 @@ export default ({ user, createdUser, query, refunds }) => {
 
   const sentMessage = async (reason: string) => {
     const { firestore } = await initFirebase();
-    const receivedUser = sentTo === "user" ? createdUser : "admin";
+    let targetUser = sentTo === "user" ? createdUser : "admin";
+    
     try {
       let reasonText = "";
       switch (reason) {
@@ -42,21 +43,14 @@ export default ({ user, createdUser, query, refunds }) => {
         default:
           throw new Error();
       }
-      // TODO: メッセージ画面を作成
-      // TODO: 自分の返金申請画面を作成
-      await firestore.collection("messages").add({
-        sendUser: user.uid,
-        receivedUser,
-        relatedUsers: [user.uid, receivedUser],
-        text: `返金申請理由: ${reasonText}\n` + detailText,
-      });
+      // TODO: 購入履歴画面を作成
       await firestore
         .collection("payment")
         .doc(query.paymentId)
         .collection("refund")
         .add({
           reason,
-          createdAt: Date.now(),
+          targetUser,
         });
       router.push({
         pathname: `/user/myTickets`,
@@ -187,6 +181,6 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     res.end();
   }
   const refundsSnapShot = (await firestore.collection('payments').doc(query.paymentId as string).collection('refunds').get()).docs
-  const refunds = refundsSnapShot.map((snapshot) => snapshot.data());
+  const refunds = refundsSnapShot.map((snapshot) => { return { ...snapshot.data(), id: snapshot.id } });
   return { props: { user, query, createdUser: eventData.createdUser, refunds } };
 }

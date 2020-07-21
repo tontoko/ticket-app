@@ -46,8 +46,8 @@ const UserShow = ({ user, verification }) => {
             )}
 
             <div style={{ marginTop: '1.5em' }}>
-                <h5>主催者用の登録情報</h5>
-                <p>イベントを開催するには、ユーザー情報と本人確認書類を登録する必要があります。</p>
+                <h4>イベント主催者用の登録情報</h4>
+                <Label>イベントを開催するには、ユーザー情報と本人確認書類を登録する必要があります。</Label>
                 <FormGroup style={{ marginTop: '1em' }}>
                     <Link href={`/user/edit/updateUser`}><a>ユーザー情報を追加・修正する</a></Link>
                 </FormGroup>
@@ -59,7 +59,7 @@ const UserShow = ({ user, verification }) => {
                     })()}
                 </FormGroup>
                 <FormGroup style={{ marginTop: '1em' }}>
-                    <Link href={`/user/bankAccounts`}><a>振り込み用 銀行口座を追加・修正する</a></Link>
+                    <Link href={`/user/bankAccounts`}><a>売上振り込み用 銀行口座を追加・修正する</a></Link>
                 </FormGroup>
             </div>
 
@@ -73,12 +73,10 @@ const UserShow = ({ user, verification }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const {user} = await isLogin(ctx, 'redirect')
+    const { user } = await isLogin(ctx, 'redirect')
     const { firestore } = await initFirebaseAdmin()
     const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
-    const { individual } = await stripe.accounts.retrieve(
-        stripeId
-    )
+    const { individual } = await stripe.accounts.retrieve(stripeId)
     const verification = individual ? individual.verification : null
     return { props: { user, verification } }
 }

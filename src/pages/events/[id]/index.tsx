@@ -2,25 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import {
-    Button, Container, Col, Row, 
+    Button, Col, Row, 
     Carousel,
     CarouselItem,
     CarouselControl,
     CarouselIndicators,
-    CarouselCaption,
-    FormGroup,
-    Card,
-    CardBody
-} from 'reactstrap';
+    FormGroup} from 'reactstrap';
 import getImg from '@/src/lib/getImgSSR'
 import { GetServerSideProps } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import isLogin from '@/src/lib/isLogin'
 import { event } from 'events'
 import moment from 'moment'
-import { encodeQuery } from '@/src/lib/parseQuery';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import { setCookie } from 'nookies'
 import {
   LineShareButton,
@@ -32,7 +25,7 @@ import {
 } from "react-share";
 import Tickets from '@/src/components/tickets';
 
-export default ({ user, event, categories, status, items, tickets, setModal, setModalInner }) => {
+export default ({ event, categories, status, items, tickets, setModal, setModalInner }) => {
 
     const router = useRouter();
     const startDate = moment(event.startDate * 1000)
@@ -226,11 +219,11 @@ export default ({ user, event, categories, status, items, tickets, setModal, set
             </FormGroup>
             <FormGroup>
               <h5>開始</h5>
-              <p>{moment(startDate).format("YYYY M月d日 H:mm")}</p>
+              <p>{moment(startDate).format("YYYY年 M月d日 H:mm")}</p>
             </FormGroup>
             <FormGroup>
               <h5>終了</h5>
-              <p>{moment(endDate).format("YYYY M月d日 H:mm")}</p>
+              <p>{moment(endDate).format("YYYY年 M月d日 H:mm")}</p>
             </FormGroup>
             <FormGroup>
               <TwitterShareButton {...twitterShareProps} style={{ marginRight: "1em" }}>
@@ -267,16 +260,14 @@ export default ({ user, event, categories, status, items, tickets, setModal, set
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { query } = ctx
     const { user } = await isLogin(ctx)
-    const { firebase, firestore } = await initFirebaseAdmin()
+    const { firestore } = await initFirebaseAdmin()
     const eventRef = firestore.collection('events').doc(query.id as string)
     const result = await eventRef.get()
     const data = result.data() as event
-    const createdAt = data.createdAt.seconds
-    const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
     const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser, '800'))) : [await getImg(null, data.createdUser)]
-    const event = { ...data, createdAt, updatedAt, startDate, endDate, photos, id: result.id }
+    const event = { ...data, startDate, endDate, photos, id: result.id }
     const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
     let status: string
     let tickets = []
@@ -304,11 +295,15 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         }))
         status = payments.length > 0 && 'bought'
         // ログイン済みで主催者以外の場合に履歴に追加
-        data && await firestore.collection('users').doc(user.uid).update({
-            eventHistory: firebase.firestore.FieldValue.arrayUnion(result.id)
-        })
+        if (data) {
+          let { eventHistory } = (await firestore.collection('users').doc(user.uid).get()).data()
+          if (!eventHistory) eventHistory = []
+          eventHistory = Array.from(new Set([...eventHistory, result.id]));
+          eventHistory.length > 10 && eventHistory.shift()
+          await firestore.collection('users').doc(user.uid).update({ eventHistory })
+        }
     }
-    const items = event.photos.map((url, i) => {
+    const items = event.photos.map((url) => {
         return {
             src: url,
         }

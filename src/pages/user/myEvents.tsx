@@ -10,6 +10,7 @@ import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
 import stripe from '@/src/lib/stripe';
+import { event } from 'events';
 
 export default ({ user, events, requirements }) => {
   const renderUserEvents = () => events.map((event, i) => {
@@ -84,13 +85,11 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   const {firestore} = await initFirebaseAdmin()
   const result = await firestore.collection('events').where('createdUser', '==', user.user_id).get()
   const events = await Promise.all(result.docs.map(async doc => {
-    const data = doc.data()
-    const createdAt = data.createdAt.seconds
-    const updatedAt = data.updatedAt.seconds
+    const data = doc.data() as event
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
     const photos = data.photos.length > 0 ? await getImg(data.photos[0], user.user_id, '360') : await getImg(null, user.user_id, '360')
-    return { ...data, createdAt, updatedAt, startDate, endDate, photos, id: doc.id }
+    return { ...data, startDate, endDate, photos, id: doc.id }
   }))
 
   const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()

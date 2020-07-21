@@ -71,10 +71,8 @@ export default ({ user, event, photoUrls }) => {
                 photos,
                 placeName,
                 name: eventName,
-                createdAt: new Date,
                 createdUser: firebase.auth().currentUser.uid,
                 eventDetail,
-                updatedAt: new Date(startDate as string),
                 startDate: moment(startDate as string).toDate(),
                 endDate: moment(endDate as string).toDate(),
             })
@@ -186,10 +184,8 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
     const photos: undefined | string[] = data.photos
     const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, user.user_id))) : undefined
-    const createdAt = data.createdAt.seconds
-    const updatedAt = data.updatedAt.seconds
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
 
-    return { props: { user, event: { ...data, createdAt, updatedAt, startDate, endDate }, photoUrls } }
+    return { props: { user, event: { ...data, startDate, endDate }, photoUrls } }
 }

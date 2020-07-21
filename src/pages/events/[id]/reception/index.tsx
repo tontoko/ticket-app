@@ -7,6 +7,7 @@ import isLogin from '@/src/lib/isLogin';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import initFirebase from '@/src/lib/initFirebase';
 import { useAlert } from 'react-alert';
+import { event } from 'events';
 
 class NoStockError extends Error {
     constructor(message: string) {
@@ -240,12 +241,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         categories.push({ ...category, id })
     })
     const eventsSnapShot = (await firestore.collection('events').doc(query.id as string).get())
-    const data = eventsSnapShot.data()
-    const createdAt = data.createdAt.seconds
-    const updatedAt = data.updatedAt.seconds
+    const data = eventsSnapShot.data() as event
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
-    const events = { ...data, createdAt, updatedAt, startDate, endDate, id: eventsSnapShot.id }
+    const events = { ...data, startDate, endDate, id: eventsSnapShot.id }
 
     return { props: { user, query: ctx.query, categories, events } }
 }
