@@ -48,15 +48,21 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
 
     useEffect(() => {
         setTwitterShareProps({
-            url: location.href,
-            title: event.name,
-        })
+          url: location.href.includes("?")
+            ? location.href.split("?")[0]
+            : location.href,
+          title: event.name,
+        });
         setFacebookShareProps({
-          url: location.href,
+          url: location.href.includes("?")
+            ? location.href.split("?")[0]
+            : location.href,
           quote: event.name,
         });
         setLineShareProps({
-          url: location.href,
+          url: location.href.includes("?")
+            ? location.href.split("?")[0]
+            : location.href,
           title: event.name,
         });
     },[])
