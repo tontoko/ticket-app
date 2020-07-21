@@ -77,7 +77,7 @@
     "dev": "next",
     "build": "next build",
     "now-build": "next build",
-    "start": "next start ",
+    "start": "next start",
     "shell": "firebase functions:shell",
     "logs": "firebase functions:log",
     "deploy-preview": "vercel",
