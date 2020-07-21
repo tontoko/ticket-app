@@ -10,6 +10,6 @@ export const TermsOfUse: React.FC = () => <Text />
 export default TermsOfUse
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  await isLogin(ctx);
-  return { props: {} };
+  const { user } = await isLogin(ctx);
+  return { props: { user } };
 };

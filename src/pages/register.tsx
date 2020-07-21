@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Spinner } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Container, Spinner, Row } from 'reactstrap'
 import initFirebase from '@/src/lib/initFirebase'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
@@ -58,16 +58,20 @@ export default () => {
               onChange={(e) => setPwdConfirm(e.target.value)}
             />
           </FormGroup>
-          <Button disabled={loading} className="ml-auto">
-            {loading ? <Spinner /> : "登録"}
-          </Button>
+          <Row form>
+            <Button disabled={loading} className="ml-auto">
+              {loading ? <Spinner /> : "登録"}
+            </Button>
+          </Row>
         </Form>
-        <p style={{ marginTop: "0.7em" }}>
-          既にアカウントをお持ちの方は
-          <Link href="/login">
-            <a>ログイン</a>
-          </Link>
-        </p>
+        <FormGroup style={{ textAlign: "right" }}>
+          <p style={{ marginTop: "0.7em" }}>
+            既にアカウントをお持ちの方は
+            <Link href="/login">
+              <a>ログイン</a>
+            </Link>
+          </p>
+        </FormGroup>
       </>
     );
 }

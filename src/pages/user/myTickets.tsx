@@ -28,7 +28,7 @@ export default ({ events }) => {
                     return `${startDate.format("YYYY年 M月d日  H:mm")} - ${endDate.format("YYYY年  M月d日 H:mm")}`
                 }
             }
-            // TODO: 返金フロー作成
+
             return (
               <div key={i}>
                 <Card>
