@@ -32,7 +32,7 @@ export default () => {
         }
         fileReader.readAsDataURL(inputFiles[0])
     }
-    // TODO: 確認ページを統合
+
     const submit = e => {
         e.preventDefault()
         if (eventName.length == 0 || placeName.length == 0) return alert.error('必須項目が入力されていません')

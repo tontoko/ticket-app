@@ -33,7 +33,7 @@ export const Leave = ({user}) => {
         }
     }
     // TODO: お問い合わせページ作成
-    // TODO: イベント主催者がイベント開催まで退会できないような条件付け
+    // TODO: 退会条件の設定
     return (
       <Form style={{ marginTop: "6.5em" }}>
         <h5>本当に退会しますか？</h5>

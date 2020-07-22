@@ -137,7 +137,6 @@ export default ({event, beforeCategories}) => {
     }
   }
 
-  // TODO: 確認ページを統合
   return (
           <Form style={{ marginTop: '5em' }}>
         <h5 style={{marginBottom: '1em'}}>カテゴリ一覧</h5>

@@ -33,10 +33,18 @@ export default ({ payment, event, category, refunded }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { user, query } = await isLogin(ctx, "redirect");
+  const { user, query, res } = await isLogin(ctx, "redirect");
   const { firestore } = await initFirebaseAdmin();
   const paymentSnapShot = await firestore.collection('payments').doc(query.paymentId as string).get()
   const payment = { ...paymentSnapShot.data(), createdAt: paymentSnapShot.createTime.seconds*1000 } as any
+  if (user && payment.seller !== user.uid || payment.buyer !== user.uid) {
+    res.writeHead(302, {
+      Location: `/login`,
+    });
+    res.end();
+    return { props: {} }
+  }
+
   const eventSnapShot = (
     await firestore.collection("events").doc(payment.event).get()
   )

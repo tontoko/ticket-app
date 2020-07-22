@@ -193,7 +193,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
       </Form>
     );
 }
-
+// TODO: 決済失敗時の検証
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user, res } = await isLogin(ctx, 'redirect')
     const { firestore } = await initFirebaseAdmin()
