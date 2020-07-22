@@ -8,6 +8,7 @@ import {useRouter} from 'next/router'
 import Firebase from 'firebase'
 import ResetPassword from './resetPassword'
 import { GetServerSideProps } from 'next'
+import { encodeQuery } from '@/src/lib/parseQuery'
 
 export default ({user, mode, oobCode}) => {
     const alert = useAlert()
@@ -51,7 +52,11 @@ export default ({user, mode, oobCode}) => {
         if (auth.currentUser) {
             await auth.signOut()
         }
-        router.push({ pathname: `/login`, query: { msg } }, '/login')
+        if (msg) {
+            const message = encodeQuery(msg)
+            return router.push({ pathname: `/login`, query: { msg: message } }, "/login");
+        }
+        router.push("/login");
     }
 
     const handleResetPassword = async (auth:Firebase.auth.Auth) => {

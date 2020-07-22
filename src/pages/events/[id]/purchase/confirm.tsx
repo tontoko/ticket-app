@@ -93,7 +93,7 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         );
 
     return (
-        <Form style={{ marginBottom: "2em" }} onSubmit={handleSubmit}>
+      <Form style={{ marginBottom: "2em" }} onSubmit={handleSubmit}>
         <FormGroup>
           <Label>お名前</Label>
           <FormGroup>
@@ -160,8 +160,12 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
         </FormGroup>
         <Row className="flex-row-reverse">
           <FormGroup check style={{ marginRight: "1em" }}>
-            {/* TODO 利用規約作る */}
-            <Label>何たらかんたらに同意する必要がある的な文言</Label>
+            <Label>
+              <Link href="/termsOfUse">
+                <a>利用規約</a>
+              </Link>
+              を確認の上同意します。
+            </Label>
           </FormGroup>
         </Row>
         <Row className="flex-row-reverse">

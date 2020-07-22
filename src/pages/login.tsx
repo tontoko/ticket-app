@@ -69,85 +69,89 @@ export const Login = () => {
     }
 
     return (
-      <>
-        <Form style={{ marginTop: "5em" }} onSubmit={loginWithEmail}>
-          <FormGroup>
-            <Label>メールアドレス</Label>
-            <Input
-              type="email"
-              name="email"
-              placeholder="メールアドレス"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </FormGroup>
-          <FormGroup>
-            <Label>パスワード</Label>
-            <Input
-              type="password"
-              name="password"
-              placeholder="パスワード"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </FormGroup>
-          <Row form>
-            <Button disabled={loading} className="ml-auto">
-              {loading ? <Spinner /> : "ログイン"}
-            </Button>
-          </Row>
-        </Form>
-        <Form>
-          <FormGroup style={{ marginTop: "1em" }}>
-            <Col style={{ display: "flex", padding: 0 }}>
-              <p className="ml-auto" onClick={() => loginWithTwitter()}>
-                <FontAwesomeIcon
-                  icon={faTwitter}
-                  size="lg"
-                  style={{
-                    color: "#1da1f2",
-                    marginLeft: "0.5em",
-                    cursor: "pointer",
-                  }}
-                  className="fa-2x"
-                />
-              </p>
-              <p onClick={() => loginWithFacebook()}>
-                <FontAwesomeIcon
-                  icon={faFacebook}
-                  size="lg"
-                  style={{
-                    color: "#4267b2",
-                    marginLeft: "0.5em",
-                    cursor: "pointer",
-                  }}
-                  className="fa-2x"
-                />
-              </p>
-              <p onClick={() => loginWithGoogle()}>
-                <FontAwesomeIcon
-                  icon={faGoogle}
-                  size="lg"
-                  style={{
-                    color: "#DB4437",
-                    marginLeft: "0.5em",
-                    cursor: "pointer",
-                  }}
-                  className="fa-2x"
-                />
-              </p>
-            </Col>
-          </FormGroup>
-          <FormGroup style={{ textAlign: "right" }}>
-            <Link href="/register">
-              <a>ユーザー登録</a>
-            </Link>
-          </FormGroup>
-          <FormGroup style={{ textAlign: "right" }}>
-            <Link href="/forgetPassword">
-              <a>パスワード再設定</a>
-            </Link>
-          </FormGroup>
-        </Form>
-      </>
+      <Row>
+        <Col sm="12" md={{ size: 6, offset: 3 }}>
+          <Form style={{ marginTop: "5em" }} onSubmit={loginWithEmail}>
+            <FormGroup>
+              <Label>メールアドレス</Label>
+              <Input
+                type="email"
+                name="email"
+                placeholder="メールアドレス"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label>パスワード</Label>
+              <Input
+                type="password"
+                name="password"
+                placeholder="パスワード"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </FormGroup>
+            <Row form>
+              <Button disabled={loading} className="ml-auto">
+                {loading ? <Spinner /> : "ログイン"}
+              </Button>
+            </Row>
+          </Form>
+          <Form>
+            <FormGroup style={{ marginTop: "1em" }}>
+              <Row form>
+                <Col style={{ display: "flex", padding: 0 }}>
+                  <p className="ml-auto" onClick={() => loginWithTwitter()}>
+                    <FontAwesomeIcon
+                      icon={faTwitter}
+                      size="lg"
+                      style={{
+                        color: "#1da1f2",
+                        marginLeft: "0.5em",
+                        cursor: "pointer",
+                      }}
+                      className="fa-2x"
+                    />
+                  </p>
+                  <p onClick={() => loginWithFacebook()}>
+                    <FontAwesomeIcon
+                      icon={faFacebook}
+                      size="lg"
+                      style={{
+                        color: "#4267b2",
+                        marginLeft: "0.5em",
+                        cursor: "pointer",
+                      }}
+                      className="fa-2x"
+                    />
+                  </p>
+                  <p onClick={() => loginWithGoogle()}>
+                    <FontAwesomeIcon
+                      icon={faGoogle}
+                      size="lg"
+                      style={{
+                        color: "#DB4437",
+                        marginLeft: "0.5em",
+                        cursor: "pointer",
+                      }}
+                      className="fa-2x"
+                    />
+                  </p>
+                </Col>
+              </Row>
+            </FormGroup>
+            <FormGroup style={{ textAlign: "right" }}>
+              <Link href="/register">
+                <a>ユーザー登録</a>
+              </Link>
+            </FormGroup>
+            <FormGroup style={{ textAlign: "right" }}>
+              <Link href="/forgetPassword">
+                <a>パスワード再設定</a>
+              </Link>
+            </FormGroup>
+          </Form>
+        </Col>
+      </Row>
     );
 }
 
