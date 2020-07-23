@@ -41,7 +41,7 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
           {user && user.email && (
             <>
               <div style={{ marginLeft: "auto" }}>
-                <Link href={`/user`}>
+                <Link href={`/user/edit`}>
                   <div className="ml-auto mr-2">
                     <Avater
                       size="40"

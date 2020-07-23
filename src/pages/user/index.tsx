@@ -56,25 +56,9 @@ export const UserShow: React.FC<any> = ({user, event}) => {
             </Row>
           )}
           <Row form style={{ marginBottom: "1em" }}>
-            <Link href={`/user/payments`}>
-              <Button className="ml-auto">購入履歴</Button>
-            </Link>
-          </Row>
-          <Row form style={{ marginBottom: "1em" }}>
             <Link href={`/user/edit`}>
               <Button className="ml-auto">登録情報の編集</Button>
             </Link>
-          </Row>
-          <Row form style={{ marginBottom: "2em" }}>
-            <Button
-              className="ml-auto"
-              onClick={async () => {
-                const { firebase } = await initFirebase();
-                await firebase.auth().signOut();
-              }}
-            >
-              ログアウト
-            </Button>
           </Row>
         </Form>
       </>
@@ -90,7 +74,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     if (history || cookie.lastVisitedEvent) {
         let doc: string
         if (history) {
-            doc = history.slice(-1)[0]
+            doc = history[history.length-1]
         } else {
             doc = cookie.lastVisitedEvent
         }
