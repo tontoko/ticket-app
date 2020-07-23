@@ -68,22 +68,26 @@ export const UserShow: React.FC<any> = ({user, event}) => {
 export const getServerSideProps: GetServerSideProps = async ctx => {
     const { user } = await isLogin(ctx, 'redirect')
     const { firestore } = await initFirebaseAdmin()
-    const history: string[] = await (await firestore.collection('users').doc(user.uid).get()).data().eventHistory
+    const userData = (await firestore.collection('users').doc(user.uid).get()).data()
+    const history = userData && userData.eventHistory;
     const cookie = parseCookies(ctx)
     let event = null
     if (history || cookie.lastVisitedEvent) {
-        let doc: string
-        if (history) {
-            doc = history[history.length-1]
-        } else {
-            doc = cookie.lastVisitedEvent
-        }
-        const result = await firestore.collection('events').doc(doc).get()
-        const data = result.data() as event
-        const startDate = data.startDate.seconds
-        const endDate = data.endDate.seconds
-        const photos = data.photos.length > 0 ? await getImg(data.photos[0], data.createdUser) : await getImg(null, data.createdUser)
-        event = { ...data, startDate, endDate, photos, id: result.id }
+      let doc: string;
+      if (history) {
+        doc = history[history.length - 1];
+      } else {
+        doc = cookie.lastVisitedEvent;
+      }
+      const result = await firestore.collection("events").doc(doc).get();
+      const data = result.data() as event;
+      const startDate = data.startDate.seconds;
+      const endDate = data.endDate.seconds;
+      const photos =
+        data.photos.length > 0
+          ? await getImg(data.photos[0], data.createdUser)
+          : await getImg(null, data.createdUser);
+      event = { ...data, startDate, endDate, photos, id: result.id };
     }
     return { props: { user, event } }
 }

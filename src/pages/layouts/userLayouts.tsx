@@ -46,8 +46,12 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
                     <Avater
                       size="40"
                       round
-                      style={{ cursor: "pointer" }}
-                      src={user.picture}
+                      style={{ cursor: "pointer", backgroundColor: 'lightgray' }}
+                      src={
+                        user.picture
+                          ? user.picture
+                          : "/icons/person-icon-default.png"
+                      }
                     />
                   </div>
                 </Link>

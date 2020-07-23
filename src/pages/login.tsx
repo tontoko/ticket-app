@@ -1,9 +1,8 @@
 import Link from 'next/link'
-import Router, { useRouter } from 'next/router'
 import React, {useState} from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Col, Spinner, Row } from 'reactstrap'
+import { Form, FormGroup, Button, Label, Input, Col, Spinner, Row } from 'reactstrap'
 import initFirebase from '@/src/lib/initFirebase'
-import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
+import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
@@ -42,18 +41,6 @@ export const Login = () => {
         }
     }
 
-    const loginWithTwitter = async () => {
-        if (loading) return
-        setLoading(true)
-        try {
-            const {firebase} = await initFirebase()
-            const provider = new firebase.auth.TwitterAuthProvider()
-            await firebase.auth().signInWithPopup(provider)
-        } catch (e) {
-            alert.error(errorMsg(e, 'signin/popup'))
-            setLoading(false)
-        }
-    }
 
     const loginWithGoogle = async () => {
         if (loading) return
@@ -100,19 +87,7 @@ export const Login = () => {
             <FormGroup style={{ marginTop: "1em" }}>
               <Row form>
                 <Col style={{ display: "flex", padding: 0 }}>
-                  <p className="ml-auto" onClick={() => loginWithTwitter()}>
-                    <FontAwesomeIcon
-                      icon={faTwitter}
-                      size="lg"
-                      style={{
-                        color: "#1da1f2",
-                        marginLeft: "0.5em",
-                        cursor: "pointer",
-                      }}
-                      className="fa-2x"
-                    />
-                  </p>
-                  <p onClick={() => loginWithFacebook()}>
+                  <p className="ml-auto" onClick={() => loginWithFacebook()}>
                     <FontAwesomeIcon
                       icon={faFacebook}
                       size="lg"

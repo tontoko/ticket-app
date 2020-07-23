@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
+import { FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
-import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
+import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
@@ -32,16 +32,6 @@ const UserShow = ({ user, verification }) => {
             <Label>連携済みサービス</Label>
             <Row style={{ margin: 0 }}>
               <Col style={{ display: "flex", padding: 0 }}>
-                {user.firebase.sign_in_provider === "twitter.com" && (
-                  <p>
-                    <FontAwesomeIcon
-                      icon={faTwitter}
-                      size="lg"
-                      style={{ color: "#1da1f2" }}
-                      className="fa-2x"
-                    />
-                  </p>
-                )}
                 {user.firebase.sign_in_provider === "facebook.com" && (
                   <p>
                     <FontAwesomeIcon
