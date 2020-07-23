@@ -11,6 +11,7 @@ import isLogin from '@/src/lib/isLogin'
 import { useAlert } from 'react-alert'
 import { encodeQuery } from '@/src/lib/parseQuery'
 
+// TODO: 確認画面を統合
 export default ({event, beforeCategories}) => {
   const router = useRouter()
   const alert = useAlert()
@@ -124,14 +125,15 @@ export default ({event, beforeCategories}) => {
         if (!e.name) throw new Error('チケット名を入力してください。')
         if (e.price < 500) throw new Error('チケットの価格は500円以上に設定してください。')
         if (e.stock < 1 && e.new) throw new Error('チケットの在庫は1枚以上に設定してください。')
-        if (!e.new && e.stock - e.sold < 1) throw new Error('チケットの在庫は売り上げ分を引いて1枚以上に設定してください。')
+        if (!e.new && e.stock - e.sold < 0) throw new Error('チケットの在庫は売り上げ分を引いて0枚以上に設定してください。')
         if (names.indexOf(e["name"]) === -1) {
           names.push(e["name"])
           return e
         }
         throw new Error('チケット名が重複しています')
       })
-      router.push(`/events/${router.query.id}/categories/edit/[confirm]`, `/events/${router.query.id}/categories/edit/${encodeQuery(JSON.stringify(categories))}`)
+      console.log(encodeQuery(JSON.stringify(categories)));
+      router.push(`/events/[id]/categories/edit/[confirm]`, `/events/${router.query.id}/categories/edit/${encodeQuery(JSON.stringify(categories))}`)
     } catch(e) {
       alert.error(e.message)
     }

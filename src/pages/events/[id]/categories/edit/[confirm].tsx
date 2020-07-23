@@ -49,7 +49,7 @@ const Confirmation= props => {
       await firestore.runTransaction(async transaction => {
         await Promise.all(Object.keys(updateCategories).map(async id => {
           const targetCategory = (await transaction.get(categoriesRef.doc(id))).data()
-          if (updateCategories[id].stock - targetCategory.sold < 1) throw new Error('チケットの在庫は売り上げ分を引いて1枚以上に設定してください。')
+          if (updateCategories[id].stock - targetCategory.sold < 0) throw new Error('チケットの在庫は売り上げ分を引いて0枚以上に設定してください。')
           transaction.update(categoriesRef.doc(id), updateCategories[id])
           return
         }))

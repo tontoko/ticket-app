@@ -71,16 +71,25 @@ export default ({ events }) => {
     )
 
     return (
-        <div style={{ marginTop: "1em", minHeight: '4em' }}>
-            <h5>購入済みチケット</h5>
-            {events.length === 0 ?
-            <>
-                <p>チケットを購入した場合、ここに表示されます。</p>
-                <p>購入処理に時間がかかる場合があります。<br/>購入したチケットが表示されていない場合は<a href="#" onClick={() => location.reload()}>画面を更新</a>してください。</p>
-            </>
-            :
-            renderUserEvents()}
-        </div>
+      <div style={{ marginTop: "1em", minHeight: "4em" }}>
+        <h5>購入済みチケット</h5>
+        <p>
+          購入処理に時間がかかる場合があります。
+          <br />
+          購入したチケットが表示されていない場合は
+          <a href="#" onClick={() => location.reload()}>
+            画面の更新
+          </a>
+          をお試しください。
+        </p>
+        {events.length === 0 ? (
+          <>
+            <p>チケットを購入した場合、ここに表示されます。</p>
+          </>
+        ) : (
+          renderUserEvents()
+        )}
+      </div>
     );
 };
 

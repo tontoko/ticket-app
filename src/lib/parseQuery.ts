@@ -1,6 +1,26 @@
 import btoa from 'btoa'
 import atob from 'atob'
 
-export const encodeQuery = (v: string) => btoa(encodeURIComponent(`t${v}a`))
+const secret = btoa(
+  encodeURIComponent(
+    process.env.QUERY_SECRET ? process.env.QUERY_SECRET : "dev_secret"
+  )
+);
 
-export const decodeQuery = (v: string) => decodeURIComponent(atob(v)).slice(1).slice(0, -1)
+const regExp = new RegExp(`.{${Math.ceil(secret.length / 2)}}`, "g");
+const splitedSecret = secret.match(regExp)
+
+export const encodeQuery = (v: string) => {
+    let result = [...splitedSecret];
+    result.splice(splitedSecret.length-1, 0, btoa(encodeURIComponent(v)));
+    return result.join("");
+} 
+
+export const decodeQuery = (v: string) => {
+    const matchTexts = [
+      splitedSecret.slice(0, splitedSecret.length - 1).join(''),
+      splitedSecret[splitedSecret.length - 1],
+    ];
+    const decodeRegExp = new RegExp(`^${matchTexts[0]}(.+)${matchTexts[1]}$`);
+    return decodeURIComponent(atob(v.match(decodeRegExp)[1]));
+} 

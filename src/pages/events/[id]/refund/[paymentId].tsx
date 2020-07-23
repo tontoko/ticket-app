@@ -21,7 +21,8 @@ export default ({ user, createdUser, query, refunds }) => {
   const [detailText, setDetailText] = useState("");
   const [sentTo, setSentTo] = useState("" as sentTo);
 
-  const sentMessage = async (reason: string) => {
+  // TODO: 返金失敗時のWebhock用API作成
+  const createRefund = async (reason: string) => {
     const { firestore } = await initFirebase();
     let targetUser = sentTo === "user" ? createdUser : "admin";
     
@@ -76,12 +77,12 @@ export default ({ user, createdUser, query, refunds }) => {
         break;
       case "fraud":
         if (!detailText) return alert.error("詳細を記入してください");
-        sentMessage(select);
+        createRefund(select);
         break;
       case "other":
         if (!problem) return alert.error("選択肢から選択してください");
         if (!detailText) return alert.error("詳細を記入してください");
-        sentMessage(problem);
+        createRefund(problem);
         break;
       default:
         alert.error("返金理由を選択してください");
