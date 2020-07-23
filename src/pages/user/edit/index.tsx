@@ -10,7 +10,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import stripe from '@/src/lib/stripe'
 import initFirebase from '@/src/lib/initFirebase'
 
-const UserShow = ({ user, verification }) => {
+const UserShow = ({ user, verification, balance }) => {
     const [loading, setLoading] = useState(false)
     const status = !verification ? null : verification.status
 
@@ -124,10 +124,16 @@ const UserShow = ({ user, verification }) => {
           </FormGroup>
         </div>
 
+        <FormGroup style={{ marginBottom: "1.5em" }}>
+          <h4>売上と入金</h4>
+          <p>入金待ち: {balance.available[0].amount} 円<br/>
+          暫定売上(確認中): {balance.pending[0].amount} 円</p>
+        </FormGroup>
+
         <FormGroup style={{ marginBottom: "1em" }}>
-        <Link href={`/user/edit/leave`}>
+          <Link href={`/user/edit/leave`}>
             <a>退会する</a>
-        </Link>
+          </Link>
         </FormGroup>
 
         <Row form style={{ marginBottom: "1em" }}>
@@ -142,7 +148,7 @@ const UserShow = ({ user, verification }) => {
             disabled={loading}
             onClick={async () => {
               const { firebase } = await initFirebase();
-              setLoading(true)
+              setLoading(true);
               await firebase.auth().signOut();
             }}
           >
@@ -159,7 +165,8 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
     const { individual } = await stripe.accounts.retrieve(stripeId)
     const verification = individual ? individual.verification : null
-    return { props: { user, verification } }
+    const balance = await stripe.balance.retrieve({ stripeAccount: stripeId });
+    return { props: { user, verification, balance } }
 }
 
 export default UserShow
