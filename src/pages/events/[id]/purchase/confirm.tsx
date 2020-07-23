@@ -213,6 +213,14 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
     // @ts-ignore
     const { stripeId }  = (await firestore.collection('users').doc(event.createdUser).get()).data()
     
+    if (user && user.uid === data.createdUser) {
+      res.writeHead(302, {
+        Location: "/",
+      });
+      res.end();
+      return { props: {} }
+    }
+    
     const paymentIntent = await stripe.paymentIntents.create({
         amount: category.price,
         currency: 'jpy',
@@ -230,13 +238,6 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         }
     })
     const { client_secret } = paymentIntent
-
-    if (user && user.uid === data.createdUser) {
-      res.writeHead(302, {
-        Location: "/",
-      });
-      res.end();
-    }
 
     return { props: { familyName, firstName, email, event, category, photoUrls, client_secret, user, categoryId, eventId } }
 }
