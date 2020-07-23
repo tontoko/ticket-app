@@ -158,6 +158,6 @@ export const Login = () => {
 export default Login
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    await isLogin(ctx)
+    await isLogin(ctx, 'redirect');
     return { props: { } }
 }

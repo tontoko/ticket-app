@@ -6,6 +6,8 @@ import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { useRouter } from 'next/router'
 import { encodeQuery } from '../lib/parseQuery'
+import { GetServerSideProps } from 'next'
+import isLogin from '../lib/isLogin'
 
 export default () => {
   const alert = useAlert()
@@ -60,3 +62,8 @@ export default () => {
     </Row>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  await isLogin(ctx, "redirect");
+  return { props: {} };
+};

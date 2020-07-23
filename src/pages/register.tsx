@@ -79,6 +79,6 @@ export default () => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  await isLogin(ctx);
+  await isLogin(ctx, "redirect");
   return { props: {} };
 };
