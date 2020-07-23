@@ -37,7 +37,9 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
     return (
       <>
         <Navbar style={{ backgroundColor: "#A0522D" }} expand="md" dark>
-          <NavbarBrand href={user ? "/user" : "/login"}>Ticket-App</NavbarBrand>
+          <Link href={user ? "/user" : "/login"}>
+            <NavbarBrand style={{ cursor: "pointer" }}>Ticket-App</NavbarBrand>
+          </Link>
           {user && user.email && (
             <>
               <div style={{ marginLeft: "auto" }}>
@@ -46,7 +48,10 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
                     <Avater
                       size="40"
                       round
-                      style={{ cursor: "pointer", backgroundColor: 'lightgray' }}
+                      style={{
+                        cursor: "pointer",
+                        backgroundColor: "lightgray",
+                      }}
                       src={
                         user.picture
                           ? user.picture
@@ -94,13 +99,19 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
               >
                 <Nav navbar>
                   <NavItem>
-                    <NavLink href={`/user/myEvents`}>主催するイベント</NavLink>
+                    <Link href={`/user/myEvents`}>
+                      <NavLink>主催するイベント</NavLink>
+                    </Link>
                   </NavItem>
                   <NavItem>
-                    <NavLink href={`/user/myTickets`}>購入済みチケット</NavLink>
+                    <Link href={`/user/myTickets`}>
+                      <NavLink>購入済みチケット</NavLink>
+                    </Link>
                   </NavItem>
                   <NavItem>
-                    <NavLink href={`/termsOfUse`}>利用規約</NavLink>
+                    <Link href={`/termsOfUse`}>
+                      <NavLink>利用規約</NavLink>
+                    </Link>
                   </NavItem>
                 </Nav>
               </Collapse>
