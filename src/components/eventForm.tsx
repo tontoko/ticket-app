@@ -176,6 +176,7 @@ const EventForm = ({
       : event.photos[2];
     // 配列の空要素を削除して先頭から詰める
     photos = photos.filter((v) => v);
+
     const eventData = {
       photos,
       placeName,

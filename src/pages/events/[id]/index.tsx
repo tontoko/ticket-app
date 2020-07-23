@@ -189,7 +189,7 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
       <>
         <Row style={{ marginTop: "1em", marginLeft: "0" }}>
           <h3>
-            【{moment(startDate).format("d/M")}】{event.name}
+            【{moment(startDate).format("M/d")}】{event.name}
           </h3>
         </Row>
         <Row style={{ marginTop: "1em" }}>
@@ -254,7 +254,7 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
               )}
             </FormGroup>
           </Col>
-          <Col xs="12" md="6" lg="8" style={{ marginTop: "2em" }}>
+          <Col xs="12" md="6" lg="8" style={{ marginTop: "1em", whiteSpace: 'pre-wrap' }}>
             <h6>{event.eventDetail}</h6>
             {buttons()}
           </Col>

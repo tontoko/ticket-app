@@ -11,6 +11,7 @@ import stripe from '@/src/lib/stripe'
 import initFirebase from '@/src/lib/initFirebase'
 
 const UserShow = ({ user, verification }) => {
+    const [loading, setLoading] = useState(false)
     const status = !verification ? null : verification.status
 
     return (
@@ -148,8 +149,10 @@ const UserShow = ({ user, verification }) => {
         <Row form style={{ marginBottom: "2em" }}>
           <Button
             className="ml-auto"
+            disabled={loading}
             onClick={async () => {
               const { firebase } = await initFirebase();
+              setLoading(true)
               await firebase.auth().signOut();
             }}
           >

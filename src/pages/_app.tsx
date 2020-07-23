@@ -58,10 +58,6 @@ const App = ({ Component, pageProps }: AppProps) => {
           }
         } else {
           setCSRUser(currentUser)
-          await fetch('/api/logout', {
-            method: 'POST',
-            credentials: 'same-origin'
-          })
           if (
             window.location.pathname !== "/" &&
             window.location.pathname !== "/login" &&
@@ -71,7 +67,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             !window.location.pathname.match(/^\/__\/auth\/action/) &&
             !window.location.pathname.match(/^\/events\/[^\/]+\/*/)
           ) {
-            router.push(
+            await router.push(
               {
                 pathname: "/login",
                 query: { msg: encodeQuery("ログアウトしました") },
@@ -79,6 +75,10 @@ const App = ({ Component, pageProps }: AppProps) => {
               "/login"
             );
           }
+          await fetch("/api/logout", {
+            method: "POST",
+            credentials: "same-origin",
+          });
         }
       })
     })()
