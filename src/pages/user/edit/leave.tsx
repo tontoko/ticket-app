@@ -55,7 +55,7 @@ export const Leave = ({user}) => {
               onChange={(e) => setCheckBox(e.target.checked)}
               checked={checkBox}
             />{" "}
-            上記の説明を理解しました
+            上記の説明と利用規約を確認し、理解しました
           </Label>
         </FormGroup>
         {user.firebase.sign_in_provider === "password" && (

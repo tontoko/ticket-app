@@ -2,6 +2,7 @@ import {
     Button, Row, Form, Input, FormGroup, Label, CarouselItem, Carousel, CarouselIndicators, CarouselControl, Spinner
 } from 'reactstrap';
 import moment from 'moment'
+import { useState, useEffect } from 'react';
 export default ({
   setModal,
   setModalInner,
@@ -13,10 +14,109 @@ export default ({
   const { eventName, placeName, eventDetail, startDate, endDate } = params;
 
   setModalInner(
-    <Form style={{ margin: "2em" }} onSubmit={submitEvent}>
+    <PreviewModal
+      setModal={setModal}
+      submitEvent={submitEvent}
+      loading={loading}
+      photos={photos}
+      eventName={eventName}
+      placeName={placeName}
+      eventDetail={eventDetail}
+      startDate={startDate}
+      endDate={endDate}
+    />
+  );
+  setModal(true);
+};
+
+// モーダル内用React Component
+const PreviewModal = ({
+  setModal,
+  submitEvent,
+  loading,
+  photos,
+  eventName,
+  placeName,
+  eventDetail,
+  startDate,
+  endDate,
+}) => {
+
+  const items = photos
+    .filter((v) => v)
+    .map((photo) => {
+      return {
+        src: photo,
+      };
+    });
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [thisLoading, setThisLoading] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setThisLoading(true);
+    const success = await submitEvent();
+    !success && setThisLoading(false);
+  }
+
+  const next = () => {
+    if (animating) return;
+    const nextIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1;
+    setActiveIndex(nextIndex);
+  };
+
+  const previous = () => {
+    if (animating) return;
+    const nextIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1;
+    setActiveIndex(nextIndex);
+  };
+
+  const goToIndex = (newIndex) => {
+    if (animating) return;
+    setActiveIndex(newIndex);
+  };
+
+  const slides = items.map((item, i) => {
+    return (
+      <CarouselItem
+        key={i}
+        onExiting={() => setAnimating(true)}
+        onExited={() => setAnimating(false)}
+      >
+        <img src={item.src} height="360em" />
+      </CarouselItem>
+    );
+  });
+
+  return (
+    <Form style={{ margin: "2em" }} onSubmit={submit}>
       <h4 style={{ marginBottom: "1em" }}>この内容で送信しますか？</h4>
       <FormGroup style={{ textAlign: "center" }}>
-        <img src={photos[0]} height="360em" />
+        <Carousel
+          activeIndex={activeIndex}
+          next={next}
+          previous={previous}
+          className="carousel-fade"
+          interval="20000"
+        >
+          <CarouselIndicators
+            items={items}
+            activeIndex={activeIndex}
+            onClickHandler={goToIndex}
+          />
+          {slides}
+          <CarouselControl
+            direction="prev"
+            directionText="Previous"
+            onClickHandler={previous}
+          />
+          <CarouselControl
+            direction="next"
+            directionText="Next"
+            onClickHandler={next}
+          />
+        </Carousel>
       </FormGroup>
       <FormGroup>
         <Label className="mr-2">イベント名</Label>
@@ -53,15 +153,16 @@ export default ({
           <Button
             type="button"
             className="ml-auto"
-            style={{ marginRight: '0.5em' }}
+            style={{ marginRight: "0.5em" }}
             onClick={() => setModal(false)}
           >
             キャンセル
           </Button>
-          <Button disabled={loading}>{loading ? <Spinner /> : "送信"}</Button>
+          <Button disabled={thisLoading}>
+            {thisLoading ? <Spinner /> : "送信"}
+          </Button>
         </Row>
       </FormGroup>
     </Form>
   );
-  setModal(true);
 };

@@ -90,8 +90,6 @@ const EventForm = ({
         files[1] ? files[1] : photoUrls[1],
         files[2] ? files[2] : photoUrls[2]
     ].filter((v) => v);
-
-    console.log(photos)
     
     const params = {
       eventName,
@@ -162,8 +160,7 @@ const EventForm = ({
     return filename;
   };
   
-  const submitEvent = async (e) => {
-    e.preventDefault();
+  const submitEvent = async () => {
     if (loading) return;
     setLoading(true);
     const { firebase, firestore } = await initFirebase();
@@ -206,9 +203,11 @@ const EventForm = ({
         router.push({
             pathname,
             query: { msg: encodeQuery(msg) }})
+        return true
     } catch (e) {
       alert.error(errorMsg(e));
       setLoading(false);
+      return false
     }
   };
 
@@ -283,9 +282,7 @@ const EventForm = ({
       <FormGroup>{fileInput(2)}</FormGroup>
       <FormGroup>
         <Row style={{ margin: 0, marginTop: "0.5em" }}>
-          <Button className="ml-auto" disabled={loading}>
-            {loading ? <Spinner /> : "確認"}
-          </Button>
+          <Button className="ml-auto">確認</Button>
         </Row>
       </FormGroup>
     </Form>

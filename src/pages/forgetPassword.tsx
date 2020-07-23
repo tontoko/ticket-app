@@ -34,9 +34,9 @@ export default () => {
   return (
     <Row>
       <Col sm="12" md={{ size: 6, offset: 3 }}>
-        <Form style={{ marginTop: "5em" }}>
-          <h4>パスワード再設定</h4>
-          <FormGroup style={{ marginTop: "2em" }}>
+        <Form style={{ margin: "5em 0" }}>
+          <h4 style={{ marginBottom: "1.5em" }}>パスワード再設定</h4>
+          <FormGroup style={{ marginBottom: "1.5em" }}>
             <Label>登録メールアドレス</Label>
             <Input
               type="email"

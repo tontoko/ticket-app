@@ -81,7 +81,7 @@ export const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </FormGroup>
-            <FormGroup>
+            <FormGroup style={{ marginBottom: "1.5em" }}>
               <Label>パスワード</Label>
               <Input
                 type="password"
