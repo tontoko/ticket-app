@@ -36,7 +36,6 @@ export default ({ user, event, categories, payments }) => {
         )
     })
 
-    // TODO: 電子チケットの一覧も見れるようにする
     return (
         <>
             <Row style={{margin: "0", marginTop: "1em"}}>

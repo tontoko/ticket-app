@@ -27,17 +27,30 @@ const stripeSecret =
 const stripe = new Stripe(stripeSecret, { apiVersion: null });
 
 exports.createUser = functions.auth.user().onCreate(async (user) => {
-  const stripeAccount = await stripe.accounts.create({
-    country: "JP",
-    type: "custom",
-    requested_capabilities: ["card_payments", "transfers"],
-    email: user.email,
-  });
-  const usersRef = firestore.collection("users");
-  await usersRef.doc(user.uid).set({
-    admin: false,
-    stripeId: stripeAccount.id,
-  });
+  try {
+    const stripeAccount = await stripe.accounts.create({
+      country: "JP",
+      type: "custom",
+      requested_capabilities: ["card_payments", "transfers"],
+      email: user.email,
+    });
+    const usersRef = firestore.collection("users");
+    await usersRef.doc(user.uid).set({
+      admin: false,
+      stripeId: stripeAccount.id,
+    });
+  } catch(e) {
+    firestore
+      .collection("users")
+      .doc('admin')
+      .collection("notifies")
+      .add({
+        text: `次のユーザーの登録時にstripeIDの作成に失敗しました: ${user.uid}\nemail: ${user.email}`,
+        url: '',
+        read: false,
+      });
+    admin.auth().deleteUser(user.uid)
+  }
 });
 
 exports.refundNotify = functions.firestore.document('payments/{payment}/refunds/{refund}').onCreate(async (snap, context) => {

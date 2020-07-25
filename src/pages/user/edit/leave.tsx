@@ -13,7 +13,7 @@ export const Leave = ({user}) => {
     const [checkBox, setCheckBox] = useState(false)
     const [pwd, setPwd] = useState('')
 
-    const leave = async () => {
+    const submit = async () => {
         if (!checkBox) return alert.error('チェックボックスが選択されていません。')
         const {firebase} = await initFirebase()
         const auth = firebase.auth()
@@ -35,7 +35,7 @@ export const Leave = ({user}) => {
     // TODO: お問い合わせページ作成
     // TODO: 退会条件の設定
     return (
-      <Form style={{ marginTop: "6.5em" }}>
+      <Form style={{ marginTop: "6.5em" }} onSubmit={submit}>
         <h5>本当に退会しますか？</h5>
         <ul>
           <li>削除されたアカウントは復元できません。</li>
@@ -69,7 +69,7 @@ export const Leave = ({user}) => {
           </FormGroup>
         )}
         <Row style={{ margin: 0 }}>
-          <Button className="ml-auto" onClick={() => leave()}>
+          <Button className="ml-auto">
             退会する
           </Button>
         </Row>
