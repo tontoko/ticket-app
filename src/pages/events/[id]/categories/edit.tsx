@@ -91,15 +91,15 @@ export default ({ user, beforeCategories, setModal, setModalInner }) => {
                   <Input type='number' min='0' value={category.price} onChange={e => setPrice(parseInt(e.target.value, 10))} style={{textAlign: 'right'}} disabled={!category.new} />
                   <p style={{margin: 'auto 0', marginLeft: '0.5em'}}> 円</p>
                 </Col>
-              {!category.new && 
-              <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
-                <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}>{category.sold} 枚 (残り {(category.stock - category.sold) ? (category.stock - category.sold) : 0} 枚)</p>
-              </Col>
-              }
               <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
                 <Input type='number' min='0' value={category.stock} onChange={e => setStock(parseInt((e.target.value ? e.target.value : '0'), 10))} style={{ textAlign: 'right' }} />
                 <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}> 枚</p>
               </Col>
+              {!category.new && 
+              <Col sm="12" md='4' lg='3' style={{ display: 'flex', marginTop: '0.5em' }}>
+                <p style={{ margin: 'auto 0', marginLeft: '0.5em' }}>売上 {category.sold} 枚<br/>残り在庫 {(category.stock - category.sold) ? (category.stock - category.sold) : 0} 枚</p>
+              </Col>
+              }
               <Col style={{display: "flex",alignItems: "center", marginTop: '0.5em'}}>
                 <Label for="public" style={{margin: 0, fontWeight: "bold"}}>公開する</Label>
                 <Input type="checkbox" name="public" checked={category.public} onChange={e => setPublic(e.target.checked)} style={{margin: 0, marginLeft: '0.3em', position: "initial"}}/>
