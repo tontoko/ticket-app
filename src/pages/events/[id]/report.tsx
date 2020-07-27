@@ -79,9 +79,15 @@ export default ({ user, event, categories, payments }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { user, query } = await isLogin(ctx, 'redirect')
+    const { user, query, res } = await isLogin(ctx, 'redirect')
+    if (!user) {
+      res.writeHead(302, {
+        Location: `/`,
+      });
+      res.end();
+      return { props: {} };
+    }
     const { firestore } = await initFirebaseAdmin()
-    
     const result = await firestore.collection('events').doc(query.id as string).get()
     const data = result.data() as event
     const startDate = data.startDate.seconds

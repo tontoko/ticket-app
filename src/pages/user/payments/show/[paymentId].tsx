@@ -39,7 +39,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const payment = { ...paymentSnapShot.data(), createdAt: paymentSnapShot.createTime.seconds*1000 } as any
   if (user && payment.seller !== user.uid && payment.buyer !== user.uid) {
     res.writeHead(302, {
-      Location: `/login`,
+      Location: `/`,
     });
     res.end();
     return { props: {} }

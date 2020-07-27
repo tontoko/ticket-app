@@ -281,7 +281,14 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { query } = ctx
-  const { user } = await isLogin(ctx, 'redirect')
+  const { user, res } = await isLogin(ctx, 'redirect')
+  if (!user) {
+    res.writeHead(302, {
+      Location: `/`,
+    });
+    res.end();
+    return { props: {} };
+  }
   const { firestore } = await initFirebaseAdmin()
   const result = (await firestore.collection('events').doc(query.id as string).get())
   const data = result.data() as event

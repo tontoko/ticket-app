@@ -175,7 +175,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
   const { firestore } = await initFirebaseAdmin()
   const eventData = (await firestore.collection("events").doc(query.id as string).get()).data()
   const paymentData = (await firestore.collection("payments").doc(query.paymentId as string).get()).data()
-  if ((user && user.uid === eventData.createdUser) || paymentData.refund) {
+  if (!user || user.uid === eventData.createdUser || paymentData.refund) {
     res.writeHead(302, {
       Location: "/",
     });

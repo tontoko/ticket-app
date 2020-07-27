@@ -51,7 +51,14 @@ export default ({ requirements, setModal, setModalInner, user }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const {user} = await isLogin(ctx, 'redirect')
+    const { user, res } = await isLogin(ctx, 'redirect')
+    if (!user) {
+      res.writeHead(302, {
+        Location: `/`,
+      });
+      res.end();
+      return { props: {} };
+    }
     const { firestore } = await initFirebaseAdmin();
     const { stripeId } = (
       await firestore.collection("users").doc(user.uid).get()

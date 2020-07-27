@@ -83,7 +83,14 @@ export default ({ user, events, requirements }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-  const {user} = await isLogin(ctx, 'redirect')
+  const {user, res} = await isLogin(ctx, 'redirect')
+  if (!user) {
+    res.writeHead(302, {
+      Location: `/`,
+    });
+    res.end();
+    return { props: {} };
+  }
   const {firestore} = await initFirebaseAdmin()
   const result = await firestore.collection('events').where('createdUser', '==', user.user_id).get()
   const events = await Promise.all(result.docs.map(async doc => {

@@ -113,7 +113,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         category.public && categories.push({ ...category, id })
     })
 
-    if (user && user.uid === data.createdUser) {
+    if (!user || user.uid === data.createdUser) {
       res.writeHead(302, {
         Location: "/",
       });

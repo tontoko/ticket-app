@@ -51,9 +51,15 @@ export default ({ user, event, photoUrls, setModal, setModalInner }) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ctx => {
-    const {user} = await isLogin(ctx, 'redirect')
+    const {user, res} = await isLogin(ctx, 'redirect')
+    if (!user) {
+      res.writeHead(302, {
+        Location: `/`,
+      });
+      res.end();
+      return { props: {} };
+    }
     const {firestore} = await initFirebaseAdmin()
-
     const {query} = ctx
     const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
     const photos: undefined | string[] = data.photos
