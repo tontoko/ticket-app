@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
-import { Form, FormGroup, Button, Input, Container, Row, Col, Label } from 'reactstrap'
+import { Form, FormGroup, Button, Input, Container, Row, Col, Label, Spinner, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
@@ -10,10 +10,10 @@ import { event } from 'events'
 import isLogin from '@/src/lib/isLogin'
 import { useAlert } from 'react-alert'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import initFirebase from '@/src/lib/initFirebase'
 
-// TODO: 確認画面を統合
-export default ({event, beforeCategories}) => {
-  const router = useRouter()
+export default ({ user, beforeCategories, setModal, setModalInner }) => {
+  
   const alert = useAlert()
 
   const [categories, setCategories] = useState(beforeCategories)
@@ -118,41 +118,169 @@ export default ({event, beforeCategories}) => {
     setCategories(copyCategories)
   }
 
-  const submit = () => {
+  const submit = (e) => {
+    e.preventDefault();
     try {
       let names = []
-      categories.filter(e => {
-        if (!e.name) throw new Error('チケット名を入力してください。')
-        if (e.price < 500) throw new Error('チケットの価格は500円以上に設定してください。')
-        if (e.stock < 1 && e.new) throw new Error('チケットの在庫は1枚以上に設定してください。')
-        if (!e.new && e.stock - e.sold < 0) throw new Error('チケットの在庫は売り上げ分を引いて0枚以上に設定してください。')
-        if (names.indexOf(e["name"]) === -1) {
-          names.push(e["name"])
-          return e
+      categories.filter(category => {
+        if (!category.name) throw new Error("チケット名を入力してください。");
+        if (category.price < 500)
+          throw new Error("チケットの価格は500円以上に設定してください。");
+        if (category.stock < 1 && category.new)
+          throw new Error("チケットの在庫は1枚以上に設定してください。");
+        if (!category.new && category.stock - category.sold < 0)
+          throw new Error(
+            "チケットの在庫は売り上げ分を引いて0枚以上に設定してください。"
+          );
+        if (names.indexOf(category["name"]) === -1) {
+          names.push(category["name"]);
+          return category;
         }
         throw new Error('チケット名が重複しています')
       })
-      console.log(encodeQuery(JSON.stringify(categories)));
-      router.push(`/events/[id]/categories/edit/[confirm]`, `/events/${router.query.id}/categories/edit/${encodeQuery(JSON.stringify(categories))}`)
+      setModalInner(
+        <ModalInner
+          categories={categories}
+          user={user}
+          alert={alert}
+          setModal={setModal}
+        />
+      );
+      setModal(true);
     } catch(e) {
       alert.error(e.message)
     }
   }
 
   return (
-          <Form style={{ marginTop: '5em' }}>
-        <h5 style={{marginBottom: '1em'}}>カテゴリ一覧</h5>
-        {renderCategories()}
-        <Button onClick={addCategory}>カテゴリ追加</Button>
-        <Row className="flex-row-reverse" style={{marginTop: '2em'}}>
-          <Button style={{ marginRight: '1em' }} onClick={submit} >確認</Button>
-        </Row>
-      </Form>
-      );
+    <Form style={{ marginTop: '5em' }} onSubmit={submit}>
+      <h5 style={{marginBottom: '1em'}}>カテゴリ一覧</h5>
+      {renderCategories()}
+      <Button onClick={addCategory}>カテゴリ追加</Button>
+      <Row className="flex-row-reverse" style={{marginTop: '2em'}}>
+        <Button style={{ marginRight: '1em' }}>確認</Button>
+      </Row>
+    </Form>
+  );
 }
 
+const ModalInner = ({ categories, user, alert, setModal }) => {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    try {
+      setLoading(true);
+      const { firestore } = await initFirebase();
+      const categoriesRef = firestore
+        .collection("events")
+        .doc(router.query.id as string)
+        .collection("categories");
+      let names = [];
+      categories.filter((e) => {
+        if (!e.name) throw new Error("チケット名を入力してください。");
+        if (e.price < 500)
+          throw new Error("チケットの価格は500円以上に設定してください。");
+        if (e.stock < 1 && e.new)
+          throw new Error("チケットの在庫は1枚以上に設定してください。");
+        if (names.indexOf(e["name"]) === -1) {
+          names.push(e["name"]);
+          return e;
+        }
+        throw new Error("チケット名が重複しています");
+      });
+      let addCategories = [];
+      let updateCategories: { string?: FirebaseFirestore.DocumentData } = {};
+      await Promise.all(
+        categories.map(async (category, i) => {
+          if (category.new) {
+            const addCategory = {
+              ...category,
+              price: Number(category.price),
+              stock: Number(category.stock),
+              sold: 0,
+              createdUser: user.uid,
+              index: i,
+            };
+            delete addCategory.new;
+            addCategories.push(addCategory);
+          } else {
+            const updateCategory = {
+              stock: Number(category.stock),
+              public: category.public,
+              index: i,
+            };
+            updateCategories[category.id] = updateCategory;
+          }
+        })
+      );
+      // 既存カテゴリ編集
+      await firestore.runTransaction(async (transaction) => {
+        await Promise.all(
+          Object.keys(updateCategories).map(async (id) => {
+            const targetCategory = (
+              await transaction.get(categoriesRef.doc(id))
+            ).data();
+            if (updateCategories[id].stock - targetCategory.sold < 0)
+              throw new Error(
+                "チケットの在庫は売り上げ分を引いて0枚以上に設定してください。"
+              );
+            transaction.update(categoriesRef.doc(id), updateCategories[id]);
+            return;
+          })
+        );
+      });
+      // 新規カテゴリ登録
+      await Promise.all(
+        addCategories.map(async (addCategory) => categoriesRef.add(addCategory))
+      );
+      router.push({
+        pathname: `/events/${router.query.id}`,
+        query: { msg: encodeQuery("更新しました。") },
+      });
+    } catch (e) {
+      alert.error(e.message);
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Form onSubmit={submit}>
+      <ModalHeader>チケットカテゴリーを更新します。</ModalHeader>
+      <ModalBody>
+        <h5 style={{ marginBottom: "1em" }}>
+          一度登録したチケット名と価格は変更することができません。
+          (非公開にすることはできます)
+        </h5>
+        {categories.map((category, i) => (
+          <FormGroup key={i}>
+            <p>
+              {`${category.name}: ${category.price} 円 (在庫: ${
+                category.stock
+              })${!category.public ? " (非公開)" : ""}`}
+            </p>
+          </FormGroup>
+        ))}
+        <Row style={{ marginTop: "0.5em" }}></Row>
+      </ModalBody>
+      <ModalFooter>
+        <Button
+          type="button"
+          style={{ marginRight: "0.5em" }}
+          onClick={() => setModal(false)}
+        >
+          キャンセル
+        </Button>
+        <Button disabled={loading}>{loading ? <Spinner /> : "設定"}</Button>
+      </ModalFooter>
+    </Form>
+  );
+};
+
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const {query} = ctx
+  const { query } = ctx
   const { user } = await isLogin(ctx, 'redirect')
   const { firestore } = await initFirebaseAdmin()
   const result = (await firestore.collection('events').doc(query.id as string).get())
@@ -167,5 +295,5 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const category = e.data()
     categories.push({...category, id})
   })
-  return { props: { user, event, beforeCategories: categories }}
+  return { props: { user, event, beforeCategories: categories } };
 }
