@@ -14,25 +14,29 @@ const UserLayout: React.FC<any> = ({user, children, CSRUser}) => {
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
   const [notifiesLength, setNotifiesLength] = useState(0)
+  let cancelListner = () => {};
 
   useEffect(() => {
-      let cancelListner = () => {}
-      (async() => {
-          const { msg } = router.query
-          if (msg) alert.success(decodeQuery(msg as string))
-          if (!user) return
-          const { firestore } = await initFirebase()
-          cancelListner = firestore
-            .collection("users")
-            .doc(user.uid)
-            .collection("notifies")
-            .where("read", "==", false)
-            .onSnapshot((notifies) => {
-              setNotifiesLength(notifies.size);
-            });
-      })()
-      return cancelListner();
-  },[])
+    (async () => {
+      const { msg } = router.query;
+      if (msg) alert.success(decodeQuery(msg as string));
+      if (!user) return;
+      const { firestore } = await initFirebase();
+      cancelListner = firestore
+        .collection("users")
+        .doc(user.uid)
+        .collection("notifies")
+        .where("read", "==", false)
+        .onSnapshot((notifies) => {
+          setNotifiesLength(notifies.size);
+        });
+    })();
+    return cancelListner();
+  }, []);
+
+  useEffect(() => {
+    if (!CSRUser) cancelListner();
+  }, [CSRUser]);
 
   return (
     <>

@@ -23,21 +23,23 @@ const Notifies = ({ user, payments, events, categories }) => {
     return payments.map((payment, i) => {
       return (
         <Link href={`/user/payments/show/${payment.id}`} key={i}>
-          <Row>
-            <Col xs="12" style={{ padding: "0", cursor: "pointer" }}>
-              <Card style={{ height: "100%", width: "100%" }}>
-                <CardBody>
-                  <p>{events[payment.event].name}</p>
-                  <p>{`${categories[payment.category].name}: ${
-                    categories[payment.category].price
-                  } 円`}</p>
-                  <p>
-                    {moment(payment.createdAt).format("YYYY年 M月d日 H:mm")}
-                  </p>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
+          <div>
+            <Row>
+              <Col xs="12" style={{ padding: "0", cursor: "pointer" }}>
+                <Card style={{ height: "100%", width: "100%" }}>
+                  <CardBody>
+                    <p>{events[payment.event].name}</p>
+                    <p>{`${categories[payment.category].name}: ${
+                      categories[payment.category].price
+                    } 円`}</p>
+                    <p>
+                      {moment(payment.createdAt).format("YYYY年 M月d日 H:mm")}
+                    </p>
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+          </div>
         </Link>
       );
     });
