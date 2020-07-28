@@ -2,7 +2,7 @@ import React, { Component, useState } from 'react';
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Table, Container, Row, Col, Label, Button, Input, FormGroup, Form, ModalBody, ModalFooter } from 'reactstrap';
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, GetStaticProps, GetStaticPaths } from 'next';
 import isLogin from '@/src/lib/isLogin';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import initFirebase from '@/src/lib/initFirebase';
@@ -228,30 +228,27 @@ export default ({ events, categories, query, setModal, setModalInner }) => {
     );
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    const { user, res } = await isLogin(ctx, 'redirect')
-    if (!user) {
-      res.writeHead(302, {
-        Location: `/`,
-      });
-      res.end();
-      return { props: {} };
-    }
-
-    const { query } = ctx
+export const getStaticPaths: GetStaticPaths = async () => {
     const { firestore } = await initFirebaseAdmin()
-    const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get())
+    const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `events/${doc.id}/reception`))
+    return { paths, fallback: true }
+}
+
+export const getStaticProps: GetStaticProps = async ({params}) => {
+    const { id } = params;
+    const { firestore } = await initFirebaseAdmin()
+    const categoriesSnapShot = (await firestore.collection('events').doc(id as string).collection('categories').orderBy('index').get())
     let categories: FirebaseFirestore.DocumentData[] = []
     categoriesSnapShot.forEach(e => {
         const id = e.id
         const category = e.data()
         categories.push({ ...category, id })
     })
-    const eventsSnapShot = (await firestore.collection('events').doc(query.id as string).get())
+    const eventsSnapShot = (await firestore.collection('events').doc(id as string).get())
     const data = eventsSnapShot.data() as event
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
     const events = { ...data, startDate, endDate, id: eventsSnapShot.id }
 
-    return { props: { user, query: ctx.query, categories, events } }
+    return { props: { categories, events } }
 }

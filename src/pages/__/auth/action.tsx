@@ -1,41 +1,43 @@
 import React, { useState, useEffect } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
+import { auth } from '@/src/lib/initFirebase'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import {useRouter} from 'next/router'
-import Firebase from 'firebase'
 import ResetPassword from './resetPassword'
-import { GetServerSideProps } from 'next'
 import { encodeQuery } from '@/src/lib/parseQuery'
 
-export default ({user, mode, oobCode}) => {
+export default () => {
     const alert = useAlert()
     const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [valid, setValid] = useState(false)
-    const [view, setView] = useState(null)
+    const [view, setView] = useState(null);
+    const [mode, setMode] = useState(null);
+    const [oobCode, setOobCode] = useState(null);
 
     useEffect(() => {
         (async() => {
             if (!loading) return
-            const auth = (await initFirebase()).firebase.auth()
+            if (!router) return
+            setMode(router.query.mode);
+            setOobCode(router.query.oobCode);
             try {
                 switch (mode as string) {
                     case 'resetPassword':
                         // Display reset password handler and UI.
-                        handleResetPassword(auth)
+                        handleResetPassword()
                         return
                     case 'recoverEmail':
                         // Display email recovery handler and UI.
-                        await handleRecoverEmail(auth)
-                        setTimeout(() => redirectAfterUpdate(auth), 5000)
+                        await handleRecoverEmail()
+                        setTimeout(() => redirectAfterUpdate(), 5000)
                         return
                     case 'verifyEmail':
                         // Display email verification handler and UI.
-                        await handleVerifyEmail(auth)
-                        setTimeout(() => redirectAfterUpdate(auth), 5000)
+                        await handleVerifyEmail()
+                        setTimeout(() => redirectAfterUpdate(), 5000)
                         return
                     default:
                         // Error: invalid mode.
@@ -43,12 +45,12 @@ export default ({user, mode, oobCode}) => {
                 }
             } catch (e) {
                 alert.error(errorMsg(e))
-                setTimeout(() => redirectAfterUpdate(auth), 5000)
+                setTimeout(() => redirectAfterUpdate(), 5000)
             }
         })()
-    }, [])
+    }, [router])
 
-    const redirectAfterUpdate = async(auth:Firebase.auth.Auth, msg?:string) => {
+    const redirectAfterUpdate = async(msg?:string) => {
         if (auth.currentUser) {
             await auth.signOut()
         }
@@ -59,7 +61,7 @@ export default ({user, mode, oobCode}) => {
         router.push("/login");
     }
 
-    const handleResetPassword = async (auth:Firebase.auth.Auth) => {
+    const handleResetPassword = async () => {
         await auth.verifyPasswordResetCode(oobCode as string)
         setValid(true)
         setView(<ResetPassword confirmResetPassword={confirmResetPassword} />)
@@ -68,16 +70,15 @@ export default ({user, mode, oobCode}) => {
 
     const confirmResetPassword = async (newPwd, newPwdConfirm) => {
         if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません。')
-        const auth = (await initFirebase()).firebase.auth()
         try {
             await auth.confirmPasswordReset(oobCode as string, newPwd)
-            redirectAfterUpdate(auth, '新しいパスワードに更新しました。')
+            redirectAfterUpdate('新しいパスワードに更新しました。')
         } catch(e) {
             alert.error(errorMsg(e))
         }
     }
 
-    const handleRecoverEmail = async (auth: Firebase.auth.Auth) => {
+    const handleRecoverEmail = async () => {
         const info = await auth.checkActionCode(oobCode as string)
         const restoredEmail = info['data']['email']
         await auth.applyActionCode(oobCode as string)
@@ -87,7 +88,7 @@ export default ({user, mode, oobCode}) => {
         setLoading(false)
     }
 
-    const handleVerifyEmail = async (auth: Firebase.auth.Auth) => {
+    const handleVerifyEmail = async () => {
         await auth.applyActionCode(oobCode as string)
         setView(<h4>メールアドレスが認証されました。リダイレクトします。</h4>)
         setValid(true)
@@ -114,10 +115,4 @@ export default ({user, mode, oobCode}) => {
             })()}
         </Form>
     )
-}
-
-export const getServerSideProps: GetServerSideProps = async ctx => {
-    const {query} = ctx
-    const { mode, oobCode } = query
-    return {props: {mode,oobCode}}
 }

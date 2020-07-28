@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import React, { useState, Dispatch, SetStateAction } from 'react'
+import React, { useState, Dispatch, SetStateAction, useEffect } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTwitter, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
@@ -7,23 +7,34 @@ import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import stripe from '@/src/lib/stripe'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import initFirebase from '@/src/lib/initFirebase'
 import { useAlert } from 'react-alert'
 import { useRouter } from 'next/router'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import Loading from '@/src/components/loading'
 
-const Identification = ({ user, verification }) => {
+const Identification = ({ user, userData, verification }) => {
   const alert = useAlert()
   const router = useRouter()
 
   const [file1, setFile1]: [File, Dispatch<SetStateAction<File>>] = useState()
   const [file2, setFile2]: [File, Dispatch<SetStateAction<File>>] = useState()
+  const [loading, setLoading] = useState(true)
+
+
+
+  useEffect(() => {
+    if (!userData) return
+    const { stripeId } = userData;
+    const result = await stripe.accounts.retrieve(stripeId);
+    const { individual } = result;
+    const { verification } = individual;
+    setLoading(false);
+  }, [userData]);
 
   const submit = async (e) => {
     e.preventDefault()
     if (!file1) return alert.error('')
-    const { firebase } = await initFirebase()
-    const token = await firebase.auth().currentUser.getIdToken()
+    const token = await user.getIdToken()
     const formData = new FormData()
     formData.append('file1', file1)
     formData.append('file2', file2)
@@ -37,6 +48,8 @@ const Identification = ({ user, verification }) => {
       router.push({ pathname: '/user/edit', query: { msg: encodeQuery('本人確認書類のアップロードに成功しました。') } }, 'user/edit')
     }
   }
+
+  if (loading) return <Loading />
 
   return (
     <Form onSubmit={submit}>
@@ -70,25 +83,6 @@ const Identification = ({ user, verification }) => {
       </FormGroup>
     </Form>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user, res } = await isLogin(ctx, 'redirect')
-  if (!user) {
-    res.writeHead(302, {
-      Location: `/`,
-    });
-    res.end();
-    return { props: {} };
-  }
-  const { firestore } = await initFirebaseAdmin()
-  const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
-  const result = await stripe.accounts.retrieve(
-    stripeId
-  )
-  const { individual } = result
-  const { verification } = individual
-  return { props: { user, verification } }
 }
 
 export default Identification

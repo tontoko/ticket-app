@@ -1,16 +1,14 @@
-import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState } from 'react'
-import { Form, FormGroup, Button, Input, Container, Row, Col, Label, Spinner, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
+import React, { useState } from 'react'
+import { Form, FormGroup, Button, Input, Row, Col, Label, Spinner, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
-import { GetServerSideProps } from 'next'
+import { GetStaticProps, GetStaticPaths } from 'next'
 import { event } from 'events'
-import isLogin from '@/src/lib/isLogin'
 import { useAlert } from 'react-alert'
 import { encodeQuery } from '@/src/lib/parseQuery'
-import initFirebase from '@/src/lib/initFirebase'
+import { firestore } from '@/src/lib/initFirebase'
 
 export default ({ user, beforeCategories, setModal, setModalInner }) => {
   
@@ -173,7 +171,6 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
     if (loading) return;
     try {
       setLoading(true);
-      const { firestore } = await initFirebase();
       const categoriesRef = firestore
         .collection("events")
         .doc(router.query.id as string)
@@ -279,28 +276,26 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { query } = ctx
-  const { user, res } = await isLogin(ctx, 'redirect')
-  if (!user) {
-    res.writeHead(302, {
-      Location: `/`,
-    });
-    res.end();
-    return { props: {} };
-  }
+export const getStaticPaths: GetStaticPaths = async () => {
   const { firestore } = await initFirebaseAdmin()
-  const result = (await firestore.collection('events').doc(query.id as string).get())
+  const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/categories/edit`))
+  return { paths, fallback: true }
+}
+
+export const getStaticProps: GetStaticProps = async ({params}) => {
+  const { id } = params
+  const { firestore } = await initFirebaseAdmin()
+  const result = (await firestore.collection('events').doc(id as string).get())
   const data = result.data() as event
   const startDate = data.startDate.seconds
   const endDate = data.endDate.seconds
   const event = { ...data, startDate, endDate, id: result.id }
-  const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get())
+  const categoriesSnapShot = (await firestore.collection('events').doc(id as string).collection('categories').orderBy('index').get())
   let categories: FirebaseFirestore.DocumentData[] = []
   categoriesSnapShot.forEach(e => {
     const id = e.id
     const category = e.data()
     categories.push({...category, id})
   })
-  return { props: { user, event, beforeCategories: categories } };
+  return { props: { event, beforeCategories: categories } };
 }

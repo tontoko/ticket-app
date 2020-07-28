@@ -1,20 +1,48 @@
 import React, {useState, useEffect} from 'react';
 import {
   Card, CardText, CardBody,
-  CardTitle, CardSubtitle, Button, Container, Col, Row
+  CardTitle, CardSubtitle, Button, Col, Row
 } from 'reactstrap';
 import Link from 'next/link'
 import getImg from '@/src/lib/getImgSSR'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
 import stripe from '@/src/lib/stripe';
 import { event } from 'events';
+import { firestore } from '@/src/lib/initFirebase';
+import Loading from '@/src/components/loading';
 
-export default ({ user, events, requirements }) => {
+export default ({ user, userData }) => {
+  const [events, setEvents] = useState(null);
+  const [requirements, setRequirements] = useState(null);
+
+  useEffect(() => {
+    if (!userData) return
+    (async () => {
+      const result = await firestore
+        .collection("events")
+        .where("createdUser", "==", user.user_id)
+        .get();
+      setEvents(await Promise.all(
+        result.docs.map(async (doc) => {
+          const data = doc.data() as event;
+          const startDate = data.startDate.seconds;
+          const endDate = data.endDate.seconds;
+          const photos =
+            data.photos.length > 0
+              ? await getImg(data.photos[0], user.user_id, "360")
+              : await getImg(null, user.user_id, "360");
+          return { ...data, startDate, endDate, photos, id: doc.id };
+        })
+      ));
+      const { stripeId } = (
+        await firestore.collection("users").doc(user.uid).get()
+      ).data();
+      const { individual } = await stripe.accounts.retrieve(stripeId);
+      setRequirements(individual ? individual.requirements : null);
+    })();
+  }, [userData]);
+
   const renderUserEvents = () => events.map((event, i) => {
-
       const showDate = () => {
         const startDate = moment(event.startDate * 1000)
         const endDate = moment(event.endDate * 1000)
@@ -55,6 +83,7 @@ export default ({ user, events, requirements }) => {
         {renderUserEvents()}
       </div>
       {(() => {
+        if (!userData) return <Loading />
         if (requirements && !requirements.currently_due.length && !requirements.errors.length && !requirements.past_due.length && !requirements.eventually_due.length) {
           return (
             <Row style={{ margin: 0, marginTop: "0.5em" }}>
@@ -80,32 +109,4 @@ export default ({ user, events, requirements }) => {
       })()}
     </>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const {user, res} = await isLogin(ctx, 'redirect')
-  if (!user) {
-    res.writeHead(302, {
-      Location: `/`,
-    });
-    res.end();
-    return { props: {} };
-  }
-  const {firestore} = await initFirebaseAdmin()
-  const result = await firestore.collection('events').where('createdUser', '==', user.user_id).get()
-  const events = await Promise.all(result.docs.map(async doc => {
-    const data = doc.data() as event
-    const startDate = data.startDate.seconds
-    const endDate = data.endDate.seconds
-    const photos = data.photos.length > 0 ? await getImg(data.photos[0], user.user_id, '360') : await getImg(null, user.user_id, '360')
-    return { ...data, startDate, endDate, photos, id: doc.id }
-  }))
-
-  const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
-  const { individual } = await stripe.accounts.retrieve(
-    stripeId
-  )
-  const requirements = individual ? individual.requirements : null
-
-  return { props: { user, events, requirements }}
 }

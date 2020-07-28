@@ -15,9 +15,8 @@ import isLogin from '@/src/lib/isLogin'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
 import stripe from '@/src/lib/stripe'
-import initFirebase from '@/src/lib/initFirebase'
-import atob from 'atob'
-import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery'
+import { firestore } from '@/src/lib/initFirebase'
+import { decodeQuery } from '@/src/lib/parseQuery'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import { event } from 'events'
@@ -34,34 +33,33 @@ const Confirmation = ({ familyName, firstName, email, event, category, photoUrls
     const timerRef = useRef(redirectTimer)
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        if (!stripe || !elements) return
-        if (!agree) return alert.error("同意します が選択されていません")
-        const { firestore } = await initFirebase()
-        setProcessing(true)
-        const ticket = (await firestore.collection('events').doc(eventId).collection('categories').doc(categoryId).get()).data()
-        if (category.stock - category.sold < 1 || !ticket.public) {
-            const msg = ticket.stock - ticket.sold < 1 ? '在庫がありませんでした。リダイレクトします。' : '対象のチケットは主催者によって非公開に設定されました。リダイレクトします。'
-            alert.error(msg)
-            setTimeout(() => {
-                router.push(`/events/${eventId}`)
-            }, 3000);
-            return
-        }
-        const res = await stripe.confirmCardPayment(client_secret, {
-            payment_method: {
-                card: elements.getElement(CardElement),
-                billing_details: {
-                    name: `${familyName} ${firstName}`,
-                    email
-                },
-            }
-        })
-        if (res.error) {
-            alert.error("エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。");
-            return setProcessing(false)
-        }
-        paymentComplete();
+      e.preventDefault()
+      if (!stripe || !elements) return
+      if (!agree) return alert.error("同意します が選択されていません")
+      setProcessing(true)
+      const ticket = (await firestore.collection('events').doc(eventId).collection('categories').doc(categoryId).get()).data()
+      if (category.stock - category.sold < 1 || !ticket.public) {
+          const msg = ticket.stock - ticket.sold < 1 ? '在庫がありませんでした。リダイレクトします。' : '対象のチケットは主催者によって非公開に設定されました。リダイレクトします。'
+          alert.error(msg)
+          setTimeout(() => {
+              router.push(`/events/${eventId}`)
+          }, 3000);
+          return
+      }
+      const res = await stripe.confirmCardPayment(client_secret, {
+          payment_method: {
+              card: elements.getElement(CardElement),
+              billing_details: {
+                  name: `${familyName} ${firstName}`,
+                  email
+              },
+          }
+      })
+      if (res.error) {
+          alert.error("エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。");
+          return setProcessing(false)
+      }
+      paymentComplete();
     }
 
     const paymentComplete = () => {

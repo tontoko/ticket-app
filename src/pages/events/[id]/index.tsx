@@ -9,9 +9,9 @@ import {
     CarouselIndicators,
     FormGroup} from 'reactstrap';
 import getImg from '@/src/lib/getImgSSR'
-import { GetServerSideProps } from 'next'
+import { GetStaticProps, GetStaticPaths } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import isLogin from '@/src/lib/isLogin'
+import { firestore } from '@/src/lib/initFirebase'
 import { event } from 'events'
 import moment from 'moment'
 import { setCookie } from 'nookies'
@@ -23,11 +23,10 @@ import {
   LineIcon,
   TwitterIcon,
 } from "react-share";
-import Tickets from '@/src/components/tickets';
 
-export default ({ event, categories, status, items, tickets, setModal, setModalInner }) => {
-
+export default ({ user, event, categories, items, setModal, setModalInner, userData }) => {
     const router = useRouter();
+    const [tickets, setTickets] = useState([]);
     const startDate = moment(event.startDate * 1000)
     const endDate = moment(event.endDate * 1000)
     const [activeIndex, setActiveIndex] = useState(0)
@@ -45,6 +44,60 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
       url: "",
       title: "",
     });
+
+    useEffect(() => {
+      if (!router) return;
+      (async() => {
+        let status: string;
+        if (!user) {
+          status = "anonymous";
+          setCookie(null, "lastVisitedEvent", event.id, {
+            maxAge: 30 * 24 * 60 * 60,
+            path: "/",
+          });
+        } else if (event.createdUser == user.uid) {
+          status = "organizer";
+        } else {
+          const payments = (
+            await firestore
+              .collection("payments")
+              .where("event", "==", event.id)
+              .where("buyer", "==", user.uid)
+              .get()
+          ).docs;
+          setTickets(await Promise.all(
+            payments
+              .filter((ticket) => ticket.data().event === event.id)
+              .map(async (payment) => {
+                const targetCategory = categories.filter(
+                  (catgegory) => catgegory.id === payment.data().category
+                )[0];
+                return {
+                  ...targetCategory,
+                  categoryId: targetCategory.id,
+                  paymentId: payment.id,
+                  accepted: payment.data().accepted,
+                  error: payment.data().error,
+                  buyer: payment.data().buyer,
+                  seller: payment.data().seller,
+                };
+              })
+          ));
+          status = payments.length > 0 && "bought";
+          // ログイン済みで主催者以外の場合に履歴に追加
+          if (userData) {
+            let { eventHistory } = userData;
+            if (!eventHistory) eventHistory = [];
+            eventHistory = Array.from(new Set([...eventHistory, event.id]));
+            eventHistory.length > 10 && eventHistory.shift();
+            await firestore
+              .collection("users")
+              .doc(user.uid)
+              .update({ eventHistory });
+          }
+        }
+      })()
+    }, [router])
 
     useEffect(() => {
         setTwitterShareProps({
@@ -263,56 +316,32 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
     );
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { query } = ctx
-    const { user } = await isLogin(ctx)
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { firestore } = await initFirebaseAdmin();
+  const paths = (await firestore.collection("events").get()).docs.map(doc => `events/${doc.id}`)
+
+  return { paths, fallback: true };
+};
+
+
+export const getStaticProps: GetStaticProps = async ctx => {
+    const query = ctx.params
     const { firestore } = await initFirebaseAdmin()
-    const eventRef = firestore.collection('events').doc(query.id as string)
-    const result = await eventRef.get()
+    const result = await firestore
+      .collection("events")
+      .doc(query.id as string)
+      .get();
     const data = result.data() as event
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
     const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser, '800'))) : [await getImg(null, data.createdUser)]
     const event = { ...data, startDate, endDate, photos, id: result.id }
     const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
-    let status: string
-    let tickets = []
-    if (!user) {
-        status = 'anonymous'
-        setCookie(ctx, 'lastVisitedEvent', event.id, {
-            maxAge: 30 * 24 * 60 * 60,
-            path: '/',
-        })
-    } else if (event.createdUser == user.uid) {
-        status = 'organizer'
-    } else {
-        const payments = (await firestore.collection('payments').where("event", "==", result.id).where("buyer", "==", user.uid).get()).docs
-        tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async payment => {
-            const targetCategory = categories.filter(catgegory => catgegory.id === payment.data().category)[0]
-            return {
-                ...targetCategory,
-                categoryId: targetCategory.id,
-                paymentId: payment.id,
-                accepted: payment.data().accepted,
-                error: payment.data().error,
-                buyer: payment.data().buyer,
-                seller: payment.data().seller
-            }
-        }))
-        status = payments.length > 0 && 'bought'
-        // ログイン済みで主催者以外の場合に履歴に追加
-        if (data) {
-          let { eventHistory } = (await firestore.collection('users').doc(user.uid).get()).data()
-          if (!eventHistory) eventHistory = []
-          eventHistory = Array.from(new Set([...eventHistory, result.id]));
-          eventHistory.length > 10 && eventHistory.shift()
-          await firestore.collection('users').doc(user.uid).update({ eventHistory })
-        }
-    }
+    
     const items = event.photos.map((url) => {
         return {
             src: url,
         }
     })
-    return { props: { user, event, categories, status, items, tickets } }
+    return { props: { event, categories, status, items }, revalidate: 1 }
 }
