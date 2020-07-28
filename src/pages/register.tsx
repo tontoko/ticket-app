@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
 import isLogin from '../lib/isLogin'
 
-export default () => {
+const Register = () => {
     const alert = useAlert()
     const [email, setEmail] = useState('')
     const [pwd, setPwd] = useState('')
@@ -82,3 +82,5 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   await isLogin(ctx, "redirect");
   return { props: {} };
 };
+
+export default Register

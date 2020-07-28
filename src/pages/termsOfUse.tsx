@@ -5,7 +5,7 @@ import Text from '@/termsOfUse.mdx'
 import { GetServerSideProps } from 'next'
 import isLogin from '../lib/isLogin'
 
-export const TermsOfUse: React.FC = () => <Text />
+const TermsOfUse: React.FC = () => <Text />
 
 export default TermsOfUse
 

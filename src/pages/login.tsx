@@ -9,7 +9,7 @@ import errorMsg from '@/src/lib/errorMsg'
 import isLogin from '../lib/isLogin'
 import { GetServerSideProps } from 'next'
 
-export const Login = () => {
+const Login = () => {
     const alert = useAlert()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')

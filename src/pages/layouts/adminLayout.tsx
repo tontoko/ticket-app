@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem } from 'reactstrap'
 import Avater from 'react-avatar'
 
-export const UserLayout: React.FC = () => {
+const UserLayout: React.FC = () => {
     const [isOpen, toggle] = useState(false)
 
     return (

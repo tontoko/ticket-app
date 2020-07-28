@@ -1,6 +1,6 @@
 import { Spinner } from 'reactstrap'
 
-export default () => {
+const Loading = () => {
     return (
         <div style={{
             opacity: 0.5,
@@ -25,3 +25,5 @@ export default () => {
         </div>
     )
 }
+
+export default Loading
