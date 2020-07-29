@@ -3,6 +3,7 @@ import {
 } from 'reactstrap';
 import moment from 'moment'
 import { useState, useEffect } from 'react';
+
 export default ({
   setModal,
   setModalInner,
@@ -53,8 +54,7 @@ const PreviewModal = ({
   const [animating, setAnimating] = useState(false);
   const [thisLoading, setThisLoading] = useState(false);
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const submit = async () => {
     setThisLoading(true);
     const success = await submitEvent();
     !success && setThisLoading(false);
@@ -90,10 +90,8 @@ const PreviewModal = ({
   });
 
   return (
-    <Form style={{ margin: "2em" }} onSubmit={submit}>
-      <ModalHeader>
-        <h4 style={{ marginBottom: "1em" }}>この内容で送信しますか？</h4>
-      </ModalHeader>
+    <div style={{ margin: "2em" }}>
+      <ModalHeader>この内容で送信しますか？</ModalHeader>
       <ModalBody>
         <FormGroup style={{ textAlign: "center" }}>
           <Carousel
@@ -163,10 +161,14 @@ const PreviewModal = ({
         >
           キャンセル
         </Button>
-        <Button disabled={thisLoading}>
+        <Button
+          disabled={thisLoading}
+          type="button"
+          onClick={submit}
+        >
           {thisLoading ? <Spinner /> : "送信"}
         </Button>
       </ModalFooter>
-    </Form>
+    </div>
   );
 };

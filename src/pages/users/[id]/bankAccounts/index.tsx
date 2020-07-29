@@ -6,6 +6,7 @@ import { NextPage } from 'next'
 import Link from 'next/link'
 import { Stripe } from '@/src/lib/stripe'
 import Loading from '@/src/components/loading'
+import withAuth from '@/src/lib/withAuth'
 
 type props = {
   user: firebase.User,
@@ -149,7 +150,7 @@ export const BankAccounts: NextPage<props> = ({ user, userLoading, setModal, set
       </Row>
 
       <FormGroup>
-        <Link href="/user/bankAccounts/new">
+        <Link href={`/users/${user.uid}/bankAccounts/new`}>
           <Button>新しい口座を登録</Button>
         </Link>
       </FormGroup>
@@ -157,4 +158,4 @@ export const BankAccounts: NextPage<props> = ({ user, userLoading, setModal, set
   );
 }
 
-export default BankAccounts
+export default withAuth(BankAccounts)

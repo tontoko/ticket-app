@@ -5,11 +5,12 @@ import { useRouter } from 'next/router'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import { useAlert } from 'react-alert';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import { firestore } from '@/src/lib/initFirebase';
+import { firestore, auth } from '@/src/lib/initFirebase';
 import { encodeQuery } from '@/src/lib/parseQuery';
 import Loading from '@/src/components/loading';
+import withAuth from '@/src/lib/withAuth';
 
-export default ({
+const Refund = ({
   user,
   createdUser,
   query,
@@ -29,7 +30,7 @@ export default ({
   useEffect(() => {
     if (!user) return;
     if (user.uid === createdUser || paymentData.refund) {
-      router.push('/')
+      auth.signOut()
       return
     }
     setLoading(false);
@@ -88,7 +89,7 @@ export default ({
           targetUser,
         });
       router.push({
-        pathname: `/user/myTickets`,
+        pathname: `/users/${user.uid}/myTickets`,
         query: {
           msg: encodeQuery(
             "問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。"
@@ -190,7 +191,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const paths = [].concat([...await Promise.all(
     (await firestore.collection("events").get()).docs.map(async(event) =>
       (await firestore.collection("payments").get()).docs.map(
-        (payment) => `events/${event.id}/refunds/${payment.id}`
+        (payment) => `/events/${event.id}/refunds/${payment.id}`
       )
     )
   )]);
@@ -206,3 +207,6 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
     props: { createdUser: eventData.createdUser, paymentData },
   };
 }
+// TODO: ルート変更
+
+export default withAuth(Refund)

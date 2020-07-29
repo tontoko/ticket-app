@@ -1,28 +1,27 @@
 import Link from 'next/link'
 import React, {useState, useEffect} from 'react'
-import initFirebase from '@/src/lib/initFirebase'
 import {useRouter} from 'next/router'
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
+import { auth } from '../lib/initFirebase'
 
-export default (props) => {
+export default ({user}) => {
     const router = useRouter()
     const [msg, setMsg] = useState('')
     const [loading, setLoading] = useState(true)
     
     useEffect(() => {
         (async() => {
-            // クライアント側の認証を待つ
-            const CSRUser = props.CSRUser as firebase.User
-            if (!CSRUser) return
+            // クライアント側の認証を待つuser
+            if (!user) return;
             if (!loading) return
-            sendEmail(CSRUser)
+            sendEmail();
         })()
     })
 
-    const sendEmail = async (CSRUser: firebase.User) => {
+    const sendEmail = async () => {
         try {
-            await CSRUser.sendEmailVerification()
+            await user.sendEmailVerification();
             setLoading(false)
             setMsg('登録されたメールアドレスに認証用メールを送信しました。')
         } catch (e) {
@@ -31,7 +30,7 @@ export default (props) => {
             setMsg(errorMsg(e))
         }
         setTimeout(async() => {
-            await (await initFirebase()).firebase.auth().signOut()
+            await auth.signOut()
             router.push('/login')
         }, 5000)
     }

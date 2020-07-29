@@ -7,7 +7,6 @@ import {
   Input,
   FormGroup,
   Label,
-  Spinner,
 } from "reactstrap";
 import DatePicker, { registerLocale } from "react-datepicker";
 import ja from "date-fns/locale/ja";
@@ -17,9 +16,9 @@ import { toUtcIso8601str } from "@/src/lib/time";
 import { useAlert } from "react-alert";
 import previewEvent from "@/src/lib/previewEvent";
 import { useRouter } from "next/router";
-import initFirebase from "../lib/initFirebase";
 import { encodeQuery } from "../lib/parseQuery";
 import errorMsg from "../lib/errorMsg";
+import { storage, firestore } from "../lib/initFirebase";
 
 const EventForm = ({
   user,
@@ -143,7 +142,7 @@ const EventForm = ({
     </div>
   );
 
-  const saveImages = async (file: string, number: number, firebase: any) => {
+  const saveImages = async (file: string, number: number) => {
     const dt = new Date();
     const yyyy = dt.getFullYear();
     const MM = ("00" + (dt.getMonth() + 1)).slice(-2);
@@ -152,9 +151,9 @@ const EventForm = ({
     const mm = ("00" + dt.getMinutes()).slice(-2);
     const ss = ("00" + dt.getSeconds()).slice(-2);
     const filename = yyyy + MM + dd + hh + mm + ss + "_" + number;
-    const storageRef = firebase.storage().ref();
+    const storageRef = storage.ref();
     const userEventRef = storageRef.child(
-      `${firebase.auth().currentUser.uid}/events/${filename}.jpg`
+      `${user.uid}/events/${filename}.jpg`
     );
     await userEventRef.putString(file, "data_url");
     return filename;
@@ -163,16 +162,15 @@ const EventForm = ({
   const submitEvent = async () => {
     if (loading) return;
     setLoading(true);
-    const { firebase, firestore } = await initFirebase();
     let photos: string[] = [];
     photos[0] = files[0]
-      ? await saveImages(files[0] as string, 1, firebase)
+      ? await saveImages(files[0] as string, 1)
       : event.photos[0];
     photos[1] = files[1]
-      ? await saveImages(files[1] as string, 2, firebase)
+      ? await saveImages(files[1] as string, 2)
       : event.photos[1];
     photos[2] = files[2]
-      ? await saveImages(files[2] as string, 3, firebase)
+      ? await saveImages(files[2] as string, 3)
       : event.photos[2];
     // 配列の空要素を削除して先頭から詰める
     photos = photos.filter((v) => v);

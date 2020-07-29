@@ -6,8 +6,9 @@ import { useState, useEffect } from "react";
 import Loading from '@/src/components/loading'
 import { decodeQuery, encodeQuery } from "@/src/lib/parseQuery";
 import { useRouter } from "next/router";
+import withAuth from "@/src/lib/withAuth";
 
-export default () => {
+const Show = () => {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [value, setValue] = useState('')
@@ -40,3 +41,5 @@ export default () => {
         </Row>
     )
 }
+
+export default withAuth(Show)

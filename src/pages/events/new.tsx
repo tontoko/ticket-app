@@ -8,15 +8,19 @@ registerLocale('ja', ja)
 import stripe from '@/src/lib/stripe';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import EventForm from '@/src/components/eventForm';
+import { firestore } from '@/src/lib/initFirebase';
+import { useDocumentData } from 'react-firebase-hooks/firestore';
+import withAuth from '@/src/lib/withAuth';
 
-export default ({ userData, setModal, setModalInner, user }) => {
+const New = ({ setModal, setModalInner, user }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [userData] = useDocumentData(firestore.collection('users').doc(user.uid));
 
   useEffect(() => {
     if (!userData) return
     (async() => {
-      const { stripeId } = userData
+      const { stripeId } = userData as { stripeId: string|undefined }
       const res = await fetch('/api/stripeAccountsRetrieve', { body: JSON.stringify({ stripeId }) })
       const individual = await res.json();
       const requirements = individual ? individual.requirements : null;
@@ -27,7 +31,7 @@ export default ({ userData, setModal, setModalInner, user }) => {
           requirements.eventually_due.length ||
           requirements.past_due.length)
       ) {
-        router.push("/user/edit");
+        router.push(`/users/${user.uid}/edit`);
       } else {
         setLoading(false);
       }
@@ -48,3 +52,5 @@ export default ({ userData, setModal, setModalInner, user }) => {
   );
 
 };
+
+export default withAuth(New)

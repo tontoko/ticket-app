@@ -1,14 +1,31 @@
-import React, {  } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FormGroup,
 } from "reactstrap";
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, GetStaticPaths, GetStaticProps } from "next";
 import isLogin from "@/src/lib/isLogin";
 import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
 import moment from "moment";
 import Link from "next/link";
+import Loading from "@/src/components/loading";
+import { useRouter } from "next/router";
+import { auth } from "@/src/lib/initFirebase";
+import withAuth from "@/src/lib/withAuth";
 
-export default ({ payment, event, category, refunded }) => {
+const Show = ({ payment, event, category, refunded, permit }) => {
+  const [loading, setLoading] = useState(true);
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!router) return;
+    if (!permit) {
+      auth.signOut()
+      return 
+    }
+    setLoading(false)
+  }, [router]);
+
+  if (loading) return <Loading />;
 
   return (
     <>
@@ -32,18 +49,20 @@ export default ({ payment, event, category, refunded }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { user, query, res } = await isLogin(ctx, "redirect");
+export const getStaticPaths: GetStaticPaths = async () => {
   const { firestore } = await initFirebaseAdmin();
-  const paymentSnapShot = await firestore.collection('payments').doc(query.paymentId as string).get()
+  const paths = (await firestore.collection("users").get()).docs.map(
+    (doc) => `/users/${doc.id}/payments`
+  );
+
+  return { paths, fallback: true };
+};
+
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const { firestore } = await initFirebaseAdmin();
+  const {id, paymentId} = params
+  const paymentSnapShot = await firestore.collection('payments').doc(paymentId as string).get()
   const payment = { ...paymentSnapShot.data(), createdAt: paymentSnapShot.createTime.seconds*1000 } as any
-  if (user && payment.seller !== user.uid && payment.buyer !== user.uid) {
-    res.writeHead(302, {
-      Location: `/`,
-    });
-    res.end();
-    return { props: {} }
-  }
 
   const eventSnapShot = (
     await firestore.collection("events").doc(payment.event).get()
@@ -65,12 +84,18 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   ).data();
   const refunded = (await firestore
     .collection("payments")
-    .doc(query.paymentId as string)
+    .doc(paymentId as string)
     .collection("refunds")
     .where("refunded", '==', true)
     .get()
     ).size > 0;
+  
+  const permit = payment.seller === id || payment.buyer === id
+
   return {
-    props: { user, query, payment, event, category, refunded },
+    props: { payment, event, category, refunded, permit },
+    revalidate: 1,
   };
 };
+
+export default withAuth(Show)

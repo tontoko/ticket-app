@@ -1,13 +1,11 @@
-import React, { Component, useState, ReactElement } from 'react';
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import { Table, Container, Row, Col, Label, Button, Input } from 'reactstrap';
+import React, { ReactElement } from 'react';
+import { Table, Row } from 'reactstrap';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import isLogin from '@/src/lib/isLogin';
-import { GetServerSideProps, GetStaticProps, GetStaticPaths } from 'next';
+import { GetStaticProps, GetStaticPaths } from 'next';
 import { event } from 'events';
+import withAuth from '@/src/lib/withAuth';
 
-export default ({ event, categories, payments }) => {
+const Report = ({ event, categories, payments }) => {
     let totalSalesProspect = 0
     let totalSales = 0
     let totalFee = 0
@@ -80,7 +78,7 @@ export default ({ event, categories, payments }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
     const { firestore } = await initFirebaseAdmin();
-    const paths = await Promise.all((await firestore.collection("events").get()).docs.map(doc => `events/${doc.id}/report`))
+    const paths = await Promise.all((await firestore.collection("events").get()).docs.map(doc => `/events/${doc.id}/report`))
     return { paths, fallback: true };
 }
 
@@ -114,3 +112,5 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
 
     return { props: { event, categories, payments } };
 };
+
+export default withAuth(Report)

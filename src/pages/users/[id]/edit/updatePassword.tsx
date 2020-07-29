@@ -1,16 +1,15 @@
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
+import { Form, FormGroup, Button, Label, Input, Row } from 'reactstrap'
+import { firebase } from '@/src/lib/initFirebase'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import withAuth from '@/src/lib/withAuth'
 
-export const UpdatePassword: React.FC<any> = (props) => {
+export const UpdatePassword: React.FC<any> = (user) => {
     const router = useRouter()
     const alert = useAlert()
     const [pwd, setPwd] = useState('')
@@ -19,20 +18,18 @@ export const UpdatePassword: React.FC<any> = (props) => {
 
     const updatePassword = async (e) => {
         e.preventDefault()
-        const {firebase} = await initFirebase()
-        const { currentUser } = firebase.auth()
         if (pwd && newPwd && newPwdConfirm && newPwd === newPwdConfirm) {
             try {
-                const currentEmail = firebase.auth().currentUser.email
+                const currentEmail = user.email
                 const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
-                await currentUser.reauthenticateAndRetrieveDataWithCredential(credential)
+                await user.reauthenticateAndRetrieveDataWithCredential(credential)
             } catch (e) {
                 return alert.error(errorMsg(e))
             }
         }
         try {
-            await currentUser.updatePassword(newPwd)
-            router.push({ pathname: `/user/edit`, query: { msg: encodeQuery('パスワードを変更しました') } }, '/user/edit')
+            await user.updatePassword(newPwd)
+            router.push({ pathname: `/users/${user.uid}/edit`, query: { msg: encodeQuery('パスワードを変更しました') } })
         } catch (e) {
             alert.error(errorMsg(e))
         }
@@ -60,9 +57,4 @@ export const UpdatePassword: React.FC<any> = (props) => {
     )
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { user } = await isLogin(ctx, 'redirect')
-    return { props: { user } }
-}
-
-export default UpdatePassword
+export default withAuth(UpdatePassword)

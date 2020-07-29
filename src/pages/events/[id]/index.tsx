@@ -23,14 +23,18 @@ import {
   LineIcon,
   TwitterIcon,
 } from "react-share";
+import Tickets from '@/src/components/tickets';
 
-export default ({ user, event, categories, items, setModal, setModalInner, userData }) => {
+const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     const router = useRouter();
     const [tickets, setTickets] = useState([]);
     const startDate = moment(event.startDate * 1000)
     const endDate = moment(event.endDate * 1000)
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false);
+    const [status, setStatus] = useState<
+      "anonymous" | "organizer" | "bought" | 'other'
+    >();
 
     const [twitterShareProps, setTwitterShareProps] = useState({
       url: "",
@@ -46,47 +50,47 @@ export default ({ user, event, categories, items, setModal, setModalInner, userD
     });
 
     useEffect(() => {
+      let ticketListener = () => {return};
       if (!router) return;
       (async() => {
-        let status: string;
         if (!user) {
-          status = "anonymous";
+          setStatus("anonymous");
           setCookie(null, "lastVisitedEvent", event.id, {
             maxAge: 30 * 24 * 60 * 60,
             path: "/",
           });
         } else if (event.createdUser == user.uid) {
-          status = "organizer";
+          setStatus("organizer");
         } else {
-          const payments = (
-            await firestore
-              .collection("payments")
-              .where("event", "==", event.id)
-              .where("buyer", "==", user.uid)
-              .get()
-          ).docs;
-          setTickets(await Promise.all(
-            payments
-              .filter((ticket) => ticket.data().event === event.id)
-              .map(async (payment) => {
-                const targetCategory = categories.filter(
-                  (catgegory) => catgegory.id === payment.data().category
-                )[0];
-                return {
-                  ...targetCategory,
-                  categoryId: targetCategory.id,
-                  paymentId: payment.id,
-                  accepted: payment.data().accepted,
-                  error: payment.data().error,
-                  buyer: payment.data().buyer,
-                  seller: payment.data().seller,
-                };
-              })
-          ));
-          status = payments.length > 0 && "bought";
+          ticketListener = firestore
+            .collection("payments")
+            .where("event", "==", event.id)
+            .where("buyer", "==", user.uid)
+            .onSnapshot(async snap => {
+              const payments = snap.docs
+              setTickets(await Promise.all(
+                payments
+                  .filter((ticket) => ticket.data().event === event.id)
+                  .map(async (payment) => {
+                    const targetCategory = categories.filter(
+                      (catgegory) => catgegory.id === payment.data().category
+                    )[0];
+                    return {
+                      ...targetCategory,
+                      categoryId: targetCategory.id,
+                      paymentId: payment.id,
+                      accepted: payment.data().accepted,
+                      error: payment.data().error,
+                      buyer: payment.data().buyer,
+                      seller: payment.data().seller,
+                    };
+                  })
+              ));
+              setStatus(snap.size > 0 ? "bought" : "other");
+            })
           // ログイン済みで主催者以外の場合に履歴に追加
-          if (userData) {
-            let { eventHistory } = userData;
+          if (user) {
+            let { eventHistory } = (await firestore.collection('users').doc(user.uid).get()).data();
             if (!eventHistory) eventHistory = [];
             eventHistory = Array.from(new Set([...eventHistory, event.id]));
             eventHistory.length > 10 && eventHistory.shift();
@@ -97,7 +101,7 @@ export default ({ user, event, categories, items, setModal, setModalInner, userD
           }
         }
       })()
-    }, [router])
+    }, [router, user])
 
     useEffect(() => {
         setTwitterShareProps({
@@ -160,68 +164,68 @@ export default ({ user, event, categories, items, setModal, setModalInner, userD
     const urlToReport = `/events/${router.query.id}/report`
     
     const buttons = () => {
-        if (status == 'organizer') {
-            // 主催者
-            return (
-                <Row style={{ marginTop: "1.5em" }}>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <Link href={urlToReception}>
-                            <Button block color="success">会場受付</Button>
-                        </Link>
-                    </Col>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <Link href={urlToEdit}>
-                            <Button block color="info">イベントを変更する</Button>
-                        </Link>
-                    </Col>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <Link href={urlToReport}>
-                            <Button block color="info">レポートを見る</Button>
-                        </Link>
-                    </Col>
-                </Row>
-            )
-        } else if (status == 'bought') {
-            // 申し込み後
-            return (
-              <Row style={{ marginTop: "1.5em" }}>
-                <Col sm="12" style={{ margin: "0.2em" }}>
-                  <h5>購入済みチケット</h5>
-                  {tickets.map((ticket, i) => <Tickets ticket={ticket} event={event} key={i} />)}
-                </Col>
-                <Col sm="12" style={{ marginTop: "1.5em" }}>
-                  <Link href={urlToPurchase}>
-                    <Button block color="primary">
-                      追加のチケットを購入する
-                    </Button>
-                  </Link>
-                </Col>
-              </Row>
-            );
-        } else if (categories.length === 0) {
-            return
-        } else if (status == 'anonymous') {
-            return (
-                <Row style={{ marginTop: "2em" }}>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <p>チケットの購入にはログインが必要です</p>
-                        <Link href='/login'>
-                            <Button block color="info">ログイン / 会員登録する</Button>
-                        </Link>
-                    </Col>
-                </Row>
-            )
-        }else {
-            return (
-                <Row style={{ marginTop: "1.5em" }}>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <Link href={urlToPurchase}>
-                            <Button block color="primary">チケットを購入する</Button>
-                        </Link>
-                    </Col>
-                </Row>
-            )
-        }
+      if (status === 'organizer') {
+        // 主催者
+        return (
+          <Row style={{ marginTop: "1.5em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Link href={urlToReception}>
+                <Button block color="success">会場受付</Button>
+              </Link>
+            </Col>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Link href={urlToEdit}>
+                <Button block color="info">イベントを変更する</Button>
+              </Link>
+            </Col>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Link href={urlToReport}>
+                <Button block color="info">レポートを見る</Button>
+              </Link>
+            </Col>
+          </Row>
+        )
+      } else if (status === 'bought') {
+        // 申し込み後
+        return (
+          <Row style={{ marginTop: "1.5em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <h5>購入済みチケット</h5>
+              {tickets.map((ticket, i) => <Tickets ticket={ticket} event={event} key={i} />)}
+            </Col>
+            <Col sm="12" style={{ marginTop: "1.5em" }}>
+              <Link href={urlToPurchase}>
+                <Button block color="primary">
+                  追加のチケットを購入する
+                </Button>
+              </Link>
+            </Col>
+          </Row>
+        );
+      } else if (categories.length === 0) {
+          return
+      } else if (status === 'anonymous') {
+        return (
+          <Row style={{ marginTop: "2em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <p>チケットの購入にはログインが必要です</p>
+              <Link href='/login'>
+                <Button block color="info">ログイン / 会員登録する</Button>
+              </Link>
+            </Col>
+          </Row>
+        )
+      } else if (status === 'other') {
+        return (
+          <Row style={{ marginTop: "1.5em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Link href={urlToPurchase}>
+                <Button block color="primary">チケットを購入する</Button>
+              </Link>
+            </Col>
+          </Row>
+        )
+      }
     }
 
     const returnCatetgories = () => categories.map((category, i) => {
@@ -318,7 +322,7 @@ export default ({ user, event, categories, items, setModal, setModalInner, userD
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { firestore } = await initFirebaseAdmin();
-  const paths = (await firestore.collection("events").get()).docs.map(doc => `events/${doc.id}`)
+  const paths = (await firestore.collection("events").get()).docs.map(doc => `/events/${doc.id}`)
 
   return { paths, fallback: true };
 };
@@ -343,5 +347,7 @@ export const getStaticProps: GetStaticProps = async ctx => {
             src: url,
         }
     })
-    return { props: { event, categories, status, items }, revalidate: 1 }
+    return { props: { event, categories, items }, revalidate: 1 }
 }
+
+export default Event

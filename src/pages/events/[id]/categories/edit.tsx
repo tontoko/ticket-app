@@ -9,8 +9,9 @@ import { event } from 'events'
 import { useAlert } from 'react-alert'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import { firestore } from '@/src/lib/initFirebase'
+import withAuth from '@/src/lib/withAuth'
 
-export default ({ user, beforeCategories, setModal, setModalInner }) => {
+const Edit = ({ user, beforeCategories, setModal, setModalInner }) => {
   
   const alert = useAlert()
 
@@ -299,3 +300,5 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
   })
   return { props: { event, beforeCategories: categories } };
 }
+
+export default withAuth(Edit)

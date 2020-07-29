@@ -6,6 +6,7 @@ import { useAlert } from "react-alert"
 import { useStripe } from '@stripe/react-stripe-js'
 import zenginCode from 'zengin-code'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import withAuth from '@/src/lib/withAuth'
 
 export const CreateBankAccount: React.FC<any> = ({ user, setModal, setModalInner }) => {
   const stripe = useStripe()
@@ -55,7 +56,7 @@ export const CreateBankAccount: React.FC<any> = ({ user, setModal, setModalInner
         })
       })
       if (res.status === 200) {
-        router.push({ pathname: '/user/bankAccounts', query: { msg: encodeQuery('新しい銀行口座を登録しました。') } }, '/user/bankAccounts')
+        router.push({ pathname: `/users/${user.uid}/bankAccounts`, query: { msg: encodeQuery('新しい銀行口座を登録しました。') } }, `/users/${user.uid}/bankAccounts`)
       }
     } catch(e) {
       alert.error('エラーが発生しました。しばらくしてお試しください。')
@@ -165,4 +166,4 @@ export const CreateBankAccount: React.FC<any> = ({ user, setModal, setModalInner
   )
 }
 
-export default CreateBankAccount
+export default withAuth(CreateBankAccount)

@@ -1,15 +1,9 @@
 import { NextApiHandler } from "next";
-import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
-import stripe from "@/src/lib/stripe";
+import { stripeAccounts } from "@/src/lib/stripeRetrieve";
 
 const stripeAccountsRetrieve: NextApiHandler = async (req, res) => {
-  const { firestore } = await initFirebaseAdmin();
-  const {uid} = req.body
-  const { stripeId } = (
-    await firestore.collection("users").doc(uid).get()
-  ).data();
-  const { individual } = await stripe.accounts.retrieve(stripeId);
-  res.status(200).json({ individual });
+  const { individual, tos_acceptance } = await stripeAccounts(req.body.uid);
+  res.status(200).json({ individual, tos_acceptance });
 };
 
 export default stripeAccountsRetrieve

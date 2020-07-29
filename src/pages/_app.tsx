@@ -16,18 +16,19 @@ import Modal from '@/src/components/modal'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { encodeQuery } from '../lib/parseQuery'
-import Loading from '../components/loading'
+import checkAllowNoLoginUrlList from '../lib/checkAllowNoLoginUrlList'
+import { wrapper } from '../components/store'
+import { useSelector } from "react-redux";
 const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
 
 const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter()
-  const [modal, setModal] = useState(false)
+  const [modal, setModal] = useState(false);
   const [modalInner, setModalInner]: [ReactElement, Dispatch<SetStateAction<ReactElement>>] = useState()
   const [user, userLoading, userError] = useAuthState(auth);
-  const [userData, setUserData] = useState<firebase.firestore.DocumentData>();
-  let userDataListner = () => {return};
+  const state = useSelector(state => state)
 
   useEffect(() => {
     router.events.on("routeChangeStart", (url) => {
@@ -38,48 +39,30 @@ const App = ({ Component, pageProps }: AppProps) => {
   }, [])
 
   useEffect(() => {
+    if (userLoading) return;
+    if (userError) auth.signOut();
     (async () => {
-      if (userLoading) return;
-      if (userError) auth.signOut();
       if (user) {
-        userDataListner = firestore
-          .collection("users")
-          .doc(user.uid)
-          .onSnapshot((snap) => {
-            setUserData(snap.data());
-          });
         if (
           !user.emailVerified &&
           user.providerData[0].providerId === "password" &&
           !window.location.href.match(/^\/__\/auth\/action/)
         ) {
           router.push("/confirmEmail");
-          return;
-        }
-        if (
+        } else if (
           window.location.pathname === "/login" ||
           window.location.pathname === "/register" ||
           window.location.pathname === "/forgetPassword"
         ) {
           router.push(
             {
-              pathname: "/user",
+              pathname: `/users/${user.uid}`,
               query: { msg: encodeQuery("ログインしました") },
-            },
-            "/user"
+            }
           );
-          return;
         }
       }
-      if (
-        window.location.pathname !== "/" &&
-        window.location.pathname !== "/login" &&
-        window.location.pathname !== "/register" &&
-        window.location.pathname !== "/termsOfUse" &&
-        window.location.pathname !== "/forgetPassword" &&
-        !window.location.pathname.match(/^\/__\/auth\/action/) &&
-        !window.location.pathname.match(/^\/events\/[^\/]+\/*/)
-      ) {
+      if (!user && !checkAllowNoLoginUrlList()) {
         await router.push(
           {
             pathname: "/login",
@@ -88,8 +71,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         );
       }
     })();
-    return userDataListner();
-  }, [user]);
+  }, [user, userLoading, router.pathname]);
 
   const options = {
     timeout: 4000,
@@ -130,22 +112,20 @@ const App = ({ Component, pageProps }: AppProps) => {
             {...{
               user,
               userLoading,
-              userData,
             }}
-          >
+            >
             <Modal
               {...{
                 modal,
                 setModal,
                 modalInner,
               }}
-            />
+              />
             <Component
               {...pageProps}
               {...{
                 user,
                 userLoading,
-                userData,
                 setModal,
                 setModalInner,
               }}
@@ -157,4 +137,4 @@ const App = ({ Component, pageProps }: AppProps) => {
   );
 }
 
-export default App
+export default wrapper.withRedux(App);

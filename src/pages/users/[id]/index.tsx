@@ -3,37 +3,40 @@ import React, { useEffect, useState } from 'react'
 import { Form, Button, Row, Card, CardBody, Col, CardTitle, CardSubtitle, CardText } from 'reactstrap'
 import { firestore } from '@/src/lib/initFirebase'
 import getImg from '@/src/lib/getImg'
+import getImgSSR from '@/src/lib/getImgSSR'
 import moment from 'moment'
 import { parseCookies } from 'nookies'
 import { event } from 'events'
+import withAuth from '@/src/lib/withAuth'
+import { GetStaticPaths, GetStaticProps } from 'next'
+import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 
-export const UserShow: React.FC<any> = ({user, userData}) => {
-  const [event, setEvent] = useState(null);
+export const User: React.FC<any> = ({user, staticEvent}) => {
+  const [event, setEvent] = useState(staticEvent);
 
   useEffect(() => {
+    if (!user) return
     (async() => {
-      if (!userData) return
-      const history = userData.eventHistory;
       const cookie = parseCookies();
-      if (history || cookie.lastVisitedEvent) {
-        let doc: string;
-        if (history) {
-          doc = history[history.length - 1];
-        } else {
-          doc = cookie.lastVisitedEvent;
-        }
-        const result = await firestore.collection("events").doc(doc).get();
-        const data = result.data() as event;
-        const startDate = data.startDate.seconds;
-        const endDate = data.endDate.seconds;
-        const photos =
-          data.photos.length > 0
-            ? await getImg(data.photos[0], data.createdUser)
-            : await getImg(null, data.createdUser);
-        setEvent({ ...data, startDate, endDate, photos, id: result.id })
-      }
+      const lastVisitedEvent = cookie.lastVisitedEvent;
+      if (!lastVisitedEvent || staticEvent) return;
+      const result = await firestore.collection("events").doc(lastVisitedEvent).get();
+      const data = result.data() as event;
+      const startDate = data.startDate.seconds;
+      const endDate = data.endDate.seconds;
+      const photos =
+        data.photos.length > 0
+          ? await getImg(data.photos[0], data.createdUser)
+          : await getImg(null, data.createdUser);
+      setEvent({ ...data, startDate, endDate, photos, id: result.id })
+      firestore
+        .collection("users")
+        .doc(user.uid)
+        .update({
+          eventHistory: [lastVisitedEvent],
+        });
     })()
-  }, [userData])
+  }, [user])
   
   const renderUserEvent = () => {
       const showDate = () => {
@@ -79,7 +82,7 @@ export const UserShow: React.FC<any> = ({user, userData}) => {
           </Row>
         )}
         <Row form style={{ marginBottom: "1em" }}>
-          <Link href={`/user/edit`}>
+          <Link href={`/users/${user.uid}/edit`}>
             <Button className="ml-auto">登録情報の編集</Button>
           </Link>
         </Row>
@@ -88,4 +91,37 @@ export const UserShow: React.FC<any> = ({user, userData}) => {
   );
 }
 
-export default UserShow
+export default withAuth(User)
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { firestore } = await initFirebaseAdmin();
+  const paths = (await firestore.collection("users").get()).docs.map(
+    (doc) => `/users/${doc.id}`
+  );
+
+  return { paths, fallback: true };
+};
+
+export const getStaticProps: GetStaticProps = async ({params}) => {
+  const {id} = params
+  const { firestore } = await initFirebaseAdmin();
+  const userData = (await firestore.collection('users').doc(id as string).get()).data()
+
+  let staticEvent = null
+
+  if (userData.eventHistory) {
+    const result = await firestore
+      .collection("events")
+      .doc(userData.eventHistory[userData.eventHistory.length - 1])
+      .get();
+    const data = result.data() as event;
+    const startDate = data.startDate.seconds;
+    const endDate = data.endDate.seconds;
+    const photos =
+      data.photos.length > 0
+        ? await getImgSSR(data.photos[0], data.createdUser)
+        : await getImgSSR(null, data.createdUser);
+    staticEvent = { ...data, startDate, endDate, photos, id: result.id };
+  }
+  return { props: { staticEvent }, revalidate: 1 };
+};

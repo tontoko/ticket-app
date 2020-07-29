@@ -66,7 +66,7 @@ exports.refundNotify = functions.firestore.document('payments/{payment}/refunds/
       .doc(context.params.refund)
       .set({
         text,
-        url: `/user/payments/${context.params.payment}`,
+        url: `/users/${user.uid}/payments/${context.params.payment}`,
         read: false,
       });
 })

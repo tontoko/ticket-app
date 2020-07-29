@@ -4,7 +4,7 @@ import {
     CardTitle, CardSubtitle, Button, Col, Row
 } from 'reactstrap';
 import Link from 'next/link'
-import getImg from '@/src/lib/getImgSSR'
+import getImg from '@/src/lib/getImg'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { GetServerSideProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
@@ -16,37 +16,32 @@ import Tickets from '@/src/components/tickets';
 import { event } from 'events';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { firebase, firestore } from '@/src/lib/initFirebase';
+import withAuth from '@/src/lib/withAuth';
 
-export default ({ user, userData }) => {
-  const [payments] = useCollectionData<firebase.firestore.QueryDocumentSnapshot>(
-    firestore.collection("payments").where("buyer", "==", user.user_id),
-    { idField: 'id' }
-  );
-  const [events] = useCollectionData<firebase.firestore.QueryDocumentSnapshot>(
-    (() => {
-      const myEventsIds = Array.from(
-        new Set(payments.map((payment) => payment.data().event))
-      ); // 重複除外
-      return firestore
-        .collection("events")
-        .where(firebase.firestore.FieldPath.documentId(), "in", myEventsIds)
-    })()
-  );
-    
-  const [myTickets, setMyTickets] = useState<FirebaseFirestore.DocumentData[]>(
-    null
-  );
+const MyTickets = ({ user }) => {
+  const [payments, loading] = useCollectionData<
+    FirebaseFirestore.DocumentData
+  >(firestore.collection("payments").where("buyer", "==", user.uid), {
+    idField: "id",
+  });
+  const [myTickets, setMyTickets] = useState<FirebaseFirestore.DocumentData[]>([]);
 
   useEffect(() => {
-    if (!userData) return
+    if (loading) return;
     (async () => {
       if (payments.length > 0) {
+        const myEventsIds = Array.from(
+          new Set(payments.map((payment) => payment.data().event))
+        ); // 重複除外
+        const events = (await firestore
+          .collection("events")
+          .where(firebase.firestore.FieldPath.documentId(), "in", myEventsIds).get()).docs;
         setMyTickets(
           await Promise.all(
             events.map(async (event) => {
               const tickets = await Promise.all(
                 payments
-                  .filter((ticket) => ticket.data().event === event.id)
+                  .filter((payment) => payment.data().event === event.id)
                   .map(async (payment) => {
                     const categorySnapShot = await firestore
                       .collection("events")
@@ -161,3 +156,5 @@ export default ({ user, userData }) => {
     </div>
   );
 };
+
+export default withAuth(MyTickets)

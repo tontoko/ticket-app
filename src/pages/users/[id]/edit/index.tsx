@@ -4,51 +4,18 @@ import { FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
-import { GetServerSideProps } from 'next'
+import { GetServerSideProps, GetStaticPaths, GetStaticProps } from 'next'
 import isLogin from '@/src/lib/isLogin'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import stripe, { Stripe } from '@/src/lib/stripe'
 import { auth } from '@/src/lib/initFirebase'
 import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
+import getImgSSR from '@/src/lib/getImgSSR'
+import { stripeAccounts, stripeBalance } from '@/src/lib/stripeRetrieve'
 
-const UserShow = ({ user, userLoading }) => {
-  const [loading, setLoading] = useState(true);
-  const [signOut, setSignOut] = useState(false);
-  const [status, setStatus] = useState<string | null>();
-  const [balance, setBalance] = useState<Stripe.Balance>();
-
-  useEffect(() => {
-    if (!user) return
-    (async () => {
-      const { individual } = await(
-        await fetch("/api/stripeAccountsRetrieve", {
-          method: "POST",
-          headers: new Headers({
-            "Content-Type": "application/json",
-          }),
-          body: JSON.stringify({ uid: user.uid }),
-        })
-      ).json();
-      const verification = individual ? individual.verification : null;
-      setStatus(verification ? verification.status :null)
-      setBalance(
-        (await(
-          await fetch("/api/stripeBalanceRetrieve", {
-            method: "POST",
-            headers: new Headers({
-              "Content-Type": "application/json",
-            }),
-            body: JSON.stringify({ uid: user.uid }),
-          })
-        ).json()).balance
-      );
-      setLoading(false);
-    })()
-  }, [user])
-
-  if (loading) return <Loading />
-
+const UserShow = ({ user, status, balance }) => {
+  const [loading, setLoading] = useState(false);
   return (
     <div style={{ marginTop: "1.5em", marginBottom: "1.5em" }}>
       <h4>登録情報の変更</h4>
@@ -94,12 +61,12 @@ const UserShow = ({ user, userLoading }) => {
       {user.providerId === "password" && (
         <>
           <FormGroup style={{ marginTop: "2em" }}>
-            <Link href={`/user/edit/updateEmail`}>
+            <Link href={`/users/${user.uid}/edit/updateEmail`}>
               <a>メールアドレスを変更する</a>
             </Link>
           </FormGroup>
           <FormGroup>
-            <Link href={`/user/edit/updatePassword`}>
+            <Link href={`/users/${user.uid}/edit/updatePassword`}>
               <a>パスワードを変更する</a>
             </Link>
           </FormGroup>
@@ -112,7 +79,7 @@ const UserShow = ({ user, userLoading }) => {
           イベントを開催するには、ユーザー情報と本人確認書類を登録する必要があります。
         </Label>
         <FormGroup style={{ marginBottom: "1em" }}>
-          <Link href={`/user/edit/updateUser`}>
+          <Link href={`/users/${user.uid}/edit/updateUser`}>
             <a>ユーザー情報を追加・修正する</a>
           </Link>
         </FormGroup>
@@ -120,7 +87,7 @@ const UserShow = ({ user, userLoading }) => {
           {(() => {
             if (status === "unverified")
               return (
-                <Link href={`/user/edit/identification`}>
+                <Link href={`/users/${user.uid}/edit/identification`}>
                   <a>本人確認書類をアップロードする</a>
                 </Link>
               );
@@ -128,7 +95,7 @@ const UserShow = ({ user, userLoading }) => {
               return (
                 <>
                   <p>本人確認書類: </p>
-                  <Link href={`/user/edit/identification`}>
+                  <Link href={`/users/${user.uid}/edit/identification`}>
                     <a>
                       <FontAwesomeIcon
                         icon={faExclamationCircle}
@@ -153,7 +120,7 @@ const UserShow = ({ user, userLoading }) => {
           })()}
         </FormGroup>
         <FormGroup style={{ marginBottom: "1em" }}>
-          <Link href={`/user/bankAccounts`}>
+          <Link href={`/users/${user.uid}/bankAccounts`}>
             <a>売上振り込み用 銀行口座を追加・修正する</a>
           </Link>
         </FormGroup>
@@ -168,13 +135,13 @@ const UserShow = ({ user, userLoading }) => {
       </FormGroup>
 
       <FormGroup style={{ marginBottom: "1em" }}>
-        <Link href={`/user/edit/leave`}>
+        <Link href={`/users/${user.uid}/edit/leave`}>
           <a>退会する</a>
         </Link>
       </FormGroup>
 
       <Row form style={{ marginBottom: "1em" }}>
-        <Link href={`/user/payments`}>
+        <Link href={`/users/${user.uid}/payments`}>
           <Button className="ml-auto">購入履歴</Button>
         </Link>
       </Row>
@@ -182,9 +149,9 @@ const UserShow = ({ user, userLoading }) => {
       <Row form style={{ marginBottom: "2em" }}>
         <Button
           className="ml-auto"
-          disabled={signOut}
+          disabled={loading}
           onClick={async () => {
-            setSignOut(true);
+            setLoading(true);
             await auth.signOut();
           }}
         >
@@ -193,6 +160,24 @@ const UserShow = ({ user, userLoading }) => {
       </Row>
     </div>
   );
-}
+};
 
-export default withAuth(UserShow);
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { firestore } = await initFirebaseAdmin();
+  const paths = (await firestore.collection("users").get()).docs.map(
+    (doc) => `/users/${doc.id}/edit`
+    );
+    
+    return { paths, fallback: true };
+  };
+  
+  export const getStaticProps: GetStaticProps = async ({ params }) => {
+    const { id } = params;
+    const { individual } = await stripeAccounts(id)
+    const verification = individual ? individual.verification : null;
+    const status = verification ? verification.status : null;
+    const balance = await stripeBalance(id)
+    return { props: { status, balance }, revalidate: 1 };
+  };
+  
+  export default withAuth(UserShow);

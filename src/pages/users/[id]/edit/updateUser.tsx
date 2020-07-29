@@ -1,13 +1,10 @@
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
+import { Form, FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
-import errorMsg from '@/src/lib/errorMsg'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import DatePicker, { registerLocale } from "react-datepicker"
 import ja from 'date-fns/locale/ja'
 registerLocale('ja', ja)
@@ -19,10 +16,10 @@ import Stripe from 'stripe'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import stripe from '@/src/lib/stripe'
-import { Router } from 'express'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import withAuth from '@/src/lib/withAuth'
 
-export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, from }: { user: admin.auth.DecodedIdToken, individual: Stripe.Person, tos_acceptance: Stripe.Account.TosAcceptance, from: string}) => {
+export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance }: { user: admin.auth.DecodedIdToken, individual: Stripe.Person, tos_acceptance: Stripe.Account.TosAcceptance, from: string}) => {
   const alert = useAlert()
   const router = useRouter()
   const [form, setForm] = useState(individual ? individual : {
@@ -57,7 +54,7 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
   })
   const [birthDay, setBirthDay] = useState(toUtcIso8601str(moment()))
   const [agree, setAgree] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [] = useState(false)
 
   const setFormBirthDay = (moment: Moment) => {
     setBirthDay(toUtcIso8601str(moment))
@@ -82,8 +79,7 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
     }
     if (needParams.length > 0) return alert.error('項目に入力漏れがあります。')
     if (!agree && !tos_acceptance.date) return alert.error('同意します がチェックされていません。')
-    const { firebase } = await initFirebase()
-    const token = await firebase.auth().currentUser.getIdToken()
+    const token = await user.getIdToken()
     const res = await fetch('/api/updateUser', {
       method: 'POST',
       headers: new Headers({
@@ -95,22 +91,15 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
         ...form
       })
     })
-    switch (from) {
-      case '購入導線のアドレス':
-
-        break;
-      default:
-        if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
-        return router.push({ pathname: '/user/edit', query: { msg: encodeQuery('ユーザー情報を更新しました。') }}, '/user/edit')
-    }
+    if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
+    return router.push({ pathname: `/users/${user.uid}/edit`, query: { msg: encodeQuery('ユーザー情報を更新しました。') }})
   }
 
   const searchZipCode = async() => {
     try {
       const zip = form.address_kanji.postal_code 
       if (!zip) return
-      const { firebase } = await initFirebase()
-      const token = await firebase.auth().currentUser.getIdToken()
+      const token = await user.getIdToken()
       const res = await fetch('/api/searchZipCode', {
         method: 'POST',
         headers: new Headers({
@@ -262,24 +251,28 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user, res } = await isLogin(ctx, 'redirect')
-  if (!user) {
-    res.writeHead(302, {
-      Location: `/`,
-    });
-    res.end();
-    return { props: {} };
-  }
-  const { query } = ctx
-  const from = query.from ? query.from : ''
-  const { firestore } = await initFirebaseAdmin()
-  const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
-  const result = await stripe.accounts.retrieve(
-    stripeId
-  )
-  const { individual, tos_acceptance } = result
-  return { props: { user, individual: individual ? individual : null, tos_acceptance, from } }
-}
 
-export default UpdateUser
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { firestore } = await initFirebaseAdmin();
+  const paths = (await firestore.collection("users").get()).docs.map(
+    (doc) => `/users/${doc.id}/edit/updateUser`
+  );
+
+  return { paths, fallback: true };
+};
+
+export const getStaticProps: GetStaticProps = async ({params}) => {
+  const { id } = params;
+  const { firestore } = await initFirebaseAdmin();
+  const { stripeId } = (
+    await firestore.collection("users").doc(id as string).get()
+  ).data();
+  const result = await stripe.accounts.retrieve(stripeId);
+  const { individual, tos_acceptance } = result;
+  return {
+    props: { individual: individual ? individual : null, tos_acceptance },
+    revalidate: 1,
+  };
+};
+
+export default withAuth(UpdateUser)

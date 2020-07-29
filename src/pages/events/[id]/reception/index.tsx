@@ -5,9 +5,10 @@ import { Table, Container, Row, Col, Label, Button, Input, FormGroup, Form, Moda
 import { GetServerSideProps, GetStaticProps, GetStaticPaths } from 'next';
 import isLogin from '@/src/lib/isLogin';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import initFirebase from '@/src/lib/initFirebase';
 import { useAlert } from 'react-alert';
 import { event } from 'events';
+import { firestore, firebase } from '@/src/lib/initFirebase';
+import withAuth from '@/src/lib/withAuth';
 
 class NoStockError extends Error {
     constructor(message: string) {
@@ -16,7 +17,7 @@ class NoStockError extends Error {
     }
 }
 
-export default ({ events, categories, query, setModal, setModalInner }) => {
+const Reception = ({ events, categories, query, setModal, setModalInner }) => {
 
     const router = useRouter()
     const alert = useAlert()
@@ -36,7 +37,6 @@ export default ({ events, categories, query, setModal, setModalInner }) => {
         if (!newManualPayment.name) return alert.error('名前が入力されていません。')
         try {
             setLoading(true)
-            const { firebase, firestore } = await initFirebase()
             await firestore.runTransaction(async transaction => {
                 const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(newManualPayment.category)
                 const eventRef = firestore.collection('events').doc(query.id as string)
@@ -71,7 +71,6 @@ export default ({ events, categories, query, setModal, setModalInner }) => {
         if (!manualPayments[i].name) return alert.error('名前が入力されていません。')
         try {
             setLoading(true)
-            const { firestore } = await initFirebase()
             await firestore.runTransaction(async transaction => {
                 const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
                 const originalCategoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(originalManualPayments[i].category)
@@ -108,7 +107,6 @@ export default ({ events, categories, query, setModal, setModalInner }) => {
             try {
                 setLoading(true)
                 setModal(false)
-                const { firestore } = await initFirebase()
                 let copyManualPayments = [...manualPayments]
                 copyManualPayments.splice(i,1)
                 await firestore.runTransaction(async transaction => {
@@ -230,7 +228,7 @@ export default ({ events, categories, query, setModal, setModalInner }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
     const { firestore } = await initFirebaseAdmin()
-    const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `events/${doc.id}/reception`))
+    const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/reception`))
     return { paths, fallback: true }
 }
 
@@ -252,3 +250,5 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
 
     return { props: { categories, events } }
 }
+
+export default withAuth(Reception)

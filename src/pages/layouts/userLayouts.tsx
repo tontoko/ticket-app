@@ -34,33 +34,31 @@ const UserLayout: React.FC<any> = ({user, children}) => {
   return (
     <>
       <Navbar style={{ backgroundColor: "#A0522D" }} expand="md" dark>
-        <Link href={user ? "/user" : "/login"}>
+        <Link href={user ? `/users/${user.uid}` : "/login"}>
           <div>
             <NavbarBrand style={{ cursor: "pointer" }}>Ticket-App</NavbarBrand>
           </div>
         </Link>
         {user && (
           <>
-            <div style={{ marginLeft: "auto" }}>
-              <Link href={`/user/edit`}>
-                <div className="ml-auto mr-2">
-                  <Avater
-                    size="40"
-                    round
-                    style={{
-                      cursor: "pointer",
-                      backgroundColor: "lightgray",
-                    }}
-                    src={
-                      user.photoURL
-                        ? user.photoURL
-                        : "/icons/person-icon-default.png"
-                    }
-                  />
-                </div>
-              </Link>
-            </div>
-            <Link href={`/user/notifies`}>
+            <Link href={`/users/${user.uid}/edit`}>
+              <Avater
+                size="40"
+                round
+                className="ml-auto mr-2"
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: "lightgray",
+                  marginLeft: "auto",
+                }}
+                src={
+                  user.photoURL
+                    ? user.photoURL
+                    : "/icons/person-icon-default.png"
+                }
+              />
+            </Link>
+            <Link href={`/users/${user.uid}/notifies`}>
               <div
                 className="mr-2"
                 style={{
@@ -98,12 +96,12 @@ const UserLayout: React.FC<any> = ({user, children}) => {
             >
               <Nav navbar>
                 <NavItem style={{ cursor: "pointer" }}>
-                  <Link href={`/user/myEvents`}>
+                  <Link href={`/users/${user.uid}/myEvents`}>
                     <NavLink>主催するイベント</NavLink>
                   </Link>
                 </NavItem>
                 <NavItem style={{ cursor: "pointer" }}>
-                  <Link href={`/user/myTickets`}>
+                  <Link href={`/users/${user.uid}/myTickets`}>
                     <NavLink>購入済みチケット</NavLink>
                   </Link>
                 </NavItem>

@@ -5,14 +5,14 @@ import { Dispatch, SetStateAction } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem } from 'reactstrap'
 import Avater from 'react-avatar'
 
-const UserLayout: React.FC = () => {
+const UserLayout = (user) => {
     const [isOpen, toggle] = useState(false)
 
     return (
         // 未実装
         <Navbar color="danger" dark>
             <NavbarBrand href="/">管理者ツール</NavbarBrand>
-            <Link href="/user/1">
+            <Link href={`/users/${user.uid}/1`}>
                 <div className="ml-auto mr-2">
                     <Avater size="40" round style={{ cursor: "pointer" }} />
                 </div>
@@ -24,7 +24,7 @@ const UserLayout: React.FC = () => {
                         <NavLink href="/events">イベント一覧</NavLink>
                     </NavItem>
                     <NavItem>
-                        <NavLink href="/user/index">ユーザー一覧</NavLink>
+                        <NavLink href={`/users/${user.uid}/index`}>ユーザー一覧</NavLink>
                     </NavItem>
                 </Nav>
             </Collapse>
