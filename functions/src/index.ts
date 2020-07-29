@@ -59,6 +59,7 @@ exports.refundNotify = functions.firestore.document('payments/{payment}/refunds/
       targetUser === "admin"
         ? "ユーザーから調査依頼がありました。"
         : "あなたが主催するイベントに対して返金が申請されました。3日以内に対処しない場合、自動的に返金されます。";
+    const url = targetUser === 'admin' ? '' : `/users/${targetUser}/payments/${context.params.payment}`
     firestore
       .collection("users")
       .doc(targetUser)
@@ -66,7 +67,7 @@ exports.refundNotify = functions.firestore.document('payments/{payment}/refunds/
       .doc(context.params.refund)
       .set({
         text,
-        url: `/users/${user.uid}/payments/${context.params.payment}`,
+        url,
         read: false,
       });
 })
