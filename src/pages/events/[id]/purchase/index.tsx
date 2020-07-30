@@ -13,7 +13,7 @@ import withAuth from '@/src/lib/withAuth'
 export const Purchase = ({ user, event, categories, photoUrls }) => {
     const router = useRouter();
 
-    const validCategories = categories.filter(category => category.stock - category.sold > 0)
+    const validCategories = categories.filter(category => category.stock - category.sold >= 0)
     const [familyName, setFamilyName] = useState('')
     const [firstName, setFirstName] = useState('')
     const [email, setEmail] = useState(user.email)
