@@ -31,7 +31,7 @@ const MyTickets = ({ user }) => {
     (async () => {
       if (payments.length > 0) {
         const myEventsIds = Array.from(
-          new Set(payments.map((payment) => payment.data().event))
+          new Set(payments.map((payment) => payment.event))
         ); // 重複除外
         const events = (await firestore
           .collection("events")
@@ -41,22 +41,22 @@ const MyTickets = ({ user }) => {
             events.map(async (event) => {
               const tickets = await Promise.all(
                 payments
-                  .filter((payment) => payment.data().event === event.id)
+                  .filter((payment) => payment.event === event.id)
                   .map(async (payment) => {
                     const categorySnapShot = await firestore
                       .collection("events")
                       .doc(event.id)
                       .collection("categories")
-                      .doc(payment.data().category)
+                      .doc(payment.category)
                       .get();
                     return {
                       ...categorySnapShot.data(),
                       categoryId: categorySnapShot.id,
                       paymentId: payment.id,
-                      accepted: payment.data().accepted,
-                      error: payment.data().error,
-                      buyer: payment.data().buyer,
-                      seller: payment.data().seller,
+                      accepted: payment.accepted,
+                      error: payment.error,
+                      buyer: payment.buyer,
+                      seller: payment.seller,
                     };
                   })
               );

@@ -196,7 +196,7 @@ const EventForm = ({
               .collection("events")
               .doc(router.query.id as string)
               .update(eventData);
-            msg = "イベントが更新されました。";
+            msg = "イベントが更新されました。表示に反映されるまで時間がかかる場合があります。";
             pathname = `/events/${router.query.id}`;
         }
         router.push({

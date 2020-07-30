@@ -236,7 +236,7 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
       );
       router.push({
         pathname: `/events/${router.query.id}`,
-        query: { msg: encodeQuery("更新しました。") },
+        query: { msg: encodeQuery("更新しました。表示に反映されるまで時間がかかる場合があります。") },
       });
     } catch (e) {
       alert.error(e.message);
@@ -271,7 +271,7 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
         >
           キャンセル
         </Button>
-        <Button disabled={loading}>{loading ? <Spinner /> : "設定"}</Button>
+        <Button disabled={loading}>{loading ? <Spinner /> : "公開"}</Button>
       </ModalFooter>
     </Form>
   );

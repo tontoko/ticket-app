@@ -16,9 +16,13 @@ service cloud.firestore {
       allow delete: if false
     }
     match /events/{event} {
-    	allow read: if request.auth.uid == resource.data.createdUser;
+    	allow read: if true;
     	allow update: if request.auth.uid == resource.data.createdUser;
     	allow create: if request.auth.uid != null;
+    }
+    match /events/{event}/manualPayments/{manualPayment} {
+    	allow read, write: if request.auth.uid == 
+        get(/databases/$(database)/documents/events/$(event)).data.createdUser
     }
     match /events/{event}/categories/{category} {
     	allow read: if true

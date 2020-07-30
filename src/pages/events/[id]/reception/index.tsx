@@ -1,4 +1,4 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Table, Container, Row, Col, Label, Button, Input, FormGroup, Form, ModalBody, ModalFooter } from 'reactstrap';
@@ -9,6 +9,7 @@ import { useAlert } from 'react-alert';
 import { event } from 'events';
 import { firestore, firebase } from '@/src/lib/initFirebase';
 import withAuth from '@/src/lib/withAuth';
+import { useDocumentDataOnce } from 'react-firebase-hooks/firestore';
 
 class NoStockError extends Error {
     constructor(message: string) {
@@ -17,19 +18,36 @@ class NoStockError extends Error {
     }
 }
 
-const Reception = ({ events, categories, query, setModal, setModalInner }) => {
+type manualPayment = {category: string, name: string, paid: boolean}
 
+const Reception = ({ categories, id, setModal, setModalInner }) => {
     const router = useRouter()
     const alert = useAlert()
 
-    const [originalManualPayments, setOriginalManualPayments] = useState(events.manualPayments ? events.manualPayments : [])
-    const [manualPayments, setManualPayments] = useState(events.manualPayments ? events.manualPayments : [])
-    const [newManualPayment, setNewManualPayment] = useState({
-        name: '',
-        category: categories.length > 0 ? categories[0].id : '',
-        paid: true
-    })
-    const [loading, setLoading] = useState(false)
+    const [originalManualPayments, setOriginalManualPayments] = useState<manualPayment[]>([])
+    const [manualPayments, setManualPayments] = useState<manualPayment[]>([]);
+    const [newManualPayment, setNewManualPayment] = useState<manualPayment>({
+      name: "",
+      category: categories.length > 0 ? categories[0].id : "",
+      paid: true,
+    });
+    const [loading, setLoading] = useState(true)
+    const [firebaseresult, firebaseLoading] = useDocumentDataOnce<{manualPayments: manualPayment[]}>(
+      firestore
+        .collection("events")
+        .doc(id as string)
+        .collection("manualPayments")
+        .doc("default")
+    );
+
+    useEffect(() => {
+      if (firebaseLoading) return;
+      setLoading(false);
+      if (!firebaseresult) return;
+      const firebaseManualPayments = firebaseresult.manualPayments;
+      setOriginalManualPayments(firebaseManualPayments);
+      setManualPayments(firebaseManualPayments);
+    }, [firebaseLoading]);
 
     const createManualPayment = async () => {
         if (loading) return
@@ -38,13 +56,18 @@ const Reception = ({ events, categories, query, setModal, setModalInner }) => {
         try {
             setLoading(true)
             await firestore.runTransaction(async transaction => {
-                const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(newManualPayment.category)
-                const eventRef = firestore.collection('events').doc(query.id as string)
+                const categoryRef = firestore.collection('events').doc(id as string).collection('categories').doc(newManualPayment.category)
+                const manualPaymentsRef = firestore
+                  .collection("events")
+                  .doc(id as string)
+                  .collection("manualPayments").doc('default');
                 const targetCategory = (await transaction.get(categoryRef)).data()
                 if (targetCategory.stock - targetCategory.sold < 1) throw new NoStockError('チケットの在庫がありません。')
-                transaction.update(eventRef, {
-                    manualPayments: firebase.firestore.FieldValue.arrayUnion(newManualPayment)
-                })
+                transaction.set(manualPaymentsRef, {
+                  manualPayments: firebase.firestore.FieldValue.arrayUnion(
+                    newManualPayment
+                  ),
+                });
                 transaction.update(categoryRef, {
                     sold: targetCategory.sold + 1
                 })
@@ -72,9 +95,9 @@ const Reception = ({ events, categories, query, setModal, setModalInner }) => {
         try {
             setLoading(true)
             await firestore.runTransaction(async transaction => {
-                const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
-                const originalCategoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(originalManualPayments[i].category)
-                const eventRef = firestore.collection('events').doc(query.id as string)
+                const categoryRef = firestore.collection('events').doc(id as string).collection('categories').doc(manualPayments[i].category)
+                const originalCategoryRef = firestore.collection('events').doc(id as string).collection('categories').doc(originalManualPayments[i].category)
+                const eventRef = firestore.collection('events').doc(id as string)
                 const targetCategory = (await transaction.get(categoryRef)).data()
                 const originalCategory = (await transaction.get(originalCategoryRef)).data()
 
@@ -110,8 +133,8 @@ const Reception = ({ events, categories, query, setModal, setModalInner }) => {
                 let copyManualPayments = [...manualPayments]
                 copyManualPayments.splice(i,1)
                 await firestore.runTransaction(async transaction => {
-                    const categoryRef = firestore.collection('events').doc(query.id as string).collection('categories').doc(manualPayments[i].category)
-                    const eventRef = firestore.collection('events').doc(query.id as string)
+                    const categoryRef = firestore.collection('events').doc(id as string).collection('categories').doc(manualPayments[i].category)
+                    const eventRef = firestore.collection('events').doc(id as string)
                     const targetCategory = (await transaction.get(categoryRef)).data()
                     if (targetCategory.sold < 1) throw new Error('他の端末でリストが更新された可能性があります。リロードします。')
                     transaction.update(eventRef, {
@@ -172,8 +195,8 @@ const Reception = ({ events, categories, query, setModal, setModalInner }) => {
                     </Input>
                 </td>
                 <td style={{ width: '6em' }}>
-                    <Button style={{ margin: '0.1em' }} color="success" onClick={() => editManualPayment(i)}>編集</Button>
-                    <Button style={{ margin: '0.1em' }} color="danger" onClick={() => deleteManualPayment(i)}>削除</Button>
+                    <Button style={{ margin: '0.1em' }} color="success" disabled={loading} onClick={() => editManualPayment(i)}>編集</Button>
+                    <Button style={{ margin: '0.1em' }} color="danger" disabled={loading} onClick={() => deleteManualPayment(i)}>削除</Button>
                 </td>
             </tr>
         );
@@ -183,7 +206,7 @@ const Reception = ({ events, categories, query, setModal, setModalInner }) => {
         <>
             <Row style={{marginTop: "1.5em"}}>
                 <Col>
-                    <Link href={`/events/${router.query.id}/reception/qrReader`}>
+                    <Link href={`/events/${id}/reception/qrReader`}>
                         <Button color="success">QRリーダーを起動する</Button>
                     </Link>
                 </Col>
@@ -214,7 +237,7 @@ const Reception = ({ events, categories, query, setModal, setModalInner }) => {
                                     </Input>
                                 </td>
                                 <td style={{ width: '6em' }}>
-                                    <Button color="primary" onClick={createManualPayment}>登録</Button>
+                                    <Button disabled={loading} color="primary" onClick={createManualPayment}>登録</Button>
                                 </td>
                             </tr>
                             {manualPayments.map((e,i) => column(e,i))}
@@ -248,7 +271,7 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
     const endDate = data.endDate.seconds
     const events = { ...data, startDate, endDate, id: eventsSnapShot.id }
 
-    return { props: { categories, events } }
+    return { props: { categories, events, id } }
 }
 
 export default withAuth(Reception)

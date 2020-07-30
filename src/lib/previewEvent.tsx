@@ -166,7 +166,7 @@ const PreviewModal = ({
           type="button"
           onClick={submit}
         >
-          {thisLoading ? <Spinner /> : "送信"}
+          {thisLoading ? <Spinner /> : "公開"}
         </Button>
       </ModalFooter>
     </div>
