@@ -11,7 +11,7 @@ import { firestore } from '@/src/lib/initFirebase'
 import { useCollection } from "react-firebase-hooks/firestore";
 import Loading from '@/src/components/loading'
 
-const UserLayout: React.FC<any> = ({user, children}) => {
+const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
   const router = useRouter()
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
@@ -114,35 +114,36 @@ const UserLayout: React.FC<any> = ({user, children}) => {
             </Collapse>
           </>
         )}
-        {!user && (
-          <>
-            <div style={{ marginLeft: "auto" }} />
-            <NavbarToggler onClick={() => toggle(!isOpen)} />
-            <Collapse
-              isOpen={isOpen}
-              navbar
-              className="justify-content-end flex-grow-0"
-            >
-              <Nav navbar>
-                <NavItem style={{ cursor: "pointer" }}>
-                  <Link href={`/register`}>
-                    <NavLink>新規登録する</NavLink>
-                  </Link>
-                </NavItem>
-                <NavItem style={{ cursor: "pointer" }}>
-                  <Link href={`/login`}>
-                    <NavLink>ログイン</NavLink>
-                  </Link>
-                </NavItem>
-                <NavItem style={{ cursor: "pointer" }}>
-                  <Link href={`/termsOfUse`}>
-                    <NavLink>利用規約</NavLink>
-                  </Link>
-                </NavItem>
-              </Nav>
-            </Collapse>
-          </>
-        )}
+        {!user &&
+          !userLoading && (
+            <>
+              <div style={{ marginLeft: "auto" }} />
+              <NavbarToggler onClick={() => toggle(!isOpen)} />
+              <Collapse
+                isOpen={isOpen}
+                navbar
+                className="justify-content-end flex-grow-0"
+              >
+                <Nav navbar>
+                  <NavItem style={{ cursor: "pointer" }}>
+                    <Link href={`/register`}>
+                      <NavLink>新規登録する</NavLink>
+                    </Link>
+                  </NavItem>
+                  <NavItem style={{ cursor: "pointer" }}>
+                    <Link href={`/login`}>
+                      <NavLink>ログイン</NavLink>
+                    </Link>
+                  </NavItem>
+                  <NavItem style={{ cursor: "pointer" }}>
+                    <Link href={`/termsOfUse`}>
+                      <NavLink>利用規約</NavLink>
+                    </Link>
+                  </NavItem>
+                </Nav>
+              </Collapse>
+            </>
+          )}
       </Navbar>
       <Container style={{ marginTop: "2em", marginBottom: "2em" }}>
         {children}

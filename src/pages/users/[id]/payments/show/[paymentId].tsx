@@ -12,13 +12,13 @@ import { useRouter } from "next/router";
 import { auth } from "@/src/lib/initFirebase";
 import withAuth from "@/src/lib/withAuth";
 
-const Show = ({ payment, event, category, refunded, permit }) => {
+const Show = ({ user, payment, event, category, refunded }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter()
 
   useEffect(() => {
     if (!router) return;
-    if (!permit) {
+    if (payment.seller !== user.id || payment.buyer !== user.id) {
       auth.signOut()
       return 
     }
@@ -95,11 +95,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     .where("refunded", '==', true)
     .get()
     ).size > 0;
-  
-  const permit = payment.seller === id || payment.buyer === id
 
   return {
-    props: { payment, event, category, refunded, permit },
+    props: { payment, event, category, refunded },
     revalidate: 1,
   };
 };

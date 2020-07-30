@@ -35,11 +35,11 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
 
     useEffect(() => {
       if (!user) return
-      if (user.uid === uid) {
-        setLoading(false)
+      if (user.uid !== uid) {
+        auth.signOut()
         return
       }
-      auth.signOut()
+      setLoading(false)
     }, [user])
 
     const handleSubmit = async (e) => {

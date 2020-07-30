@@ -51,9 +51,7 @@ const Action = ({user}) => {
     }, [router])
 
     const redirectAfterUpdate = async(msg?:string) => {
-        if (user) {
-            await auth.signOut()
-        }
+        if (user) await auth.signOut()
         if (msg) {
             const message = encodeQuery(msg)
             return router.push({ pathname: `/login`, query: { msg: message } }, "/login");
