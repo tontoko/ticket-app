@@ -1,13 +1,5 @@
-import Link from 'next/link'
-import React, { useState, useEffect } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
-import { useAlert } from "react-alert"
-import errorMsg from '@/src/lib/errorMsg'
-import Loading from '@/src/components/loading'
-import { useRouter } from 'next/router'
-import Firebase from 'firebase'
-import ResetPassword from './resetPassword'
+import React, { useState } from 'react'
+import { FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 
 interface props {
   confirmResetPassword: (newPwd:string, newPwdConfirm:string) => void
