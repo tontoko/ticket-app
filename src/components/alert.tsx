@@ -1,6 +1,6 @@
 import { Alert } from 'reactstrap'
 
-export default ({ style, options, message, close }) => {
+const alert = ({ style, options, message, close }) => {
     let color =''
     if (options.type === 'success') color = 'success'
     if (options.type === 'error') color = 'danger'
@@ -11,3 +11,5 @@ export default ({ style, options, message, close }) => {
         </Alert>
     )
 }
+
+export default alert

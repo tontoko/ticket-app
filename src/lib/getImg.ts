@@ -1,6 +1,6 @@
 import { storage } from '@/src/lib/initFirebase'
 
-export default async (img:string, uid: string, size?: '800' | '360') => {
+const getImg = async (img:string, uid: string, size?: '800' | '360') => {
   
   if (!img) return await storage.ref('event_default_360x360.jpg').getDownloadURL() as string
   
@@ -42,3 +42,5 @@ export default async (img:string, uid: string, size?: '800' | '360') => {
     return await storage.ref('event_default_800x800.jpg').getDownloadURL() as string
   }
 }
+
+export default getImg

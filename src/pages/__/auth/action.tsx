@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container } from 'reactstrap'
+import { Form } from 'reactstrap'
 import { auth } from '@/src/lib/initFirebase'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
@@ -8,7 +8,7 @@ import {useRouter} from 'next/router'
 import ResetPassword from './resetPassword'
 import { encodeQuery } from '@/src/lib/parseQuery'
 
-export default () => {
+const Action = ({user}) => {
     const alert = useAlert()
     const router = useRouter()
     const [loading, setLoading] = useState(true)
@@ -51,7 +51,7 @@ export default () => {
     }, [router])
 
     const redirectAfterUpdate = async(msg?:string) => {
-        if (auth.currentUser) {
+        if (user) {
             await auth.signOut()
         }
         if (msg) {
@@ -116,3 +116,5 @@ export default () => {
         </Form>
     )
 }
+
+export default Action

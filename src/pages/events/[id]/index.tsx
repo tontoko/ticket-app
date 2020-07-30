@@ -12,7 +12,6 @@ import getImg from '@/src/lib/getImgSSR'
 import { GetStaticProps, GetStaticPaths } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { firestore } from '@/src/lib/initFirebase'
-import { event } from 'events'
 import moment from 'moment'
 import { setCookie } from 'nookies'
 import {
@@ -25,11 +24,10 @@ import {
 } from "react-share";
 import Tickets from '@/src/components/tickets';
 
-const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
+const Event = ({ user, userLoading, event, categories, items, setModal, setModalInner }) => {
+    if (!event) return <></>
     const router = useRouter();
     const [tickets, setTickets] = useState([]);
-    const startDate = moment(event.startDate * 1000)
-    const endDate = moment(event.endDate * 1000)
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false);
     const [status, setStatus] = useState<
@@ -50,9 +48,11 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     });
 
     useEffect(() => {
-      let ticketListener = () => {return};
-      if (!router) return;
-      (async() => {
+      let ticketListener = () => {
+        return;
+      };
+      if (!router || userLoading) return;
+      (async () => {
         if (!user) {
           setStatus("anonymous");
           setCookie(null, "lastVisitedEvent", event.id, {
@@ -66,42 +66,45 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
             .collection("payments")
             .where("event", "==", event.id)
             .where("buyer", "==", user.uid)
-            .onSnapshot(async snap => {
-              const payments = snap.docs
-              setTickets(await Promise.all(
-                payments
-                  .filter((ticket) => ticket.data().event === event.id)
-                  .map(async (payment) => {
-                    const targetCategory = categories.filter(
-                      (catgegory) => catgegory.id === payment.data().category
-                    )[0];
-                    return {
-                      ...targetCategory,
-                      categoryId: targetCategory.id,
-                      paymentId: payment.id,
-                      accepted: payment.data().accepted,
-                      error: payment.data().error,
-                      buyer: payment.data().buyer,
-                      seller: payment.data().seller,
-                    };
-                  })
-              ));
+            .onSnapshot(async (snap) => {
+              const payments = snap.docs;
+              setTickets(
+                await Promise.all(
+                  payments
+                    .filter((ticket) => ticket.data().event === event.id)
+                    .map(async (payment) => {
+                      const targetCategory = categories.filter(
+                        (catgegory) => catgegory.id === payment.data().category
+                      )[0];
+                      return {
+                        ...targetCategory,
+                        categoryId: targetCategory.id,
+                        paymentId: payment.id,
+                        accepted: payment.data().accepted,
+                        error: payment.data().error,
+                        buyer: payment.data().buyer,
+                        seller: payment.data().seller,
+                      };
+                    })
+                )
+              );
               setStatus(snap.size > 0 ? "bought" : "other");
-            })
+            });
           // ログイン済みで主催者以外の場合に履歴に追加
-          if (user) {
-            let { eventHistory } = (await firestore.collection('users').doc(user.uid).get()).data();
-            if (!eventHistory) eventHistory = [];
-            eventHistory = Array.from(new Set([...eventHistory, event.id]));
-            eventHistory.length > 10 && eventHistory.shift();
-            await firestore
-              .collection("users")
-              .doc(user.uid)
-              .update({ eventHistory });
-          }
+          let { eventHistory } = (
+            await firestore.collection("users").doc(user.uid).get()
+          ).data();
+          if (!eventHistory) eventHistory = [];
+          eventHistory = Array.from(new Set([...eventHistory, event.id]));
+          eventHistory.length > 10 && eventHistory.shift();
+          await firestore
+            .collection("users")
+            .doc(user.uid)
+            .update({ eventHistory });
         }
-      })()
-    }, [router, user])
+      })();
+      return ticketListener;
+    }, [router, user, userLoading]);
 
     useEffect(() => {
         setTwitterShareProps({
@@ -142,16 +145,20 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     }
     
     const slides = items.map((item) => {
-        return (
-            <CarouselItem
-                onExiting={() =>setAnimating(true)}
-                onExited={() => setAnimating(false)}
-                key={item.src}
-            >
-                <img src={item.src} style={{ width: "100%", height: "100%" }} onClick={() => callModalForImg(item.src)} />
-            </CarouselItem>
-        )
-    })
+      return (
+        <CarouselItem
+          onExiting={() => setAnimating(true)}
+          onExited={() => setAnimating(false)}
+          key={item.src}
+        >
+          <img
+            src={item.src}
+            style={{ width: "100%", height: "100%" }}
+            onClick={() => callModalForImg(item.src)}
+          />
+        </CarouselItem>
+      );
+    });
 
     const callModalForImg = (src) => {
         setModalInner(<img src={src} style={{ width: "100%", height: "100%" }} onClick={() => setModal(false)} />)
@@ -246,7 +253,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
       <>
         <Row style={{ marginTop: "1em", marginLeft: "0" }}>
           <h3>
-            【{moment(startDate).format("M/d")}】{event.name}
+            【{moment(event.startDate * 1000).format("M/d")}】{event.name}
           </h3>
         </Row>
         <Row style={{ marginTop: "1em" }}>
@@ -282,17 +289,25 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
             </FormGroup>
             <FormGroup>
               <h5>開始</h5>
-              <p>{moment(startDate).format("YYYY年 M月d日 H:mm")}</p>
+              <p>
+                {moment(event.startDate * 1000).format("YYYY年 M月d日 H:mm")}
+              </p>
             </FormGroup>
             <FormGroup>
               <h5>終了</h5>
-              <p>{moment(endDate).format("YYYY年 M月d日 H:mm")}</p>
+              <p>{moment(event.endData * 1000).format("YYYY年 M月d日 H:mm")}</p>
             </FormGroup>
             <FormGroup>
-              <TwitterShareButton {...twitterShareProps} style={{ marginRight: "1em" }}>
+              <TwitterShareButton
+                {...twitterShareProps}
+                style={{ marginRight: "1em" }}
+              >
                 <TwitterIcon size={40} />
               </TwitterShareButton>
-              <FacebookShareButton {...facebookShareProps} style={{ marginRight: "1em" }}>
+              <FacebookShareButton
+                {...facebookShareProps}
+                style={{ marginRight: "1em" }}
+              >
                 <FacebookIcon size={40} />
               </FacebookShareButton>
               <LineShareButton {...lineShareProps}>
@@ -311,7 +326,12 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
               )}
             </FormGroup>
           </Col>
-          <Col xs="12" md="6" lg="8" style={{ marginTop: "1em", whiteSpace: 'pre-wrap' }}>
+          <Col
+            xs="12"
+            md="6"
+            lg="8"
+            style={{ marginTop: "1em", whiteSpace: "pre-wrap" }}
+          >
             <h6>{event.eventDetail}</h6>
             {buttons()}
           </Col>
@@ -322,31 +342,39 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { firestore } = await initFirebaseAdmin();
-  const paths = (await firestore.collection("events").get()).docs.map(doc => `/events/${doc.id}`)
+  const paths = await Promise.all((await firestore.collection("events").get()).docs.map(async doc => `/events/${doc.id}`))
 
   return { paths, fallback: true };
 };
 
-
-export const getStaticProps: GetStaticProps = async ctx => {
-    const query = ctx.params
+export const getStaticProps: GetStaticProps = async ({params}) => {
+    const {id} = params
     const { firestore } = await initFirebaseAdmin()
-    const result = await firestore
-      .collection("events")
-      .doc(query.id as string)
-      .get();
-    const data = result.data() as event
-    const startDate = data.startDate.seconds
-    const endDate = data.endDate.seconds
-    const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser, '800'))) : [await getImg(null, data.createdUser)]
-    const event = { ...data, startDate, endDate, photos, id: result.id }
-    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
-    
-    const items = event.photos.map((url) => {
-        return {
-            src: url,
-        }
-    })
+    const snapshot = await firestore.collection("events").doc(id as string).get();
+    const data = snapshot.data()
+    const startDate = data.startDate.seconds;
+    const endDate = data.endDate.seconds;
+    const event = { ...data, startDate, endDate, id: snapshot.id };
+    const items =
+      data.photos.length > 0
+        ? await Promise.all(
+            data.photos.map(
+              async (photo) => {return {src: await getImg(photo, data.createdUser, "800")}}
+            )
+          )
+        : [{src: await getImg(null, data.createdUser)}];
+    const categories = await Promise.all(
+      (
+        await firestore
+          .collection("events")
+          .doc(id as string)
+          .collection("categories")
+          .orderBy("index")
+          .get()
+      ).docs.map(async (category) => {
+        return { ...category.data(), id: category.id };
+      })
+    );
     return { props: { event, categories, items }, revalidate: 1 }
 }
 

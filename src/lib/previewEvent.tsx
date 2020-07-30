@@ -4,7 +4,7 @@ import {
 import moment from 'moment'
 import { useState, useEffect } from 'react';
 
-export default ({
+const previewEvent = ({
   setModal,
   setModalInner,
   submitEvent,
@@ -172,3 +172,5 @@ const PreviewModal = ({
     </div>
   );
 };
+
+export default previewEvent

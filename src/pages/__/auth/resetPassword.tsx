@@ -5,7 +5,7 @@ interface props {
   confirmResetPassword: (newPwd:string, newPwdConfirm:string) => void
 }
 
-export default (props: props) => {
+const ResetPassword = (props: props) => {
   const [newPwd, setNewPwd] = useState('')
   const [newPwdConfirm, setNewPwdConfirm] = useState('') 
 
@@ -25,3 +25,5 @@ export default (props: props) => {
     </Row>
   )
 }
+
+export default ResetPassword;

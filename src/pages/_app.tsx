@@ -135,17 +135,5 @@ const App = ({ Component, pageProps }: AppProps) => {
     </>
   );
 }
-
-App.getInitialProps = async ({ Component, ctx }: AppContext) => {
-
-  return {
-    pageProps: {
-      // Call page-level getInitialProps
-      ...(Component.getInitialProps
-        ? await Component.getInitialProps(ctx)
-        : {}),
-    },
-  };
-};
               
 export default App;

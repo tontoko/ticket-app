@@ -5,7 +5,7 @@ import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import { auth } from '../lib/initFirebase'
 
-export default ({user}) => {
+const ConfirmEmail = ({user}) => {
     const router = useRouter()
     const [msg, setMsg] = useState('')
     const [loading, setLoading] = useState(true)
@@ -40,3 +40,5 @@ export default ({user}) => {
     <h4>{msg}</h4>
     )
 }
+
+export default ConfirmEmail

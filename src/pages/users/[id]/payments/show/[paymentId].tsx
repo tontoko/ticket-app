@@ -51,9 +51,15 @@ const Show = ({ payment, event, category, refunded, permit }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const { firestore } = await initFirebaseAdmin();
-  const paths = (await firestore.collection("users").get()).docs.map(
-    (doc) => `/users/${doc.id}/payments`
-  );
+  let paths = []
+  await Promise.all((await firestore.collection("events").get()).docs.map(
+    async (event) =>
+      (await firestore.collection("payments").get()).docs.map((payment) => {
+        return paths.push({
+          params: { id: event.id, paymentId: payment.id },
+        });
+      })
+  ));
 
   return { paths, fallback: true };
 };

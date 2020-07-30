@@ -1,6 +1,6 @@
 
 
-export default () => {
+const checkAllowNoLoginUrlList = () => {
     return window.location.pathname === "/" ||
       window.location.pathname === "/login" ||
       window.location.pathname === "/register" ||
@@ -9,3 +9,5 @@ export default () => {
       !!window.location.pathname.match(/^\/__\/auth\/action/) ||
       !!window.location.pathname.match(/^\/events\/[^\/]+\/*/);
 }
+
+export default checkAllowNoLoginUrlList

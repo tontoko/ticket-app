@@ -1,4 +1,4 @@
-export default (e, method?) => {
+const errorMsg = (e, method?) => {
     console.log(e)
     switch (e.code) {
         case 'auth/cancelled-popup-request':
@@ -44,3 +44,5 @@ export default (e, method?) => {
                 return 'エラーが発生しました。しばらく時間をおいてお試しください。';
             }
 }
+
+export default errorMsg
