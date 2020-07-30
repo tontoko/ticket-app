@@ -6,7 +6,7 @@ import UserLayouts from './layouts/userLayouts'
 import { auth, firestore } from '@/src/lib/initFirebase'
 import { useAuthState } from "react-firebase-hooks/auth";
 import {useRouter} from 'next/router'
-import { AppProps } from 'next/app'
+import { AppProps, AppContext } from 'next/app'
 import Head from "next/head";
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -17,26 +17,15 @@ import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { encodeQuery } from '../lib/parseQuery'
 import checkAllowNoLoginUrlList from '../lib/checkAllowNoLoginUrlList'
-import { wrapper } from '../components/store'
-import { useSelector } from "react-redux";
 const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
 
 const App = ({ Component, pageProps }: AppProps) => {
-  const router = useRouter()
+  const router = useRouter();
   const [modal, setModal] = useState(false);
   const [modalInner, setModalInner]: [ReactElement, Dispatch<SetStateAction<ReactElement>>] = useState()
   const [user, userLoading, userError] = useAuthState(auth);
-  const state = useSelector(state => state)
-
-  useEffect(() => {
-    router.events.on("routeChangeStart", (url) => {
-      NProgress.start();
-    });
-    router.events.on("routeChangeComplete", () => NProgress.done());
-    router.events.on("routeChangeError", () => NProgress.done());
-  }, [])
 
   useEffect(() => {
     if (userLoading) return;
@@ -54,24 +43,30 @@ const App = ({ Component, pageProps }: AppProps) => {
           window.location.pathname === "/register" ||
           window.location.pathname === "/forgetPassword"
         ) {
-          router.push(
-            {
-              pathname: `/users/${user.uid}`,
-              query: { msg: encodeQuery("ログインしました") },
-            }
-          );
+          router.push({
+            pathname: `/users/${user.uid}`,
+            query: { msg: encodeQuery("ログインしました") },
+          });
         }
       }
-      if (!user && !checkAllowNoLoginUrlList()) {
-        await router.push(
-          {
+      if (!user) {
+        if (!checkAllowNoLoginUrlList()) {
+          await router.push({
             pathname: "/login",
             query: { msg: encodeQuery("ログアウトしました") },
-          }
-        );
+          });
+        }
       }
     })();
   }, [user, userLoading, router.pathname]);
+
+  useEffect(() => {
+    router.events.on("routeChangeStart", (url) => {
+      NProgress.start();
+    });
+    router.events.on("routeChangeComplete", () => NProgress.done());
+    router.events.on("routeChangeError", () => NProgress.done());
+  }, []);
 
   const options = {
     timeout: 4000,
@@ -107,27 +102,31 @@ const App = ({ Component, pageProps }: AppProps) => {
       </Head>
       <Provider template={AlertTemplate} {...options}>
         <Elements stripe={stripePromise}>
+          <Modal
+            {...{
+              modal,
+              setModal,
+              modalInner,
+            }}
+          />
           <UserLayouts
             {...pageProps}
             {...{
+              setModal,
+              setModalInner,
+              Component,
               user,
               userLoading,
             }}
-            >
-            <Modal
-              {...{
-                modal,
-                setModal,
-                modalInner,
-              }}
-              />
+          >
             <Component
               {...pageProps}
               {...{
-                user,
-                userLoading,
                 setModal,
                 setModalInner,
+                Component,
+                user,
+                userLoading,
               }}
             />
           </UserLayouts>
@@ -137,4 +136,16 @@ const App = ({ Component, pageProps }: AppProps) => {
   );
 }
 
-export default wrapper.withRedux(App);
+App.getInitialProps = async ({ Component, ctx }: AppContext) => {
+
+  return {
+    pageProps: {
+      // Call page-level getInitialProps
+      ...(Component.getInitialProps
+        ? await Component.getInitialProps(ctx)
+        : {}),
+    },
+  };
+};
+              
+export default App;

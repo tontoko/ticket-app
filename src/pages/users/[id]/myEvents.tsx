@@ -6,7 +6,7 @@ import {
 import Link from 'next/link'
 import getImg from '@/src/lib/getImgSSR'
 import moment from 'moment'
-import stripe from '@/src/lib/stripe';
+import stripe, { Stripe } from '@/src/lib/stripe';
 import { event } from 'events';
 import { firestore } from '@/src/lib/initFirebase';
 import Loading from '@/src/components/loading';
@@ -14,7 +14,23 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import withAuth from '@/src/lib/withAuth';
 
-const MyEvents = ({ user, events, requirements }) => {
+const MyEvents = ({ user, events }) => {
+  const [requirements, setRequirements] = useState<Stripe.Person.Requirements | any>(null)
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const res = await fetch("/api/stripeAccountsRetrieve", {
+        method: "POST",
+        headers: new Headers({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({ uid: user.uid }),
+      });
+      const {individual} = await res.json();
+      setRequirements(individual ? individual.requirements : null);
+    })();
+  }, [user]);
 
   const renderUserEvents = () =>
     events.map((event, i) => {
@@ -122,13 +138,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       return { ...data, startDate, endDate, photos, id: doc.id };
     })
   )
-  const { stripeId } = (
-    await firestore.collection("users").doc(id as string).get()
-  ).data();
-  const { individual } = await stripe.accounts.retrieve(stripeId);
-  const requirements = individual ? individual.requirements : null
 
-  return { props: { events, requirements }, revalidate: 1 };
+  return { props: { events }, revalidate: 1 };
 };
 
 export default withAuth(MyEvents);
