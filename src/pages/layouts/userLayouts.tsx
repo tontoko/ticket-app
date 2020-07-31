@@ -9,7 +9,7 @@ import { useRouter } from 'next/router'
 import { decodeQuery } from '@/src/lib/parseQuery'
 import { firestore } from '@/src/lib/initFirebase'
 
-const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
+const UserLayout: React.FC<any> = ({ user, tmpUser, userLoading, children }) => {
   const router = useRouter()
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
@@ -41,9 +41,9 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
             <NavbarBrand style={{ cursor: "pointer" }}>Ticket-App</NavbarBrand>
           </div>
         </Link>
-        {user && (
+        {(user || tmpUser) && (
           <>
-            <Link href={`/users/${user.uid}/edit`}>
+            <Link href={`/users/${user ? user.uid : tmpUser.uid}/edit`}>
               <Avater
                 size="40"
                 round
@@ -54,13 +54,18 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
                   marginLeft: "auto",
                 }}
                 src={
-                  user.photoURL
-                    ? user.photoURL
-                    : "/icons/person-icon-default.png"
+                  (() => {
+                    if (user) {
+                      return user.photoURL
+                        ? user.photoURL
+                        : "/icons/person-icon-default.png"
+                    }
+                    return tmpUser.photoURL
+                  })()
                 }
               />
             </Link>
-            <Link href={`/users/${user.uid}/notifies`}>
+            <Link href={`/users/${user ? user.uid : tmpUser.uid}/notifies`}>
               <div
                 className="mr-2"
                 style={{
@@ -98,12 +103,12 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
             >
               <Nav navbar>
                 <NavItem style={{ cursor: "pointer" }}>
-                  <Link href={`/users/${user.uid}/myEvents`}>
+                  <Link href={`/users/${user ? user.uid : tmpUser.uid}/myEvents`}>
                     <NavLink>主催するイベント</NavLink>
                   </Link>
                 </NavItem>
                 <NavItem style={{ cursor: "pointer" }}>
-                  <Link href={`/users/${user.uid}/myTickets`}>
+                  <Link href={`/users/${user ? user.uid : tmpUser.uid}/myTickets`}>
                     <NavLink>購入済みチケット</NavLink>
                   </Link>
                 </NavItem>
@@ -116,7 +121,7 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
             </Collapse>
           </>
         )}
-        {!user &&
+        {!user && !tmpUser &&
           !userLoading && (
             <>
               <div style={{ marginLeft: "auto" }} />

@@ -17,6 +17,7 @@ import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { encodeQuery } from '../lib/parseQuery'
 import checkAllowNoLoginUrlList from '../lib/checkAllowNoLoginUrlList'
+import { setCookie, destroyCookie, parseCookies } from 'nookies'
 const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
@@ -26,12 +27,25 @@ const App = ({ Component, pageProps }: AppProps) => {
   const [modal, setModal] = useState(false);
   const [modalInner, setModalInner]: [ReactElement, Dispatch<SetStateAction<ReactElement>>] = useState()
   const [user, userLoading, userError] = useAuthState(auth);
+  const cookies = parseCookies()
+  const [tmpUser, setTmpUser] = useState(cookies.tmpUser);
 
   useEffect(() => {
     if (userLoading) return;
     if (userError) auth.signOut();
     (async () => {
       if (user) {
+
+        setCookie(null, "tmpUser", JSON.stringify({
+          photoURL: user.photoURL,
+          providerData: user.providerData,
+          uid: user.uid
+        }), {
+          maxAge: 60,
+          path: "/",
+          domain: document.domain,
+          secure: document.domain !== 'localhost',
+        });
         if (
           !user.emailVerified &&
           user.providerData[0].providerId === "password" &&
@@ -50,6 +64,8 @@ const App = ({ Component, pageProps }: AppProps) => {
         }
       }
       if (!user) {
+        destroyCookie(null, 'photoUrl')
+        setTmpUser(null)
         if (!checkAllowNoLoginUrlList()) {
           await router.push({
             pathname: "/login",
@@ -112,6 +128,7 @@ const App = ({ Component, pageProps }: AppProps) => {
           <UserLayouts
             {...pageProps}
             {...{
+              tmpUser,
               setModal,
               setModalInner,
               Component,
