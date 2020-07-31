@@ -17,7 +17,6 @@ import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { encodeQuery } from '../lib/parseQuery'
 import checkAllowNoLoginUrlList from '../lib/checkAllowNoLoginUrlList'
-import { setCookie, destroyCookie, parseCookies } from 'nookies'
 const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
@@ -27,22 +26,12 @@ const App = ({ Component, pageProps }: AppProps) => {
   const [modal, setModal] = useState(false);
   const [modalInner, setModalInner]: [ReactElement, Dispatch<SetStateAction<ReactElement>>] = useState()
   const [user, userLoading, userError] = useAuthState(auth);
-  const cookies = parseCookies()
-  const [mergedUser, setMergedUser] = useState(cookies.loginUser && JSON.parse(cookies.loginUser));
 
   useEffect(() => {
     if (userLoading) return;
     if (userError) auth.signOut();
     (async () => {
-      if (user || (cookies && cookies.loginUser)) {
-        user && setMergedUser(user)
-        console.log(user)
-        setCookie(null, "loginUser", JSON.stringify(user), {
-          maxAge: 10,
-          path: "/",
-          domain: document.domain,
-          secure: document.domain !== 'localhost',
-        });
+      if (user) {
         if (
           !user.emailVerified &&
           user.providerData[0].providerId === "password" &&
@@ -61,8 +50,6 @@ const App = ({ Component, pageProps }: AppProps) => {
         }
       }
       if (!user) {
-        setMergedUser(null)
-        destroyCookie(null, 'loginUser')
         if (!checkAllowNoLoginUrlList()) {
           await router.push({
             pathname: "/login",
@@ -128,7 +115,7 @@ const App = ({ Component, pageProps }: AppProps) => {
               setModal,
               setModalInner,
               Component,
-              user: mergedUser,
+              user,
               userLoading,
             }}
           >
@@ -138,7 +125,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                 setModal,
                 setModalInner,
                 Component,
-                user: mergedUser,
+                user,
                 userLoading,
               }}
             />
