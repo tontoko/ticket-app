@@ -8,7 +8,7 @@ import { encodeQuery } from '@/src/lib/parseQuery'
 import { firebase } from '@/src/lib/initFirebase'
 import withAuth from '@/src/lib/withAuth'
 
-export const UpdateEmail: React.FC<any> = (user) => {
+export const UpdateEmail: React.FC<any> = ({user}) => {
     const router = useRouter()
     const alert = useAlert()
     const [email, setEmail] = useState('')

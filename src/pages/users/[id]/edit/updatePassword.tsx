@@ -9,7 +9,7 @@ import errorMsg from '@/src/lib/errorMsg'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 
-export const UpdatePassword: React.FC<any> = (user) => {
+export const UpdatePassword: React.FC<any> = ({user}) => {
     const router = useRouter()
     const alert = useAlert()
     const [pwd, setPwd] = useState('')
