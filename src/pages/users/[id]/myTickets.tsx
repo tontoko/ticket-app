@@ -11,6 +11,7 @@ import { event } from 'events';
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { firebase, firestore } from '@/src/lib/initFirebase';
 import withAuth from '@/src/lib/withAuth';
+import Loading from '@/src/components/loading';
 
 const MyTickets = ({ user }) => {
   const [payments, loading] = useCollectionData<
@@ -140,13 +141,13 @@ const MyTickets = ({ user }) => {
         </a>
         をお試しください。
       </p>
-      {myTickets.length === 0 ? (
+      {myTickets.length === 0 && (
         <>
           <p>チケットを購入した場合、ここに表示されます。</p>
         </>
-      ) : (
-        renderUserTickets()
       )}
+      {loading && <Loading style={{ position: 'relative' }} />}
+      {renderUserTickets()}
     </div>
   );
 };

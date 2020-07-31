@@ -23,11 +23,12 @@ import {
   TwitterIcon,
 } from "react-share";
 import Tickets from '@/src/components/tickets';
+import Loading from '@/src/components/loading';
 
 const Event = ({ user, userLoading, event, categories, items, setModal, setModalInner }) => {
     if (!event) return <></>
     const router = useRouter();
-    const [tickets, setTickets] = useState([]);
+    const [tickets, setTickets] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false);
     const [status, setStatus] = useState<
@@ -71,7 +72,6 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
               setTickets(
                 await Promise.all(
                   payments
-                    .filter((ticket) => ticket.data().event === event.id)
                     .map(async (payment) => {
                       const targetCategory = categories.filter(
                         (catgegory) => catgegory.id === payment.data().category
@@ -199,6 +199,7 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
           <Row style={{ marginTop: "1.5em" }}>
             <Col sm="12" style={{ margin: "0.2em" }}>
               <h5>購入済みチケット</h5>
+              {tickets === null && <Loading style={{ position: 'reletive' }} />}
               {tickets.map((ticket, i) => <Tickets ticket={ticket} event={event} key={i} />)}
             </Col>
             <Col sm="12" style={{ marginTop: "1.5em" }}>
@@ -211,8 +212,14 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
           </Row>
         );
       }
-      if (categories.length === 0) {
-          return <></>
+      if (categories.filter(category => category.public).length === 0) {
+        return (
+          <Row style={{ marginTop: "1.5em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Button block color="secondary">まだチケットが販売されていません</Button>
+            </Col>
+          </Row>
+        )
       }
       if (status === 'anonymous') {
         return (

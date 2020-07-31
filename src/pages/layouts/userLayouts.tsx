@@ -8,8 +8,6 @@ import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 import { decodeQuery } from '@/src/lib/parseQuery'
 import { firestore } from '@/src/lib/initFirebase'
-import { useCollection } from "react-firebase-hooks/firestore";
-import Loading from '@/src/components/loading'
 
 const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
   const router = useRouter()
@@ -18,8 +16,6 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
   const [notifiesLength, setNotifiesLength] = useState(0)
 
   useEffect(() => {
-    const { msg } = router.query;
-    if (msg) alert.success(decodeQuery(msg as string));
     if (!user || userLoading) return
     const listner = firestore
       .collection("users")
@@ -29,7 +25,13 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
         setNotifiesLength(snap ? snap.size : 0);
       })
     return listner
-  }, [user, userLoading, router.query.msg]);
+  }, [user, userLoading]);
+
+  useEffect(() => {
+    if (!router) return
+    const { msg } = router.query;
+    if (msg) alert.success(decodeQuery(msg as string));
+  }, [!!router, router.query.msg])
 
   return (
     <>

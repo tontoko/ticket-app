@@ -47,7 +47,7 @@
     "react-qr-reader": "^2.2.1",
     "react-share": "^4.2.1",
     "reactstrap": "^8.5.1",
-    "stripe": "^8.80.0",
+    "stripe": "^8.81.0",
     "typescript": "^3.9.7",
     "zengin-code": "^1.0.0-p20200727"
   },
