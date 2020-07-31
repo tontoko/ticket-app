@@ -36,11 +36,11 @@ const App = ({ Component, pageProps }: AppProps) => {
     (async () => {
       if (user || (cookies && cookies.loginUser)) {
         user && setMergedUser(user)
+        console.log(user)
         setCookie(null, "loginUser", JSON.stringify(user), {
-          maxAge: 30,
+          maxAge: 10,
           path: "/",
           domain: document.domain,
-          httpOnly: document.domain !==  'localhost',
           secure: document.domain !== 'localhost',
         });
         if (
