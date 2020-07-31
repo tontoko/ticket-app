@@ -12,17 +12,18 @@ const Notifies = ({user}) => {
   const [notifies, setNotifies] = useState([])
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter()
-  const [snapshot] = useCollection(
+  const [snapshot, loading] = useCollection(
     firestore.collection("users").doc(user.uid).collection("notifies"));
 
   useEffect(() => {
     (async () => {
+      if (loading || !snapshot) return
       let tmpNotifies: firebase.firestore.DocumentData[] = [];
       await Promise.all(snapshot.docs.map(async (doc) => tmpNotifies.push({...doc.data(), id: doc.id})));
       setNotifies(tmpNotifies)
       setIsLoading(false);
     })()
-  }, [])
+  }, [loading, snapshot])
 
   const clickLinkWithsaveAsRead = async (id, url) => {
     if (!firestore) return
