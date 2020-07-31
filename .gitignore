@@ -77,3 +77,4 @@ ticket-app-admin-dev.json
 
 sw.js*
 workbox-*
+.vercel

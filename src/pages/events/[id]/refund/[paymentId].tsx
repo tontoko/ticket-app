@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import { useAlert } from 'react-alert';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import { firestore, auth } from '@/src/lib/initFirebase';
+import { auth } from '@/src/lib/initFirebase';
 import { encodeQuery } from '@/src/lib/parseQuery';
 import Loading from '@/src/components/loading';
 import withAuth from '@/src/lib/withAuth';
@@ -13,7 +13,6 @@ import withAuth from '@/src/lib/withAuth';
 const Refund = ({
   user,
   createdUser,
-  query,
   paymentData,
 }) => {
   const router = useRouter();
@@ -59,6 +58,7 @@ const Refund = ({
 
   // TODO: 返金失敗時のWebhock用API作成
   const createRefund = async (reason: string) => {
+    setLoading(true);
     let targetUser = sentTo === "user" ? createdUser : "admin";
 
     try {
@@ -105,6 +105,7 @@ const Refund = ({
       console.error(e.message);
       alert.error("エラーが発生しました。しばらくしてお試しください。");
     }
+    setLoading(false);
   };
 
   const submit = async (e) => {

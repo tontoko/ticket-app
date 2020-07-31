@@ -20,7 +20,7 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
   useEffect(() => {
     const { msg } = router.query;
     if (msg) alert.success(decodeQuery(msg as string));
-    if (!user) return
+    if (!user || userLoading) return
     const listner = firestore
       .collection("users")
       .doc(user.uid)
@@ -28,8 +28,8 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
       .where("read", "==", false).onSnapshot(snap => {
         setNotifiesLength(snap ? snap.size : 0);
       })
-    return listner()
-  }, [user]);
+    return listner
+  }, [user, userLoading]);
 
   return (
     <>

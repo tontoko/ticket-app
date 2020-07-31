@@ -7,6 +7,8 @@ import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { firestore } from "@/src/lib/initFirebase";
 import withAuth from "@/src/lib/withAuth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 
 const Notifies = ({user}) => {
   const [notifies, setNotifies] = useState([])
@@ -55,7 +57,13 @@ const Notifies = ({user}) => {
                 backgroundColor: notify.read ? "gainsboro" : null,
               }}
             >
-              <CardBody>{notify.text}</CardBody>
+              <CardBody>
+                <FontAwesomeIcon
+                icon={notify.read ? faCheckCircle : faExclamationCircle}
+                  style={{ color: notify.read ? "#00DD00": 'orange' }}
+                />{' '}
+                {notify.text}
+              </CardBody>
             </Card>
           </Col>
         </Row>
