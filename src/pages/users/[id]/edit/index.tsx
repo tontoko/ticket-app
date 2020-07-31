@@ -29,12 +29,12 @@ const UserShow = ({ user, status, balance }) => {
           value={user.email}
         />
       </FormGroup>
-      {user.providerId !== "password" && (
+      {user.providerData[0].providerId !== "password" && (
         <FormGroup style={{ marginTop: "1em" }}>
           <Label>連携済みサービス</Label>
           <Row style={{ margin: 0 }}>
             <Col style={{ display: "flex", padding: 0 }}>
-              {user.providerId === "facebook.com" && (
+              {user.providerData[0].providerId === "facebook.com" && (
                 <p>
                   <FontAwesomeIcon
                     icon={faFacebook}
@@ -44,7 +44,7 @@ const UserShow = ({ user, status, balance }) => {
                   />
                 </p>
               )}
-              {user.providerId === "google.com" && (
+              {user.providerData[0].providerId === "google.com" && (
                 <p>
                   <FontAwesomeIcon
                     icon={faGoogle}
@@ -58,7 +58,7 @@ const UserShow = ({ user, status, balance }) => {
           </Row>
         </FormGroup>
       )}
-      {user.providerId === "password" && (
+      {user.providerData[0].providerId === "password" && (
         <>
           <FormGroup style={{ marginTop: "2em" }}>
             <Link href={`/users/${user.uid}/edit/updateEmail`}>
