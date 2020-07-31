@@ -25,6 +25,7 @@ import {
 import Tickets from '@/src/components/tickets';
 
 const Event = ({ user, userLoading, event, categories, items, setModal, setModalInner }) => {
+    if (!event) return <></>
     const router = useRouter();
     const [tickets, setTickets] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0)
@@ -348,7 +349,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return { paths, fallback: true };
 };
-// TODO: 日付がおかしい
+
 export const getStaticProps: GetStaticProps = async ({params}) => {
     const {id} = params
     const { firestore } = await initFirebaseAdmin()
