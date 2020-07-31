@@ -64,7 +64,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         }
       }
       if (!user) {
-        destroyCookie(null, 'photoUrl')
+        destroyCookie(null, 'tmpUser')
         setTmpUser(null)
         if (!checkAllowNoLoginUrlList()) {
           await router.push({
