@@ -12,7 +12,8 @@ export const Leave = ({user}) => {
   const [checkBox, setCheckBox] = useState(false)
   const [pwd, setPwd] = useState('')
 
-  const submit = async () => {
+  const submit = async (e) => {
+    e.preventDefault();
     if (!checkBox) return alert.error('チェックボックスが選択されていません。')
     const { providerData } = user
     try {
