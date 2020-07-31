@@ -29,7 +29,7 @@ const UserLayout: React.FC<any> = ({user, userLoading, children}) => {
         setNotifiesLength(snap ? snap.size : 0);
       })
     return listner
-  }, [user, userLoading]);
+  }, [user, userLoading, router.query.msg]);
 
   return (
     <>

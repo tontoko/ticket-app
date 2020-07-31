@@ -16,16 +16,10 @@ export const UpdateEmail: React.FC<any> = ({user}) => {
 
     const updateEmail = async(e) => {
         e.preventDefault()
-        if (email || pwd) {
-            try {
-                const currentEmail = user.email
-                const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
-                await user.reauthenticateAndRetrieveDataWithCredential(credential)
-            } catch(e) {
-                return alert.error(errorMsg(e))
-            }
-        }
         try {
+            const currentEmail = user.email
+            const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
+            await user.reauthenticateAndRetrieveDataWithCredential(credential)
             await user.updateEmail(email)
             router.push({pathname: `/users/${user.uid}/edit`, query: {msg: encodeQuery('メールアドレスを変更しました') }})
         } catch (e) {

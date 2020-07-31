@@ -18,16 +18,12 @@ export const UpdatePassword: React.FC<any> = ({user}) => {
 
     const updatePassword = async (e) => {
         e.preventDefault()
-        if (pwd && newPwd && newPwdConfirm && newPwd === newPwdConfirm) {
-            try {
-                const currentEmail = user.email
-                const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
-                await user.reauthenticateAndRetrieveDataWithCredential(credential)
-            } catch (e) {
-                return alert.error(errorMsg(e))
-            }
-        }
+        if (!pwd || !newPwd || !newPwdConfirm) return alert.error('パスワードを入力してください')
+        if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません')
         try {
+            const currentEmail = user.email
+            const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
+            await user.reauthenticateAndRetrieveDataWithCredential(credential)
             await user.updatePassword(newPwd)
             router.push({ pathname: `/users/${user.uid}/edit`, query: { msg: encodeQuery('パスワードを変更しました') } })
         } catch (e) {

@@ -12,7 +12,8 @@ const ForgetPassword = () => {
   const [email, setEmail] = useState('')
   const router = useRouter()
 
-  const sendEmail = async () => {
+  const sendEmail = async (e) => {
+    e.preventDefault();
     try {
       await auth.sendPasswordResetEmail(email)
       router.push({
@@ -33,7 +34,7 @@ const ForgetPassword = () => {
   return (
     <Row>
       <Col sm="12" md={{ size: 6, offset: 3 }}>
-        <Form style={{ margin: "5em 0" }}>
+        <Form style={{ margin: "5em 0" }} onSubmit={sendEmail}>
           <h4 style={{ marginBottom: "1.5em" }}>パスワード再設定</h4>
           <FormGroup style={{ marginBottom: "1.5em" }}>
             <Label>登録メールアドレス</Label>
@@ -45,8 +46,8 @@ const ForgetPassword = () => {
             />
           </FormGroup>
           <Row form>
-            <Button onClick={() => sendEmail()} className="ml-auto">
-              確認
+            <Button className="ml-auto">
+              送信
             </Button>
           </Row>
           <FormGroup style={{ marginTop: "1.5em", textAlign: "right" }}>
