@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
     Card, CardText, CardBody,
-    CardTitle, CardSubtitle, Button, Col, Row
+    CardTitle, CardSubtitle, Col, Row
 } from 'reactstrap';
 import Link from 'next/link'
 import getImg from '@/src/lib/getImg'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
 import moment from 'moment'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
-import { encodeQuery } from '@/src/lib/parseQuery';
 import Tickets from '@/src/components/tickets';
 import { event } from 'events';
 import { useCollectionData } from "react-firebase-hooks/firestore";
@@ -61,8 +55,8 @@ const MyTickets = ({ user }) => {
                   })
               );
               const data = event.data() as event;
-              const startDate = data.startDate.seconds;
-              const endDate = data.endDate.seconds;
+              const startDate = data.startDate.toMillis();
+              const endDate = data.endDate.toMillis();
               const photos =
                 data.photos.length > 0
                   ? await getImg(data.photos[0], data.createdUser, "360")
@@ -82,11 +76,11 @@ const MyTickets = ({ user }) => {
     })();
   }, [payments]);
           
-  const renderUserEvents = () =>
+  const renderUserTickets = () =>
     myTickets.map((event, i) => {
       const showDate = () => {
-        const startDate = moment(event.startDate.toMillis());
-        const endDate = moment(event.endDate.toMillis());
+        const startDate = moment(event.startDate);
+        const endDate = moment(event.endDate);
         if (startDate.format("YYYYMD") === endDate.format("YYYYMD")) {
           return `${startDate.format("YYYY年 M月D日  H:mm")} - ${endDate.format(
             "H:mm"
@@ -151,7 +145,7 @@ const MyTickets = ({ user }) => {
           <p>チケットを購入した場合、ここに表示されます。</p>
         </>
       ) : (
-        renderUserEvents()
+        renderUserTickets()
       )}
     </div>
   );
