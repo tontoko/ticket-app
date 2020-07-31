@@ -28,16 +28,14 @@ const App = ({ Component, pageProps }: AppProps) => {
   const [modalInner, setModalInner]: [ReactElement, Dispatch<SetStateAction<ReactElement>>] = useState()
   const [user, userLoading, userError] = useAuthState(auth);
   const cookies = parseCookies()
-  const [tmpUser, setTmpUser] = useState(cookies.tmpUser);
+  const [tmpUser, setTmpUser] = useState(cookies.tmpUser && JSON.parse(cookies.tmpUser));
 
   useEffect(() => {
     if (userLoading) return;
     if (userError) auth.signOut();
     (async () => {
       if (user) {
-
         setCookie(null, "tmpUser", JSON.stringify({
-          photoURL: user.photoURL,
           providerData: user.providerData,
           uid: user.uid
         }), {

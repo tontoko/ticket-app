@@ -14,6 +14,17 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, userLoading, children }) => 
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
   const [notifiesLength, setNotifiesLength] = useState(0)
+  let facebookUid = null
+  let googleUid = null
+  if (user || tmpUser) {
+    const providerData = user ? user.providerData[0] : tmpUser.providerData[0]
+    if (providerData.providerId === 'facebook.com') {
+      facebookUid = providerData.uid
+    }
+    if (providerData.providerId === 'google.com') {
+      googleUid = providerData.uid
+    }
+  }
 
   useEffect(() => {
     if (!user || userLoading) return
@@ -53,16 +64,9 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, userLoading, children }) => 
                   backgroundColor: "lightgray",
                   marginLeft: "auto",
                 }}
-                src={
-                  (() => {
-                    if (user) {
-                      return user.photoURL
-                        ? user.photoURL
-                        : "/icons/person-icon-default.png"
-                    }
-                    return tmpUser.photoURL
-                  })()
-                }
+                facebookId={facebookUid}
+                googleId={googleUid}
+                src="/icons/person-icon-default.png"
               />
             </Link>
             <Link href={`/users/${user ? user.uid : tmpUser.uid}/notifies`}>
