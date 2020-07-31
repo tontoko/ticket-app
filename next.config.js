@@ -1,4 +1,5 @@
 const withPWA = require("next-pwa");
+const runtimeCaching = require('next-pwa/cache')
 const withMDX = require('@next/mdx')()
 const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 
@@ -6,7 +7,8 @@ module.exports = withPWA(
   withMDX({
     cssModule: true,
     pwa: {
-      disable: process.env.NODE_ENV === "development",
+      dest: 'public',
+      runtimeCaching,
     },
     webpack: (config) => {
       config.plugins.push(
