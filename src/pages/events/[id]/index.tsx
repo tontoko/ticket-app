@@ -25,7 +25,6 @@ import {
 import Tickets from '@/src/components/tickets';
 
 const Event = ({ user, userLoading, event, categories, items, setModal, setModalInner }) => {
-    if (!event) return <></>
     const router = useRouter();
     const [tickets, setTickets] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0)
@@ -192,7 +191,8 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
             </Col>
           </Row>
         )
-      } else if (status === 'bought') {
+      }
+      if (status === 'bought') {
         // 申し込み後
         return (
           <Row style={{ marginTop: "1.5em" }}>
@@ -209,9 +209,11 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
             </Col>
           </Row>
         );
-      } else if (categories.length === 0) {
-          return
-      } else if (status === 'anonymous') {
+      }
+      if (categories.length === 0) {
+          return <></>
+      }
+      if (status === 'anonymous') {
         return (
           <Row style={{ marginTop: "2em" }}>
             <Col sm="12" style={{ margin: "0.2em" }}>
@@ -222,7 +224,8 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
             </Col>
           </Row>
         )
-      } else if (status === 'other') {
+      }
+      if (status === 'other') {
         return (
           <Row style={{ marginTop: "1.5em" }}>
             <Col sm="12" style={{ margin: "0.2em" }}>
@@ -233,27 +236,28 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
           </Row>
         )
       }
+      return <></>
     }
 
     const returnCatetgories = () => categories.map((category, i) => {
-        const msg = `${category.name}: ${category.price} 円`
-        const organizerMsg = status == 'organizer' && ` 残り ${category.stock - category.sold} 枚`
-        if (status == 'organizer' && !category.public) {
-            return <h6 key={i}>{msg}{organizerMsg} (非公開)</h6>
+      const msg = `${category.name}: ${category.price} 円`
+      const organizerMsg = status == 'organizer' && ` 残り ${category.stock - category.sold} 枚`
+      if (status == 'organizer' && !category.public) {
+        return <h6 key={i}>{msg}{organizerMsg} (非公開)</h6>
+      }
+      if (category.public) {
+        if (category.stock - category.sold < 1) {
+          return <h6 key={i} style={{ textDecorationLine: 'line-through' }}>{msg}{organizerMsg}<span> 完売</span></h6>
         }
-        if (category.public) {
-            if (category.stock - category.sold < 1) {
-                return <h6 key={i} style={{ textDecorationLine: 'line-through' }}>{msg}{organizerMsg}<span> 完売</span></h6>
-            }
-            return <h6 key={i}>{msg}{organizerMsg}</h6>
-        }
+        return <h6 key={i}>{msg}{organizerMsg}</h6>
+      }
     })
 
     return (
       <>
         <Row style={{ marginTop: "1em", marginLeft: "0" }}>
           <h3>
-            【{moment(event.startDate * 1000).format("M/d")}】{event.name}
+            【{moment(event.startDate).format("M/D")}】{event.name}
           </h3>
         </Row>
         <Row style={{ marginTop: "1em" }}>
@@ -289,13 +293,11 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
             </FormGroup>
             <FormGroup>
               <h5>開始</h5>
-              <p>
-                {moment(event.startDate * 1000).format("YYYY年 M月d日 H:mm")}
-              </p>
+              <p>{moment(event.startDate).format("YYYY年 M月D日 H:mm")}</p>
             </FormGroup>
             <FormGroup>
               <h5>終了</h5>
-              <p>{moment(event.endData * 1000).format("YYYY年 M月d日 H:mm")}</p>
+              <p>{moment(event.endDate).format("YYYY年 M月D日 H:mm")}</p>
             </FormGroup>
             <FormGroup>
               <TwitterShareButton
@@ -346,14 +348,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return { paths, fallback: true };
 };
-
+// TODO: 日付がおかしい
 export const getStaticProps: GetStaticProps = async ({params}) => {
     const {id} = params
     const { firestore } = await initFirebaseAdmin()
     const snapshot = await firestore.collection("events").doc(id as string).get();
     const data = snapshot.data()
-    const startDate = data.startDate.seconds;
-    const endDate = data.endDate.seconds;
+    const startDate = data.startDate.toMillis();
+    const endDate = data.endDate.toMillis();
     const event = { ...data, startDate, endDate, id: snapshot.id };
     const items =
       data.photos.length > 0
@@ -375,6 +377,7 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
         return { ...category.data(), id: category.id };
       })
     );
+
     return { props: { event, categories, items }, revalidate: 1 }
 }
 

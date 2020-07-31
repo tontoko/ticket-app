@@ -28,7 +28,7 @@ const Payments = ({ user, payments, events, categories }) => {
                       categories[payment.category].price
                     } 円`}</p>
                     <p>
-                      {moment(payment.createdAt).format("YYYY年 M月d日 H:mm")}
+                      {moment(payment.createdAt).format("YYYY年 M月D日 H:mm")}
                     </p>
                   </CardBody>
                 </Card>

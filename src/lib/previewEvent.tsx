@@ -130,14 +130,14 @@ const PreviewModal = ({
         <FormGroup>
           <Label>開始</Label>
           <Input
-            value={moment(startDate).format("YYYY年 M月d日 H:mm")}
+            value={moment(startDate).format("YYYY年 M月D日 H:mm")}
             disabled
           />
         </FormGroup>
         <FormGroup>
           <Label>終了</Label>
           <Input
-            value={moment(endDate).format("YYYY年 M月d日 H:mm")}
+            value={moment(endDate).format("YYYY年 M月D日 H:mm")}
             disabled
           />
         </FormGroup>

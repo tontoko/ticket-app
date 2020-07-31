@@ -40,7 +40,7 @@ const Show = ({ user, payment, event, category, refunded }) => {
         <p>{`チケット名: ${category.name}`}</p>
         <p>{`価格: ${category.price} 円`}</p>
         <p>{`購入日時: ${moment(payment.createdAt).format(
-          "YYYY年 M月d日 H:mm"
+          "YYYY年 M月D日 H:mm"
         )}`}</p>
         <p>{`受付済み: ${payment.accepted ? "はい" : "いいえ"}`}</p>
         <p>{`返金: ${refunded ? "はい" : "いいえ"}`}</p>
@@ -76,8 +76,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const eventData = eventSnapShot.data()
   const event = {
     ...eventData,
-    startDate: eventData.startDate.seconds * 1000,
-    endDate: eventData.endDate.seconds * 1000,
+    startDate: eventData.startDate.toMillis(),
+    endDate: eventData.endDate.toMillis(),
     id: eventSnapShot.id,
   };
   const category = (

@@ -35,15 +35,15 @@ const MyEvents = ({ user, events }) => {
   const renderUserEvents = () =>
     events.map((event, i) => {
       const showDate = () => {
-        const startDate = moment(event.startDate * 1000);
-        const endDate = moment(event.endDate * 1000);
-        if (startDate.format("YYYYMd") === endDate.format("YYYYMd")) {
-          return `${startDate.format("YYYY年 M月d日  H:mm")} - ${endDate.format(
+        const startDate = moment(event.startDate);
+        const endDate = moment(event.endDate);
+        if (startDate.format("YYYYMD") === endDate.format("YYYYMD")) {
+          return `${startDate.format("YYYY年 M月D日  H:mm")} - ${endDate.format(
             "H:mm"
           )}`;
         } else {
-          return `${startDate.format("YYYY年 M月d日  H:mm")} - ${endDate.format(
-            "YYYY年  M月d日 H:mm"
+          return `${startDate.format("YYYY年 M月D日  H:mm")} - ${endDate.format(
+            "YYYY年  M月D日 H:mm"
           )}`;
         }
       };
@@ -129,8 +129,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const events = await Promise.all(
     result.docs.map(async (doc) => {
       const data = doc.data() as event;
-      const startDate = data.startDate.seconds;
-      const endDate = data.endDate.seconds;
+      const startDate = data.startDate.toMillis();
+      const endDate = data.endDate.toMillis();
       const photos =
         data.photos.length > 0
           ? await getImg(data.photos[0], id as string, "360")

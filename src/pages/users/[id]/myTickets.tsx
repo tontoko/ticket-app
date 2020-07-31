@@ -85,15 +85,15 @@ const MyTickets = ({ user }) => {
   const renderUserEvents = () =>
     myTickets.map((event, i) => {
       const showDate = () => {
-        const startDate = moment(event.startDate * 1000);
-        const endDate = moment(event.endDate * 1000);
-        if (startDate.format("YYYYMd") === endDate.format("YYYYMd")) {
-          return `${startDate.format("YYYY年 M月d日  H:mm")} - ${endDate.format(
+        const startDate = moment(event.startDate.toMillis());
+        const endDate = moment(event.endDate.toMillis());
+        if (startDate.format("YYYYMD") === endDate.format("YYYYMD")) {
+          return `${startDate.format("YYYY年 M月D日  H:mm")} - ${endDate.format(
             "H:mm"
           )}`;
         } else {
-          return `${startDate.format("YYYY年 M月d日  H:mm")} - ${endDate.format(
-            "YYYY年  M月d日 H:mm"
+          return `${startDate.format("YYYY年 M月D日  H:mm")} - ${endDate.format(
+            "YYYY年  M月D日 H:mm"
           )}`;
         }
       };
