@@ -81,9 +81,7 @@ const Refund = ({
       }
 
       await firestore
-        .collection("payment")
-        .doc(query.paymentId)
-        .collection("refund")
+        .collection("refunds")
         .add({
           reason,
           targetUser,
