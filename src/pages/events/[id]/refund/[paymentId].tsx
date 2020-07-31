@@ -80,14 +80,19 @@ const Refund = ({
           throw new Error();
       }
 
-      await firestore
-        .collection("refunds")
-        .add({
+      const res = await fetch("/api/stripeAccountsRetrieve", {
+        method: "POST",
+        headers: new Headers({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({
           reason,
           reasonText,
           detailText,
           targetUser,
-        });
+        }),
+      });
+      if (res.status !== 200) throw new Error()
       router.push({
         pathname: `/users/${user.uid}/myTickets`,
         query: {
