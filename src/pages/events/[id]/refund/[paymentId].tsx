@@ -80,7 +80,7 @@ const Refund = ({
           throw new Error();
       }
 
-      const res = await fetch("/api/stripeAccountsRetrieve", {
+      const res = await fetch("/api/sendRefundRequest", {
         method: "POST",
         headers: new Headers({
           "Content-Type": "application/json",
