@@ -14,17 +14,17 @@ const Action = ({user}) => {
     const [loading, setLoading] = useState(true)
     const [valid, setValid] = useState(false)
     const [view, setView] = useState(null);
-    const [mode, setMode] = useState(null);
-    const [oobCode, setOobCode] = useState(null);
+    let mode = ''
+    let oobCode = ''
 
     useEffect(() => {
         (async() => {
             if (!loading) return
             if (!router) return
-            setMode(router.query.mode);
-            setOobCode(router.query.oobCode);
+            mode = router.query.mode as string;
+            oobCode = router.query.oobCode as string;
             try {
-                switch (mode as string) {
+                switch (mode) {
                     case 'resetPassword':
                         // Display reset password handler and UI.
                         handleResetPassword()
