@@ -15,9 +15,9 @@ export const Leave = ({user}) => {
   const submit = async (e) => {
     e.preventDefault();
     if (!checkBox) return alert.error('チェックボックスが選択されていません。')
-    const { providerData } = user
+    const { providerData } = user as firebase.User
     try {
-        if (providerData[0] === "password") {
+        if (providerData[0].providerId === "password") {
           const credencial: firebase.auth.AuthCredential = firebase.auth.EmailAuthProvider.credential(
             auth.currentUser.email,
             pwd
@@ -59,7 +59,7 @@ export const Leave = ({user}) => {
           上記の説明と利用規約を確認し、理解しました
         </Label>
       </FormGroup>
-      {user.providerData[0] === "password" && (
+      {user.providerData[0].providerId === "password" && (
         <FormGroup>
           <Input
             type="password"
