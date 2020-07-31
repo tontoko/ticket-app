@@ -84,6 +84,8 @@ const Refund = ({
         .collection("refunds")
         .add({
           reason,
+          reasonText,
+          detailText,
           targetUser,
         });
       router.push({
