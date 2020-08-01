@@ -1,17 +1,13 @@
 import Link from 'next/link'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
-import { GetServerSideProps, GetStaticPaths, GetStaticProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import stripe, { Stripe } from '@/src/lib/stripe'
 import { auth } from '@/src/lib/initFirebase'
-import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
-import getImgSSR from '@/src/lib/getImgSSR'
 import { stripeAccounts, stripeBalance } from '@/src/lib/stripeRetrieve'
 
 const UserShow = ({ user, status, balance }) => {
@@ -72,7 +68,7 @@ const UserShow = ({ user, status, balance }) => {
           </FormGroup>
         </>
       )}
-
+      // TODO: 主催者用の情報は別ページに移す
       <div style={{ marginBottom: "1.5em" }}>
         <h4>イベント主催者用の登録情報</h4>
         <Label>

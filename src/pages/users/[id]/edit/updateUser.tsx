@@ -15,8 +15,9 @@ import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 import { firestore } from '@/src/lib/initFirebase'
+import Loading from '@/src/components/loading'
 
-export const UpdateUser: React.FC<any> = ({ user }) => {
+export const UpdateUser: React.FC<any> = ({ user, userLoading }) => {
   const alert = useAlert()
   const router = useRouter()
   const [tosAcceptance, setTosAcceptance] = useState<
@@ -54,10 +55,10 @@ export const UpdateUser: React.FC<any> = ({ user }) => {
   })
   const [birthDay, setBirthDay] = useState(toUtcIso8601str(moment()))
   const [agree, setAgree] = useState(false)
-  const [, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
   
   useEffect(() => {
-    if (!user) return
+    if (!user || userLoading) return
     (async() => {
       const {stripeId} = (await firestore.collection('users').doc(user.uid).get()).data()
       const res = await fetch("/api/stripeAccountsRetrieve", {
@@ -72,7 +73,7 @@ export const UpdateUser: React.FC<any> = ({ user }) => {
       setTosAcceptance(tos_acceptance)
       setLoading(false)
     })()
-  }, [user])
+  }, [user, userLoading])
 
   const setFormBirthDay = (moment: Moment) => {
     setBirthDay(toUtcIso8601str(moment))
@@ -143,6 +144,8 @@ export const UpdateUser: React.FC<any> = ({ user }) => {
       alert.error('エラーが発生しました。入力項目が正しいか確認してください。')
     }
   }
+
+  if (loading) return <Loading/>
 
   return (
     <Form style={{ marginTop: "1.5em" }} onSubmit={submit}>
