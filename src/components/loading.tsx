@@ -1,8 +1,9 @@
 import { Spinner } from 'reactstrap'
 
-const Loading = () => {
+const Loading = (props) => {
+    const style = props.style ? props.style : {}
     return (
-        <div style={{
+        <div style={{...{
             opacity: 0.5,
             height: "100%",
             width: "100%",
@@ -13,7 +14,7 @@ const Loading = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center"
-        }}>
+        }, ...style}}>
             <Spinner style={
                 {
                     width: '8rem',

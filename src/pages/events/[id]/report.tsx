@@ -1,13 +1,11 @@
-import React, { Component, useState, ReactElement } from 'react';
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import { Table, Container, Row, Col, Label, Button, Input } from 'reactstrap';
+import React, { ReactElement } from 'react';
+import { Table, Row } from 'reactstrap';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import isLogin from '@/src/lib/isLogin';
-import { GetServerSideProps } from 'next';
+import { GetStaticProps, GetStaticPaths } from 'next';
 import { event } from 'events';
+import withAuth from '@/src/lib/withAuth';
 
-export default ({ user, event, categories, payments }) => {
+const Report = ({ event, categories, payments }) => {
     let totalSalesProspect = 0
     let totalSales = 0
     let totalFee = 0
@@ -78,24 +76,41 @@ export default ({ user, event, categories, payments }) => {
     );
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { user, query, res } = await isLogin(ctx, 'redirect')
-    if (!user) {
-      res.writeHead(302, {
-        Location: `/`,
-      });
-      res.end();
-      return { props: {} };
-    }
-    const { firestore } = await initFirebaseAdmin()
-    const result = await firestore.collection('events').doc(query.id as string).get()
-    const data = result.data() as event
-    const startDate = data.startDate.seconds
-    const endDate = data.endDate.seconds
-    const event = { ...data, startDate, endDate, id: result.id }
-
-    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
-    const payments = (await firestore.collection('payments').where("event", "==", result.id).get()).docs.map(payment => payment.data())
-
-    return { props: { user, event, categories, payments } }
+export const getStaticPaths: GetStaticPaths = async () => {
+    const { firestore } = await initFirebaseAdmin();
+    const paths = await Promise.all((await firestore.collection("events").get()).docs.map(doc => `/events/${doc.id}/report`))
+    return { paths, fallback: true };
 }
+
+export const getStaticProps: GetStaticProps = async ({params}) => {
+    const { id } = params
+    const { firestore } = await initFirebaseAdmin();
+    const result = await firestore
+    .collection("events")
+    .doc(id as string)
+    .get();
+    const data = result.data() as event;
+    const startDate = data.startDate.seconds;
+    const endDate = data.endDate.seconds;
+    const event = { ...data, startDate, endDate, id: result.id };
+
+    const categories = (await firestore
+        .collection("events")
+        .doc(id as string)
+        .collection("categories")
+        .orderBy("index")
+        .get()
+    ).docs.map((category) => {
+        return { ...category.data(), id: category.id };
+    });
+    const payments = (
+    await firestore
+        .collection("payments")
+        .where("event", "==", result.id)
+        .get()
+    ).docs.map((payment) => payment.data());
+
+    return { props: { event, categories, payments } };
+};
+
+export default withAuth(Report)

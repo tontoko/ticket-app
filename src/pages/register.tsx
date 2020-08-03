@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Spinner, Row, Col } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
+import { auth } from '@/src/lib/initFirebase'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { useRouter } from 'next/router'
@@ -21,9 +21,8 @@ const Register = () => {
         if (loading) return
         setLoading(true)
         if (pwd !== pwdConfirm) return alert.error('確認用パスワードが一致していません。')
-        const {firebase} = await initFirebase()
         try {
-            await firebase.auth().createUserWithEmailAndPassword(email, pwd)
+            await auth.createUserWithEmailAndPassword(email, pwd)
         } catch(e) {
             alert.error(errorMsg(e, 'signup'))
             setLoading(false)
@@ -77,10 +76,5 @@ const Register = () => {
       </Row>
     );
 }
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  await isLogin(ctx, "redirect");
-  return { props: {} };
-};
 
 export default Register

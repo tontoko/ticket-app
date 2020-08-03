@@ -9,10 +9,9 @@ import {
     CarouselIndicators,
     FormGroup} from 'reactstrap';
 import getImg from '@/src/lib/getImgSSR'
-import { GetServerSideProps } from 'next'
+import { GetStaticProps, GetStaticPaths } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import isLogin from '@/src/lib/isLogin'
-import { event } from 'events'
+import { firestore } from '@/src/lib/initFirebase'
 import moment from 'moment'
 import { setCookie } from 'nookies'
 import {
@@ -24,14 +23,17 @@ import {
   TwitterIcon,
 } from "react-share";
 import Tickets from '@/src/components/tickets';
+import Loading from '@/src/components/loading';
 
-export default ({ event, categories, status, items, tickets, setModal, setModalInner }) => {
-
+const Event = ({ user, userLoading, event, categories, items, setModal, setModalInner }) => {
+    if (!event) return <></>
     const router = useRouter();
-    const startDate = moment(event.startDate * 1000)
-    const endDate = moment(event.endDate * 1000)
+    const [tickets, setTickets] = useState(null);
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false);
+    const [status, setStatus] = useState<
+      "anonymous" | "organizer" | "bought" | 'other'
+    >();
 
     const [twitterShareProps, setTwitterShareProps] = useState({
       url: "",
@@ -45,6 +47,64 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
       url: "",
       title: "",
     });
+
+    useEffect(() => {
+      let ticketListener = () => {
+        return;
+      };
+      if (!router || userLoading) return;
+      (async () => {
+        if (!user) {
+          setStatus("anonymous");
+          setCookie(null, "lastVisitedEvent", event.id, {
+            maxAge: 30 * 24 * 60 * 60,
+            path: "/",
+          });
+        } else if (event.createdUser == user.uid) {
+          setStatus("organizer");
+        } else {
+          ticketListener = firestore
+            .collection("payments")
+            .where("event", "==", event.id)
+            .where("buyer", "==", user.uid)
+            .onSnapshot(async (snap) => {
+              const payments = snap.docs;
+              setTickets(
+                await Promise.all(
+                  payments
+                    .map(async (payment) => {
+                      const targetCategory = categories.filter(
+                        (catgegory) => catgegory.id === payment.data().category
+                      )[0];
+                      return {
+                        ...targetCategory,
+                        categoryId: targetCategory.id,
+                        paymentId: payment.id,
+                        accepted: payment.data().accepted,
+                        error: payment.data().error,
+                        buyer: payment.data().buyer,
+                        seller: payment.data().seller,
+                      };
+                    })
+                )
+              );
+              setStatus(snap.size > 0 ? "bought" : "other");
+            });
+          // ログイン済みで主催者以外の場合に履歴に追加
+          let { eventHistory } = (
+            await firestore.collection("users").doc(user.uid).get()
+          ).data();
+          if (!eventHistory) eventHistory = [];
+          eventHistory = Array.from(new Set([...eventHistory, event.id]));
+          eventHistory.length > 10 && eventHistory.shift();
+          await firestore
+            .collection("users")
+            .doc(user.uid)
+            .update({ eventHistory });
+        }
+      })();
+      return ticketListener;
+    }, [router, user, userLoading]);
 
     useEffect(() => {
         setTwitterShareProps({
@@ -85,16 +145,20 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
     }
     
     const slides = items.map((item) => {
-        return (
-            <CarouselItem
-                onExiting={() =>setAnimating(true)}
-                onExited={() => setAnimating(false)}
-                key={item.src}
-            >
-                <img src={item.src} style={{ width: "100%", height: "100%" }} onClick={() => callModalForImg(item.src)} />
-            </CarouselItem>
-        )
-    })
+      return (
+        <CarouselItem
+          onExiting={() => setAnimating(true)}
+          onExited={() => setAnimating(false)}
+          key={item.src}
+        >
+          <img
+            src={item.src}
+            style={{ width: "100%", height: "100%" }}
+            onClick={() => callModalForImg(item.src)}
+          />
+        </CarouselItem>
+      );
+    });
 
     const callModalForImg = (src) => {
         setModalInner(<img src={src} style={{ width: "100%", height: "100%" }} onClick={() => setModal(false)} />)
@@ -107,89 +171,101 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
     const urlToReport = `/events/${router.query.id}/report`
     
     const buttons = () => {
-        if (status == 'organizer') {
-            // 主催者
-            return (
-                <Row style={{ marginTop: "1.5em" }}>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <Link href={urlToReception}>
-                            <Button block color="success">会場受付</Button>
-                        </Link>
-                    </Col>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <Link href={urlToEdit}>
-                            <Button block color="info">イベントを変更する</Button>
-                        </Link>
-                    </Col>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <Link href={urlToReport}>
-                            <Button block color="info">レポートを見る</Button>
-                        </Link>
-                    </Col>
-                </Row>
-            )
-        } else if (status == 'bought') {
-            // 申し込み後
-            return (
-              <Row style={{ marginTop: "1.5em" }}>
-                <Col sm="12" style={{ margin: "0.2em" }}>
-                  <h5>購入済みチケット</h5>
-                  {tickets.map((ticket, i) => <Tickets ticket={ticket} event={event} key={i} />)}
-                </Col>
-                <Col sm="12" style={{ marginTop: "1.5em" }}>
-                  <Link href={urlToPurchase}>
-                    <Button block color="primary">
-                      追加のチケットを購入する
-                    </Button>
-                  </Link>
-                </Col>
-              </Row>
-            );
-        } else if (categories.length === 0) {
-            return
-        } else if (status == 'anonymous') {
-            return (
-                <Row style={{ marginTop: "2em" }}>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <p>チケットの購入にはログインが必要です</p>
-                        <Link href='/login'>
-                            <Button block color="info">ログイン / 会員登録する</Button>
-                        </Link>
-                    </Col>
-                </Row>
-            )
-        }else {
-            return (
-                <Row style={{ marginTop: "1.5em" }}>
-                    <Col sm="12" style={{ margin: "0.2em" }}>
-                        <Link href={urlToPurchase}>
-                            <Button block color="primary">チケットを購入する</Button>
-                        </Link>
-                    </Col>
-                </Row>
-            )
-        }
+      if (status === 'organizer') {
+        // 主催者
+        return (
+          <Row style={{ marginTop: "1.5em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Link href={urlToReception}>
+                <Button block color="success">会場受付</Button>
+              </Link>
+            </Col>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Link href={urlToEdit}>
+                <Button block color="info">イベントを変更する</Button>
+              </Link>
+            </Col>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Link href={urlToReport}>
+                <Button block color="info">レポートを見る</Button>
+              </Link>
+            </Col>
+          </Row>
+        )
+      }
+      if (status === 'bought') {
+        // 申し込み後
+        return (
+          <Row style={{ marginTop: "1.5em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <h5>購入済みチケット</h5>
+              {tickets === null && <Loading style={{ position: 'reletive' }} />}
+              {tickets.map((ticket, i) => <Tickets user={user} ticket={ticket} event={event} key={i} />)}
+            </Col>
+            <Col sm="12" style={{ marginTop: "1.5em" }}>
+              <Link href={urlToPurchase}>
+                <Button block color="primary">
+                  追加のチケットを購入する
+                </Button>
+              </Link>
+            </Col>
+          </Row>
+        );
+      }
+      if (categories.filter(category => category.public).length === 0) {
+        return (
+          <Row style={{ marginTop: "1.5em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Button block color="secondary">まだチケットが販売されていません</Button>
+            </Col>
+          </Row>
+        )
+      }
+      if (status === 'anonymous') {
+        return (
+          <Row style={{ marginTop: "2em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <p>チケットの購入にはログインが必要です</p>
+              <Link href='/login'>
+                <Button block color="info">ログイン / 会員登録する</Button>
+              </Link>
+            </Col>
+          </Row>
+        )
+      }
+      if (status === 'other') {
+        return (
+          <Row style={{ marginTop: "1.5em" }}>
+            <Col sm="12" style={{ margin: "0.2em" }}>
+              <Link href={urlToPurchase}>
+                <Button block color="primary">チケットを購入する</Button>
+              </Link>
+            </Col>
+          </Row>
+        )
+      }
+      return <></>
     }
 
     const returnCatetgories = () => categories.map((category, i) => {
-        const msg = `${category.name}: ${category.price} 円`
-        const organizerMsg = status == 'organizer' && ` 残り ${category.stock - category.sold} 枚`
-        if (status == 'organizer' && !category.public) {
-            return <h6 key={i}>{msg}{organizerMsg} (非公開)</h6>
+      const msg = `${category.name}: ${category.price} 円`
+      const organizerMsg = status == 'organizer' && ` 残り ${category.stock - category.sold} 枚`
+      if (status == 'organizer' && !category.public) {
+        return <h6 key={i}>{msg}{organizerMsg} (非公開)</h6>
+      }
+      if (category.public) {
+        if (category.stock - category.sold < 1) {
+          return <h6 key={i} style={{ textDecorationLine: 'line-through' }}>{msg}{organizerMsg}<span> 完売</span></h6>
         }
-        if (category.public) {
-            if (category.stock - category.sold < 1) {
-                return <h6 key={i} style={{ textDecorationLine: 'line-through' }}>{msg}{organizerMsg}<span> 完売</span></h6>
-            }
-            return <h6 key={i}>{msg}{organizerMsg}</h6>
-        }
+        return <h6 key={i}>{msg}{organizerMsg}</h6>
+      }
     })
 
     return (
       <>
         <Row style={{ marginTop: "1em", marginLeft: "0" }}>
           <h3>
-            【{moment(startDate).format("M/d")}】{event.name}
+            【{moment(event.startDate).format("M/D")}】{event.name}
           </h3>
         </Row>
         <Row style={{ marginTop: "1em" }}>
@@ -225,17 +301,23 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
             </FormGroup>
             <FormGroup>
               <h5>開始</h5>
-              <p>{moment(startDate).format("YYYY年 M月d日 H:mm")}</p>
+              <p>{moment(event.startDate).format("YYYY年 M月D日 H:mm")}</p>
             </FormGroup>
             <FormGroup>
               <h5>終了</h5>
-              <p>{moment(endDate).format("YYYY年 M月d日 H:mm")}</p>
+              <p>{moment(event.endDate).format("YYYY年 M月D日 H:mm")}</p>
             </FormGroup>
             <FormGroup>
-              <TwitterShareButton {...twitterShareProps} style={{ marginRight: "1em" }}>
+              <TwitterShareButton
+                {...twitterShareProps}
+                style={{ marginRight: "1em" }}
+              >
                 <TwitterIcon size={40} />
               </TwitterShareButton>
-              <FacebookShareButton {...facebookShareProps} style={{ marginRight: "1em" }}>
+              <FacebookShareButton
+                {...facebookShareProps}
+                style={{ marginRight: "1em" }}
+              >
                 <FacebookIcon size={40} />
               </FacebookShareButton>
               <LineShareButton {...lineShareProps}>
@@ -254,7 +336,12 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
               )}
             </FormGroup>
           </Col>
-          <Col xs="12" md="6" lg="8" style={{ marginTop: "1em", whiteSpace: 'pre-wrap' }}>
+          <Col
+            xs="12"
+            md="6"
+            lg="8"
+            style={{ marginTop: "1em", whiteSpace: "pre-wrap" }}
+          >
             <h6>{event.eventDetail}</h6>
             {buttons()}
           </Col>
@@ -263,56 +350,43 @@ export default ({ event, categories, status, items, tickets, setModal, setModalI
     );
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { query } = ctx
-    const { user } = await isLogin(ctx)
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { firestore } = await initFirebaseAdmin();
+  const paths = await Promise.all((await firestore.collection("events").get()).docs.map(async doc => `/events/${doc.id}`))
+
+  return { paths, fallback: true };
+};
+
+export const getStaticProps: GetStaticProps = async ({params}) => {
+    const {id} = params
     const { firestore } = await initFirebaseAdmin()
-    const eventRef = firestore.collection('events').doc(query.id as string)
-    const result = await eventRef.get()
-    const data = result.data() as event
-    const startDate = data.startDate.seconds
-    const endDate = data.endDate.seconds
-    const photos: string[] = data.photos.length > 0 ? await Promise.all(data.photos.map(async photo => await getImg(photo, data.createdUser, '800'))) : [await getImg(null, data.createdUser)]
-    const event = { ...data, startDate, endDate, photos, id: result.id }
-    const categories = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get()).docs.map(category => { return { ...category.data(), id: category.id } })
-    let status: string
-    let tickets = []
-    if (!user) {
-        status = 'anonymous'
-        setCookie(ctx, 'lastVisitedEvent', event.id, {
-            maxAge: 30 * 24 * 60 * 60,
-            path: '/',
-        })
-    } else if (event.createdUser == user.uid) {
-        status = 'organizer'
-    } else {
-        const payments = (await firestore.collection('payments').where("event", "==", result.id).where("buyer", "==", user.uid).get()).docs
-        tickets = await Promise.all(payments.filter(ticket => ticket.data().event === event.id).map(async payment => {
-            const targetCategory = categories.filter(catgegory => catgegory.id === payment.data().category)[0]
-            return {
-                ...targetCategory,
-                categoryId: targetCategory.id,
-                paymentId: payment.id,
-                accepted: payment.data().accepted,
-                error: payment.data().error,
-                buyer: payment.data().buyer,
-                seller: payment.data().seller
-            }
-        }))
-        status = payments.length > 0 && 'bought'
-        // ログイン済みで主催者以外の場合に履歴に追加
-        if (data) {
-          let { eventHistory } = (await firestore.collection('users').doc(user.uid).get()).data()
-          if (!eventHistory) eventHistory = []
-          eventHistory = Array.from(new Set([...eventHistory, result.id]));
-          eventHistory.length > 10 && eventHistory.shift()
-          await firestore.collection('users').doc(user.uid).update({ eventHistory })
-        }
-    }
-    const items = event.photos.map((url) => {
-        return {
-            src: url,
-        }
-    })
-    return { props: { user, event, categories, status, items, tickets } }
+    const snapshot = await firestore.collection("events").doc(id as string).get();
+    const data = snapshot.data()
+    const startDate = data.startDate.toMillis();
+    const endDate = data.endDate.toMillis();
+    const event = { ...data, startDate, endDate, id: snapshot.id };
+    const items =
+      data.photos.length > 0
+        ? await Promise.all(
+            data.photos.map(
+              async (photo) => {return {src: await getImg(photo, data.createdUser, "800")}}
+            )
+          )
+        : [{src: await getImg(null, data.createdUser)}];
+    const categories = await Promise.all(
+      (
+        await firestore
+          .collection("events")
+          .doc(id as string)
+          .collection("categories")
+          .orderBy("index")
+          .get()
+      ).docs.map(async (category) => {
+        return { ...category.data(), id: category.id };
+      })
+    );
+
+    return { props: { event, categories, items }, revalidate: 1 }
 }
+
+export default Event

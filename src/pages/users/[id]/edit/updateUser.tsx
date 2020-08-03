@@ -1,31 +1,29 @@
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
-import { Form, FormGroup, Button, Label, Input, Container, Row, Col } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
+import { Form, FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
-import errorMsg from '@/src/lib/errorMsg'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
 import DatePicker, { registerLocale } from "react-datepicker"
 import ja from 'date-fns/locale/ja'
 registerLocale('ja', ja)
 import moment, { Moment } from 'moment'
 import { toUtcIso8601str } from '@/src/lib/time'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import admin from 'firebase-admin'
 import Stripe from 'stripe'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
-import stripe from '@/src/lib/stripe'
-import { Router } from 'express'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import withAuth from '@/src/lib/withAuth'
+import { firestore } from '@/src/lib/initFirebase'
+import Loading from '@/src/components/loading'
 
-export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, from }: { user: admin.auth.DecodedIdToken, individual: Stripe.Person, tos_acceptance: Stripe.Account.TosAcceptance, from: string}) => {
+export const UpdateUser: React.FC<any> = ({ user, userLoading }) => {
   const alert = useAlert()
   const router = useRouter()
-  const [form, setForm] = useState(individual ? individual : {
+  const [tosAcceptance, setTosAcceptance] = useState<
+    Stripe.Account.TosAcceptance
+  >();
+  const [form, setForm] = useState({
     first_name_kana: '',
     last_name_kana: '',
     first_name_kanji: '',
@@ -57,7 +55,28 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
   })
   const [birthDay, setBirthDay] = useState(toUtcIso8601str(moment()))
   const [agree, setAgree] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  let isNew = true
+  
+  useEffect(() => {
+    if (!user || userLoading) return
+    (async() => {
+      const res = await fetch("/api/stripeAccountsRetrieve", {
+        method: "POST",
+        headers: new Headers({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({ uid: user.uid }),
+      });
+      const { individual, tos_acceptance } = await res.json()
+      if (individual) {
+        isNew = false
+        setForm(individual);
+      }
+      tos_acceptance && setTosAcceptance(tos_acceptance);
+      setLoading(false)
+    })()
+  }, [user, userLoading])
 
   const setFormBirthDay = (moment: Moment) => {
     setBirthDay(toUtcIso8601str(moment))
@@ -81,9 +100,9 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
       }
     }
     if (needParams.length > 0) return alert.error('項目に入力漏れがあります。')
-    if (!agree && !tos_acceptance.date) return alert.error('同意します がチェックされていません。')
-    const { firebase } = await initFirebase()
-    const token = await firebase.auth().currentUser.getIdToken()
+    if (!agree && !tosAcceptance.date)
+      return alert.error("同意します がチェックされていません。");
+    const token = await user.getIdToken()
     const res = await fetch('/api/updateUser', {
       method: 'POST',
       headers: new Headers({
@@ -95,22 +114,18 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
         ...form
       })
     })
-    switch (from) {
-      case '購入導線のアドレス':
+    if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
 
-        break;
-      default:
-        if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
-        return router.push({ pathname: '/user/edit', query: { msg: encodeQuery('ユーザー情報を更新しました。') }}, '/user/edit')
-    }
+    if (isNew) return router.push({ pathname: `/users/${user.uid}/edit/identification`, query: { msg: encodeQuery('ユーザー情報を更新しました。引き続き本人確認書類を提出してください。') }})
+
+    return router.push({ pathname: `/users/${user.uid}/edit`, query: { msg: encodeQuery('ユーザー情報を更新しました。') }})
   }
 
   const searchZipCode = async() => {
     try {
       const zip = form.address_kanji.postal_code 
       if (!zip) return
-      const { firebase } = await initFirebase()
-      const token = await firebase.auth().currentUser.getIdToken()
+      const token = await user.getIdToken()
       const res = await fetch('/api/searchZipCode', {
         method: 'POST',
         headers: new Headers({
@@ -135,6 +150,8 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
       alert.error('エラーが発生しました。入力項目が正しいか確認してください。')
     }
   }
+
+  if (loading) return <Loading/>
 
   return (
     <Form style={{ marginTop: "1.5em" }} onSubmit={submit}>
@@ -174,7 +191,7 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
         </Col>
       </FormGroup>
       <FormGroup>
-        <Label>誕生日</Label>
+        <Label>誕生日(13才以上)</Label>
         <div>
           <DatePicker
             locale="ja"
@@ -221,38 +238,56 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
       </FormGroup>
 
       {(() => {
-        if (!tos_acceptance.date) {
+        if (tosAcceptance && !tosAcceptance.date) {
           return (
             <>
-            <FormGroup style={{ marginTop: '2em', marginBottom: 0 }}>
-              <Label>決済に関する同意事項</Label>
-              <p style={{ fontSize: 12, marginBottom: 0 }}>
-                このサービスにおける支払処理サービスは、Stripeが提供し、<a href="https://stripe.com/connect-account/legal">Stripe Connectアカウント契約</a>（<a href="https://stripe.com/legal">Stripe利用規約</a>を含み、総称して「Stripeサービス契約」といいます。）に従うものとします。<br />
-                このサービスにおける電子チケット取引の継続により、お客様はStripeサービス契約（随時Stripeにより修正されることがあり、その場合には修正されたものを含みます。）に拘束されることに同意するものとします。 <br />
-                Stripeを通じた支払処理サービスをこのサービスが使用するための条件として、お客様は、このサービスに対してお客様及びお客様の事業に関する正確かつ完全な情報を提供することに同意し、このサービスが当該情報及びStripeが提供する支払処理サービスのお客様による使用に関連する取引情報を共有することを認めるものとします。
-              </p>
-            </FormGroup>
-            <FormGroup check>
-              <Row form>
-                <Label className="ml-auto" check for="agree">
-                  <Input id="agree" type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} />
-                  同意します
-                </Label>
-              </Row>
-            </FormGroup>
+              <FormGroup style={{ marginTop: "2em", marginBottom: 0 }}>
+                <Label>決済に関する同意事項</Label>
+                <p style={{ fontSize: 12, marginBottom: 0 }}>
+                  このサービスにおける支払処理サービスは、Stripeが提供し、
+                  <a href="https://stripe.com/connect-account/legal">
+                    Stripe Connectアカウント契約
+                  </a>
+                  （<a href="https://stripe.com/legal">Stripe利用規約</a>
+                  を含み、総称して「Stripeサービス契約」といいます。）に従うものとします。
+                  <br />
+                  このサービスにおける電子チケット取引の継続により、お客様はStripeサービス契約（随時Stripeにより修正されることがあり、その場合には修正されたものを含みます。）に拘束されることに同意するものとします。{" "}
+                  <br />
+                  Stripeを通じた支払処理サービスをこのサービスが使用するための条件として、お客様は、このサービスに対してお客様及びお客様の事業に関する正確かつ完全な情報を提供することに同意し、このサービスが当該情報及びStripeが提供する支払処理サービスのお客様による使用に関連する取引情報を共有することを認めるものとします。
+                </p>
+              </FormGroup>
+              <FormGroup check>
+                <Row form>
+                  <Label className="ml-auto" check for="agree">
+                    <Input
+                      id="agree"
+                      type="checkbox"
+                      checked={agree}
+                      onChange={(e) => setAgree(e.target.checked)}
+                    />
+                    同意します
+                  </Label>
+                </Row>
+              </FormGroup>
             </>
-          )
+          );
         } else {
           return (
             <>
-            <FormGroup style={{ marginTop: '2em', marginBottom: 0 }}>
-              <Label>決済に関する同意事項</Label>
-            </FormGroup>
-            <FormGroup>
-              <p style={{ marginLeft: "1em" }}><FontAwesomeIcon icon={faCheckSquare} style={{ color: "#00DD00" }} /> 同意済み</p>
-            </FormGroup>
+              <FormGroup style={{ marginTop: "2em", marginBottom: 0 }}>
+                <Label>決済に関する同意事項</Label>
+              </FormGroup>
+              <FormGroup>
+                <p style={{ marginLeft: "1em" }}>
+                  <FontAwesomeIcon
+                    icon={faCheckSquare}
+                    style={{ color: "#00DD00" }}
+                  />{" "}
+                  同意済み
+                </p>
+              </FormGroup>
             </>
-          )
+          );
         }
       })()}
       <Row form style={{ marginTop: '2em' }}>
@@ -262,24 +297,4 @@ export const UpdateUser: React.FC<any> = ({ user, individual, tos_acceptance, fr
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user, res } = await isLogin(ctx, 'redirect')
-  if (!user) {
-    res.writeHead(302, {
-      Location: `/`,
-    });
-    res.end();
-    return { props: {} };
-  }
-  const { query } = ctx
-  const from = query.from ? query.from : ''
-  const { firestore } = await initFirebaseAdmin()
-  const { stripeId } = (await firestore.collection('users').doc(user.uid).get()).data()
-  const result = await stripe.accounts.retrieve(
-    stripeId
-  )
-  const { individual, tos_acceptance } = result
-  return { props: { user, individual: individual ? individual : null, tos_acceptance, from } }
-}
-
-export default UpdateUser
+export default withAuth(UpdateUser)

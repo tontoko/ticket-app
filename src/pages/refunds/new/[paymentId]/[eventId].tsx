@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Button, Container, Col, Row, Form, Input, FormGroup, Label, InputGroup
-} from 'reactstrap';
+  Button, Row, Form, Input, FormGroup, Label} from 'reactstrap';
 import { useRouter } from 'next/router'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
+import { GetStaticPaths, GetStaticProps } from 'next'
 import { useAlert } from 'react-alert';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import initFirebase from '@/src/lib/initFirebase';
+import { auth } from '@/src/lib/initFirebase';
 import { encodeQuery } from '@/src/lib/parseQuery';
+import Loading from '@/src/components/loading';
+import withAuth from '@/src/lib/withAuth';
 
-export default ({ user, createdUser, query, refunds }) => {
+const Refund = ({
+  user,
+  createdUser,
+  paymentData,
+}) => {
   const router = useRouter();
   const alert = useAlert();
   type select = "" | "mistake" | "fraud" | "other";
@@ -20,12 +24,43 @@ export default ({ user, createdUser, query, refunds }) => {
   const [problem, setProblem] = useState("" as problem);
   const [detailText, setDetailText] = useState("");
   const [sentTo, setSentTo] = useState("" as sentTo);
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user) return;
+    if (user.uid === createdUser || paymentData.refund) {
+      auth.signOut()
+      return
+    }
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    if (select === "other") {
+      switch (problem) {
+        case "event":
+          return setSentTo("user");
+        case "payment":
+          return setSentTo("system");
+        case "system":
+          return setSentTo("system");
+      }
+    }
+    switch (select) {
+      case "mistake":
+        return setSentTo("");
+      case "fraud":
+        return setSentTo("user");
+      default:
+        return setSentTo("");
+    }
+  }, [select, problem]);
 
   // TODO: 返金失敗時のWebhock用API作成
   const createRefund = async (reason: string) => {
-    const { firestore } = await initFirebase();
+    setLoading(true);
     let targetUser = sentTo === "user" ? createdUser : "admin";
-    
+
     try {
       let reasonText = "";
       switch (reason) {
@@ -45,16 +80,21 @@ export default ({ user, createdUser, query, refunds }) => {
           throw new Error();
       }
 
-      await firestore
-        .collection("payment")
-        .doc(query.paymentId)
-        .collection("refund")
-        .add({
+      const res = await fetch("/api/sendRefundRequest", {
+        method: "POST",
+        headers: new Headers({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({
           reason,
+          reasonText,
+          detailText,
           targetUser,
-        });
+        }),
+      });
+      if (res.status !== 200) throw new Error()
       router.push({
-        pathname: `/user/myTickets`,
+        pathname: `/users/${user.uid}/myTickets`,
         query: {
           msg: encodeQuery(
             "問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。"
@@ -65,6 +105,7 @@ export default ({ user, createdUser, query, refunds }) => {
       console.error(e.message);
       alert.error("エラーが発生しました。しばらくしてお試しください。");
     }
+    setLoading(false);
   };
 
   const submit = async (e) => {
@@ -90,26 +131,7 @@ export default ({ user, createdUser, query, refunds }) => {
     }
   };
 
-  useEffect(() => {
-    if (select === "other") {
-      switch (problem) {
-        case "event":
-          return setSentTo("user");
-        case "payment":
-          return setSentTo("system");
-        case "system":
-          return setSentTo("system");
-      }
-    }
-    switch (select) {
-      case "mistake":
-        return setSentTo("");
-      case "fraud":
-        return setSentTo("user");
-      default:
-        return setSentTo("");
-    }
-  }, [select, problem]);
+  if (loading) return <Loading />
 
   return (
     <Form style={{ marginTop: "2em" }} onSubmit={submit}>
@@ -170,18 +192,34 @@ export default ({ user, createdUser, query, refunds }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user, query, res } = await isLogin(ctx, 'redirect')
+export const getStaticPaths: GetStaticPaths = async () => {
+  const { firestore } = await initFirebaseAdmin();
+  let paths = []
+  await Promise.all(
+    (await firestore.collection("events").get()).docs.map(async(event) =>
+      (await firestore.collection("payments").get()).docs.map(
+        (payment) => {
+          return paths.push({ params: { eventId: event.id, paymentId: payment.id }})
+        }
+      )
+    )
+  )
+  return { paths, fallback: true };
+};
+
+export const getStaticProps: GetStaticProps = async ({params}) => {
+  const { eventId, paymentId } = params;
   const { firestore } = await initFirebaseAdmin()
-  const eventData = (await firestore.collection("events").doc(query.id as string).get()).data()
-  const paymentData = (await firestore.collection("payments").doc(query.paymentId as string).get()).data()
-  if (!user || user.uid === eventData.createdUser || paymentData.refund) {
-    res.writeHead(302, {
-      Location: "/",
-    });
-    res.end();
-  }
-  const refundsSnapShot = (await firestore.collection('payments').doc(query.paymentId as string).collection('refunds').get()).docs
-  const refunds = refundsSnapShot.map((snapshot) => { return { ...snapshot.data(), id: snapshot.id } });
-  return { props: { user, query, createdUser: eventData.createdUser, refunds } };
+  const eventData = (
+    await firestore
+      .collection("events")
+      .doc(eventId as string)
+      .get()
+  ).data();
+  const paymentData = (await firestore.collection("payments").doc(paymentId as string).get()).data()
+  return {
+    props: { createdUser: eventData.createdUser, paymentData },
+  };
 }
+
+export default withAuth(Refund)

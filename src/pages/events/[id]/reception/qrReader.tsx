@@ -3,23 +3,23 @@ import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { useAlert } from 'react-alert';
 import Loading from '@/src/components/loading'
-import { GetServerSideProps } from 'next';
-import isLogin from '@/src/lib/isLogin';
 import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery';
+import withAuth from '@/src/lib/withAuth';
 const QrReader = dynamic(() => import("react-qr-reader"), {
     loading: () => <p>loading...</p>, ssr: false
 })
 
-export default ({query}) => {
+const QrReaderPage = () => {
     const router = useRouter()
     const alert = useAlert()
     const [proccessing, setProccesing] = useState(false)
 
     useEffect(() => {
-        if (query.params) {
-            proccessQRCode(query.params)
+        if (!router) return
+        if (router.query.params) {
+          proccessQRCode(router.query.params as string);
         }
-    }, [])
+    }, [router])
 
     const handleScan = (data: string) => {
         if (data) {
@@ -47,23 +47,19 @@ export default ({query}) => {
         }
     }
 
-    return proccessing ? <Loading />
-        :
-            (
-            <div>
-                <p>推奨環境はChrome・FireFoxです。iOSはSafariのみ対応しています。<br/>動作しない場合はサードパーティーのQRコードスキャナをご利用ください。</p>
-                <QrReader
-                    delay={300}
-                    onError={handleError}
-                    onScan={handleScan}
-                    style={{ width: '100%', marginTop: '0.5em' }}
-                />
-            </div>
-            )
+    if (proccessing) return <Loading />
+
+    return (
+        <div>
+            <p>推奨環境はChrome・FireFoxです。iOSはSafariのみ対応しています。<br/>動作しない場合はサードパーティーのQRコードスキャナをご利用ください。</p>
+            <QrReader
+                delay={300}
+                onError={handleError}
+                onScan={handleScan}
+                style={{ width: '100%', marginTop: '0.5em' }}
+            />
+        </div>
+    )
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    const { user } = await isLogin(ctx, 'redirect')
-
-    return { props: { user, query: ctx.query } }
-}
+export default withAuth(QrReaderPage)

@@ -2,15 +2,13 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Row } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
-import 'firebase/storage'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import { firebase } from '@/src/lib/initFirebase'
+import withAuth from '@/src/lib/withAuth'
 
-export const UpdateEmail: React.FC<any> = (props) => {
+export const UpdateEmail: React.FC<any> = ({user}) => {
     const router = useRouter()
     const alert = useAlert()
     const [email, setEmail] = useState('')
@@ -18,20 +16,12 @@ export const UpdateEmail: React.FC<any> = (props) => {
 
     const updateEmail = async(e) => {
         e.preventDefault()
-        const {firebase} = await initFirebase()
-        const { currentUser } = firebase.auth()
-        if (email || pwd) {
-            try {
-                const currentEmail = firebase.auth().currentUser.email
-                const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
-                await currentUser.reauthenticateAndRetrieveDataWithCredential(credential)
-            } catch(e) {
-                return alert.error(errorMsg(e))
-            }
-        }
         try {
-            await currentUser.updateEmail(email)
-            router.push({pathname: `/user/edit`, query: {msg: encodeQuery('メールアドレスを変更しました') }}, '/user/edit')
+            const currentEmail = user.email
+            const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
+            await user.reauthenticateAndRetrieveDataWithCredential(credential)
+            await user.updateEmail(email)
+            router.push({pathname: `/users/${user.uid}/edit`, query: {msg: encodeQuery('メールアドレスを変更しました') }})
         } catch (e) {
             alert.error(errorMsg(e))
         }
@@ -55,9 +45,4 @@ export const UpdateEmail: React.FC<any> = (props) => {
     )
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-    const {user} = await isLogin(ctx, 'redirect')
-    return {props: {user}}
-}
-
-export default UpdateEmail
+export default withAuth(UpdateEmail)

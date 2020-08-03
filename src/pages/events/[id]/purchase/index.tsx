@@ -1,22 +1,19 @@
-import Link from 'next/link'
 import {useRouter} from 'next/router'
-import React, {useEffect, useState} from 'react'
-import { Dispatch, SetStateAction } from 'react'
+import React, {useState} from 'react'
 import {
-    Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
+    Form, FormGroup, Button, Label, Input, Row, Col, Card, CardBody,
     CardTitle, CardSubtitle, } from 'reactstrap'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import initFirebase from '@/src/lib/initFirebase'
 import getImg from '@/src/lib/getImgSSR'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
+import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
 import { event } from 'events'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import withAuth from '@/src/lib/withAuth'
 
 export const Purchase = ({ user, event, categories, photoUrls }) => {
     const router = useRouter();
 
-    const validCategories = categories.filter(category => category.stock - category.sold > 0)
+    const validCategories = categories.filter(category => category.stock - category.sold >= 0)
     const [familyName, setFamilyName] = useState('')
     const [firstName, setFirstName] = useState('')
     const [email, setEmail] = useState(user.email)
@@ -32,17 +29,18 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
         setInvalidEmail(!email.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/))
     }
 
-    const submit = () => {
+    const submit = (e) => {
+        e.preventDefault();
         if (!email.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/) ||
         !firstName ||
         !familyName) return
         const pathname = `/events/${router.query.id}/purchase/confirm`
         // クエリーをまるごとbase64化
-        router.push({ pathname, query: { query: encodeQuery(JSON.stringify({ familyName, firstName, email, selectedCategory })) }} )
+        router.push({ pathname, query: { query: encodeQuery(JSON.stringify({ familyName, firstName, email, selectedCategory, uid: user.uid })) }} )
     }
 
     return (
-        <Form style={{ marginTop: '5em' }}>
+        <Form style={{ marginTop: '5em' }} onSubmit={submit}>
             <FormGroup>
                 <Label>お名前</Label>
                 <Row>
@@ -90,22 +88,28 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
                 </Card>
             </FormGroup>
             <Row className="flex-row-reverse">
-                <Button style={{ marginRight: '1em' }} onClick={() => submit()}>購入手続きへ</Button>
+                <Button style={{ marginRight: '1em' }}>購入手続きへ</Button>
             </Row>
         </Form>
     );
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-    const { user, query, res } = await isLogin(ctx, "redirect");
+// export const getStaticPaths: GetStaticPaths = async () => {
+//     const { firestore } = await initFirebaseAdmin()
+//     const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/purchase`))
+//     return { paths, fallback: true }
+// }
+
+export const getServerSideProps: GetServerSideProps = async ({query}) => {
+    const { id } = query;
     const { firestore } = await initFirebaseAdmin()
-    const data = (await firestore.collection('events').doc(query.id as string).get()).data() as event
+    const data = (await firestore.collection('events').doc(id as string).get()).data() as event
     const photos: undefined | string[] = data.photos
     const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
     const event = {...data, startDate, endDate}
-    const categoriesSnapShot = (await firestore.collection('events').doc(query.id as string).collection('categories').orderBy('index').get())
+    const categoriesSnapShot = (await firestore.collection('events').doc(id as string).collection('categories').orderBy('index').get())
     let categories: FirebaseFirestore.DocumentData[] = []
     categoriesSnapShot.forEach(e => {
         const id = e.id
@@ -113,14 +117,7 @@ export const getServerSideProps: GetServerSideProps = async ctx => {
         category.public && categories.push({ ...category, id })
     })
 
-    if (!user || user.uid === data.createdUser) {
-      res.writeHead(302, {
-        Location: "/",
-      });
-      res.end();
-    }
-
-    return {props: { event, categories, photoUrls, user }}
+    return {props: { event, categories, photoUrls }}
 }
 
-export default Purchase
+export default withAuth(Purchase)

@@ -1,39 +1,31 @@
-import { GetServerSideProps } from "next"
-import isLogin from "@/src/lib/isLogin"
-import initFirebase from "@/src/lib/initFirebase"
-import { Row, Col, Button, Card, CardBody } from "reactstrap";
+import { GetStaticPaths } from "next"
+import { Row, Col, Card, CardBody } from "reactstrap";
 import { useEffect, useState } from "react";
 import Loading from '@/src/components/loading'
 import { useRouter } from "next/router";
-
-let firestore: undefined | firebase.firestore.Firestore;
+import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { firestore } from "@/src/lib/initFirebase";
+import withAuth from "@/src/lib/withAuth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 
 const Notifies = ({user}) => {
   const [notifies, setNotifies] = useState([])
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter()
+  const [snapshot, loading] = useCollection(
+    firestore.collection("users").doc(user.uid).collection("notifies"));
 
   useEffect(() => {
-    let cancelListner: () => void;
-
     (async () => {
-      firestore = (await initFirebase()).firestore
-      cancelListner = firestore
-        .collection("users")
-        .doc(user.uid)
-        .collection('notifies')
-        .onSnapshot(async (snapshot) => {
-          let tmpNotifies: firebase.firestore.DocumentData[] = [];
-          await Promise.all(snapshot.docs.map(async (doc) => tmpNotifies.push({...doc.data(), id: doc.id})));
-          setNotifies(tmpNotifies)
-          setIsLoading(false);
-        });
+      if (loading || !snapshot) return
+      let tmpNotifies: firebase.firestore.DocumentData[] = [];
+      await Promise.all(snapshot.docs.map(async (doc) => tmpNotifies.push({...doc.data(), id: doc.id})));
+      setNotifies(tmpNotifies)
+      setIsLoading(false);
     })()
-
-    return () => {
-      cancelListner();
-    }
-  }, [])
+  }, [loading, snapshot])
 
   const clickLinkWithsaveAsRead = async (id, url) => {
     if (!firestore) return
@@ -65,7 +57,13 @@ const Notifies = ({user}) => {
                 backgroundColor: notify.read ? "gainsboro" : null,
               }}
             >
-              <CardBody>{notify.text}</CardBody>
+              <CardBody>
+                <FontAwesomeIcon
+                icon={notify.read ? faCheckCircle : faExclamationCircle}
+                  style={{ color: notify.read ? "#00DD00": 'orange' }}
+                />{' '}
+                {notify.text}
+              </CardBody>
             </Card>
           </Col>
         </Row>
@@ -83,9 +81,4 @@ const Notifies = ({user}) => {
   );
 }
 
-export default Notifies;
-
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user } = await isLogin(ctx)
-  return { props: { user } }
-}
+export default withAuth(Notifies);

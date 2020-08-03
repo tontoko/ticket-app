@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, {useState} from 'react'
 import { Form, FormGroup, Button, Label, Input, Col, Spinner, Row } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
+import { auth, firebase } from '@/src/lib/initFirebase'
 import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAlert } from "react-alert"
@@ -20,8 +20,7 @@ const Login = () => {
         if (loading) return
         setLoading(true)
         try {
-            const {firebase} = await initFirebase()
-            await firebase.auth().signInWithEmailAndPassword(email, password)
+            await auth.signInWithEmailAndPassword(email, password)
         } catch (e) {
             alert.error(errorMsg(e, 'signin'))
             setLoading(false)
@@ -32,7 +31,6 @@ const Login = () => {
         if (loading) return
         setLoading(true)
         try {
-            const {firebase} = await initFirebase()
             const provider = new firebase.auth.FacebookAuthProvider()
             await firebase.auth().signInWithPopup(provider)
         } catch (e) {
@@ -46,7 +44,6 @@ const Login = () => {
         if (loading) return
         setLoading(true)
         try {
-            const {firebase} = await initFirebase()
             const provider = new firebase.auth.GoogleAuthProvider()
             await firebase.auth().signInWithPopup(provider)
         } catch (e) {
@@ -131,8 +128,3 @@ const Login = () => {
 }
 
 export default Login
-
-export const getServerSideProps: GetServerSideProps = async ctx => {
-    await isLogin(ctx, 'redirect');
-    return { props: { } }
-}

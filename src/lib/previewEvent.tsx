@@ -3,7 +3,8 @@ import {
 } from 'reactstrap';
 import moment from 'moment'
 import { useState, useEffect } from 'react';
-export default ({
+
+const previewEvent = ({
   setModal,
   setModalInner,
   submitEvent,
@@ -53,8 +54,7 @@ const PreviewModal = ({
   const [animating, setAnimating] = useState(false);
   const [thisLoading, setThisLoading] = useState(false);
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const submit = async () => {
     setThisLoading(true);
     const success = await submitEvent();
     !success && setThisLoading(false);
@@ -90,10 +90,8 @@ const PreviewModal = ({
   });
 
   return (
-    <Form style={{ margin: "2em" }} onSubmit={submit}>
-      <ModalHeader>
-        <h4 style={{ marginBottom: "1em" }}>この内容で送信しますか？</h4>
-      </ModalHeader>
+    <div style={{ margin: "2em" }}>
+      <ModalHeader>この内容で送信しますか？</ModalHeader>
       <ModalBody>
         <FormGroup style={{ textAlign: "center" }}>
           <Carousel
@@ -132,14 +130,14 @@ const PreviewModal = ({
         <FormGroup>
           <Label>開始</Label>
           <Input
-            value={moment(startDate).format("YYYY年 M月d日 H:mm")}
+            value={moment(startDate).format("YYYY年 M月D日 H:mm")}
             disabled
           />
         </FormGroup>
         <FormGroup>
           <Label>終了</Label>
           <Input
-            value={moment(endDate).format("YYYY年 M月d日 H:mm")}
+            value={moment(endDate).format("YYYY年 M月D日 H:mm")}
             disabled
           />
         </FormGroup>
@@ -163,10 +161,16 @@ const PreviewModal = ({
         >
           キャンセル
         </Button>
-        <Button disabled={thisLoading}>
-          {thisLoading ? <Spinner /> : "送信"}
+        <Button
+          disabled={thisLoading}
+          type="button"
+          onClick={submit}
+        >
+          {thisLoading ? <Spinner /> : "公開"}
         </Button>
       </ModalFooter>
-    </Form>
+    </div>
   );
 };
+
+export default previewEvent

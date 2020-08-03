@@ -2,19 +2,13 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Row, Col, ModalBody, ListGroup, ListGroupItem, Spinner } from 'reactstrap'
-import initFirebase from '@/src/lib/initFirebase'
-import 'firebase/storage'
 import { useAlert } from "react-alert"
-import errorMsg from '@/src/lib/errorMsg'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
-import Link from 'next/link'
 import { useStripe } from '@stripe/react-stripe-js'
 import zenginCode from 'zengin-code'
-import { setServers } from 'dns'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import withAuth from '@/src/lib/withAuth'
 
-export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) => {
+export const CreateBankAccount: React.FC<any> = ({ user, setModal, setModalInner }) => {
   const stripe = useStripe()
   const router = useRouter()
   const alert = useAlert()
@@ -49,8 +43,7 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
       // })
       if (stripeResult.error) throw stripeResult.error
       const stripeToken = stripeResult.token.id
-      const { firebase } = await initFirebase()
-      const firebaseToken = await firebase.auth().currentUser.getIdToken()
+      const firebaseToken = await user.getIdToken();
       const res = await fetch('/api/createBankAccount', {
         method: 'POST',
         headers: new Headers({
@@ -63,7 +56,7 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
         })
       })
       if (res.status === 200) {
-        router.push({ pathname: '/user/bankAccounts', query: { msg: encodeQuery('新しい銀行口座を登録しました。') } }, '/user/bankAccounts')
+        router.push({ pathname: `/users/${user.uid}/bankAccounts`, query: { msg: encodeQuery('新しい銀行口座を登録しました。') } }, `/users/${user.uid}/bankAccounts`)
       }
     } catch(e) {
       alert.error('エラーが発生しました。しばらくしてお試しください。')
@@ -173,9 +166,4 @@ export const CreateBankAccount: React.FC<any> = ({ setModal, setModalInner }) =>
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async ctx => {
-  const { user } = await isLogin(ctx, 'redirect')
-  return { props: { user } }
-}
-
-export default CreateBankAccount
+export default withAuth(CreateBankAccount)

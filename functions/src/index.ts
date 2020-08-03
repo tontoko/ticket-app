@@ -52,21 +52,3 @@ exports.createUser = functions.auth.user().onCreate(async (user) => {
     admin.auth().deleteUser(user.uid)
   }
 });
-
-exports.refundNotify = functions.firestore.document('payments/{payment}/refunds/{refund}').onCreate(async (snap, context) => {
-    const { targetUser } = snap.data();
-    const text =
-      targetUser === "admin"
-        ? "ユーザーから調査依頼がありました。"
-        : "あなたが主催するイベントに対して返金が申請されました。3日以内に対処しない場合、自動的に返金されます。";
-    firestore
-      .collection("users")
-      .doc(targetUser)
-      .collection("notifies")
-      .doc(context.params.refund)
-      .set({
-        text,
-        url: `/user/payments/${context.params.payment}`,
-        read: false,
-      });
-})
