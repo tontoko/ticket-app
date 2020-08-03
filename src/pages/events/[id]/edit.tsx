@@ -54,7 +54,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 
   return {
     props: { event, photoUrls },
-    revalidate: 1,
+    // revalidate: 1,
   };
 };
 
