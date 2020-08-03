@@ -109,7 +109,7 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
 
   let staticEvent = null
 
-  if (userData.eventHistory) {
+  if (userData && userData.eventHistory) {
     const result = await firestore
       .collection("events")
       .doc(userData.eventHistory[userData.eventHistory.length - 1])
