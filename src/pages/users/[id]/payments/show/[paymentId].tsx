@@ -15,16 +15,17 @@ import withAuth from "@/src/lib/withAuth";
 const Show = ({ user, payment, event, category, refunded }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter()
-
+  
   useEffect(() => {
+    if (!payment) return
     if (!router) return;
-    if (payment.seller !== user.id || payment.buyer !== user.id) {
+    if (payment.seller !== user.uid && payment.buyer !== user.uid) {
       auth.signOut()
       return 
     }
     setLoading(false)
   }, [router]);
-
+  
   if (loading) return <Loading />;
 
   return (
@@ -54,25 +55,24 @@ export const getStaticPaths: GetStaticPaths = async () => {
   let paths = []
   await Promise.all((await firestore.collection("events").get()).docs.map(
     async (event) =>
-      (await firestore.collection("payments").get()).docs.map((payment) => {
+      (await firestore.collection("payments").get()).docs.map(async (payment) => {
         return paths.push({
           params: { id: event.id, paymentId: payment.id },
         });
       })
   ));
-
   return { paths, fallback: true };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { firestore } = await initFirebaseAdmin();
-  const {id, paymentId} = params
-  const paymentSnapShot = await firestore.collection('payments').doc(paymentId as string).get()
-  const payment = { ...paymentSnapShot.data(), createdAt: paymentSnapShot.createTime.seconds*1000 } as any
+  const { id, paymentId } = params
+  const payment = (await firestore
+    .collection("payments")
+    .doc(paymentId as string)
+    .get()).data()
 
-  const eventSnapShot = (
-    await firestore.collection("events").doc(payment.event).get()
-  )
+  const eventSnapShot = await firestore.collection("events").doc(payment.event).get()
   const eventData = eventSnapShot.data()
   const event = {
     ...eventData,
@@ -89,8 +89,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       .get()
   ).data();
   const refunded = (await firestore
-    .collection("payments")
-    .doc(paymentId as string)
     .collection("refunds")
     .where("refunded", '==', true)
     .get()

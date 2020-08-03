@@ -119,7 +119,7 @@ const MyTickets = ({ user }) => {
               <Row>
                 <Col style={{ padding: "0 0.5em" }}>
                   {event.tickets.map((ticket, ticketIndex) => (
-                    <Tickets ticket={ticket} event={event} key={ticketIndex} />
+                    <Tickets user={user} ticket={ticket} event={event} key={ticketIndex} />
                   ))}
                 </Col>
               </Row>

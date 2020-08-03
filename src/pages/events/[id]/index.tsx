@@ -200,7 +200,7 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
             <Col sm="12" style={{ margin: "0.2em" }}>
               <h5>購入済みチケット</h5>
               {tickets === null && <Loading style={{ position: 'reletive' }} />}
-              {tickets.map((ticket, i) => <Tickets ticket={ticket} event={event} key={i} />)}
+              {tickets.map((ticket, i) => <Tickets user={user} ticket={ticket} event={event} key={i} />)}
             </Col>
             <Col sm="12" style={{ marginTop: "1.5em" }}>
               <Link href={urlToPurchase}>

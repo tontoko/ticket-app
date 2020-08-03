@@ -11,8 +11,8 @@ import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
 import withAuth from "@/src/lib/withAuth";
 import { stripeAccounts, stripeBalance } from "@/src/lib/stripeRetrieve";
 
+// TODO: 本人確認書類の審査結果用Webhockを作成
 const Organizer = ({ user, status, balance }) => {
-    console.log(status)
   return (
     <div style={{ marginTop: "1.5em", marginBottom: "1.5em" }}>
       <h4>イベント主催者用の登録情報</h4>

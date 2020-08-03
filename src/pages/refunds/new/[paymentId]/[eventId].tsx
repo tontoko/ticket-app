@@ -199,7 +199,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     (await firestore.collection("events").get()).docs.map(async(event) =>
       (await firestore.collection("payments").get()).docs.map(
         (payment) => {
-          return paths.push({ params: { id: event.id, paymentId: payment.id }})
+          return paths.push({ params: { eventId: event.id, paymentId: payment.id }})
         }
       )
     )
@@ -208,14 +208,18 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({params}) => {
-  const { id, paymentId } = params;
+  const { eventId, paymentId } = params;
   const { firestore } = await initFirebaseAdmin()
-  const eventData = (await firestore.collection("events").doc(id as string).get()).data()
+  const eventData = (
+    await firestore
+      .collection("events")
+      .doc(eventId as string)
+      .get()
+  ).data();
   const paymentData = (await firestore.collection("payments").doc(paymentId as string).get()).data()
   return {
     props: { createdUser: eventData.createdUser, paymentData },
   };
 }
-// TODO: ルート変更
 
 export default withAuth(Refund)
