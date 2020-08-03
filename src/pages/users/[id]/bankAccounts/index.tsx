@@ -10,13 +10,12 @@ import withAuth from '@/src/lib/withAuth'
 
 type props = {
   user: firebase.User,
-  userLoading: boolean,
   bankAccounts: Stripe.BankAccount[], 
   setModal: Dispatch<SetStateAction<boolean>>, 
   setModalInner: Dispatch<SetStateAction<ReactElement>> 
 }
 
-export const BankAccounts: NextPage<props> = ({ user, userLoading, setModal, setModalInner }) => {
+export const BankAccounts: NextPage<props> = ({ user, setModal, setModalInner }) => {
   const alert = useAlert()
   const [bankAccounts, setBankAccounts] = useState([])
   const [loading, setLoading] = useState(false)
@@ -108,7 +107,7 @@ export const BankAccounts: NextPage<props> = ({ user, userLoading, setModal, set
     <div style={{ marginTop: "1.5em" }}>
       <h3>口座情報</h3>
       <Row style={{ margin: "2em 0" }}>
-        {userLoading && <Loading />}
+        {!user && <Loading />}
         {bankAccounts.map((bankAccount: Stripe.BankAccount, i) => (
           <Col md="4" key={i} style={{ marginBottom: "1em" }}>
             <Card key={i}>

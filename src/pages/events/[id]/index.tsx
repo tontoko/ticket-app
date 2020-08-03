@@ -25,7 +25,7 @@ import {
 import Tickets from '@/src/components/tickets';
 import Loading from '@/src/components/loading';
 
-const Event = ({ user, userLoading, event, categories, items, setModal, setModalInner }) => {
+const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     if (!event) return <></>
     const router = useRouter();
     const [tickets, setTickets] = useState(null);
@@ -52,7 +52,7 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
       let ticketListener = () => {
         return;
       };
-      if (!router || userLoading) return;
+      if (!router) return;
       (async () => {
         if (!user) {
           setStatus("anonymous");
@@ -63,7 +63,7 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
         } else if (event.createdUser == user.uid) {
           setStatus("organizer");
         } else {
-          ticketListener = firestore
+          ticketListener = (await firestore())
             .collection("payments")
             .where("event", "==", event.id)
             .where("buyer", "==", user.uid)
@@ -92,19 +92,19 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
             });
           // ログイン済みで主催者以外の場合に履歴に追加
           let { eventHistory } = (
-            await firestore.collection("users").doc(user.uid).get()
+            await (await firestore()).collection("users").doc(user.uid).get()
           ).data();
           if (!eventHistory) eventHistory = [];
           eventHistory = Array.from(new Set([...eventHistory, event.id]));
           eventHistory.length > 10 && eventHistory.shift();
-          await firestore
+          await (await firestore())
             .collection("users")
             .doc(user.uid)
             .update({ eventHistory });
         }
       })();
       return ticketListener;
-    }, [router, user, userLoading]);
+    }, [router, user]);
 
     useEffect(() => {
         setTwitterShareProps({
@@ -200,7 +200,7 @@ const Event = ({ user, userLoading, event, categories, items, setModal, setModal
             <Col sm="12" style={{ margin: "0.2em" }}>
               <h5>購入済みチケット</h5>
               {tickets === null && <Loading style={{ position: 'reletive' }} />}
-              {tickets.map((ticket, i) => <Tickets user={user} ticket={ticket} event={event} key={i} />)}
+              {tickets.map((ticket, i) => <Tickets ticket={ticket} event={event} key={i} />)}
             </Col>
             <Col sm="12" style={{ marginTop: "1.5em" }}>
               <Link href={urlToPurchase}>

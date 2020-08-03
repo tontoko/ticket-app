@@ -3,8 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import "react-datepicker/dist/react-datepicker.css"
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import UserLayouts from './layouts/userLayouts'
-import { auth, firestore } from '@/src/lib/initFirebase'
-import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from '@/src/lib/initFirebase'
 import {useRouter} from 'next/router'
 import { AppProps, AppContext } from 'next/app'
 import Head from "next/head";
@@ -26,53 +25,56 @@ const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter();
   const [modal, setModal] = useState(false);
   const [modalInner, setModalInner]: [ReactElement, Dispatch<SetStateAction<ReactElement>>] = useState()
-  const [user, userLoading, userError] = useAuthState(auth);
   const cookies = parseCookies()
   const [tmpUser, setTmpUser] = useState(cookies.tmpUser && JSON.parse(cookies.tmpUser));
+  const [user, setUser] = useState<firebase.User>();
+  let listner = () => {return}
 
   useEffect(() => {
-    if (userLoading) return;
-    if (userError) auth.signOut();
     (async () => {
-      if (user) {
-        setCookie(null, "tmpUser", JSON.stringify({
-          providerData: user.providerData,
-          uid: user.uid
-        }), {
-          maxAge: 60,
-          path: "/",
-          domain: document.domain,
-          secure: document.domain !== 'localhost',
-        });
-        if (
-          !user.emailVerified &&
-          user.providerData[0].providerId === "password" &&
-          !window.location.href.match(/^\/__\/auth\/action/)
-        ) {
-          router.push("/confirmEmail");
-        } else if (
-          window.location.pathname === "/login" ||
-          window.location.pathname === "/register" ||
-          window.location.pathname === "/forgetPassword"
-        ) {
-          router.push({
-            pathname: `/users/${user.uid}`,
-            query: { msg: encodeQuery("ログインしました") },
+      listner = (await auth()).onAuthStateChanged(async currentUser => {
+        if (currentUser) {
+          setUser(currentUser)
+          setCookie(null, "tmpUser", JSON.stringify({
+            providerData: currentUser.providerData,
+            uid: currentUser.uid
+          }), {
+            maxAge: 60,
+            path: "/",
+            domain: document.domain,
+            secure: document.domain !== 'localhost',
           });
+          if (
+            !currentUser.emailVerified &&
+            currentUser.providerData[0].providerId === "password" &&
+            !window.location.href.match(/^\/__\/auth\/action/)
+          ) {
+            router.push("/confirmEmail");
+          } else if (
+            window.location.pathname === "/login" ||
+            window.location.pathname === "/register" ||
+            window.location.pathname === "/forgetPassword"
+          ) {
+            router.push({
+              pathname: `/users/${currentUser.uid}`,
+              query: { msg: encodeQuery("ログインしました") },
+            });
+          }
         }
-      }
-      if (!user) {
-        destroyCookie(null, 'tmpUser')
-        setTmpUser(null)
-        if (!checkAllowNoLoginUrlList()) {
-          await router.push({
-            pathname: "/login",
-            query: { msg: encodeQuery("ログアウトしました") },
-          });
+        if (!currentUser) {
+          setUser(null)
+          destroyCookie(null, 'tmpUser')
+          setTmpUser(null)
+          if (!checkAllowNoLoginUrlList()) {
+            await router.push({
+              pathname: "/login",
+              query: { msg: encodeQuery("ログアウトしました") },
+            });
+          }
         }
-      }
+      })
     })();
-  }, [user, userLoading, router.pathname]);
+  }, [router.pathname]);
 
   useEffect(() => {
     router.events.on("routeChangeStart", (url) => {
@@ -131,7 +133,6 @@ const App = ({ Component, pageProps }: AppProps) => {
               setModalInner,
               Component,
               user,
-              userLoading,
             }}
           >
             <Component
@@ -141,7 +142,6 @@ const App = ({ Component, pageProps }: AppProps) => {
                 setModalInner,
                 Component,
                 user,
-                userLoading,
               }}
             />
           </UserLayouts>

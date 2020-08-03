@@ -9,11 +9,12 @@ import { useRouter } from 'next/router'
 import { decodeQuery } from '@/src/lib/parseQuery'
 import { firestore } from '@/src/lib/initFirebase'
 
-const UserLayout: React.FC<any> = ({ user, tmpUser, userLoading, children }) => {
+const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
   const router = useRouter()
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
   const [notifiesLength, setNotifiesLength] = useState(0)
+  let listner = () => {return}
   let facebookUid = null
   let googleUid = null
   if (user || tmpUser) {
@@ -27,16 +28,17 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, userLoading, children }) => 
   }
 
   useEffect(() => {
-    if (!user || userLoading) return
-    const listner = firestore
+    if (!user) return
+    (async () => {
+      listner = (await firestore())
       .collection("users")
       .doc(user.uid)
       .collection("notifies")
       .where("read", "==", false).onSnapshot(snap => {
         setNotifiesLength(snap ? snap.size : 0);
-      })
+      })})()
     return listner
-  }, [user, userLoading]);
+  }, [user]);
 
   useEffect(() => {
     if (!router) return
@@ -125,8 +127,7 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, userLoading, children }) => 
             </Collapse>
           </>
         )}
-        {!user && !tmpUser &&
-          !userLoading && (
+        {!user && !tmpUser && (
             <>
               <div style={{ marginLeft: "auto" }} />
               <NavbarToggler onClick={() => toggle(!isOpen)} />

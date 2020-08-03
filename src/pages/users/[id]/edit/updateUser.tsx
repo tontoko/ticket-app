@@ -17,7 +17,7 @@ import withAuth from '@/src/lib/withAuth'
 import { firestore } from '@/src/lib/initFirebase'
 import Loading from '@/src/components/loading'
 
-export const UpdateUser: React.FC<any> = ({ user, userLoading }) => {
+export const UpdateUser = ({ user }) => {
   const alert = useAlert()
   const router = useRouter()
   const [tosAcceptance, setTosAcceptance] = useState<
@@ -59,7 +59,7 @@ export const UpdateUser: React.FC<any> = ({ user, userLoading }) => {
   let isNew = true
   
   useEffect(() => {
-    if (!user || userLoading) return
+    if (!user) return
     (async() => {
       const res = await fetch("/api/stripeAccountsRetrieve", {
         method: "POST",
@@ -76,7 +76,7 @@ export const UpdateUser: React.FC<any> = ({ user, userLoading }) => {
       tos_acceptance && setTosAcceptance(tos_acceptance);
       setLoading(false)
     })()
-  }, [user, userLoading])
+  }, [user])
 
   const setFormBirthDay = (moment: Moment) => {
     setBirthDay(toUtcIso8601str(moment))

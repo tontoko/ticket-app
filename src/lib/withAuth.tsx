@@ -6,7 +6,7 @@ import checkAllowNoLoginUrlList from "./checkAllowNoLoginUrlList";
 
 
 const withAuth = Component => {
-    return class withAuthHOC extends React.Component<{ user: string, userLoading: boolean }> {
+    return class withAuthHOC extends React.Component<{ user: string }> {
       constructor(props) {
         super(props);
       }

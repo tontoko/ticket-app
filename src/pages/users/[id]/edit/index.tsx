@@ -2,13 +2,9 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 import { FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
-import { GetStaticPaths, GetStaticProps } from 'next'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { auth } from '@/src/lib/initFirebase'
 import withAuth from '@/src/lib/withAuth'
-import { stripeAccounts, stripeBalance } from '@/src/lib/stripeRetrieve'
 
 const UserShow = ({ user }) => {
   const [loading, setLoading] = useState(false);
@@ -93,7 +89,7 @@ const UserShow = ({ user }) => {
           disabled={loading}
           onClick={async () => {
             setLoading(true);
-            await auth.signOut();
+            (await auth()).signOut();
           }}
         >
           ログアウト

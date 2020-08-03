@@ -151,7 +151,7 @@ const EventForm = ({
     const mm = ("00" + dt.getMinutes()).slice(-2);
     const ss = ("00" + dt.getSeconds()).slice(-2);
     const filename = yyyy + MM + dd + hh + mm + ss + "_" + number;
-    const storageRef = storage.ref();
+    const storageRef = (await storage()).ref();
     const userEventRef = storageRef.child(
       `${user.uid}/events/${filename}.jpg`
     );
@@ -188,11 +188,11 @@ const EventForm = ({
         let msg = ''
         let pathname = ''
         if (mode === 'new') {
-            const result = await firestore.collection("events").add(eventData);
+            const result = await (await firestore()).collection("events").add(eventData);
             msg = "イベントを作成しました。";
             pathname = `/events/${result.id}`;
         } else if (mode === 'edit') {
-            await firestore
+            await (await firestore())
               .collection("events")
               .doc(router.query.id as string)
               .update(eventData);

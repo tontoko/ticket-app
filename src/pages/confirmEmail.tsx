@@ -1,11 +1,10 @@
-import Link from 'next/link'
 import React, {useState, useEffect} from 'react'
 import {useRouter} from 'next/router'
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import { auth } from '../lib/initFirebase'
 
-const ConfirmEmail = ({ user, userLoading }) => {
+const ConfirmEmail = ({ user }) => {
   const router = useRouter();
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(true);
@@ -13,10 +12,10 @@ const ConfirmEmail = ({ user, userLoading }) => {
   useEffect(() => {
     (async () => {
       // クライアント側の認証を待つuser
-      if (!user || userLoading || !loading) return;
+      if (!user || !loading) return;
       sendEmail();
     })();
-  }, [user, userLoading]);
+  }, [user]);
 
   const sendEmail = async () => {
     try {
@@ -29,7 +28,7 @@ const ConfirmEmail = ({ user, userLoading }) => {
       setMsg(errorMsg(e));
     }
     setTimeout(async () => {
-      await auth.signOut();
+      (await auth()).signOut();
       router.push("/login");
     }, 5000);
   };

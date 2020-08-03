@@ -4,7 +4,7 @@ import { faCheckSquare, faExclamationCircle } from "@fortawesome/free-solid-svg-
 import Link from "next/link";
 import { encodeQuery } from "../lib/parseQuery";
 
-const Tickets = ({ user, ticket, event: event }) => {
+const Tickets = ({ ticket, event: event }) => {
     return (
       <Card style={{ marginBottom: "0.5em" }}>
         <CardBody>

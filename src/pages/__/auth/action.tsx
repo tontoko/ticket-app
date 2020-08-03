@@ -8,7 +8,7 @@ import {useRouter} from 'next/router'
 import ResetPassword from './resetPassword'
 import { encodeQuery } from '@/src/lib/parseQuery'
 
-const Action = ({user, userLoading}) => {
+const Action = ({user}) => {
     const alert = useAlert()
     const router = useRouter()
     const [loading, setLoading] = useState(true)
@@ -19,7 +19,7 @@ const Action = ({user, userLoading}) => {
 
     useEffect(() => {
       (async () => {
-        if (!loading || userLoading || !router) return;
+        if (!loading || !router) return;
         mode = router.query.mode as string;
         oobCode = router.query.oobCode as string;
         try {
@@ -47,10 +47,10 @@ const Action = ({user, userLoading}) => {
           setTimeout(() => redirectAfterUpdate(), 5000);
         }
       })();
-    }, [router, userLoading]);
+    }, [router]);
 
     const redirectAfterUpdate = async(msg?:string) => {
-        if (user) await auth.signOut()
+        if (user) await (await (auth())).signOut()
         if (msg) {
             const message = encodeQuery(msg)
             return router.push({ pathname: `/login`, query: { msg: message } }, "/login");
@@ -59,7 +59,7 @@ const Action = ({user, userLoading}) => {
     }
 
     const handleResetPassword = async () => {
-        await auth.verifyPasswordResetCode(oobCode as string)
+        await (await auth()).verifyPasswordResetCode(oobCode as string)
         setValid(true)
         setView(<ResetPassword confirmResetPassword={confirmResetPassword} />)
         setLoading(false)
@@ -68,7 +68,7 @@ const Action = ({user, userLoading}) => {
     const confirmResetPassword = async (newPwd, newPwdConfirm) => {
         if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません。')
         try {
-            await auth.confirmPasswordReset(oobCode as string, newPwd)
+            await (await auth()).confirmPasswordReset(oobCode as string, newPwd)
             redirectAfterUpdate('新しいパスワードに更新しました。')
         } catch(e) {
             alert.error(errorMsg(e))
@@ -76,17 +76,17 @@ const Action = ({user, userLoading}) => {
     }
 
     const handleRecoverEmail = async () => {
-        const info = await auth.checkActionCode(oobCode as string)
+        const info = await (await auth()).checkActionCode(oobCode as string)
         const restoredEmail = info['data']['email']
-        await auth.applyActionCode(oobCode as string)
-        await auth.sendPasswordResetEmail(restoredEmail)
+        await (await auth()).applyActionCode(oobCode as string)
+        await (await auth()).sendPasswordResetEmail(restoredEmail)
         setView(<h4>メールアドレスを復元しました。パスワードを変更してください。リダイレクトします。</h4>)
         setValid(true)
         setLoading(false)
     }
 
     const handleVerifyEmail = async () => {
-        await auth.applyActionCode(oobCode as string)
+        await (await auth()).applyActionCode(oobCode as string)
         setView(<h4>メールアドレスが認証されました。リダイレクトします。</h4>)
         setValid(true)
         setLoading(false)
