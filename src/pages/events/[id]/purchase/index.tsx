@@ -5,7 +5,7 @@ import {
     CardTitle, CardSubtitle, } from 'reactstrap'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
-import { GetStaticProps, GetStaticPaths } from 'next'
+import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
 import { event } from 'events'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
@@ -94,14 +94,14 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
     );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-    const { firestore } = await initFirebaseAdmin()
-    const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/purchase`))
-    return { paths, fallback: true }
-}
+// export const getStaticPaths: GetStaticPaths = async () => {
+//     const { firestore } = await initFirebaseAdmin()
+//     const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/purchase`))
+//     return { paths, fallback: true }
+// }
 
-export const getStaticProps: GetStaticProps = async ({params}) => {
-    const {id} = params
+export const getServerSideProps: GetServerSideProps = async ({query}) => {
+    const { id } = query;
     const { firestore } = await initFirebaseAdmin()
     const data = (await firestore.collection('events').doc(id as string).get()).data() as event
     const photos: undefined | string[] = data.photos

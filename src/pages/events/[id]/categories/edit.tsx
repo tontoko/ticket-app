@@ -4,7 +4,7 @@ import { Form, FormGroup, Button, Input, Row, Col, Label, Spinner, ModalBody, Mo
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
-import { GetStaticProps, GetStaticPaths } from 'next'
+import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
 import { event } from 'events'
 import { useAlert } from 'react-alert'
 import { encodeQuery } from '@/src/lib/parseQuery'
@@ -277,14 +277,14 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { firestore } = await initFirebaseAdmin()
-  const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/categories/edit`))
-  return { paths, fallback: true }
-}
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const { firestore } = await initFirebaseAdmin()
+//   const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/categories/edit`))
+//   return { paths, fallback: true }
+// }
 
-export const getStaticProps: GetStaticProps = async ({params}) => {
-  const { id } = params
+export const getServerSideProps: GetServerSideProps = async ({query}) => {
+  const { id } = query;
   const { firestore } = await initFirebaseAdmin()
   const result = (await firestore.collection('events').doc(id as string).get())
   const data = result.data() as event

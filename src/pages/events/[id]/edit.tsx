@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
 import getImg from '@/src/lib/getImgSSR'
 import EventForm from '@/src/components/eventForm';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import withAuth from '@/src/lib/withAuth';
 
@@ -26,18 +26,18 @@ const Edit = ({ user, event, photoUrls, setModal, setModalInner }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { firestore } = await initFirebaseAdmin();
-  const paths = (await firestore.collection("events").get()).docs.map(
-    (doc) => `/events/${doc.id}/edit`
-  );
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const { firestore } = await initFirebaseAdmin();
+//   const paths = (await firestore.collection("events").get()).docs.map(
+//     (doc) => `/events/${doc.id}/edit`
+//   );
 
-  return { paths, fallback: true };
-};
+//   return { paths, fallback: true };
+// };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const { firestore } = await initFirebaseAdmin();
-  const { id } = params;
+  const { id } = query;
   const snapshot = firestore.collection("events").doc(id as string).get();
   const data = (await snapshot).data()
   const startDate = data.startDate.seconds;
