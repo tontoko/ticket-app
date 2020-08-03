@@ -77,34 +77,32 @@ const MyEvents = ({ user, events }) => {
         {renderUserEvents()}
       </div>
       {(() => {
+        if (!requirements) return <Loading />
         if (
           requirements &&
           !requirements.currently_due.length &&
           !requirements.errors.length &&
           !requirements.past_due.length &&
           !requirements.eventually_due.length
-        ) {
-          return (
-            <Row style={{ margin: 0, marginTop: "0.5em" }}>
-              <Link href="/events/new">
-                <Button className="ml-auto">新しいイベントを作成</Button>
+        ) return (
+          <Row style={{ margin: 0, marginTop: "0.5em" }}>
+            <Link href="/events/new">
+              <Button className="ml-auto">新しいイベントを作成</Button>
+            </Link>
+          </Row>
+        );
+        return (
+          <>
+            <p>
+              イベントを開催し、チケット販売を開始するには必要なユーザー情報を登録してください。
+            </p>
+            <Row style={{ margin: 0, marginTop: "2em" }}>
+              <Link href={`/users/${user.uid}/edit`}>
+                <Button className="ml-auto">ユーザー情報を登録する</Button>
               </Link>
             </Row>
-          );
-        } else {
-          return (
-            <>
-              <p>
-                イベントを開催し、チケット販売を開始するには必要なユーザー情報を登録してください。
-              </p>
-              <Row style={{ margin: 0, marginTop: "2em" }}>
-                <Link href={`/users/${user.uid}/edit`}>
-                  <Button className="ml-auto">ユーザー情報を登録する</Button>
-                </Link>
-              </Row>
-            </>
-          );
-        }
+          </>
+        );
       })()}
     </>
   );
