@@ -56,21 +56,24 @@ export const UpdateUser: React.FC<any> = ({ user, userLoading }) => {
   const [birthDay, setBirthDay] = useState(toUtcIso8601str(moment()))
   const [agree, setAgree] = useState(false)
   const [loading, setLoading] = useState(true)
+  let isNew = true
   
   useEffect(() => {
     if (!user || userLoading) return
     (async() => {
-      const {stripeId} = (await firestore.collection('users').doc(user.uid).get()).data()
       const res = await fetch("/api/stripeAccountsRetrieve", {
         method: "POST",
         headers: new Headers({
           "Content-Type": "application/json",
         }),
-        body: JSON.stringify({ stripeId }),
+        body: JSON.stringify({ uid: user.uid }),
       });
       const { individual, tos_acceptance } = await res.json()
-      setForm(individual)
-      setTosAcceptance(tos_acceptance)
+      if (individual) {
+        isNew = false
+        setForm(individual);
+      }
+      tos_acceptance && setTosAcceptance(tos_acceptance);
       setLoading(false)
     })()
   }, [user, userLoading])
@@ -112,6 +115,9 @@ export const UpdateUser: React.FC<any> = ({ user, userLoading }) => {
       })
     })
     if (res.status !== 200) return alert.error('エラーが発生しました。しばらくして再度お試しください。')
+
+    if (isNew) return router.push({ pathname: `/users/${user.uid}/edit/identification`, query: { msg: encodeQuery('ユーザー情報を更新しました。引き続き本人確認書類を提出してください。') }})
+
     return router.push({ pathname: `/users/${user.uid}/edit`, query: { msg: encodeQuery('ユーザー情報を更新しました。') }})
   }
 
@@ -185,7 +191,7 @@ export const UpdateUser: React.FC<any> = ({ user, userLoading }) => {
         </Col>
       </FormGroup>
       <FormGroup>
-        <Label>誕生日</Label>
+        <Label>誕生日(13才以上)</Label>
         <div>
           <DatePicker
             locale="ja"

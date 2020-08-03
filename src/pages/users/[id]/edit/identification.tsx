@@ -22,7 +22,8 @@ const Identification = ({ user }) => {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!file1) return alert.error("");
+
+    if (!file1) return alert.error("画像を添付してください");
     const token = await user.getIdToken();
     const formData = new FormData();
     formData.append("file1", file1);
@@ -36,12 +37,11 @@ const Identification = ({ user }) => {
     if (res.status === 200) {
       router.push(
         {
-          pathname: "/user/edit",
+          pathname: `/users/${user.uid}/edit/organizer`,
           query: {
-            msg: encodeQuery("本人確認書類のアップロードに成功しました。"),
+            msg: encodeQuery("本人確認書類のアップロードに成功しました。確認が完了するまで数日掛かる可能性があります。"),
           },
-        },
-        "user/edit"
+        }
       );
     }
   };
