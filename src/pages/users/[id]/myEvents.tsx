@@ -90,7 +90,7 @@ const MyEvents = ({ user, events }) => {
             </Link>
           </Row>
         );
-        return (
+        if (requirements) return (
           <>
             <p>
               イベントを開催し、チケット販売を開始するには必要なユーザー情報を登録してください。
@@ -102,6 +102,7 @@ const MyEvents = ({ user, events }) => {
             </Row>
           </>
         );
+        return <Loading/>
       })()}
     </>
   );
