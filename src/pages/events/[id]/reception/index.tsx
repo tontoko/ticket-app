@@ -1,15 +1,13 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { Table, Container, Row, Col, Label, Button, Input, FormGroup, Form, ModalBody, ModalFooter } from 'reactstrap';
-import { GetServerSideProps, GetStaticProps, GetStaticPaths } from 'next';
-import isLogin from '@/src/lib/isLogin';
+import { Table, Row, Col, Button, Input, ModalBody, ModalFooter } from 'reactstrap';
+import { GetStaticProps, GetStaticPaths } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import { useAlert } from 'react-alert';
 import { event } from 'events';
-import { firestore, firebase } from '@/src/lib/initFirebase';
+import { firestore } from '@/src/lib/initFirebase';
 import withAuth from '@/src/lib/withAuth';
-import { useDocumentDataOnce, useCollection, useCollectionData } from 'react-firebase-hooks/firestore';
 import { encodeQuery } from '@/src/lib/parseQuery';
 
 class NoStockError extends Error {
@@ -22,7 +20,6 @@ class NoStockError extends Error {
 type manualPayment = {category: string, name: string, paid: boolean, id: string}
 
 const Reception = ({ categories, id, setModal, setModalInner }) => {
-    const router = useRouter()
     const alert = useAlert()
 
     const [loading, setLoading] = useState(true)

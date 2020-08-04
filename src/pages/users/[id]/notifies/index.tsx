@@ -1,10 +1,7 @@
-import { GetStaticPaths } from "next"
 import { Row, Col, Card, CardBody } from "reactstrap";
 import { useEffect, useState } from "react";
 import Loading from '@/src/components/loading'
 import { useRouter } from "next/router";
-import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
-import { useCollection } from "react-firebase-hooks/firestore";
 import { firestore } from "@/src/lib/initFirebase";
 import withAuth from "@/src/lib/withAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

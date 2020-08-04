@@ -8,7 +8,6 @@ import getImg from '@/src/lib/getImg'
 import moment from 'moment'
 import Tickets from '@/src/components/tickets';
 import { event } from 'events';
-import { useCollectionData } from "react-firebase-hooks/firestore";
 import { firebase, firestore } from '@/src/lib/initFirebase';
 import withAuth from '@/src/lib/withAuth';
 import Loading from '@/src/components/loading';
