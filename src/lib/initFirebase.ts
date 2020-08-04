@@ -28,3 +28,8 @@ export const functions = async () => {
     await import("firebase/functions")
     return firebase.functions()
 }
+
+export const analytics = async () => {
+    await import("firebase/analytics")
+    return firebase.analytics()
+}

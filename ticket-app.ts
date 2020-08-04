@@ -5,7 +5,8 @@ export const dev = {
     projectId: "ticket-app-dev-11346",
     storageBucket: "ticket-app-dev-11346.appspot.com",
     messagingSenderId: "281761028501",
-    appId: "1:281761028501:web:66932763c4183de80e3e9c"
+    appId: "1:281761028501:web:66932763c4183de80e3e9c",
+    measurementId: "G-XQZKF98653"
 };
 
 export const prod = {
@@ -15,5 +16,6 @@ export const prod = {
     projectId: "ticket-app-d3f5a",
     storageBucket: "ticket-app-d3f5a.appspot.com",
     messagingSenderId: "177666146990",
-    appId: "1:177666146990:web:d01b84e183097974"
+    appId: "1:177666146990:web:d01b84e183097974",
+    measurementId: "G-3BFJ314324"
 }
