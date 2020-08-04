@@ -161,7 +161,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     });
 
     const callModalForImg = (src) => {
-        setModalInner(<img src={src} style={{ width: "100%", height: "100%" }} onClick={() => setModal(false)} />)
+        setModalInner(<img src={src} style={{ width: "100%", height: "100%" }} onClick={() => setModal(false)}  alt={`preview image`} />)
         setModal(true)
     }
 

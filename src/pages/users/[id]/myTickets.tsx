@@ -118,7 +118,7 @@ const MyTickets = ({ user }) => {
                       <img
                         width="100%"
                         src={event.photos}
-                        alt="Card image cap"
+                        alt="image"
                         style={{ cursor: "pointer" }}
                       />
                     </Col>

@@ -110,17 +110,17 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
               <Nav navbar>
                 <NavItem style={{ cursor: "pointer" }}>
                   <Link href={`/users/${user ? user.uid : tmpUser.uid}/myEvents`}>
-                    <NavLink>主催するイベント</NavLink>
+                    <NavLink style={{ color: "white" }}>主催するイベント</NavLink>
                   </Link>
                 </NavItem>
                 <NavItem style={{ cursor: "pointer" }}>
                   <Link href={`/users/${user ? user.uid : tmpUser.uid}/myTickets`}>
-                    <NavLink>購入済みチケット</NavLink>
+                    <NavLink style={{ color: "white" }}>購入済みチケット</NavLink>
                   </Link>
                 </NavItem>
                 <NavItem style={{ cursor: "pointer" }}>
                   <Link href={`/termsOfUse`}>
-                    <NavLink>利用規約</NavLink>
+                    <NavLink style={{ color: "white" }}>利用規約</NavLink>
                   </Link>
                 </NavItem>
               </Nav>

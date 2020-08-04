@@ -127,7 +127,7 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
             <CardBody>
               <Row>
                 <Col sm="2" xs="3">
-                  <img width="100%" src={photoUrls[0]} alt="Card image cap" />
+                  <img width="100%" src={photoUrls[0]} alt="image" />
                 </Col>
                 <Col xs="auto">
                   <CardTitle>{event.name}</CardTitle>

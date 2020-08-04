@@ -60,7 +60,7 @@ export const User: React.FC<any> = ({user, staticEvent}) => {
                       <CardBody>
                           <Row>
                               <Col sm="2" xs="3">
-                                  <img width="100%" src={event.photos} alt="Card image cap" />
+                                  <img width="100%" src={event.photos} alt="image" />
                               </Col>
                               <Col xs="auto">
                                   <CardTitle>{event.name}</CardTitle>

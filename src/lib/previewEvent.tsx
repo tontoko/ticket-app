@@ -84,7 +84,7 @@ const PreviewModal = ({
         onExiting={() => setAnimating(true)}
         onExited={() => setAnimating(false)}
       >
-        <img src={item.src} height="360em" />
+        <img src={item.src} height="360em" alt={`image ${i}`} />
       </CarouselItem>
     );
   });

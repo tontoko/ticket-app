@@ -119,7 +119,7 @@ const EventForm = ({
         <Row>
           <Col xs="6" sm="4" md="2">
             <p style={{ margin: 0, marginTop: "0.5em" }}>現在の画像</p>
-            <img src={photoUrls[i]} style={{ width: "100%" }} />
+            <img src={photoUrls[i]} style={{ width: "100%" }} alt="now image" />
           </Col>
         </Row>
       )}
@@ -129,7 +129,7 @@ const EventForm = ({
             {photoUrls[i] && (
               <p style={{ margin: 0, marginTop: "0.5em" }}>新しい画像</p>
             )}
-            <img src={files[i]} style={{ width: "100%" }} />
+            <img src={files[i]} style={{ width: "100%" }} alt="new image" />
           </Col>
         </Row>
       )}

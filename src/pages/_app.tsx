@@ -102,7 +102,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         <meta name="theme-color" content="#000000" />
         <meta
           name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
+          content="minimum-scale=5, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
         />
 
         <link rel="apple-touch-icon" sizes="48x48" href="/favicon.ico" />
