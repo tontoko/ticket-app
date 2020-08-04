@@ -77,7 +77,6 @@ const MyEvents = ({ user, events }) => {
         {renderUserEvents()}
       </div>
       {(() => {
-        if (!requirements) return <Loading />
         if (
           requirements &&
           !requirements.currently_due.length &&
