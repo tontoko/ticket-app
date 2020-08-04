@@ -36,7 +36,7 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
     useEffect(() => {
       if (!user) return
       if (user.uid !== uid) {
-        auth.signOut()
+        (async() => (await auth()).signOut())()
         return
       }
       setLoading(false)
@@ -47,7 +47,13 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
       if (!stripe || !elements || loading) return
       if (!agree) return alert.error("同意します が選択されていません")
       setLoading(true)
-      const ticket = (await firestore.collection('events').doc(eventId).collection('categories').doc(categoryId).get()).data()
+      const ticket = (await (await firestore())
+        .collection("events")
+        .doc(eventId)
+        .collection("categories")
+        .doc(categoryId)
+        .get())
+        .data();
       if (category.stock - category.sold < 1 || !ticket.public) {
           const msg = ticket.stock - ticket.sold < 1 ? '在庫がありませんでした。リダイレクトします。' : '対象のチケットは主催者によって非公開に設定されました。リダイレクトします。'
           alert.error(msg)

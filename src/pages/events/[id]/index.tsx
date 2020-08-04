@@ -23,12 +23,11 @@ import {
   TwitterIcon,
 } from "react-share";
 import Tickets from '@/src/components/tickets';
-import Loading from '@/src/components/loading';
 
 const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     if (!event) return <></>
     const router = useRouter();
-    const [tickets, setTickets] = useState(null);
+    const [tickets, setTickets] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false);
     const [status, setStatus] = useState<
@@ -59,6 +58,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
           setCookie(null, "lastVisitedEvent", event.id, {
             maxAge: 30 * 24 * 60 * 60,
             path: "/",
+            secure: true
           });
         } else if (event.createdUser == user.uid) {
           setStatus("organizer");
@@ -199,8 +199,9 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
           <Row style={{ marginTop: "1.5em" }}>
             <Col sm="12" style={{ margin: "0.2em" }}>
               <h5>購入済みチケット</h5>
-              {tickets === null && <Loading style={{ position: 'reletive' }} />}
-              {tickets.map((ticket, i) => <Tickets ticket={ticket} event={event} key={i} />)}
+              {tickets.map((ticket, i) => (
+                <Tickets ticket={ticket} event={event} key={i} />
+              ))}
             </Col>
             <Col sm="12" style={{ marginTop: "1.5em" }}>
               <Link href={urlToPurchase}>

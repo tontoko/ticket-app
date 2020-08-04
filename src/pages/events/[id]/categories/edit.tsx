@@ -172,7 +172,7 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
     if (loading) return;
     try {
       setLoading(true);
-      const categoriesRef = firestore
+      const categoriesRef = (await firestore())
         .collection("events")
         .doc(router.query.id as string)
         .collection("categories");
@@ -215,13 +215,13 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
         })
       );
       // 既存カテゴリ編集
-      await firestore.runTransaction(async (transaction) => {
+      await(await firestore()).runTransaction(async (transaction) => {
         await Promise.all(
           Object.keys(updateCategories).map(async (id) => {
             const targetCategory = (
               await transaction.get(categoriesRef.doc(id))
             ).data();
-            if (updateCategories[id].stock - targetCategory.sold < 0)
+            if (updateCategories[id].stock - targetCategory.sold as number < 0)
               throw new Error(
                 "チケットの在庫は売り上げ分を引いて0枚以上に設定してください。"
               );

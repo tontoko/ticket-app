@@ -20,7 +20,10 @@ export const User: React.FC<any> = ({user, staticEvent}) => {
       const cookie = parseCookies();
       const lastVisitedEvent = cookie.lastVisitedEvent;
       if (!lastVisitedEvent || staticEvent) return;
-      const result = await firestore.collection("events").doc(lastVisitedEvent).get();
+      const result = await(await firestore())
+        .collection("events")
+        .doc(lastVisitedEvent)
+        .get();
       const data = result.data() as event;
       const startDate = data.startDate.seconds;
       const endDate = data.endDate.seconds;
@@ -28,8 +31,8 @@ export const User: React.FC<any> = ({user, staticEvent}) => {
         data.photos.length > 0
           ? await getImg(data.photos[0], data.createdUser)
           : await getImg(null, data.createdUser);
-      setEvent({ ...data, startDate, endDate, photos, id: result.id })
-      firestore
+      setEvent({ ...data, startDate, endDate, photos, id: result.id });
+      (await firestore())
         .collection("users")
         .doc(user.uid)
         .update({

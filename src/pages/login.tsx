@@ -6,7 +6,7 @@ import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
-import isLogin from '../lib/isLogin'
+import isLogin from '@/src/lib/isLogin'
 import { GetServerSideProps } from 'next'
 
 const Login = () => {
@@ -20,7 +20,7 @@ const Login = () => {
         if (loading) return
         setLoading(true)
         try {
-            await auth.signInWithEmailAndPassword(email, password)
+            await(await auth()).signInWithEmailAndPassword(email, password);
         } catch (e) {
             alert.error(errorMsg(e, 'signin'))
             setLoading(false)

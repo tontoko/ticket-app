@@ -1,4 +1,4 @@
-import Loading from "../components/loading";
+import Loading from "@/src/components/loading";
 import React from "react";
 import Router from "next/router";
 import { encodeQuery } from "./parseQuery";

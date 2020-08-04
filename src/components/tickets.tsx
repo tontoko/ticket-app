@@ -2,7 +2,7 @@ import { Card, CardBody, Row, Col, Button } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckSquare, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { encodeQuery } from "../lib/parseQuery";
+import { encodeQuery } from "@/src/lib/parseQuery";
 
 const Tickets = ({ ticket, event: event }) => {
     return (

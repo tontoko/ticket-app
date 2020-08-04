@@ -12,31 +12,32 @@ import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-
 
 const Notifies = ({user}) => {
   const [notifies, setNotifies] = useState([])
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const router = useRouter()
-  const [snapshot, loading] = useCollection(
-    firestore.collection("users").doc(user.uid).collection("notifies"));
 
   useEffect(() => {
     (async () => {
-      if (loading || !snapshot) return
-      let tmpNotifies: firebase.firestore.DocumentData[] = [];
-      await Promise.all(snapshot.docs.map(async (doc) => tmpNotifies.push({...doc.data(), id: doc.id})));
-      setNotifies(tmpNotifies)
-      setIsLoading(false);
+      (await firestore())
+        .collection("users")
+        .doc(user.uid)
+        .collection("notifies").onSnapshot(async snap => {
+          const tmpNotifies = await Promise.all(snap.docs.map(async (doc) => {return {...doc.data(), id: doc.id} }));
+          setNotifies(tmpNotifies)
+          setLoading(false);
+        })
     })()
-  }, [loading, snapshot])
+  }, [])
 
   const clickLinkWithsaveAsRead = async (id, url) => {
     if (!firestore) return
-    await firestore
+    await(await firestore())
       .collection("users")
       .doc(user.uid)
       .collection("notifies")
       .doc(id)
       .update({
-        read: true
-      })
+        read: true,
+      });
     router.push(url)
   }
 
@@ -71,7 +72,7 @@ const Notifies = ({user}) => {
     });
   }
 
-  if (isLoading) return <Loading />
+  if (loading) return <Loading />;
 
   return (
     <>

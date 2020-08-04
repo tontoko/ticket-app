@@ -14,68 +14,83 @@ import withAuth from '@/src/lib/withAuth';
 import Loading from '@/src/components/loading';
 
 const MyTickets = ({ user }) => {
-  const [payments, loading] = useCollectionData<
-    FirebaseFirestore.DocumentData
-  >(firestore.collection("payments").where("buyer", "==", user.uid), {
-    idField: "id",
-  });
+  const [payments, setPayments] = useState<FirebaseFirestore.DocumentData[]>([])
   const [myTickets, setMyTickets] = useState<FirebaseFirestore.DocumentData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
+    let listner = () => {return}
+    (async() => {
+      listner = (await firestore())
+        .collection("payments")
+        .where("buyer", "==", user.uid)
+        .onSnapshot(async(snap) => {
+          setPayments(await Promise.all(snap.docs.map(async doc => {return { ...doc.data(), id: doc.id } })))
+          setInitialized(true)
+        });
+    })()
+    return listner
+  }, [])
+
+  useEffect(() => {
     (async () => {
-      if (payments.length > 0) {
-        const myEventsIds = Array.from(
-          new Set(payments.map((payment) => payment.event))
-        ); // 重複除外
-        const events = (await firestore
+      if (!initialized) return;
+      if (payments.length === 0) return setLoading(false);
+      const myEventsIds = Array.from(
+        new Set(payments.map((payment) => payment.event))
+      ); // 重複除外
+      const events = (
+        await (await firestore())
           .collection("events")
-          .where(firebase.firestore.FieldPath.documentId(), "in", myEventsIds).get()).docs;
-        setMyTickets(
-          await Promise.all(
-            events.map(async (event) => {
-              const tickets = await Promise.all(
-                payments
-                  .filter((payment) => payment.event === event.id)
-                  .map(async (payment) => {
-                    const categorySnapShot = await firestore
-                      .collection("events")
-                      .doc(event.id)
-                      .collection("categories")
-                      .doc(payment.category)
-                      .get();
-                    return {
-                      ...categorySnapShot.data(),
-                      categoryId: categorySnapShot.id,
-                      paymentId: payment.id,
-                      accepted: payment.accepted,
-                      error: payment.error,
-                      buyer: payment.buyer,
-                      seller: payment.seller,
-                    };
-                  })
-              );
-              const data = event.data() as event;
-              const startDate = data.startDate.toMillis();
-              const endDate = data.endDate.toMillis();
-              const photos =
-                data.photos.length > 0
-                  ? await getImg(data.photos[0], data.createdUser, "360")
-                  : await getImg(null, data.createdUser, "360");
-              return {
-                ...data,
-                startDate,
-                endDate,
-                tickets,
-                photos,
-                id: event.id,
-              };
-            })
-          )
-        );
-      }
+          .where(firebase.firestore.FieldPath.documentId(), "in", myEventsIds)
+          .get()
+      ).docs;
+      setMyTickets(
+        await Promise.all(
+          events.map(async (event) => {
+            const tickets = await Promise.all(
+              payments
+                .filter((payment) => payment.event === event.id)
+                .map(async (payment) => {
+                  const categorySnapShot = await (await firestore())
+                    .collection("events")
+                    .doc(event.id)
+                    .collection("categories")
+                    .doc(payment.category)
+                    .get();
+                  return {
+                    ...categorySnapShot.data(),
+                    categoryId: categorySnapShot.id,
+                    paymentId: payment.id,
+                    accepted: payment.accepted,
+                    error: payment.error,
+                    buyer: payment.buyer,
+                    seller: payment.seller,
+                  };
+                })
+            );
+            const data = event.data() as event;
+            const startDate = data.startDate.toMillis();
+            const endDate = data.endDate.toMillis();
+            const photos =
+              data.photos.length > 0
+                ? await getImg(data.photos[0], data.createdUser, "360")
+                : await getImg(null, data.createdUser, "360");
+            return {
+              ...data,
+              startDate,
+              endDate,
+              tickets,
+              photos,
+              id: event.id,
+            };
+          })
+        )
+      );
+      setLoading(false);
     })();
-  }, [payments]);
+  }, [payments, initialized]);
           
   const renderUserTickets = () =>
     myTickets.map((event, i) => {
@@ -146,7 +161,7 @@ const MyTickets = ({ user }) => {
           <p>チケットを購入した場合、ここに表示されます。</p>
         </>
       )}
-      {loading && <Loading style={{ position: 'relative' }} />}
+      {loading && <Loading/>}
       {renderUserTickets()}
     </div>
   );

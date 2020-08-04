@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {useRouter} from 'next/router'
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
-import { auth } from '../lib/initFirebase'
+import { auth } from '@/src/lib/initFirebase'
 
 const ConfirmEmail = ({ user }) => {
   const router = useRouter();

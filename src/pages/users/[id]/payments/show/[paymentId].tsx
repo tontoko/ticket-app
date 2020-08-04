@@ -20,7 +20,7 @@ const Show = ({ user, payment, event, category, refunded }) => {
     if (!payment) return
     if (!router) return;
     if (payment.seller !== user.uid && payment.buyer !== user.uid) {
-      auth.signOut()
+      (async() => (await auth()).signOut())()
       return 
     }
     setLoading(false)

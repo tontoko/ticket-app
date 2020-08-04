@@ -30,23 +30,23 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
       name: "",
       category: categories.length > 0 ? categories[0].id : "",
       paid: true,
-      id: ''
+      id: "",
     });
-    const [copyManualPayments, setCopyNewValueNames] = useState<manualPayment[]>([]);
-    const [manualPayments, firebaseLoading] = useCollectionData<manualPayment>(
-      firestore
-        .collection("events")
-        .doc(id as string)
-        .collection("manualPayments"),
-      { idField: 'id' }
-    );
+    const [manualPayments, setManualPayments] = useState<manualPayment[]>([]);
 
     useEffect(() => {
-        setLoading(true);
-      if (firebaseLoading) return;
-      setCopyNewValueNames(manualPayments);
-      setLoading(false);
-    }, [manualPayments, firebaseLoading]);
+        (async() => {
+        (await firestore())
+            .collection("events")
+            .doc(id as string)
+            .collection("manualPayments")
+            .onSnapshot(async snap => {
+                const data = await Promise.all(snap.docs.map(async doc => {return { ...doc.data(), id: doc.id } as manualPayment }))
+                setManualPayments(data);
+                setLoading(false);
+            })
+        })()
+    }, []);
 
     const createManualPayment = async () => {
         if (loading) return
@@ -54,9 +54,9 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
         if (!newManualPayment.name) return alert.error('名前が入力されていません。')
         try {
             setLoading(true)
-            await firestore.runTransaction(async transaction => {
-                const categoryRef = firestore.collection('events').doc(id as string).collection('categories').doc(newManualPayment.category)
-                const manualPaymentsRef = firestore
+            await (await firestore()).runTransaction(async transaction => {
+                const categoryRef = (await firestore()).collection('events').doc(id as string).collection('categories').doc(newManualPayment.category)
+                const manualPaymentsRef = (await firestore())
                   .collection("events")
                   .doc(id as string)
                   .collection("manualPayments")
@@ -89,31 +89,44 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
         if (!newValue.name) return alert.error("名前が入力されていません。");
         try {
             setLoading(true)
-            await firestore.runTransaction(async transaction => {
-                const newCategoryRef = firestore.collection('events').doc(id as string).collection('categories').doc(newValue.category)
-                const beforeCategoryRef = firestore.collection('events').doc(id as string).collection('categories').doc(beforeValue.category)
-                const manualPaymentsRef = firestore
-                  .collection("events")
-                  .doc(id as string)
-                  .collection("manualPayments")
-                  .doc(beforeValue.id);
-                const newCategory = (await transaction.get(newCategoryRef)).data()
-                const beforeCategory = (await transaction.get(beforeCategoryRef)).data()
+            await(await firestore()).runTransaction(async (transaction) => {
+              const newCategoryRef = (await firestore())
+                .collection("events")
+                .doc(id as string)
+                .collection("categories")
+                .doc(newValue.category);
+              const beforeCategoryRef = (await firestore())
+                .collection("events")
+                .doc(id as string)
+                .collection("categories")
+                .doc(beforeValue.category);
+              const manualPaymentsRef = (await firestore())
+                .collection("events")
+                .doc(id as string)
+                .collection("manualPayments")
+                .doc(beforeValue.id);
+              const newCategory = (
+                await transaction.get(newCategoryRef)
+              ).data();
+              const beforeCategory = (
+                await transaction.get(beforeCategoryRef)
+              ).data();
 
-                transaction.update(manualPaymentsRef, { ...newValue });
+              transaction.update(manualPaymentsRef, { ...newValue });
 
-                if (newValue.category !== beforeValue.category) {
-                    if (newCategory.stock - newCategory.sold < 1) throw new NoStockError("チケットの在庫がありません。");
-                    transaction.update(newCategoryRef, {
-                      sold: newCategory.sold + 1,
-                      stock: newCategory.stock - 1,
-                    });
-                    transaction.update(beforeCategoryRef, {
-                      sold: beforeCategory.sold - 1,
-                      stock: beforeCategory.stock + 1,
-                    });
-                }
-            })
+              if (newValue.category !== beforeValue.category) {
+                if (newCategory.stock - newCategory.sold < 1)
+                  throw new NoStockError("チケットの在庫がありません。");
+                transaction.update(newCategoryRef, {
+                  sold: newCategory.sold + 1,
+                  stock: newCategory.stock - 1,
+                });
+                transaction.update(beforeCategoryRef, {
+                  sold: beforeCategory.sold - 1,
+                  stock: beforeCategory.stock + 1,
+                });
+              }
+            });
             alert.success('手動受付リストを更新しました。')
         } catch (e) {
             let msg = e.message
@@ -134,9 +147,9 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
             try {
                 setLoading(true)
                 setModal(false)
-                await firestore.runTransaction(async transaction => {
-                    const categoryRef = firestore.collection('events').doc(id as string).collection('categories').doc(payment.category)
-                    const manualPaymentsRef = firestore
+                await (await firestore()).runTransaction(async transaction => {
+                    const categoryRef = (await firestore()).collection('events').doc(id as string).collection('categories').doc(payment.category)
+                    const manualPaymentsRef = (await firestore())
                       .collection("events")
                       .doc(id as string)
                       .collection("manualPayments")
@@ -180,12 +193,12 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                 placeholder="お名前"
                 value={payment.name}
                 onChange={(e) => {
-                    const newValue = [...copyManualPayments];
+                    const newValue = [...manualPayments];
                     newValue.splice(i, 1, {
                       ...payment,
                       name: e.target.value,
                     });
-                    setCopyNewValueNames(newValue);
+                    setManualPayments(newValue);
                 }}
                 onBlur={(e) =>
                   editManualPayment(
@@ -274,7 +287,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                                     <Button disabled={loading} color="primary" onClick={createManualPayment}>登録</Button>
                                 </td>
                             </tr>
-                            {copyManualPayments && copyManualPayments.map((e,i) => column(e,i))}
+                            {manualPayments && manualPayments.map((e,i) => column(e,i))}
                         </tbody>
                     </Table>
                 </Col>

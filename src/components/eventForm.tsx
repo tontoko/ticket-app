@@ -16,9 +16,9 @@ import { toUtcIso8601str } from "@/src/lib/time";
 import { useAlert } from "react-alert";
 import previewEvent from "@/src/lib/previewEvent";
 import { useRouter } from "next/router";
-import { encodeQuery } from "../lib/parseQuery";
-import errorMsg from "../lib/errorMsg";
-import { storage, firestore } from "../lib/initFirebase";
+import { encodeQuery } from "@/src/lib/parseQuery";
+import errorMsg from "@/src/lib/errorMsg";
+import { storage, firestore } from "@/src/lib/initFirebase";
 
 const EventForm = ({
   user,

@@ -19,15 +19,15 @@ export const Leave = ({user}) => {
     try {
         if (providerData[0].providerId === "password") {
           const credencial: firebase.auth.AuthCredential = firebase.auth.EmailAuthProvider.credential(
-            auth.currentUser.email,
+            user.email,
             pwd
           );
-          await auth.currentUser.reauthenticateWithCredential(credencial);
+          await user.reauthenticateWithCredential(credencial);
         } else {
-          await auth.currentUser.reauthenticateWithPopup(providerData[0]);
+          await user.reauthenticateWithPopup(providerData[0]);
         }
         
-        await auth.currentUser.delete()
+        await user.delete()
         alert.success('退会処理が完了しました。')
     } catch (e) {
         alert.error(errorMsg(e))

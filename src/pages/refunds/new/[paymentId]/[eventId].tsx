@@ -29,7 +29,7 @@ const Refund = ({
   useEffect(() => {
     if (!user) return;
     if (user.uid === createdUser || paymentData.refund) {
-      auth.signOut()
+      (async() => (await auth()).signOut())()
       return
     }
     setLoading(false);

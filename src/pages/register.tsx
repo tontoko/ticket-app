@@ -6,7 +6,7 @@ import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { useRouter } from 'next/router'
 import { GetServerSideProps } from 'next'
-import isLogin from '../lib/isLogin'
+import isLogin from '@/src/lib/isLogin'
 
 const Register = () => {
     const alert = useAlert()
@@ -22,7 +22,7 @@ const Register = () => {
         setLoading(true)
         if (pwd !== pwdConfirm) return alert.error('確認用パスワードが一致していません。')
         try {
-            await auth.createUserWithEmailAndPassword(email, pwd)
+            await(await auth()).createUserWithEmailAndPassword(email, pwd);
         } catch(e) {
             alert.error(errorMsg(e, 'signup'))
             setLoading(false)

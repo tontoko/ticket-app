@@ -5,7 +5,7 @@ import { auth } from '@/src/lib/initFirebase'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { useRouter } from 'next/router'
-import { encodeQuery } from '../lib/parseQuery'
+import { encodeQuery } from '@/src/lib/parseQuery'
 
 const ForgetPassword = () => {
   const alert = useAlert()
@@ -15,7 +15,7 @@ const ForgetPassword = () => {
   const sendEmail = async (e) => {
     e.preventDefault();
     try {
-      await auth.sendPasswordResetEmail(email)
+      await (await auth()).sendPasswordResetEmail(email)
       router.push({
         pathname: "/login",
         query: {
