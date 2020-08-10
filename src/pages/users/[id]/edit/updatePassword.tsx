@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Row } from 'reactstrap'
-import { firebase } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import 'firebase/storage'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
@@ -22,7 +22,7 @@ export const UpdatePassword: React.FC<any> = ({user}) => {
         if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません')
         try {
             const currentEmail = user.email
-            const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
+            const credential = fuego.auth.EmailAuthProvider.credential(currentEmail, pwd)
             await user.reauthenticateAndRetrieveDataWithCredential(credential)
             await user.updatePassword(newPwd)
             router.push({ pathname: `/users/${user.uid}/edit`, query: { msg: encodeQuery('パスワードを変更しました') } })

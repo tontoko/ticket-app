@@ -1,4 +1,4 @@
-import { GetStaticPaths, GetStaticProps } from "next";
+import { GetStaticPaths, GetStaticProps, GetServerSideProps } from "next";
 import {
   Row,
   Col,
@@ -14,8 +14,10 @@ import withAuth from "@/src/lib/withAuth";
 const Payments = ({ user, payments, events, categories }) => {
   const renderPayments = () => {
     if (!payments.length) return <p>購入履歴はありません。</p>;
+    const sortedPayment = [...payments]
+    sortedPayment.sort((a,b) => b.createdAt - a.createdAt)
 
-    return payments.map((payment, i) => {
+    return sortedPayment.map((payment, i) => {
       return (
         <Link href={`/users/${user.uid}/payments/show/${payment.id}`} key={i}>
           <div>
@@ -50,17 +52,17 @@ const Payments = ({ user, payments, events, categories }) => {
 
 export default withAuth(Payments);
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { firestore } = await initFirebaseAdmin();
-  const paths = (await firestore.collection("users").get()).docs.map(
-    (doc) => `/users/${doc.id}/payments`
-  );
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const { firestore } = await initFirebaseAdmin();
+//   const paths = (await firestore.collection("users").get()).docs.map(
+//     (doc) => `/users/${doc.id}/payments`
+//   );
 
-  return { paths, fallback: true };
-};
+//   return { paths, fallback: true };
+// };
 
-export const getStaticProps: GetStaticProps = async ({params}) => {
-  const { firestore } = await initFirebaseAdmin();
+export const getServerSideProps: GetServerSideProps = async ({params}) => {
+  const { firebase, firestore } = await initFirebaseAdmin();
   const {id} = params
   const events = {};
   const categories = {};
@@ -99,10 +101,15 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
       return {
         ...data,
         id: doc.id,
-        createdAt: doc.createTime.seconds * 1000,
+        createdAt: doc.createTime.toMillis(),
       };
     })
   );
 
-  return { props: { payments, events, categories }, revalidate: 1 };
+  return { 
+    props: { 
+      payments, events, categories 
+    }, 
+    // revalidate: 1 
+  };
 };

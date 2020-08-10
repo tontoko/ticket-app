@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import { useAlert } from 'react-alert';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import { auth } from '@/src/lib/initFirebase';
+import { fuego } from '@nandorojo/swr-firestore';
 import { encodeQuery } from '@/src/lib/parseQuery';
 import Loading from '@/src/components/loading';
 import withAuth from '@/src/lib/withAuth';
@@ -29,7 +29,7 @@ const Refund = ({
   useEffect(() => {
     if (!user) return;
     if (user.uid === createdUser || paymentData.refund) {
-      (async() => (await auth()).signOut())()
+      (async() => fuego.auth().signOut())()
       return
     }
     setLoading(false);
@@ -90,6 +90,7 @@ const Refund = ({
           reasonText,
           detailText,
           targetUser,
+          paymentId: router.query.paymentId
         }),
       });
       if (res.status !== 200) throw new Error()

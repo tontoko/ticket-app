@@ -18,7 +18,8 @@ import previewEvent from "@/src/lib/previewEvent";
 import { useRouter } from "next/router";
 import { encodeQuery } from "@/src/lib/parseQuery";
 import errorMsg from "@/src/lib/errorMsg";
-import { storage, firestore } from "@/src/lib/initFirebase";
+import storage from "../lib/storage";
+import { useDocument, fuego } from "@nandorojo/swr-firestore";
 
 const EventForm = ({
   user,
@@ -32,6 +33,7 @@ const EventForm = ({
 }) => {
   const router = useRouter();
   const alert = useAlert();
+  const { update } = useDocument(router && `events/${router.query.id as string}`);
 
   if (mode === "new") {
       event = {
@@ -188,14 +190,11 @@ const EventForm = ({
         let msg = ''
         let pathname = ''
         if (mode === 'new') {
-            const result = await (await firestore()).collection("events").add(eventData);
+            const result = await fuego.db.collection("events").add(eventData);
             msg = "イベントを作成しました。";
             pathname = `/events/${result.id}`;
         } else if (mode === 'edit') {
-            await (await firestore())
-              .collection("events")
-              .doc(router.query.id as string)
-              .update(eventData);
+            await update(eventData);
             msg = "イベントが更新されました。表示に反映されるまで時間がかかる場合があります。";
             pathname = `/events/${router.query.id}`;
         }

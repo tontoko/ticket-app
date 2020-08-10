@@ -7,10 +7,11 @@ import Link from 'next/link'
 import getImg from '@/src/lib/getImg'
 import moment from 'moment'
 import Tickets from '@/src/components/tickets';
-import { event } from 'events';
-import { firebase, firestore } from '@/src/lib/initFirebase';
+import { event } from 'event';
+import { fuego } from '@nandorojo/swr-firestore';
 import withAuth from '@/src/lib/withAuth';
 import Loading from '@/src/components/loading';
+import { firestore } from 'firebase';
 
 const MyTickets = ({ user }) => {
   const [payments, setPayments] = useState<FirebaseFirestore.DocumentData[]>([])
@@ -21,7 +22,7 @@ const MyTickets = ({ user }) => {
   useEffect(() => {
     let listner = () => {return}
     (async() => {
-      listner = (await firestore())
+      listner = fuego.db
         .collection("payments")
         .where("buyer", "==", user.uid)
         .onSnapshot(async(snap) => {
@@ -40,9 +41,9 @@ const MyTickets = ({ user }) => {
         new Set(payments.map((payment) => payment.event))
       ); // 重複除外
       const events = (
-        await (await firestore())
+        await fuego.db
           .collection("events")
-          .where(firebase.firestore.FieldPath.documentId(), "in", myEventsIds)
+          .where(firestore.FieldPath.documentId(), "in", myEventsIds)
           .get()
       ).docs;
       setMyTickets(
@@ -52,7 +53,7 @@ const MyTickets = ({ user }) => {
               payments
                 .filter((payment) => payment.event === event.id)
                 .map(async (payment) => {
-                  const categorySnapShot = await (await firestore())
+                  const categorySnapShot = await fuego.db
                     .collection("events")
                     .doc(event.id)
                     .collection("categories")

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Form } from 'reactstrap'
-import { auth } from '@/src/lib/initFirebase'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import {useRouter} from 'next/router'
 import ResetPassword from './resetPassword'
 import { encodeQuery } from '@/src/lib/parseQuery'
+import { fuego } from '@nandorojo/swr-firestore'
 
 const Action = ({user}) => {
     const alert = useAlert()
@@ -50,7 +50,7 @@ const Action = ({user}) => {
     }, [router]);
 
     const redirectAfterUpdate = async(msg?:string) => {
-        if (user) await (await (auth())).signOut()
+        if (user) await fuego.auth().signOut()
         if (msg) {
             const message = encodeQuery(msg)
             return router.push({ pathname: `/login`, query: { msg: message } }, "/login");
@@ -59,7 +59,7 @@ const Action = ({user}) => {
     }
 
     const handleResetPassword = async () => {
-        await (await auth()).verifyPasswordResetCode(oobCode as string)
+        await fuego.auth().verifyPasswordResetCode(oobCode as string)
         setValid(true)
         setView(<ResetPassword confirmResetPassword={confirmResetPassword} />)
         setLoading(false)
@@ -68,7 +68,7 @@ const Action = ({user}) => {
     const confirmResetPassword = async (newPwd, newPwdConfirm) => {
         if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません。')
         try {
-            await (await auth()).confirmPasswordReset(oobCode as string, newPwd)
+            await fuego.auth().confirmPasswordReset(oobCode as string, newPwd)
             redirectAfterUpdate('新しいパスワードに更新しました。')
         } catch(e) {
             alert.error(errorMsg(e))
@@ -76,17 +76,17 @@ const Action = ({user}) => {
     }
 
     const handleRecoverEmail = async () => {
-        const info = await (await auth()).checkActionCode(oobCode as string)
+        const info = await fuego.auth().checkActionCode(oobCode as string)
         const restoredEmail = info['data']['email']
-        await (await auth()).applyActionCode(oobCode as string)
-        await (await auth()).sendPasswordResetEmail(restoredEmail)
+        await fuego.auth().applyActionCode(oobCode as string)
+        await fuego.auth().sendPasswordResetEmail(restoredEmail)
         setView(<h4>メールアドレスを復元しました。パスワードを変更してください。リダイレクトします。</h4>)
         setValid(true)
         setLoading(false)
     }
 
     const handleVerifyEmail = async () => {
-        await (await auth()).applyActionCode(oobCode as string)
+        await fuego.auth().applyActionCode(oobCode as string)
         setView(<h4>メールアドレスが認証されました。リダイレクトします。</h4>)
         setValid(true)
         setLoading(false)

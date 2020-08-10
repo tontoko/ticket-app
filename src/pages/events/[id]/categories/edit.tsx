@@ -1,62 +1,69 @@
 import { useRouter } from 'next/router'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Form, FormGroup, Button, Input, Row, Col, Label, Spinner, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
-import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
-import { event } from 'events'
 import { useAlert } from 'react-alert'
 import { encodeQuery } from '@/src/lib/parseQuery'
-import { firestore } from '@/src/lib/initFirebase'
 import withAuth from '@/src/lib/withAuth'
+import { fuego, useCollection, revalidateCollection } from '@nandorojo/swr-firestore'
+import { categories } from "event";
+import Loading from '@/src/components/loading'
 
-const Edit = ({ user, beforeCategories, setModal, setModalInner }) => {
-  
+const Edit = ({ user, setModal, setModalInner }) => {
   const alert = useAlert()
+  const router = useRouter()
+  const { data: categories, loading } = useCollection<categories>(`events/${router.query.id}/categories`, {
+    orderBy: 'index',
+  })
 
-  const [categories, setCategories] = useState(beforeCategories)
+  const [currentCategories, setCategories] = useState<any>();
 
-  const renderCategories = () => categories && categories.map((category: firebase.firestore.DocumentData, i) => {
+  useEffect(() => {
+    if (loading) return
+    setCategories(categories);
+  }, [categories, loading]);
+
+  const renderCategories = () => currentCategories && currentCategories.map((category: firebase.firestore.DocumentData, i) => {
     const setName = (name:string) => {
-      const copyCategories = [...categories]
+      const copyCategories = [...currentCategories]
       copyCategories[i] = { ...copyCategories[i], name }
       setCategories(copyCategories)
     }
     const setPrice = (price:number) => {
       if (price < 0) return
-      const copyCategories = [...categories]
+      const copyCategories = [...currentCategories]
       copyCategories[i] = {...copyCategories[i], price}
       setCategories(copyCategories)
     }
     const setStock = (stock: number) => {
       if (stock < 0) return
-      const copyCategories = [...categories]
+      const copyCategories = [...currentCategories]
       copyCategories[i] = { ...copyCategories[i], stock }
       setCategories(copyCategories)
     }
     const setPublic = (value: boolean) => {
-      const copyCategories = [...categories]
+      const copyCategories = [...currentCategories]
       copyCategories[i] = { ...copyCategories[i], public: value }
       setCategories(copyCategories)
     }
     const deleteCategory = () => {
-      const copyCategories = [...categories]
+      const copyCategories = [...currentCategories]
       copyCategories.splice(i,1)
       setCategories(copyCategories)
     }
     const moveArrayElementToPrev = () => {
-      const copyCategory = [...categories]
+      const copyCategory = [...currentCategories]
       const reversedCategories = [copyCategory[i], copyCategory[i-1]]
       const beginCategories = i-1 > 0 ? copyCategory.slice(0, i-1) : []
-      const endCategories = i < categories.length-1 ? copyCategory.slice(i+1) : []
+      const endCategories = i < currentCategories.length-1 ? copyCategory.slice(i+1) : []
       setCategories([...beginCategories, ...reversedCategories, ...endCategories])
     }
     const moveArrayElementToNext = () => {
-      const copyCategory = [...categories]
+      const copyCategory = [...currentCategories]
       const reversedCategories = [copyCategory[i+1], copyCategory[i]]
       const beginCategories = i !== 0 ? copyCategory.slice(0, i) : []
-      const endCategories = i < categories.length-2 ? copyCategory.slice(i+2) : []
+      const endCategories = i < currentCategories.length-2 ? copyCategory.slice(i+2) : []
       setCategories([...beginCategories, ...reversedCategories, ...endCategories])
     }
     return (
@@ -69,7 +76,7 @@ const Edit = ({ user, beforeCategories, setModal, setModalInner }) => {
                 }
               </Row>
               <Row form style={{ height: '50%', position: 'relative' }}>
-                {i !== categories.length - 1 && 
+                {i !== currentCategories.length - 1 && 
                 <FontAwesomeIcon icon={faSortDown} style={{ color: "gray", margin: 0, height: '60%', cursor: 'pointer', position: 'absolute', bottom: '0.1em', left: '0.25em' }} className="fa-2x" onClick={moveArrayElementToNext} />
                 }
               </Row>
@@ -112,7 +119,7 @@ const Edit = ({ user, beforeCategories, setModal, setModalInner }) => {
   )
 
   const addCategory = () => {
-    const copyCategories = categories ? [...categories] : []
+    const copyCategories = currentCategories ? [...currentCategories] : []
     copyCategories.push({name: '', price: 500, public: false, stock: 1, new: true})
     setCategories(copyCategories)
   }
@@ -121,7 +128,7 @@ const Edit = ({ user, beforeCategories, setModal, setModalInner }) => {
     e.preventDefault();
     try {
       let names = []
-      categories.filter(category => {
+      currentCategories.filter(category => {
         if (!category.name) throw new Error("チケット名を入力してください。");
         if (category.price < 500)
           throw new Error("チケットの価格は500円以上に設定してください。");
@@ -139,7 +146,7 @@ const Edit = ({ user, beforeCategories, setModal, setModalInner }) => {
       })
       setModalInner(
         <ModalInner
-          categories={categories}
+          currentCategories={currentCategories}
           user={user}
           alert={alert}
           setModal={setModal}
@@ -150,6 +157,8 @@ const Edit = ({ user, beforeCategories, setModal, setModalInner }) => {
       alert.error(e.message)
     }
   }
+
+  if (loading) <Loading/>
 
   return (
     <Form style={{ marginTop: '5em' }} onSubmit={submit}>
@@ -163,7 +172,7 @@ const Edit = ({ user, beforeCategories, setModal, setModalInner }) => {
   );
 }
 
-const ModalInner = ({ categories, user, alert, setModal }) => {
+const ModalInner = ({ currentCategories, user, alert, setModal }) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -172,12 +181,12 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
     if (loading) return;
     try {
       setLoading(true);
-      const categoriesRef = (await firestore())
+      const categoriesRef = fuego.db
         .collection("events")
         .doc(router.query.id as string)
         .collection("categories");
       let names = [];
-      categories.filter((e) => {
+      currentCategories.filter((e) => {
         if (!e.name) throw new Error("チケット名を入力してください。");
         if (e.price < 500)
           throw new Error("チケットの価格は500円以上に設定してください。");
@@ -192,7 +201,7 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
       let addCategories = [];
       let updateCategories: { string?: FirebaseFirestore.DocumentData } = {};
       await Promise.all(
-        categories.map(async (category, i) => {
+        currentCategories.map(async (category, i) => {
           if (category.new) {
             const addCategory = {
               ...category,
@@ -215,7 +224,7 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
         })
       );
       // 既存カテゴリ編集
-      await(await firestore()).runTransaction(async (transaction) => {
+      await fuego.db.runTransaction(async (transaction) => {
         await Promise.all(
           Object.keys(updateCategories).map(async (id) => {
             const targetCategory = (
@@ -234,6 +243,7 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
       await Promise.all(
         addCategories.map(async (addCategory) => categoriesRef.add(addCategory))
       );
+      await revalidateCollection(`events/${router.query.id}/categories`);
       router.push({
         pathname: `/events/${router.query.id}`,
         query: { msg: encodeQuery("更新しました。表示に反映されるまで時間がかかる場合があります。") },
@@ -252,7 +262,7 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
           一度登録したチケット名と価格は変更することができません。
           (非公開にすることはできます)
         </h5>
-        {categories.map((category, i) => (
+        {currentCategories.map((category, i) => (
           <FormGroup key={i}>
             <p>
               {`${category.name}: ${category.price} 円 (在庫: ${
@@ -276,29 +286,5 @@ const ModalInner = ({ categories, user, alert, setModal }) => {
     </Form>
   );
 };
-
-// export const getStaticPaths: GetStaticPaths = async () => {
-//   const { firestore } = await initFirebaseAdmin()
-//   const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/categories/edit`))
-//   return { paths, fallback: true }
-// }
-
-export const getServerSideProps: GetServerSideProps = async ({query}) => {
-  const { id } = query;
-  const { firestore } = await initFirebaseAdmin()
-  const result = (await firestore.collection('events').doc(id as string).get())
-  const data = result.data() as event
-  const startDate = data.startDate.seconds
-  const endDate = data.endDate.seconds
-  const event = { ...data, startDate, endDate, id: result.id }
-  const categoriesSnapShot = (await firestore.collection('events').doc(id as string).collection('categories').orderBy('index').get())
-  let categories: FirebaseFirestore.DocumentData[] = []
-  categoriesSnapShot.forEach(e => {
-    const id = e.id
-    const category = e.data()
-    categories.push({...category, id})
-  })
-  return { props: { event, beforeCategories: categories } };
-}
 
 export default withAuth(Edit)

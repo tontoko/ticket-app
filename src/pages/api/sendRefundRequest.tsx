@@ -8,13 +8,15 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
     reasonText,
     detailText,
     targetUser,
+    paymentId
   } = req.body
   const result = await firestore.collection("refunds").add({
     reason,
     reasonText,
     detailText,
     targetUser,
-  })
+    paymentId,
+  });
   const text =
     targetUser === "admin"
       ? "ユーザーから調査依頼がありました。"

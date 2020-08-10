@@ -7,8 +7,8 @@ import Link from 'next/link'
 import getImg from '@/src/lib/getImgSSR'
 import moment from 'moment'
 import stripe, { Stripe } from '@/src/lib/stripe';
-import { event } from 'events';
-import { firestore } from '@/src/lib/initFirebase';
+import { event } from 'event';
+import { fuego } from '@nandorojo/swr-firestore';
 import Loading from '@/src/components/loading';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';

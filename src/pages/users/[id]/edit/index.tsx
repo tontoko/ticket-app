@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
-import { auth } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import withAuth from '@/src/lib/withAuth'
 
 const UserShow = ({ user }) => {
@@ -89,7 +89,7 @@ const UserShow = ({ user }) => {
           disabled={loading}
           onClick={async () => {
             setLoading(true);
-            (await auth()).signOut();
+            fuego.auth().signOut();
           }}
         >
           ログアウト

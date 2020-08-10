@@ -1,12 +1,12 @@
 import {useRouter} from 'next/router'
-import React, {useState} from 'react'
+import React, {useState, useRef} from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Row, Col, Card, CardBody,
     CardTitle, CardSubtitle, } from 'reactstrap'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
 import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
-import { event } from 'events'
+import { event } from 'event'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 
@@ -14,29 +14,43 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
     const router = useRouter();
 
     const validCategories = categories.filter(category => category.stock - category.sold >= 0)
-    const [familyName, setFamilyName] = useState('')
-    const [firstName, setFirstName] = useState('')
-    const [email, setEmail] = useState(user.email)
+    const familyNameRef = useRef(null);
+    const firstNameRef = useRef(null);
+    const emailRef = useRef(null);
     const [invalidEmail, setInvalidEmail] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState(validCategories[0].id)
 
-    const changeEmail = (e) => {
-        validationEmail()
-        setEmail(e.target.value)
-    }
-
     const validationEmail = () => {
-        setInvalidEmail(!email.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/))
+        console.log(emailRef.current)
+        setInvalidEmail(!emailRef.current.value.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/))
     }
 
     const submit = (e) => {
         e.preventDefault();
-        if (!email.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/) ||
-        !firstName ||
-        !familyName) return
+        if (
+          !emailRef.current.value.match(
+            /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+          ) ||
+          !firstNameRef.current.value ||
+          !familyNameRef.current.value
+        )
+          return;
         const pathname = `/events/${router.query.id}/purchase/confirm`
         // クエリーをまるごとbase64化
-        router.push({ pathname, query: { query: encodeQuery(JSON.stringify({ familyName, firstName, email, selectedCategory, uid: user.uid })) }} )
+        router.push({
+          pathname,
+          query: {
+            query: encodeQuery(
+              JSON.stringify({
+                familyName: familyNameRef.current.value,
+                firstName: firstNameRef.current.value,
+                email: emailRef.current.value,
+                selectedCategory,
+                uid: user.uid,
+              })
+            ),
+          },
+        });
     }
 
     return (
@@ -45,16 +59,16 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
                 <Label>お名前</Label>
                 <Row>
                     <Col xs="6">
-                        <Input type="text" name="familyName" placeholder="性" onChange={e =>setFamilyName(e.target.value)} value={familyName} invalid={!familyName} />
+                        <Input type="text" name="familyName" placeholder="性" innerRef={familyNameRef} invalid={!familyNameRef.current?.value} />
                     </Col>
                     <Col xs="6">
-                        <Input type="text" name="firstName" placeholder="名" onChange={e => setFirstName(e.target.value)} value={firstName} invalid={!firstName} />
+                        <Input type="text" name="firstName" placeholder="名" innerRef={firstNameRef} invalid={!firstNameRef.current?.value} />
                     </Col>
                 </Row>
             </FormGroup>
             <FormGroup>
                 <Label>メールアドレス</Label>
-                <Input type="email" name="email" placeholder="メールアドレス" onChange={changeEmail} value={email} invalid={invalidEmail}/>
+                <Input type="email" name="email" placeholder="メールアドレス" defaultValue={user.email} innerRef={emailRef} onBlur={validationEmail} invalid={invalidEmail}/>
             </FormGroup>
             <FormGroup>
                 <Label>イベント情報</Label>

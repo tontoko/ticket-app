@@ -7,7 +7,7 @@ const Avater = lazy(() => import('react-avatar'))
 import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 import { decodeQuery } from '@/src/lib/parseQuery'
-import { firestore } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 
 const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
   const router = useRouter()
@@ -32,7 +32,7 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
     }
     if (!user) return
     (async () => {
-      listner = (await firestore())
+      listner = fuego.db
       .collection("users")
       .doc(user.uid)
       .collection("notifies")

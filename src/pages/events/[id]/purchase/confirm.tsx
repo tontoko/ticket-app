@@ -2,7 +2,7 @@ import Link from 'next/link'
 import {useRouter} from 'next/router'
 import React, {useEffect, useState, useRef} from 'react'
 import {
-    Form, FormGroup, Button, Label, Input, Container, Row, Col, Card, CardImg, CardText, CardBody,
+    Form, FormGroup, Button, Label, Input, Row, Col, Card, CardBody,
     CardTitle, CardSubtitle, FormFeedback, Spinner } from 'reactstrap'
 import { useAlert } from 'react-alert'
 import {
@@ -11,18 +11,17 @@ import {
     useElements,
 } from '@stripe/react-stripe-js';
 import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
 import stripe from '@/src/lib/stripe'
-import { firestore, auth } from '@/src/lib/initFirebase'
 import { decodeQuery } from '@/src/lib/parseQuery'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
-import { event } from 'events'
+import { event } from 'event'
 import withAuth from '@/src/lib/withAuth'
+import { fuego } from '@nandorojo/swr-firestore'
 
-const Confirmation = ({ user, uid, familyName, firstName, email, event, category, photoUrls, client_secret, categoryId, eventId }) => {
+const Confirmation = ({ user, uid, familyName, firstName, email, event, category, photoUrls, client_secret, eventId }) => {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter()
@@ -36,7 +35,7 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
     useEffect(() => {
       if (!user) return
       if (user.uid !== uid) {
-        (async() => (await auth()).signOut())()
+        (async() => fuego.auth().signOut())()
         return
       }
       setLoading(false)
@@ -47,20 +46,16 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
       if (!stripe || !elements || loading) return
       if (!agree) return alert.error("同意します が選択されていません")
       setLoading(true)
-      const ticket = (await (await firestore())
-        .collection("events")
-        .doc(eventId)
-        .collection("categories")
-        .doc(categoryId)
-        .get())
-        .data();
-      if (category.stock - category.sold < 1 || !ticket.public) {
-          const msg = ticket.stock - ticket.sold < 1 ? '在庫がありませんでした。リダイレクトします。' : '対象のチケットは主催者によって非公開に設定されました。リダイレクトします。'
-          alert.error(msg)
-          setTimeout(() => {
-              router.push(`/events/${eventId}`)
-          }, 3000);
-          return
+      if (category.stock - category.sold < 1 || !category.public) {
+        const msg =
+          category.stock - category.sold < 1
+            ? "在庫がありませんでした。リダイレクトします。"
+            : "対象のチケットは主催者によって非公開に設定されました。リダイレクトします。";
+        alert.error(msg);
+        setTimeout(() => {
+          router.push(`/events/${eventId}`);
+        }, 3000);
+        return;
       }
       const res = await stripe.confirmCardPayment(client_secret, {
           payment_method: {
@@ -93,7 +88,7 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
     }
 
     if (complete) return (
-        <>
+      <>
         <h4>
             <FontAwesomeIcon
             icon={faCheckSquare}
@@ -103,8 +98,8 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
         </h4>
         <h4>購入処理が完了すると「購入済みチケット」に表示されます。</h4>
         <p>{redirectTimer} 秒後にリダイレクトします...</p>
-        </>
-        );
+      </>
+    );
 
     return (
       <Form style={{ marginBottom: "2em" }} onSubmit={handleSubmit}>

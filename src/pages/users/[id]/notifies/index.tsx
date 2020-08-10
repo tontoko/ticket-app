@@ -2,10 +2,10 @@ import { Row, Col, Card, CardBody } from "reactstrap";
 import { useEffect, useState } from "react";
 import Loading from '@/src/components/loading'
 import { useRouter } from "next/router";
-import { firestore } from "@/src/lib/initFirebase";
 import withAuth from "@/src/lib/withAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { fuego } from "@nandorojo/swr-firestore";
 
 const Notifies = ({user}) => {
   const [notifies, setNotifies] = useState([])
@@ -14,7 +14,7 @@ const Notifies = ({user}) => {
 
   useEffect(() => {
     (async () => {
-      (await firestore())
+      fuego.db
         .collection("users")
         .doc(user.uid)
         .collection("notifies").onSnapshot(async snap => {
@@ -26,8 +26,8 @@ const Notifies = ({user}) => {
   }, [])
 
   const clickLinkWithsaveAsRead = async (id, url) => {
-    if (!firestore) return
-    await(await firestore())
+    if (!fuego) return;
+    await fuego.db
       .collection("users")
       .doc(user.uid)
       .collection("notifies")

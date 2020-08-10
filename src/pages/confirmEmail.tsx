@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {useRouter} from 'next/router'
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
-import { auth } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 
 const ConfirmEmail = ({ user }) => {
   const router = useRouter();
@@ -28,7 +28,7 @@ const ConfirmEmail = ({ user }) => {
       setMsg(errorMsg(e));
     }
     setTimeout(async () => {
-      (await auth()).signOut();
+      fuego.auth().signOut();
       router.push("/login");
     }, 5000);
   };

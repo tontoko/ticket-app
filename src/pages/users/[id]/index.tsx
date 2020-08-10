@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { Form, Button, Row, Card, CardBody, Col, CardTitle, CardSubtitle, CardText } from 'reactstrap'
-import { firestore } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import getImg from '@/src/lib/getImg'
 import getImgSSR from '@/src/lib/getImgSSR'
 import moment from 'moment'
 import { parseCookies } from 'nookies'
-import { event } from 'events'
+import { event } from 'event'
 import withAuth from '@/src/lib/withAuth'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
@@ -20,7 +20,7 @@ export const User: React.FC<any> = ({user, staticEvent}) => {
       const cookie = parseCookies();
       const lastVisitedEvent = cookie.lastVisitedEvent;
       if (!lastVisitedEvent || staticEvent) return;
-      const result = await(await firestore())
+      const result = await fuego.db
         .collection("events")
         .doc(lastVisitedEvent)
         .get();
@@ -32,7 +32,7 @@ export const User: React.FC<any> = ({user, staticEvent}) => {
           ? await getImg(data.photos[0], data.createdUser)
           : await getImg(null, data.createdUser);
       setEvent({ ...data, startDate, endDate, photos, id: result.id });
-      (await firestore())
+      fuego.db
         .collection("users")
         .doc(user.uid)
         .update({

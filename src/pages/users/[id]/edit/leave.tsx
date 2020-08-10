@@ -4,7 +4,7 @@ import { Form, FormGroup, Button, Label, Input, Row } from 'reactstrap'
 import errorMsg from '@/src/lib/errorMsg'
 import { useAlert } from "react-alert"
 import Link from 'next/link'
-import { firebase, auth } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import withAuth from '@/src/lib/withAuth'
 
 export const Leave = ({user}) => {
@@ -18,7 +18,7 @@ export const Leave = ({user}) => {
     const { providerData } = user as firebase.User
     try {
         if (providerData[0].providerId === "password") {
-          const credencial: firebase.auth.AuthCredential = firebase.auth.EmailAuthProvider.credential(
+          const credencial: firebase.auth.AuthCredential = fuego.auth.EmailAuthProvider.credential(
             user.email,
             pwd
           );

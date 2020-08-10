@@ -1,13 +1,11 @@
 import Link from 'next/link'
 import React, {useState} from 'react'
 import { Form, FormGroup, Button, Label, Input, Col, Spinner, Row } from 'reactstrap'
-import { auth, firebase } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
-import isLogin from '@/src/lib/isLogin'
-import { GetServerSideProps } from 'next'
 
 const Login = () => {
     const alert = useAlert()
@@ -20,7 +18,7 @@ const Login = () => {
         if (loading) return
         setLoading(true)
         try {
-            await(await auth()).signInWithEmailAndPassword(email, password);
+            await fuego.auth().signInWithEmailAndPassword(email, password);
         } catch (e) {
             alert.error(errorMsg(e, 'signin'))
             setLoading(false)
@@ -31,8 +29,8 @@ const Login = () => {
         if (loading) return
         setLoading(true)
         try {
-            const provider = new firebase.auth.FacebookAuthProvider()
-            await firebase.auth().signInWithPopup(provider)
+            const provider = new fuego.auth.FacebookAuthProvider();
+            await fuego.auth().signInWithPopup(provider)
         } catch (e) {
             alert.error(errorMsg(e, 'signin/popup'))
             setLoading(false)
@@ -44,8 +42,8 @@ const Login = () => {
         if (loading) return
         setLoading(true)
         try {
-            const provider = new firebase.auth.GoogleAuthProvider()
-            await firebase.auth().signInWithPopup(provider)
+            const provider = new fuego.auth.GoogleAuthProvider();
+            await fuego.auth().signInWithPopup(provider);
         } catch (e) {
             alert.error(errorMsg(e, 'signin/popup'))
             setLoading(false)

@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
-import { firestore } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import Loading from '@/src/components/loading'
 
 export const UpdateUser = ({ user }) => {

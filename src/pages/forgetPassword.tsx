@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
-import { auth } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { useRouter } from 'next/router'
@@ -15,7 +15,7 @@ const ForgetPassword = () => {
   const sendEmail = async (e) => {
     e.preventDefault();
     try {
-      await (await auth()).sendPasswordResetEmail(email)
+      await fuego.auth().sendPasswordResetEmail(email)
       router.push({
         pathname: "/login",
         query: {

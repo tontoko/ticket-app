@@ -61,7 +61,7 @@ const Tickets = ({ ticket, event: event }) => {
                     )}
                     <Col xs="12">
                       <Link
-                        href={`/refunds/new/${ticket.paymentId}/${event.id}`}
+                        href={`/refunds/new/${event.id}/${ticket.paymentId}`}
                       >
                         <Button color="danger">返金申請</Button>
                       </Link>

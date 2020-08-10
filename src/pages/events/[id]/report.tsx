@@ -2,7 +2,7 @@ import React, { ReactElement } from 'react';
 import { Table, Row } from 'reactstrap';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import { GetStaticProps, GetStaticPaths } from 'next';
-import { event } from 'events';
+import { event } from 'event';
 import withAuth from '@/src/lib/withAuth';
 
 const Report = ({ event, categories, payments }) => {

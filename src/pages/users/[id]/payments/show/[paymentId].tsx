@@ -3,14 +3,13 @@ import {
   FormGroup,
 } from "reactstrap";
 import { GetServerSideProps, GetStaticPaths, GetStaticProps } from "next";
-import isLogin from "@/src/lib/isLogin";
 import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
 import moment from "moment";
 import Link from "next/link";
 import Loading from "@/src/components/loading";
 import { useRouter } from "next/router";
-import { auth } from "@/src/lib/initFirebase";
 import withAuth from "@/src/lib/withAuth";
+import { fuego } from "@nandorojo/swr-firestore";
 
 const Show = ({ user, payment, event, category, refunded }) => {
   const [loading, setLoading] = useState(true);
@@ -20,7 +19,7 @@ const Show = ({ user, payment, event, category, refunded }) => {
     if (!payment) return
     if (!router) return;
     if (payment.seller !== user.uid && payment.buyer !== user.uid) {
-      (async() => (await auth()).signOut())()
+      (async() => fuego.auth().signOut())()
       return 
     }
     setLoading(false)

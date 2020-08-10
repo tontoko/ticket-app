@@ -1,12 +1,10 @@
 import Link from 'next/link'
 import React, { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Container, Spinner, Row, Col } from 'reactstrap'
-import { auth } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { useRouter } from 'next/router'
-import { GetServerSideProps } from 'next'
-import isLogin from '@/src/lib/isLogin'
 
 const Register = () => {
     const alert = useAlert()
@@ -22,7 +20,7 @@ const Register = () => {
         setLoading(true)
         if (pwd !== pwdConfirm) return alert.error('確認用パスワードが一致していません。')
         try {
-            await(await auth()).createUserWithEmailAndPassword(email, pwd);
+            await fuego.auth().createUserWithEmailAndPassword(email, pwd);
         } catch(e) {
             alert.error(errorMsg(e, 'signup'))
             setLoading(false)

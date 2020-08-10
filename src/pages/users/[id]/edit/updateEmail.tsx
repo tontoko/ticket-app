@@ -5,7 +5,7 @@ import { Form, FormGroup, Button, Label, Input, Container, Row } from 'reactstra
 import { useAlert } from "react-alert"
 import errorMsg from '@/src/lib/errorMsg'
 import { encodeQuery } from '@/src/lib/parseQuery'
-import { firebase } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import withAuth from '@/src/lib/withAuth'
 
 export const UpdateEmail: React.FC<any> = ({user}) => {

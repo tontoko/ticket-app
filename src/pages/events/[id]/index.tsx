@@ -11,7 +11,7 @@ import {
 import getImg from '@/src/lib/getImgSSR'
 import { GetStaticProps, GetStaticPaths } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import { firestore } from '@/src/lib/initFirebase'
+import { fuego } from '@nandorojo/swr-firestore'
 import moment from 'moment'
 import { setCookie } from 'nookies'
 import {
@@ -63,7 +63,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
         } else if (event.createdUser == user.uid) {
           setStatus("organizer");
         } else {
-          ticketListener = (await firestore())
+          ticketListener = fuego.db
             .collection("payments")
             .where("event", "==", event.id)
             .where("buyer", "==", user.uid)
@@ -92,12 +92,12 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
             });
           // ログイン済みで主催者以外の場合に履歴に追加
           let { eventHistory } = (
-            await (await firestore()).collection("users").doc(user.uid).get()
+            await fuego.db.collection("users").doc(user.uid).get()
           ).data();
           if (!eventHistory) eventHistory = [];
           eventHistory = Array.from(new Set([...eventHistory, event.id]));
           eventHistory.length > 10 && eventHistory.shift();
-          await (await firestore())
+          await fuego.db
             .collection("users")
             .doc(user.uid)
             .update({ eventHistory });

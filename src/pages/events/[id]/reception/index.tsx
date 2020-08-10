@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Table, Row, Col, Button, Input, ModalBody, ModalFooter } from 'reactstrap';
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import { useAlert } from 'react-alert';
-import { event } from 'events';
-import { firestore } from '@/src/lib/initFirebase';
+import { event } from 'event';
 import withAuth from '@/src/lib/withAuth';
 import { encodeQuery } from '@/src/lib/parseQuery';
+import { useCollection, fuego } from '@nandorojo/swr-firestore';
 
 class NoStockError extends Error {
     constructor(message: string) {
@@ -17,43 +17,34 @@ class NoStockError extends Error {
     }
 }
 
-type manualPayment = {category: string, name: string, paid: boolean, id: string}
+type manualPayment = {category: string, name: string, paid: boolean, id?: string}
 
 const Reception = ({ categories, id, setModal, setModalInner }) => {
     const alert = useAlert()
+    const { data: manualPayments, loading } = useCollection(`events/${id}/manualPayments`, {
+        listen: true
+    })
 
-    const [loading, setLoading] = useState(true)
+
+
     const [newManualPayment, setNewManualPayment] = useState<manualPayment>({
       name: "",
       category: categories.length > 0 ? categories[0].id : "",
       paid: true,
-      id: "",
     });
-    const [manualPayments, setManualPayments] = useState<manualPayment[]>([]);
-
-    useEffect(() => {
-        (async() => {
-        (await firestore())
-            .collection("events")
-            .doc(id as string)
-            .collection("manualPayments")
-            .onSnapshot(async snap => {
-                const data = await Promise.all(snap.docs.map(async doc => {return { ...doc.data(), id: doc.id } as manualPayment }))
-                setManualPayments(data);
-                setLoading(false);
-            })
-        })()
-    }, []);
 
     const createManualPayment = async () => {
         if (loading) return
         if (!newManualPayment.category) return alert.error('先にチケットカテゴリを登録してください。')
         if (!newManualPayment.name) return alert.error('名前が入力されていません。')
         try {
-            setLoading(true)
-            await (await firestore()).runTransaction(async transaction => {
-                const categoryRef = (await firestore()).collection('events').doc(id as string).collection('categories').doc(newManualPayment.category)
-                const manualPaymentsRef = (await firestore())
+            await fuego.db.runTransaction(async transaction => {
+                const categoryRef = fuego.db
+                  .collection("events")
+                  .doc(id as string)
+                  .collection("categories")
+                  .doc(newManualPayment.category);
+                const manualPaymentsRef = fuego.db
                   .collection("events")
                   .doc(id as string)
                   .collection("manualPayments")
@@ -77,27 +68,24 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                 location.reload()
             }, 1000);
         }
-        setLoading(false)
     }
 
     const editManualPayment = async (newValue, beforeValue) => {
         if (loading) return
-        console.log(newValue)
         if (!newValue.name) return alert.error("名前が入力されていません。");
         try {
-            setLoading(true)
-            await(await firestore()).runTransaction(async (transaction) => {
-              const newCategoryRef = (await firestore())
+            await fuego.db.runTransaction(async (transaction) => {
+              const newCategoryRef = fuego.db
                 .collection("events")
                 .doc(id as string)
                 .collection("categories")
                 .doc(newValue.category);
-              const beforeCategoryRef = (await firestore())
+              const beforeCategoryRef = fuego.db
                 .collection("events")
                 .doc(id as string)
                 .collection("categories")
                 .doc(beforeValue.category);
-              const manualPaymentsRef = (await firestore())
+              const manualPaymentsRef = fuego.db
                 .collection("events")
                 .doc(id as string)
                 .collection("manualPayments")
@@ -135,18 +123,20 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
             }
             alert.error(msg);
         }
-        setLoading(false)
     }
 
     const deleteManualPayment = async (payment) => {
         if (loading) return
         const submit = async () => {
             try {
-                setLoading(true)
                 setModal(false)
-                await (await firestore()).runTransaction(async transaction => {
-                    const categoryRef = (await firestore()).collection('events').doc(id as string).collection('categories').doc(payment.category)
-                    const manualPaymentsRef = (await firestore())
+                await fuego.db.runTransaction(async transaction => {
+                    const categoryRef = fuego.db
+                      .collection("events")
+                      .doc(id as string)
+                      .collection("categories")
+                      .doc(payment.category);
+                    const manualPaymentsRef = fuego.db
                       .collection("events")
                       .doc(id as string)
                       .collection("manualPayments")
@@ -165,7 +155,6 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                     location.reload()
                 }, 2000);
             }
-            setLoading(false)
         }
         setModalInner((
             <>
@@ -188,15 +177,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
             <td>
               <Input
                 placeholder="お名前"
-                value={payment.name}
-                onChange={(e) => {
-                    const newValue = [...manualPayments];
-                    newValue.splice(i, 1, {
-                      ...payment,
-                      name: e.target.value,
-                    });
-                    setManualPayments(newValue);
-                }}
+                defaultValue={payment.name}
                 onBlur={(e) =>
                   editManualPayment(
                     { ...payment, name: e.target.value },
@@ -293,14 +274,14 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
     );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-    const { firestore } = await initFirebaseAdmin()
-    const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/reception`))
-    return { paths, fallback: true }
-}
+// export const getStaticPaths: GetStaticPaths = async () => {
+//     const { firestore } = await initFirebaseAdmin()
+//     const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/reception`))
+//     return { paths, fallback: true }
+// }
 
-export const getStaticProps: GetStaticProps = async ({params}) => {
-    const { id } = params;
+export const getServerSideProps: GetServerSideProps = async ({query}) => {
+    const { id } = query;
     const { firestore } = await initFirebaseAdmin()
     const categoriesSnapShot = (await firestore.collection('events').doc(id as string).collection('categories').orderBy('index').get())
     let categories: FirebaseFirestore.DocumentData[] = []

@@ -1,4 +1,4 @@
-import { storage } from '@/src/lib/initFirebase'
+import storage from '@/src/lib/storage'
 
 const getImg = async (img:string, uid: string, size?: '800' | '360') => {
   

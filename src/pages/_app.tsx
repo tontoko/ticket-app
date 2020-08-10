@@ -3,7 +3,9 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import "react-datepicker/dist/react-datepicker.css"
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import UserLayouts from './layouts/userLayouts'
-import { auth } from '@/src/lib/initFirebase'
+import "firebase/firestore";
+import "firebase/auth";
+import { Fuego, FuegoProvider } from "@nandorojo/swr-firestore";
 import {useRouter} from 'next/router'
 import { AppProps, AppContext } from 'next/app'
 import Head from "next/head";
@@ -20,6 +22,9 @@ import { setCookie, destroyCookie, parseCookies } from 'nookies'
 const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
+import { dev, prod } from "@/ticket-app";
+const firebaseConfig = process.env.ENV === "prod" ? prod : dev;
+const fuego = new Fuego(firebaseConfig);
 
 const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter();
@@ -31,19 +36,25 @@ const App = ({ Component, pageProps }: AppProps) => {
   let listner = () => {return}
 
   useEffect(() => {
+    if (!fuego || !router) return
     (async () => {
-      listner = (await auth()).onAuthStateChanged(async currentUser => {
+      listner = fuego.auth().onAuthStateChanged(async (currentUser) => {
         if (currentUser) {
-          setUser(currentUser)
-          setCookie(null, "tmpUser", JSON.stringify({
-            providerData: currentUser.providerData,
-            uid: currentUser.uid
-          }), {
-            maxAge: 60,
-            path: "/",
-            domain: document.domain,
-            secure: document.domain !== 'localhost',
-          });
+          setUser(currentUser);
+          setCookie(
+            null,
+            "tmpUser",
+            JSON.stringify({
+              providerData: currentUser.providerData,
+              uid: currentUser.uid,
+            }),
+            {
+              maxAge: 60,
+              path: "/",
+              domain: document.domain,
+              secure: document.domain !== "localhost",
+            }
+          );
           if (
             !currentUser.emailVerified &&
             currentUser.providerData[0].providerId === "password" &&
@@ -62,9 +73,9 @@ const App = ({ Component, pageProps }: AppProps) => {
           }
         }
         if (!currentUser) {
-          setUser(null)
-          destroyCookie(null, 'tmpUser')
-          setTmpUser(null)
+          setUser(null);
+          destroyCookie(null, "tmpUser");
+          setTmpUser(null);
           if (!checkAllowNoLoginUrlList()) {
             await router.push({
               pathname: "/login",
@@ -72,9 +83,9 @@ const App = ({ Component, pageProps }: AppProps) => {
             });
           }
         }
-      })
+      });
     })();
-  }, [router.pathname]);
+  }, [router.pathname, fuego]);
 
   useEffect(() => {
     router.events.on("routeChangeStart", (url) => {
@@ -116,37 +127,39 @@ const App = ({ Component, pageProps }: AppProps) => {
           href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
         />
       </Head>
-      <Provider template={AlertTemplate} {...options}>
-        <Elements stripe={stripePromise}>
-          <Modal
-            {...{
-              modal,
-              setModal,
-              modalInner,
-            }}
-          />
-          <UserLayouts
-            {...pageProps}
-            {...{
-              tmpUser,
-              setModal,
-              setModalInner,
-              Component,
-              user,
-            }}
-          >
-            <Component
+      <FuegoProvider fuego={fuego}>
+        <Provider template={AlertTemplate} {...options}>
+          <Elements stripe={stripePromise}>
+            <Modal
+              {...{
+                modal,
+                setModal,
+                modalInner,
+              }}
+            />
+            <UserLayouts
               {...pageProps}
               {...{
+                tmpUser,
                 setModal,
                 setModalInner,
                 Component,
                 user,
               }}
-            />
-          </UserLayouts>
-        </Elements>
-      </Provider>
+            >
+              <Component
+                {...pageProps}
+                {...{
+                  setModal,
+                  setModalInner,
+                  Component,
+                  user,
+                }}
+              />
+            </UserLayouts>
+          </Elements>
+        </Provider>
+      </FuegoProvider>
     </>
   );
 }
