@@ -115,7 +115,7 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
   const { firestore } = await initFirebaseAdmin();
   const userData = (await firestore.collection('users').doc(id as string).get()).data()
 
-  let staticEvent = null
+  let serverEventHistory = null;
 
   if (userData && userData.eventHistory) {
     const result = await firestore
@@ -129,10 +129,10 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
       data.photos.length > 0
         ? await getImgSSR(data.photos[0], data.createdUser)
         : await getImgSSR(null, data.createdUser);
-    staticEvent = { ...data, startDate, endDate, photos, id: result.id };
+    serverEventHistory = { ...data, startDate, endDate, photos, id: result.id };
   }
-  return { 
-    props: { staticEvent }, 
-    // revalidate: 1 
+  return {
+    props: { serverEventHistory },
+    // revalidate: 1
   };
 };
