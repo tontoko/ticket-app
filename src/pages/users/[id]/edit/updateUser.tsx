@@ -147,7 +147,8 @@ export const UpdateUser = ({ user }) => {
         } 
       })
     } catch(e) {
-      alert.error('エラーが発生しました。入力項目が正しいか確認してください。')
+      alert.error("エラーが発生しました。入力項目が正しいか確認してください。");
+      alert.error(e.message);
     }
   }
 
@@ -241,22 +242,7 @@ export const UpdateUser = ({ user }) => {
         if (tosAcceptance && !tosAcceptance.date) {
           return (
             <>
-              <FormGroup style={{ marginTop: "2em", marginBottom: 0 }}>
-                <Label>決済に関する同意事項</Label>
-                <p style={{ fontSize: 12, marginBottom: 0 }}>
-                  このサービスにおける支払処理サービスは、Stripeが提供し、
-                  <a href="https://stripe.com/connect-account/legal">
-                    Stripe Connectアカウント契約
-                  </a>
-                  （<a href="https://stripe.com/legal">Stripe利用規約</a>
-                  を含み、総称して「Stripeサービス契約」といいます。）に従うものとします。
-                  <br />
-                  このサービスにおける電子チケット取引の継続により、お客様はStripeサービス契約（随時Stripeにより修正されることがあり、その場合には修正されたものを含みます。）に拘束されることに同意するものとします。{" "}
-                  <br />
-                  Stripeを通じた支払処理サービスをこのサービスが使用するための条件として、お客様は、このサービスに対してお客様及びお客様の事業に関する正確かつ完全な情報を提供することに同意し、このサービスが当該情報及びStripeが提供する支払処理サービスのお客様による使用に関連する取引情報を共有することを認めるものとします。
-                </p>
-              </FormGroup>
-              <FormGroup check>
+              <FormGroup check style={{ marginTop: "2em", marginBottom: 0 }}>
                 <Row form>
                   <Label className="ml-auto" check for="agree">
                     <Input
@@ -265,7 +251,7 @@ export const UpdateUser = ({ user }) => {
                       checked={agree}
                       onChange={(e) => setAgree(e.target.checked)}
                     />
-                    同意します
+                    利用規約を確認し、同意します
                   </Label>
                 </Row>
               </FormGroup>

@@ -19,7 +19,7 @@ const Payments = ({ user, payments, events, categories }) => {
 
     return sortedPayment.map((payment, i) => {
       return (
-        <Link href={`/users/${user.uid}/payments/show/${payment.id}`} key={i}>
+        <Link href={`/users/${user.uid}/payments/${payment.id}`} key={i}>
           <div>
             <Row>
               <Col xs="12" style={{ padding: "0", cursor: "pointer" }}>
@@ -101,7 +101,7 @@ export const getServerSideProps: GetServerSideProps = async ({params}) => {
       return {
         ...data,
         id: doc.id,
-        createdAt: doc.createTime.toMillis(),
+        createdAt: data.createdAt.toMillis(),
       };
     })
   );

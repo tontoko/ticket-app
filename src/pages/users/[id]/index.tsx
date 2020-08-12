@@ -22,14 +22,14 @@ export const User: React.FC<any> = ({user, serverEventHistory}) => {
 
   useEffect(() => {
     (async() => {
-      if (!lastVisitedEventData) return
-        const photos =
-          lastVisitedEventData.photos.length > 0
-            ? await getImg(
-                lastVisitedEventData.photos[0],
-                lastVisitedEventData.createdUser
-              )
-            : await getImg(null, lastVisitedEventData.createdUser);
+      if (!lastVisitedEventData || serverEventHistory) return;
+      const photos =
+        lastVisitedEventData.photos.length > 0
+          ? await getImg(
+              lastVisitedEventData.photos[0],
+              lastVisitedEventData.createdUser
+            )
+          : await getImg(null, lastVisitedEventData.createdUser);
       setEvent({
         ...lastVisitedEventData,
         startDate: lastVisitedEventData.startDate.toMillis(),

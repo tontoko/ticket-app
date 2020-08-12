@@ -23,6 +23,7 @@ const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
 import { dev, prod } from "@/ticket-app";
+import { query } from 'express'
 const firebaseConfig = process.env.ENV === "prod" ? prod : dev;
 const fuego = new Fuego(firebaseConfig);
 
@@ -40,7 +41,6 @@ const App = ({ Component, pageProps }: AppProps) => {
     (async () => {
       listner = fuego.auth().onAuthStateChanged(async (currentUser) => {
         if (currentUser) {
-          setUser(currentUser);
           setCookie(
             null,
             "tmpUser",
@@ -58,10 +58,11 @@ const App = ({ Component, pageProps }: AppProps) => {
           if (
             !currentUser.emailVerified &&
             currentUser.providerData[0].providerId === "password" &&
-            !window.location.href.match(/^\/__\/auth\/action/)
+            !window.location.pathname.match(/^\/__\/auth\/action/)
           ) {
             router.push("/confirmEmail");
-          } else if (
+          } 
+          if (
             window.location.pathname === "/login" ||
             window.location.pathname === "/register" ||
             window.location.pathname === "/forgetPassword"
@@ -71,6 +72,18 @@ const App = ({ Component, pageProps }: AppProps) => {
               query: { msg: encodeQuery("ログインしました") },
             });
           }
+          if (
+            window.location.pathname.match(/^\/users\//) &&
+            !router.query.id
+          ) return
+          if (
+            window.location.pathname.match(/^\/users\//) &&
+            router.query.id &&
+            router.query.id !== currentUser.uid
+          ) {
+            return fuego.auth().signOut()
+          }
+          setUser(currentUser);
         }
         if (!currentUser) {
           setUser(null);
@@ -85,7 +98,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         }
       });
     })();
-  }, [router.pathname, fuego]);
+  }, [router, router.pathname, fuego]);
 
   useEffect(() => {
     router.events.on("routeChangeStart", (url) => {

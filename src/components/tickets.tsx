@@ -4,7 +4,7 @@ import { faCheckSquare, faExclamationCircle } from "@fortawesome/free-solid-svg-
 import Link from "next/link";
 import { encodeQuery } from "@/src/lib/parseQuery";
 
-const Tickets = ({ ticket, event: event }) => {
+const Tickets = ({ user, ticket, event: event }) => {
     return (
       <Card style={{ marginBottom: "0.5em" }}>
         <CardBody>
@@ -60,9 +60,7 @@ const Tickets = ({ ticket, event: event }) => {
                       </Col>
                     )}
                     <Col xs="12">
-                      <Link
-                        href={`/refunds/new/${event.id}/${ticket.paymentId}`}
-                      >
+                      <Link href={`/users/${user.uid}/payments/${ticket.paymentId}/refund`}>
                         <Button color="danger">返金申請</Button>
                       </Link>
                     </Col>

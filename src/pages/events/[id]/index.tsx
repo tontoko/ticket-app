@@ -201,7 +201,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
             <Col sm="12" style={{ margin: "0.2em" }}>
               <h5>購入済みチケット</h5>
               {tickets.map((ticket, i) => (
-                <Tickets ticket={ticket} event={event} key={i} />
+                <Tickets user={user} ticket={ticket} event={event} key={i} />
               ))}
             </Col>
             <Col sm="12" style={{ marginTop: "1.5em" }}>

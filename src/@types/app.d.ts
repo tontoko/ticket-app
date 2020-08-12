@@ -37,6 +37,12 @@ declare module 'app' {
     error: string,
     buyer: string,
     seller: string,
+    refund: {
+      detailText: string,
+      reason: string,
+      event: event.id
+    },
+    createdAt: firebase.firestore.Timestamp
     id?: string,
   };
 

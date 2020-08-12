@@ -20,20 +20,22 @@ const MyTickets = ({ user }) => {
     listen: true,
     where: ["buyer", "==", user.uid],
   });
+  const { data: events, loading: eventsLoading } = useCollection<event>(
+    payments && `events`,
+    {
+      listen: true,
+      where: [
+        firestore.FieldPath.documentId(),
+        "in",
+        Array.from(new Set(payments?.map((payment) => payment.event))),
+      ], // 重複除外
+    }
+  );
 
   useEffect(() => {
     (async () => {
-      if (paymentsLoading) return;
+      if (paymentsLoading || !payments || eventsLoading || !events) return;
       if (payments.length === 0) return setLoading(false);
-      const myEventsIds = Array.from(
-        new Set(payments.map((payment) => payment.event))
-      ); // 重複除外
-      const events = (
-        await fuego.db
-          .collection("events")
-          .where(firestore.FieldPath.documentId(), "in", myEventsIds)
-          .get()
-      ).docs;
       setMyTickets(
         await Promise.all(
           events.map(async (event) => {
@@ -58,15 +60,14 @@ const MyTickets = ({ user }) => {
                   };
                 })
             );
-            const data = event.data() as event;
-            const startDate = data.startDate.toMillis();
-            const endDate = data.endDate.toMillis();
+            const startDate = event.startDate.toMillis();
+            const endDate = event.endDate.toMillis();
             const photos =
-              data.photos.length > 0
-                ? await getImg(data.photos[0], data.createdUser, "360")
-                : await getImg(null, data.createdUser, "360");
+              event.photos.length > 0
+                ? await getImg(event.photos[0], event.createdUser, "360")
+                : await getImg(null, event.createdUser, "360");
             return {
-              ...data,
+              ...event,
               startDate,
               endDate,
               tickets,
@@ -78,7 +79,7 @@ const MyTickets = ({ user }) => {
       );
       setLoading(false);
     })();
-  }, [payments, paymentsLoading]);
+  }, [payments, paymentsLoading, events, eventsLoading]);
           
   const renderUserTickets = () =>
     myTickets.map((event, i) => {
@@ -122,7 +123,7 @@ const MyTickets = ({ user }) => {
               <Row>
                 <Col style={{ padding: "0 0.5em" }}>
                   {event.tickets.map((ticket, ticketIndex) => (
-                    <Tickets ticket={ticket} event={event} key={ticketIndex} />
+                    <Tickets user={user} ticket={ticket} event={event} key={ticketIndex} />
                   ))}
                 </Col>
               </Row>
@@ -137,12 +138,6 @@ const MyTickets = ({ user }) => {
       <h5>購入済みチケット</h5>
       <p>
         購入処理に時間がかかる場合があります。
-        <br />
-        購入したチケットが表示されていない場合は
-        <a href="#" onClick={() => location.reload()}>
-          画面の更新
-        </a>
-        をお試しください。
       </p>
       {myTickets.length === 0 && (
         <>

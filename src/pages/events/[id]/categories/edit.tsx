@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Form, FormGroup, Button, Input, Row, Col, Label, Spinner, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons'
@@ -17,7 +17,7 @@ const Edit = ({ user, setModal, setModalInner }) => {
     orderBy: 'index',
   })
 
-  const [currentCategories, setCategories] = useState<any>();
+  const [currentCategories, setCategories] = useState<any>([]);
 
   useEffect(() => {
     if (loading) return
@@ -119,16 +119,22 @@ const Edit = ({ user, setModal, setModalInner }) => {
   )
 
   const addCategory = () => {
-    const copyCategories = currentCategories ? [...currentCategories] : []
-    copyCategories.push({name: '', price: 500, public: false, stock: 1, new: true})
-    setCategories(copyCategories)
+    const copyCategories = [...currentCategories];
+    copyCategories.push({
+      name: "",
+      price: 500,
+      public: false,
+      stock: 1,
+      new: true,
+    });
+    setCategories(copyCategories);
   }
 
   const submit = (e) => {
     e.preventDefault();
     try {
-      let names = []
-      currentCategories.filter(category => {
+      let names = [];
+      currentCategories.filter((category) => {
         if (!category.name) throw new Error("チケット名を入力してください。");
         if (category.price < 500)
           throw new Error("チケットの価格は500円以上に設定してください。");
@@ -142,8 +148,8 @@ const Edit = ({ user, setModal, setModalInner }) => {
           names.push(category["name"]);
           return category;
         }
-        throw new Error('チケット名が重複しています')
-      })
+        throw new Error("チケット名が重複しています");
+      });
       setModalInner(
         <ModalInner
           currentCategories={currentCategories}
@@ -153,10 +159,10 @@ const Edit = ({ user, setModal, setModalInner }) => {
         />
       );
       setModal(true);
-    } catch(e) {
-      alert.error(e.message)
+    } catch (e) {
+      alert.error(e.message);
     }
-  }
+  };
 
   if (loading) <Loading/>
 

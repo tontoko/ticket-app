@@ -108,7 +108,7 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
         .collection("payments")
         .where("event", "==", result.id)
         .get()
-    ).docs.map((payment) => payment.data());
+    ).docs.map((payment) => {return { ...payment.data(), createdAt: payment?.data().createdAt }});
 
     return { props: { event, categories, payments } };
 };

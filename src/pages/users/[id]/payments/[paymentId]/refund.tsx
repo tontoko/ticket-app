@@ -9,11 +9,12 @@ import { fuego } from '@nandorojo/swr-firestore';
 import { encodeQuery } from '@/src/lib/parseQuery';
 import Loading from '@/src/components/loading';
 import withAuth from '@/src/lib/withAuth';
+import { payment, event } from 'app';
 
 const Refund = ({
   user,
   createdUser,
-  paymentData,
+  payment,
 }) => {
   const router = useRouter();
   const alert = useAlert();
@@ -28,9 +29,9 @@ const Refund = ({
 
   useEffect(() => {
     if (!user) return;
-    if (user.uid === createdUser || paymentData.refund) {
-      (async() => fuego.auth().signOut())()
-      return
+    if (user.uid === createdUser) {
+      (async () => fuego.auth().signOut())();
+      return;
     }
     setLoading(false);
   }, [user]);
@@ -57,9 +58,8 @@ const Refund = ({
   }, [select, problem]);
 
   // TODO: 返金失敗時のWebhock用API作成
-  const createRefund = async (reason: string) => {
+  const createRefund = async (reason: select | problem) => {
     setLoading(true);
-    let targetUser = sentTo === "user" ? createdUser : "admin";
 
     try {
       let reasonText = "";
@@ -89,8 +89,9 @@ const Refund = ({
           reason,
           reasonText,
           detailText,
-          targetUser,
-          paymentId: router.query.paymentId
+          seller: payment.seller,
+          buyer: payment.buyer,
+          paymentId: router.query.paymentId,
         }),
       });
       if (res.status !== 200) throw new Error()
@@ -105,31 +106,59 @@ const Refund = ({
     } catch (e) {
       console.error(e.message);
       alert.error("エラーが発生しました。しばらくしてお試しください。");
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const contactAdmin = async (reason: select | problem) => {
+    setLoading(true);
+    
+    try {
+      await fuego.db.collection("contact").add({
+        category: "refund",
+        text: detailText,
+        info: {
+          paymentId: router.query.paymentId,
+          reason,
+        },
+      });
+      router.push({
+        pathname: `/users/${user.uid}/myTickets`,
+        query: {
+          msg: encodeQuery(
+            "システム管理者に調査を依頼しました。"
+          ),
+        },
+      });
+    } catch(e) {
+      console.error(e.message);
+      alert.error("エラーが発生しました。しばらくしてお試しください。");
+      setLoading(false);
+    }
   };
 
   const submit = async (e) => {
     e.preventDefault();
+    let reason: select | problem;
     switch (select) {
       case "mistake":
-        alert.error(
+        return alert.error(
           "購入したチケットは販売者に責任がある場合を除き返金できません。詳しくは利用規約をご確認ください。"
         );
-        break;
       case "fraud":
         if (!detailText) return alert.error("詳細を記入してください");
-        createRefund(select);
+        reason = select;
         break;
       case "other":
         if (!problem) return alert.error("選択肢から選択してください");
         if (!detailText) return alert.error("詳細を記入してください");
-        createRefund(problem);
+        reason = problem;
         break;
       default:
-        alert.error("返金理由を選択してください");
-        break;
+        return alert.error("返金理由を選択してください");
     }
+    if (sentTo === 'user') return createRefund(reason);
+    contactAdmin(reason);
   };
 
   if (loading) return <Loading />
@@ -209,17 +238,17 @@ const Refund = ({
 // };
 
 export const getServerSideProps: GetServerSideProps = async ({query}) => {
-  const { eventId, paymentId } = query;
+  const { paymentId } = query;
   const { firestore } = await initFirebaseAdmin()
-  const eventData = (
+  const payment = (await firestore.collection("payments").doc(paymentId as string).get()).data()
+  const event = (
     await firestore
       .collection("events")
-      .doc(eventId as string)
+      .doc(payment.event)
       .get()
   ).data();
-  const paymentData = (await firestore.collection("payments").doc(paymentId as string).get()).data()
   return {
-    props: { createdUser: eventData.createdUser, paymentData },
+    props: { createdUser: event.createdUser, payment },
   };
 }
 

@@ -7,30 +7,35 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
     reason,
     reasonText,
     detailText,
-    targetUser,
-    paymentId
-  } = req.body
-  const result = await firestore.collection("refunds").add({
-    reason,
-    reasonText,
-    detailText,
-    targetUser,
+    seller,
+    buyer,
     paymentId,
+  } = req.body
+  await firestore.collection("payments").doc(paymentId).update({
+    refund: {
+      reason,
+      reasonText,
+      detailText,
+    },
   });
-  const text =
-    targetUser === "admin"
-      ? "ユーザーから調査依頼がありました。"
-      : "あなたが主催するイベントに対して返金が申請されました。3日以内に対処しない場合、自動的に返金されます。";
-  const url =
-    targetUser === "admin" ? "" : `/refunds/${result.id}`;
   await firestore
     .collection("users")
-    .doc(targetUser)
+    .doc(seller)
     .collection("notifies")
-    .doc(result.id)
-    .set({
-      text,
-      url,
+    .add({
+      text:
+        "あなたが主催するイベントに対して返金が申請されました。3日以内に対処しない場合、自動的に返金されます。",
+      url: `/users/${seller}/payments/${paymentId}`,
+      read: false,
+    });
+  await firestore
+    .collection("users")
+    .doc(buyer)
+    .collection("notifies")
+    .add({
+      text:
+        "返金申請が送信されました。3日以内に対処しない場合、自動的に返金されます。",
+      url: `/users/${buyer}/payments/${paymentId}`,
       read: false,
     });
   res.status(200).end()

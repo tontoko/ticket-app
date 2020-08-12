@@ -13,24 +13,28 @@ import Loading from '@/src/components/loading';
 import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import withAuth from '@/src/lib/withAuth';
+import useSWR from 'swr'
+
+const fetcher = (url, user) =>
+  fetch(url, {
+    method: "POST",
+    headers: new Headers({
+      "Content-Type": "application/json",
+    }),
+    body: JSON.stringify({ uid: user.uid }),
+  });
 
 const MyEvents = ({ user, events }) => {
+  const { data: res } = useSWR(user && ["/api/stripeAccountsRetrieve", user], fetcher);
   const [requirements, setRequirements] = useState<Stripe.Person.Requirements | any>(null)
 
   useEffect(() => {
-    if (!user) return;
+    if (!res) return;
     (async () => {
-      const res = await fetch("/api/stripeAccountsRetrieve", {
-        method: "POST",
-        headers: new Headers({
-          "Content-Type": "application/json",
-        }),
-        body: JSON.stringify({ uid: user.uid }),
-      });
-      const {individual} = await res.json();
+      const { individual } = await res.json();
       setRequirements(individual ? individual.requirements : null);
     })();
-  }, [user]);
+  }, [res]);
 
   const renderUserEvents = () =>
     events.map((event, i) => {
@@ -70,6 +74,9 @@ const MyEvents = ({ user, events }) => {
       );
     });
 
+
+  if (!res) return <Loading />;
+
   return (
     <>
       <div style={{ marginTop: "1em", minHeight: "4em" }}>
@@ -90,19 +97,18 @@ const MyEvents = ({ user, events }) => {
             </Link>
           </Row>
         );
-        if (requirements) return (
+        return (
           <>
             <p>
               イベントを開催し、チケット販売を開始するには必要なユーザー情報を登録してください。
             </p>
             <Row style={{ margin: 0, marginTop: "2em" }}>
-              <Link href={`/users/${user.uid}/edit`}>
+              <Link href={`/users/${user.uid}/edit/organizer`}>
                 <Button className="ml-auto">ユーザー情報を登録する</Button>
               </Link>
             </Row>
           </>
         );
-        return <Loading/>
       })()}
     </>
   );
