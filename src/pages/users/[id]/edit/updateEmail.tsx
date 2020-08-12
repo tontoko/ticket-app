@@ -18,7 +18,7 @@ export const UpdateEmail: React.FC<any> = ({user}) => {
         e.preventDefault()
         try {
             const currentEmail = user.email
-            const credential = firebase.auth.EmailAuthProvider.credential(currentEmail, pwd)
+            const credential = fuego.auth.EmailAuthProvider.credential(currentEmail, pwd)
             await user.reauthenticateAndRetrieveDataWithCredential(credential)
             await user.updateEmail(email)
             router.push({pathname: `/users/${user.uid}/edit`, query: {msg: encodeQuery('メールアドレスを変更しました') }})
