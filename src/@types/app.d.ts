@@ -1,4 +1,4 @@
-declare module 'event' {
+declare module 'app' {
   export type events = event[]
   
   export type event = {
@@ -14,8 +14,10 @@ declare module 'event' {
     createdUser: string;
     id?: string;
   };
+
+  export type categories = category[];
   
-  export type categories = {
+  export type category = {
     name: string,
     price: number,
     createdUser: string,
@@ -24,5 +26,25 @@ declare module 'event' {
     public: boolean,
     index: number,
     id?: string
+  }
+
+  export type payments = payment[]
+
+  export type payment = {
+    category: category.id,
+    event: event.id,
+    accepted: boolean,
+    error: string,
+    buyer: string,
+    seller: string,
+    id?: string,
+  };
+
+  export type notifies = notify[]
+
+  export type notify = {
+    read: boolean,
+    text: string,
+    url: string,
   }
 }

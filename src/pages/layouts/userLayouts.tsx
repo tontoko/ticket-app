@@ -7,17 +7,19 @@ const Avater = lazy(() => import('react-avatar'))
 import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 import { decodeQuery } from '@/src/lib/parseQuery'
-import { fuego } from '@nandorojo/swr-firestore'
+import { fuego, useCollection } from "@nandorojo/swr-firestore";
 
 const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
   const router = useRouter()
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
-  const [notifiesLength, setNotifiesLength] = useState(0)
-  let listner = () => {return}
   const [facebookUid, setFacebookUid] = useState();
   const [googleUid, setGoogleUid] = useState();
-
+  const { data: notifies } = useCollection(user && `users/${user.uid}/notifies`, {
+    where: ["read", "==", false],
+    listen: true
+  });
+  
   useEffect(() => {
     if ((user || tmpUser) && !facebookUid && !googleUid) {
       const providerData = user
@@ -31,15 +33,6 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
       }
     }
     if (!user) return
-    (async () => {
-      listner = fuego.db
-      .collection("users")
-      .doc(user.uid)
-      .collection("notifies")
-      .where("read", "==", false).onSnapshot(snap => {
-        setNotifiesLength(snap ? snap.size : 0);
-      })})()
-    return listner
   }, [user]);
 
   useEffect(() => {
@@ -58,7 +51,7 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
         </Link>
         {(user || tmpUser) && (
           <>
-            <Suspense fallback={<div className="ml-auto mr-2"/>}>
+            <Suspense fallback={<div className="ml-auto mr-2" />}>
               <Link href={`/users/${user ? user.uid : tmpUser.uid}/edit`}>
                 <div className="ml-auto mr-2">
                   <Avater
@@ -80,7 +73,7 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
                   style={{
                     border: "solid 1px gray",
                     borderRadius: "50%",
-                    backgroundColor: notifiesLength > 0 ? "orange" : "gray",
+                    backgroundColor: notifies?.length > 0 ? "orange" : "gray",
                     width: "40px",
                     height: "40px",
                     display: "flex",
@@ -100,14 +93,12 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
                       alignItems: "center",
                     }}
                   >
-                    <div style={{ fontWeight: "bold" }}>{notifiesLength}</div>
+                    <div style={{ fontWeight: "bold" }}>{notifies?.length}</div>
                   </div>
                 </div>
               </Link>
             </Suspense>
-            <NavbarToggler
-              onClick={() => toggle(!isOpen)}
-            />
+            <NavbarToggler onClick={() => toggle(!isOpen)} />
             <Collapse
               isOpen={isOpen}
               navbar

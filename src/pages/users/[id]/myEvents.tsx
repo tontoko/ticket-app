@@ -7,10 +7,10 @@ import Link from 'next/link'
 import getImg from '@/src/lib/getImgSSR'
 import moment from 'moment'
 import stripe, { Stripe } from '@/src/lib/stripe';
-import { event } from 'event';
+import { event } from 'app';
 import { fuego } from '@nandorojo/swr-firestore';
 import Loading from '@/src/components/loading';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import withAuth from '@/src/lib/withAuth';
 
@@ -108,18 +108,18 @@ const MyEvents = ({ user, events }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { firestore } = await initFirebaseAdmin();
-  const paths = (await firestore.collection("users").get()).docs.map(
-    (doc) => `/users/${doc.id}/myEvents`
-  );
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const { firestore } = await initFirebaseAdmin();
+//   const paths = (await firestore.collection("users").get()).docs.map(
+//     (doc) => `/users/${doc.id}/myEvents`
+//   );
 
-  return { paths, fallback: true };
-};
+//   return { paths, fallback: true };
+// };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const { firestore } = await initFirebaseAdmin();
-  const { id } = params;
+  const { id } = query;
   const result = await firestore
     .collection("events")
     .where("createdUser", "==", id)
@@ -137,7 +137,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     })
   )
 
-  return { props: { events }, revalidate: 1 };
+  return { props: { events }, 
+    // revalidate: 1 
+  };
 };
 
 export default withAuth(MyEvents);

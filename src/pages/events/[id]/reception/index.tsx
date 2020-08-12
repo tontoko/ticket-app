@@ -5,7 +5,7 @@ import { Table, Row, Col, Button, Input, ModalBody, ModalFooter } from 'reactstr
 import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import { useAlert } from 'react-alert';
-import { event } from 'event';
+import { event } from 'app';
 import withAuth from '@/src/lib/withAuth';
 import { encodeQuery } from '@/src/lib/parseQuery';
 import { useCollection, fuego } from '@nandorojo/swr-firestore';

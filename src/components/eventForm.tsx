@@ -19,7 +19,7 @@ import { useRouter } from "next/router";
 import { encodeQuery } from "@/src/lib/parseQuery";
 import errorMsg from "@/src/lib/errorMsg";
 import storage from "../lib/storage";
-import { useDocument, fuego } from "@nandorojo/swr-firestore";
+import { useDocument, fuego, revalidateDocument } from "@nandorojo/swr-firestore";
 
 const EventForm = ({
   user,

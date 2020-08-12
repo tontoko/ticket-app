@@ -6,7 +6,7 @@ import {
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
 import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
-import { event } from 'event'
+import { event } from 'app'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 

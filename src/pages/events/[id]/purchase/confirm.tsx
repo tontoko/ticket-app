@@ -17,7 +17,7 @@ import stripe from '@/src/lib/stripe'
 import { decodeQuery } from '@/src/lib/parseQuery'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
-import { event } from 'event'
+import { event } from 'app'
 import withAuth from '@/src/lib/withAuth'
 import { fuego } from '@nandorojo/swr-firestore'
 

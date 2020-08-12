@@ -1,45 +1,50 @@
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { Form, Button, Row, Card, CardBody, Col, CardTitle, CardSubtitle, CardText } from 'reactstrap'
-import { fuego } from '@nandorojo/swr-firestore'
+import { fuego, useDocument } from '@nandorojo/swr-firestore'
 import getImg from '@/src/lib/getImg'
 import getImgSSR from '@/src/lib/getImgSSR'
 import moment from 'moment'
 import { parseCookies } from 'nookies'
-import { event } from 'event'
+import { event } from 'app'
 import withAuth from '@/src/lib/withAuth'
-import { GetStaticPaths, GetStaticProps } from 'next'
+import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 
-export const User: React.FC<any> = ({user, staticEvent}) => {
-  const [event, setEvent] = useState(staticEvent);
+export const User: React.FC<any> = ({user, serverEventHistory}) => {
+  const [event, setEvent] = useState(serverEventHistory);
+  const cookie = parseCookies();
+  const { data: lastVisitedEventData } = useDocument<event>(
+    cookie.lastVisitedEvent &&
+      !serverEventHistory &&
+      `events/${cookie.lastVisitedEvent}`
+  );
 
   useEffect(() => {
-    if (!user) return
     (async() => {
-      const cookie = parseCookies();
-      const lastVisitedEvent = cookie.lastVisitedEvent;
-      if (!lastVisitedEvent || staticEvent) return;
-      const result = await fuego.db
-        .collection("events")
-        .doc(lastVisitedEvent)
-        .get();
-      const data = result.data() as event;
-      const startDate = data.startDate.seconds;
-      const endDate = data.endDate.seconds;
-      const photos =
-        data.photos.length > 0
-          ? await getImg(data.photos[0], data.createdUser)
-          : await getImg(null, data.createdUser);
-      setEvent({ ...data, startDate, endDate, photos, id: result.id });
+      if (!lastVisitedEventData) return
+        const photos =
+          lastVisitedEventData.photos.length > 0
+            ? await getImg(
+                lastVisitedEventData.photos[0],
+                lastVisitedEventData.createdUser
+              )
+            : await getImg(null, lastVisitedEventData.createdUser);
+      setEvent({
+        ...lastVisitedEventData,
+        startDate: lastVisitedEventData.startDate.toMillis(),
+        endDate: lastVisitedEventData.endDate.toMillis(),
+        photos,
+        id: lastVisitedEventData.id,
+      });
       fuego.db
         .collection("users")
         .doc(user.uid)
         .update({
-          eventHistory: [lastVisitedEvent],
+          eventHistory: [lastVisitedEventData.id],
         });
     })()
-  }, [user])
+  }, [lastVisitedEventData])
   
   const renderUserEvent = () => {
       const showDate = () => {
@@ -96,17 +101,17 @@ export const User: React.FC<any> = ({user, staticEvent}) => {
 
 export default withAuth(User)
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { firestore } = await initFirebaseAdmin();
-  const paths = (await firestore.collection("users").get()).docs.map(
-    (doc) => `/users/${doc.id}`
-  );
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const { firestore } = await initFirebaseAdmin();
+//   const paths = (await firestore.collection("users").get()).docs.map(
+//     (doc) => `/users/${doc.id}`
+//   );
 
-  return { paths, fallback: true };
-};
+//   return { paths, fallback: true };
+// };
 
-export const getStaticProps: GetStaticProps = async ({params}) => {
-  const {id} = params
+export const getServerSideProps: GetServerSideProps = async ({query}) => {
+  const {id} = query
   const { firestore } = await initFirebaseAdmin();
   const userData = (await firestore.collection('users').doc(id as string).get()).data()
 
@@ -126,5 +131,8 @@ export const getStaticProps: GetStaticProps = async ({params}) => {
         : await getImgSSR(null, data.createdUser);
     staticEvent = { ...data, startDate, endDate, photos, id: result.id };
   }
-  return { props: { staticEvent }, revalidate: 1 };
+  return { 
+    props: { staticEvent }, 
+    // revalidate: 1 
+  };
 };

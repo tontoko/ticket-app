@@ -7,35 +7,23 @@ import Link from 'next/link'
 import getImg from '@/src/lib/getImg'
 import moment from 'moment'
 import Tickets from '@/src/components/tickets';
-import { event } from 'event';
-import { fuego } from '@nandorojo/swr-firestore';
+import { event, payment } from 'app';
+import { fuego, useCollection } from '@nandorojo/swr-firestore';
 import withAuth from '@/src/lib/withAuth';
 import Loading from '@/src/components/loading';
 import { firestore } from 'firebase';
 
 const MyTickets = ({ user }) => {
-  const [payments, setPayments] = useState<FirebaseFirestore.DocumentData[]>([])
   const [myTickets, setMyTickets] = useState<FirebaseFirestore.DocumentData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    let listner = () => {return}
-    (async() => {
-      listner = fuego.db
-        .collection("payments")
-        .where("buyer", "==", user.uid)
-        .onSnapshot(async(snap) => {
-          setPayments(await Promise.all(snap.docs.map(async doc => {return { ...doc.data(), id: doc.id } })))
-          setInitialized(true)
-        });
-    })()
-    return listner
-  }, [])
+  const { data: payments, loading: paymentsLoading } = useCollection<payment>(user && `payments`, {
+    listen: true,
+    where: ["buyer", "==", user.uid],
+  });
 
   useEffect(() => {
     (async () => {
-      if (!initialized) return;
+      if (paymentsLoading) return;
       if (payments.length === 0) return setLoading(false);
       const myEventsIds = Array.from(
         new Set(payments.map((payment) => payment.event))
@@ -90,7 +78,7 @@ const MyTickets = ({ user }) => {
       );
       setLoading(false);
     })();
-  }, [payments, initialized]);
+  }, [payments, paymentsLoading]);
           
   const renderUserTickets = () =>
     myTickets.map((event, i) => {

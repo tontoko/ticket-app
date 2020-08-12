@@ -11,7 +11,7 @@ import {
 import getImg from '@/src/lib/getImgSSR'
 import { GetStaticProps, GetStaticPaths } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import { fuego } from '@nandorojo/swr-firestore'
+import { fuego, useCollection } from '@nandorojo/swr-firestore'
 import moment from 'moment'
 import { setCookie } from 'nookies'
 import {
@@ -23,6 +23,7 @@ import {
   TwitterIcon,
 } from "react-share";
 import Tickets from '@/src/components/tickets';
+import { payment } from 'app'
 
 const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     if (!event) return <></>
@@ -33,6 +34,12 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     const [status, setStatus] = useState<
       "anonymous" | "organizer" | "bought" | 'other'
     >();
+    const { data: payments } = useCollection<payment>(user && "payments", {
+      where: [
+        ["event", "==", event.id],
+        ["buyer", "==", user?.uid],
+      ],
+    });
 
     const [twitterShareProps, setTwitterShareProps] = useState({
       url: "",
@@ -53,78 +60,72 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
       };
       if (!router) return;
       (async () => {
-        if (!user) {
+        if (user === undefined) return
+        if (user === null) {
           setStatus("anonymous");
           setCookie(null, "lastVisitedEvent", event.id, {
             maxAge: 30 * 24 * 60 * 60,
             path: "/",
             secure: true
           });
-        } else if (event.createdUser == user.uid) {
-          setStatus("organizer");
-        } else {
-          ticketListener = fuego.db
-            .collection("payments")
-            .where("event", "==", event.id)
-            .where("buyer", "==", user.uid)
-            .onSnapshot(async (snap) => {
-              const payments = snap.docs;
-              setTickets(
-                await Promise.all(
-                  payments
-                    .map(async (payment) => {
-                      const targetCategory = categories.filter(
-                        (catgegory) => catgegory.id === payment.data().category
-                      )[0];
-                      return {
-                        ...targetCategory,
-                        categoryId: targetCategory.id,
-                        paymentId: payment.id,
-                        accepted: payment.data().accepted,
-                        error: payment.data().error,
-                        buyer: payment.data().buyer,
-                        seller: payment.data().seller,
-                      };
-                    })
-                )
-              );
-              setStatus(snap.size > 0 ? "bought" : "other");
-            });
-          // ログイン済みで主催者以外の場合に履歴に追加
-          let { eventHistory } = (
-            await fuego.db.collection("users").doc(user.uid).get()
-          ).data();
-          if (!eventHistory) eventHistory = [];
-          eventHistory = Array.from(new Set([...eventHistory, event.id]));
-          eventHistory.length > 10 && eventHistory.shift();
-          await fuego.db
-            .collection("users")
-            .doc(user.uid)
-            .update({ eventHistory });
+          return
+        } 
+        if (event.createdUser == user.uid) {
+          return setStatus("organizer");
         }
+        if (!payments) return;
+        const tickets = await Promise.all(
+          payments.map(async (payment) => {
+            const targetCategory = categories.filter(
+              (catgegory) => catgegory.id === payment.category
+            )[0];
+            return {
+              ...targetCategory,
+              categoryId: targetCategory.id,
+              paymentId: payment.id,
+              accepted: payment.accepted,
+              error: payment.error,
+              buyer: payment.buyer,
+              seller: payment.seller,
+            };
+          })
+        );
+        setTickets(tickets);
+        setStatus(payments.length > 0 ? "bought" : "other");
+        // ログイン済みで主催者以外の場合に履歴に追加
+        let { eventHistory } = (
+          await fuego.db.collection("users").doc(user.uid).get()
+        ).data();
+        if (!eventHistory) eventHistory = [];
+        eventHistory = Array.from(new Set([...eventHistory, event.id]));
+        eventHistory.length > 10 && eventHistory.shift();
+        await fuego.db
+          .collection("users")
+          .doc(user.uid)
+          .update({ eventHistory });
       })();
       return ticketListener;
-    }, [router, user]);
+    }, [router, user, payments]);
 
     useEffect(() => {
-        setTwitterShareProps({
-          url: location.href.includes("?")
-            ? location.href.split("?")[0]
-            : location.href,
-          title: event.name,
-        });
-        setFacebookShareProps({
-          url: location.href.includes("?")
-            ? location.href.split("?")[0]
-            : location.href,
-          quote: event.name,
-        });
-        setLineShareProps({
-          url: location.href.includes("?")
-            ? location.href.split("?")[0]
-            : location.href,
-          title: event.name,
-        });
+      setTwitterShareProps({
+        url: location.href.includes("?")
+          ? location.href.split("?")[0]
+          : location.href,
+        title: event.name,
+      });
+      setFacebookShareProps({
+        url: location.href.includes("?")
+          ? location.href.split("?")[0]
+          : location.href,
+        quote: event.name,
+      });
+      setLineShareProps({
+        url: location.href.includes("?")
+          ? location.href.split("?")[0]
+          : location.href,
+        title: event.name,
+      });
     },[])
 
     const next = () => {

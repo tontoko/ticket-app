@@ -7,13 +7,13 @@ import { useAlert } from 'react-alert'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 import { fuego, useCollection, revalidateCollection } from '@nandorojo/swr-firestore'
-import { categories } from "event";
+import { category } from "app";
 import Loading from '@/src/components/loading'
 
 const Edit = ({ user, setModal, setModalInner }) => {
   const alert = useAlert()
   const router = useRouter()
-  const { data: categories, loading } = useCollection<categories>(`events/${router.query.id}/categories`, {
+  const { data: categories, loading } = useCollection<category>(`events/${router.query.id}/categories`, {
     orderBy: 'index',
   })
 

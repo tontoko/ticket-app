@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Button, Row, Form, Input, FormGroup, Label} from 'reactstrap';
 import { useRouter } from 'next/router'
-import { GetStaticPaths, GetStaticProps } from 'next'
+import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next'
 import { useAlert } from 'react-alert';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import { fuego } from '@nandorojo/swr-firestore';
@@ -193,23 +193,23 @@ const Refund = ({
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { firestore } = await initFirebaseAdmin();
-  let paths = []
-  await Promise.all(
-    (await firestore.collection("events").get()).docs.map(async(event) =>
-      (await firestore.collection("payments").get()).docs.map(
-        (payment) => {
-          return paths.push({ params: { eventId: event.id, paymentId: payment.id }})
-        }
-      )
-    )
-  )
-  return { paths, fallback: true };
-};
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const { firestore } = await initFirebaseAdmin();
+//   let paths = []
+//   await Promise.all(
+//     (await firestore.collection("events").get()).docs.map(async(event) =>
+//       (await firestore.collection("payments").get()).docs.map(
+//         (payment) => {
+//           return paths.push({ params: { eventId: event.id, paymentId: payment.id }})
+//         }
+//       )
+//     )
+//   )
+//   return { paths, fallback: true };
+// };
 
-export const getStaticProps: GetStaticProps = async ({params}) => {
-  const { eventId, paymentId } = params;
+export const getServerSideProps: GetServerSideProps = async ({query}) => {
+  const { eventId, paymentId } = query;
   const { firestore } = await initFirebaseAdmin()
   const eventData = (
     await firestore

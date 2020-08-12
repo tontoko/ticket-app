@@ -13,7 +13,7 @@
     "@googlemaps/google-maps-services-js": "^2.6.1",
     "@mdx-js/loader": "^1.6.16",
     "@nandorojo/swr-firestore": "^0.10.0",
-    "@next/mdx": "^9.5.1",
+    "@next/mdx": "^9.5.2",
     "@stripe/react-stripe-js": "^1.1.2",
     "@stripe/stripe-js": "^1.8.0",
     "@zeit/next-css": "^1.0.1",
@@ -31,7 +31,7 @@
     "micro-upload": "^1.0.1",
     "moment": "^2.27.0",
     "moment-locales-webpack-plugin": "^1.2.0",
-    "next": "^9.5.1",
+    "next": "^9.5.2",
     "next-pwa": "^3.1.1",
     "node-fetch": "^2.6.0",
     "nookies": "^2.4.0",
@@ -50,7 +50,7 @@
     "stripe": "^8.84.0",
     "swr": "^0.3.0",
     "typescript": "^3.9.7",
-    "zengin-code": "^1.0.0-p20200727"
+    "zengin-code": "^1.0.0-p20200811"
   },
   "devDependencies": {
     "@types/atob": "^2.1.2",
@@ -62,7 +62,7 @@
     "@types/node": "^12.12.54",
     "@types/node-fetch": "^2.5.7",
     "@types/nprogress": "^0.2.0",
-    "@types/react": "^16.9.45",
+    "@types/react": "^16.9.46",
     "@types/react-alert": "^5.2.0",
     "@types/react-datepicker": "^2.11.1",
     "@types/react-dom": "^16.9.8",

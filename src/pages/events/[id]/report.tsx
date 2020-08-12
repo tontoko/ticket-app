@@ -1,8 +1,8 @@
 import React, { ReactElement } from 'react';
 import { Table, Row } from 'reactstrap';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
-import { GetStaticProps, GetStaticPaths } from 'next';
-import { event } from 'event';
+import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next';
+import { event } from 'app';
 import withAuth from '@/src/lib/withAuth';
 
 const Report = ({ event, categories, payments }) => {
@@ -76,14 +76,14 @@ const Report = ({ event, categories, payments }) => {
     );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-    const { firestore } = await initFirebaseAdmin();
-    const paths = await Promise.all((await firestore.collection("events").get()).docs.map(doc => `/events/${doc.id}/report`))
-    return { paths, fallback: true };
-}
+// export const getStaticPaths: GetStaticPaths = async () => {
+//     const { firestore } = await initFirebaseAdmin();
+//     const paths = await Promise.all((await firestore.collection("events").get()).docs.map(doc => `/events/${doc.id}/report`))
+//     return { paths, fallback: true };
+// }
 
-export const getStaticProps: GetStaticProps = async ({params}) => {
-    const { id } = params
+export const getServerSideProps: GetServerSideProps = async ({query}) => {
+    const { id } = query
     const { firestore } = await initFirebaseAdmin();
     const result = await firestore
     .collection("events")

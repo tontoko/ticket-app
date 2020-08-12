@@ -6,7 +6,7 @@ import {
   faCheckSquare,
   faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { GetStaticPaths, GetStaticProps, GetServerSideProps } from "next";
 import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
 import withAuth from "@/src/lib/withAuth";
 import { stripeAccounts, stripeBalance } from "@/src/lib/stripeRetrieve";
@@ -76,22 +76,25 @@ const Organizer = ({ user, status, balance }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { firestore } = await initFirebaseAdmin();
-  const paths = (await firestore.collection("users").get()).docs.map(
-    (doc) => `/users/${doc.id}/edit/organizer`
-  );
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const { firestore } = await initFirebaseAdmin();
+//   const paths = (await firestore.collection("users").get()).docs.map(
+//     (doc) => `/users/${doc.id}/edit/organizer`
+//   );
 
-  return { paths, fallback: true };
-};
+//   return { paths, fallback: true };
+// };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const { id } = params;
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const { id } = query;
   const { individual } = await stripeAccounts(id);
   const verification = individual ? individual.verification : null;
   const status = verification && verification.status;
   const balance = await stripeBalance(id);
-  return { props: { status, balance }, revalidate: 1 };
+  return { 
+      props: { status, balance }, 
+    // revalidate: 1 
+    };
 };
 
 export default withAuth(Organizer);

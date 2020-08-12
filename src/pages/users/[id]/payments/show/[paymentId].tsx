@@ -49,23 +49,23 @@ const Show = ({ user, payment, event, category, refunded }) => {
   );
 };
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { firestore } = await initFirebaseAdmin();
-  let paths = []
-  await Promise.all((await firestore.collection("events").get()).docs.map(
-    async (event) =>
-      (await firestore.collection("payments").get()).docs.map(async (payment) => {
-        return paths.push({
-          params: { id: event.id, paymentId: payment.id },
-        });
-      })
-  ));
-  return { paths, fallback: true };
-};
+// export const getStaticPaths: GetStaticPaths = async () => {
+//   const { firestore } = await initFirebaseAdmin();
+//   let paths = []
+//   await Promise.all((await firestore.collection("events").get()).docs.map(
+//     async (event) =>
+//       (await firestore.collection("payments").get()).docs.map(async (payment) => {
+//         return paths.push({
+//           params: { id: event.id, paymentId: payment.id },
+//         });
+//       })
+//   ));
+//   return { paths, fallback: true };
+// };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const { firestore } = await initFirebaseAdmin();
-  const { id, paymentId } = params
+  const { id, paymentId } = query
   const payment = (await firestore
     .collection("payments")
     .doc(paymentId as string)
@@ -95,7 +95,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   return {
     props: { payment, event, category, refunded },
-    revalidate: 1,
+    // revalidate: 1,
   };
 };
 
