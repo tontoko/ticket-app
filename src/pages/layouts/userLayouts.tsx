@@ -1,11 +1,10 @@
 import Link from 'next/link'
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
-    Navbar, NavbarBrand, NavbarToggler, Collapse, NavLink, Nav, NavItem, Container } from 'reactstrap'
+    Navbar, NavbarBrand, Container } from 'reactstrap'
 import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 import { decodeQuery } from '@/src/lib/parseQuery'
-import { useCollection } from "@nandorojo/swr-firestore";
 import { LoginMenu, LogoutMenu } from "@/src/components/navMenu";
 
 const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
@@ -13,10 +12,6 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
   const [Menu, setMenu] = useState(<></>)
-  const { data: notifies } = useCollection(user && `users/${user.uid}/notifies`, {
-    where: ["read", "==", false],
-    listen: true
-  });
 
   const avater = useMemo(() => {
     if (user || tmpUser) {

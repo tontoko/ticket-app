@@ -1,8 +1,15 @@
 import Link from "next/link"
-import notifies from "../pages/users/[id]/notifies"
 import { NavbarToggler, Collapse, Nav, NavItem, NavLink } from "reactstrap"
+import { useCollection } from "@nandorojo/swr-firestore";
 
 export const LoginMenu = ({user, tmpUser, avater, toggle, isOpen}) => {
+    const { data: notifies } = useCollection(
+      user && `users/${user.uid}/notifies`,
+      {
+        where: ["read", "==", false],
+        listen: true,
+      }
+    );
 
     return (
           <>
