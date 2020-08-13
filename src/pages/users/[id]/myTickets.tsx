@@ -23,7 +23,6 @@ const MyTickets = ({ user }) => {
     user && `payments`,
     {
       listen: true,
-      orderBy: ["createdAt", "desc"],
       where: ["buyer", "==", user.uid],
     }
   );
@@ -47,7 +46,7 @@ const MyTickets = ({ user }) => {
       setLoading(false);
     })();
   }, [payments, paymentsLoading, events, eventsLoading]);
-          
+  //TODO: 時期順にソート
   const renderUserTickets = () =>
     myTicketsPerEvents.map((ticketsPerEvent, i) => {
       const showDate = () => {

@@ -36,7 +36,6 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
       "anonymous" | "organizer" | "bought" | 'other'
     >();
     const { data: payments } = useCollection<payment>(user && "payments", {
-      orderBy: ["createdAt", "desc"],
       where: [
         ["event", "==", event.id],
         ["buyer", "==", user?.uid],
