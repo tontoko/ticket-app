@@ -119,7 +119,7 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
     const { firestore } = await initFirebaseAdmin()
     const data = (await firestore.collection('events').doc(id as string).get()).data() as event
     const photos: undefined | string[] = data.photos
-    const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : undefined
+    const photoUrls = photos ? await Promise.all(photos.map(async photo => getImg(photo, data.createdUser))) : ["/images/event_default_360x360.jpg"]
     const startDate = data.startDate.seconds
     const endDate = data.endDate.seconds
     const event = {...data, startDate, endDate}
