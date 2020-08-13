@@ -37,9 +37,8 @@ const App = ({ Component, pageProps }: AppProps) => {
   let listner = () => {return}
 
   useEffect(() => {
-    if (!user) return
-    firebaseCloudMessaging.init(user, env);
-  }, [user]);
+    firebaseCloudMessaging.init(env);
+  }, []);
 
   useEffect(() => {
     if (!fuego || !router) return

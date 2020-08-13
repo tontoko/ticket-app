@@ -10,9 +10,9 @@ const LoginMenu = dynamic(() => import("@/src/components/navLoginMenu"));
 const LogoutMenu = dynamic(() => import("@/src/components/navLogoutMenu"));
 
 const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
-  const router = useRouter()
-  const alert = useAlert()
-  const [isOpen, toggle] = useState(false)
+  const router = useRouter();
+  const alert = useAlert();
+  const [isOpen, toggle] = useState(false);
 
   const avater = useMemo(() => {
     if (user || tmpUser) {
@@ -21,14 +21,14 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
         : tmpUser.providerData[0];
       if (providerData.photoURL) return providerData.photoURL;
     }
-    return "/icons/person-icon-default.png"
-  }, [user, tmpUser])
+    return "/icons/person-icon-default.png";
+  }, [user, tmpUser]);
 
   useEffect(() => {
-    if (!router) return
+    if (!router) return;
     const { msg } = router.query;
     if (msg) alert.success(decodeQuery(msg as string));
-  }, [router, router.query.msg])
+  }, [router, router.query.msg]);
 
   return (
     <>
@@ -49,6 +49,6 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
       </Container>
     </>
   );
-}
+};
 
 export default UserLayout
