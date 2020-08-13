@@ -5,13 +5,14 @@ import {
 import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 import { decodeQuery } from '@/src/lib/parseQuery'
-import { LoginMenu, LogoutMenu } from "@/src/components/navMenu";
+import dynamic from 'next/dynamic'
+const LoginMenu = dynamic(() => import("@/src/components/navLoginMenu"));
+const LogoutMenu = dynamic(() => import("@/src/components/navLogoutMenu"));
 
 const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
   const router = useRouter()
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
-  const [Menu, setMenu] = useState(<></>)
 
   const avater = useMemo(() => {
     if (user || tmpUser) {
@@ -22,16 +23,6 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
     }
     return "/icons/person-icon-default.png"
   }, [user, tmpUser])
-
-  useEffect(() => {
-    setMenu(
-      (user || tmpUser) ? (
-        <LoginMenu {...{ user, tmpUser, avater, toggle, isOpen }} />
-      ) : (
-        <LogoutMenu {...{ avater, toggle, isOpen }} />
-      )
-    );
-  }, [avater])
 
   useEffect(() => {
     if (!router) return
@@ -47,7 +38,11 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
             <NavbarBrand style={{ cursor: "pointer" }}>Ticket-App</NavbarBrand>
           </div>
         </Link>
-        {Menu}
+        {user || tmpUser ? (
+          <LoginMenu {...{ user, tmpUser, avater, toggle, isOpen }} />
+        ) : (
+          <LogoutMenu {...{ avater, toggle, isOpen }} />
+        )}
       </Navbar>
       <Container style={{ marginTop: "2em", marginBottom: "2em" }}>
         {children}

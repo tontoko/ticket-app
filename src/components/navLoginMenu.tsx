@@ -2,7 +2,7 @@ import Link from "next/link"
 import { NavbarToggler, Collapse, Nav, NavItem, NavLink } from "reactstrap"
 import { useCollection } from "@nandorojo/swr-firestore";
 
-export const LoginMenu = ({user, tmpUser, avater, toggle, isOpen}) => {
+const LoginMenu = ({user, tmpUser, avater, toggle, isOpen}) => {
     const { data: notifies } = useCollection(
       user && `users/${user.uid}/notifies`,
       {
@@ -10,7 +10,7 @@ export const LoginMenu = ({user, tmpUser, avater, toggle, isOpen}) => {
         listen: true,
       }
     );
-
+    
     return (
           <>
             <Link href={`/users/${user ? user.uid : tmpUser.uid}/edit`}>
@@ -52,7 +52,7 @@ export const LoginMenu = ({user, tmpUser, avater, toggle, isOpen}) => {
                     alignItems: "center",
                   }}
                 >
-                  <div style={{ fontWeight: "bold" }}>{notifies?.length}</div>
+                  <div style={{ fontWeight: "bold" }}>{notifies ? notifies.length : 0}</div>
                 </div>
               </div>
             </Link>
@@ -93,36 +93,4 @@ export const LoginMenu = ({user, tmpUser, avater, toggle, isOpen}) => {
     )
 }
 
-    
-
-export const LogoutMenu = ({ toggle, isOpen }) => {
-  return (
-    <>
-      <div style={{ marginLeft: "auto" }} />
-      <NavbarToggler onClick={() => toggle(!isOpen)} />
-      <Collapse
-        isOpen={isOpen}
-        navbar
-        className="justify-content-end flex-grow-0"
-      >
-        <Nav navbar>
-          <NavItem style={{ cursor: "pointer" }}>
-            <Link href={`/register`}>
-              <NavLink>新規登録する</NavLink>
-            </Link>
-          </NavItem>
-          <NavItem style={{ cursor: "pointer" }}>
-            <Link href={`/login`}>
-              <NavLink>ログイン</NavLink>
-            </Link>
-          </NavItem>
-          <NavItem style={{ cursor: "pointer" }}>
-            <Link href={`/termsOfUse`}>
-              <NavLink>利用規約</NavLink>
-            </Link>
-          </NavItem>
-        </Nav>
-      </Collapse>
-    </>
-  );
-};
+export default LoginMenu
