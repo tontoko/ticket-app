@@ -103,6 +103,7 @@ const Webhock: NextApiHandler = async (req, res) => {
           accepted: false,
           stripe: intent.id,
           error,
+          createdAt: new Date()
         });
         break;
       case "payment_intent.payment_failed":
