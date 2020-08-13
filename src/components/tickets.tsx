@@ -52,7 +52,13 @@ const Tickets = ({ user, ticket, event }: {user:firebase.User, ticket: ticket, e
                           href={{
                             pathname: `/events/${event.id}/reception/show`,
                             query: {
-                              ticket: encodeQuery(JSON.stringify(ticket)),
+                              ticket: encodeQuery(
+                                JSON.stringify({
+                                  paymentId: ticket.payment.id,
+                                  seller: ticket.payment.seller,
+                                  buyer: ticket.payment.buyer,
+                                })
+                              ),
                             },
                           }}
                         >
