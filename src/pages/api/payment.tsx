@@ -66,12 +66,6 @@ const Webhock: NextApiHandler = async (req, res) => {
             const sold = categoryResult && categoryResult.sold;
 
             if (stock === 0 || stock - sold < 1) {
-              // 在庫なしの返金処理
-              await stripe.refunds.create({
-                payment_intent: intent.id,
-                refund_application_fee: true,
-                reverse_transfer: true,
-              });
               throw new NoStockError(
                 "在庫がありませんでした。返金手続きが行われました。"
               );
@@ -90,8 +84,14 @@ const Webhock: NextApiHandler = async (req, res) => {
           if (e instanceof NoStockError) {
             error = e.message;
           } else {
-            error = "不明なエラーが発生しました。";
+            error = "不明なエラーが発生しました。返金手続きが行われました。";
           }
+          // 返金処理
+          await stripe.refunds.create({
+            payment_intent: intent.id,
+            refund_application_fee: true,
+            reverse_transfer: true,
+          });
           console.log(`${e}:`, intent.id);
         }
         // 決済履歴追加

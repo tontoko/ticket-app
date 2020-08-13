@@ -18,8 +18,9 @@ const initFirebaseAdmin = async () => {
     
     const firestore = firebase.firestore();
     const storage = firebase.storage().bucket(params.storageBucket);
+    const messaging = firebase.messaging();
     
-    return { firebase, firestore, storage }
+    return { firebase, firestore, storage, messaging };
 
 }
 

@@ -23,7 +23,7 @@ const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
 import { dev, prod } from "@/ticket-app";
-import { query } from 'express'
+import { firebaseCloudMessaging } from '../lib/webPush'
 const firebaseConfig = process.env.ENV === "prod" ? prod : dev;
 const fuego = new Fuego(firebaseConfig);
 
@@ -35,6 +35,11 @@ const App = ({ Component, pageProps }: AppProps) => {
   const [tmpUser, setTmpUser] = useState(cookies.tmpUser && JSON.parse(cookies.tmpUser));
   const [user, setUser] = useState<firebase.User>();
   let listner = () => {return}
+
+  useEffect(() => {
+    if (!user) return
+    firebaseCloudMessaging.init(user, env);
+  }, [user]);
 
   useEffect(() => {
     if (!fuego || !router) return

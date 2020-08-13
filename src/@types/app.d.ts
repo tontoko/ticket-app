@@ -1,3 +1,4 @@
+
 declare module 'app' {
   export type events = event[]
   
@@ -31,19 +32,22 @@ declare module 'app' {
   export type payments = payment[]
 
   export type payment = {
-    category: category.id,
-    event: event.id,
-    accepted: boolean,
-    error: string,
-    buyer: string,
-    seller: string,
+    category: category.id;
+    event: event.id;
+    accepted: boolean;
+    error: string;
+    buyer: string;
+    seller: string;
     refund: {
-      detailText: string,
-      reason: string,
-      event: event.id
-    },
-    createdAt: firebase.firestore.Timestamp
-    id?: string,
+      detailText: string;
+      reason: string;
+      reasonText: string;
+      refunded?: boolean,
+      rejected?: boolean,
+    };
+    createdAt: firebase.firestore.Timestamp;
+    stripe: string,
+    id?: string;
   };
 
   export type notifies = notify[]

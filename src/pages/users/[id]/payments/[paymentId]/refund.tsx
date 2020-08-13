@@ -29,7 +29,7 @@ const Refund = ({
 
   useEffect(() => {
     if (!user) return;
-    if (user.uid === createdUser) {
+    if (user.uid === createdUser || payment.error) {
       (async () => fuego.auth().signOut())();
       return;
     }
@@ -57,7 +57,6 @@ const Refund = ({
     }
   }, [select, problem]);
 
-  // TODO: 返金失敗時のWebhock用API作成
   const createRefund = async (reason: select | problem) => {
     setLoading(true);
 
@@ -80,6 +79,8 @@ const Refund = ({
           throw new Error();
       }
 
+      const token = await fuego.auth().currentUser.getIdToken()
+
       const res = await fetch("/api/sendRefundRequest", {
         method: "POST",
         headers: new Headers({
@@ -92,11 +93,12 @@ const Refund = ({
           seller: payment.seller,
           buyer: payment.buyer,
           paymentId: router.query.paymentId,
+          token,
         }),
       });
       if (res.status !== 200) throw new Error()
       router.push({
-        pathname: `/users/${user.uid}/myTickets`,
+        pathname: `/users/${user.uid}/payments/${payment.id}`,
         query: {
           msg: encodeQuery(
             "問い合わせを行いました。三日以内に対応されない場合は再度申請を行うことで返金処理が行われます。"
@@ -114,7 +116,7 @@ const Refund = ({
     setLoading(true);
     
     try {
-      await fuego.db.collection("contact").add({
+      await fuego.db.collection("contacts").add({
         category: "refund",
         text: detailText,
         info: {

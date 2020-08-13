@@ -40,15 +40,13 @@ exports.createUser = functions.auth.user().onCreate(async (user) => {
       stripeId: stripeAccount.id,
     });
   } catch(e) {
-    firestore
-      .collection("users")
-      .doc('admin')
-      .collection("notifies")
-      .add({
-        text: `次のユーザーの登録時にstripeIDの作成に失敗しました: ${user.uid}\nemail: ${user.email}`,
-        url: '',
-        read: false,
-      });
+    firestore.collection("contacts").add({
+      category: "new user register faild",
+      text: `次のユーザーの登録時にstripeIDの作成に失敗しました: ${user.uid}\nemail: ${user.email}`,
+      info: {
+        user: user.uid,
+      },
+    });
     admin.auth().deleteUser(user.uid)
   }
 });

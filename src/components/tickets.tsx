@@ -60,8 +60,8 @@ const Tickets = ({ user, ticket, event: event }) => {
                       </Col>
                     )}
                     <Col xs="12">
-                      <Link href={`/users/${user.uid}/payments/${ticket.paymentId}/refund`}>
-                        <Button color="danger">返金申請</Button>
+                      <Link href={`/users/${user.uid}/payments/${ticket.paymentId}`}>
+                        <Button color="secondary">詳細</Button>
                       </Link>
                     </Col>
                   </>
