@@ -21,7 +21,6 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
     const [selectedCategory, setSelectedCategory] = useState(validCategories[0].id)
 
     const validationEmail = () => {
-        console.log(emailRef.current)
         setInvalidEmail(!emailRef.current.value.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/))
     }
 

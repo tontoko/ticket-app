@@ -96,7 +96,7 @@ const Confirmation = ({ user, uid, familyName, firstName, email, event, category
             />
             ご購入ありがとうございました。
         </h4>
-        <h4>購入処理が完了すると「購入済みチケット」に表示されます。</h4>
+        <h4>購入処理が完了すると、購入済みチケット に表示されます。</h4>
         <p>{redirectTimer} 秒後にリダイレクトします...</p>
       </>
     );

@@ -239,18 +239,32 @@ const Refund = ({
 //   return { paths, fallback: true };
 // };
 
-export const getServerSideProps: GetServerSideProps = async ({query}) => {
+export const getServerSideProps: GetServerSideProps = async ({res, query}) => {
   const { paymentId } = query;
   const { firestore } = await initFirebaseAdmin()
-  const payment = (await firestore.collection("payments").doc(paymentId as string).get()).data()
+  const paymentSnap = await firestore.collection("payments").doc(paymentId as string).get()
+  if (paymentSnap.data().refund) {
+    res.writeHead(302, {
+      Location: `/login`,
+    });
+    res.end();
+    return {props: {}}
+  }
   const event = (
     await firestore
       .collection("events")
-      .doc(payment.event)
+      .doc(paymentSnap.data().event)
       .get()
   ).data();
   return {
-    props: { createdUser: event.createdUser, payment },
+    props: {
+      createdUser: event.createdUser,
+      payment: {
+        ...paymentSnap.data(),
+        createdAt: paymentSnap.data().createdAt.toMillis(),
+        id: paymentSnap.id,
+      },
+    },
   };
 }
 

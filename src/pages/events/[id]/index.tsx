@@ -23,12 +23,13 @@ import {
   TwitterIcon,
 } from "react-share";
 import Tickets from '@/src/components/tickets';
-import { payment } from 'app'
+import { payment, tickets, event } from "app";
+import createTicketsData from '@/src/lib/createTicketsData';
 
 const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     if (!event) return <></>
     const router = useRouter();
-    const [tickets, setTickets] = useState([]);
+    const [tickets, setTickets] = useState<{ tickets: tickets; event: event; photos: string }[]>([]);
     const [activeIndex, setActiveIndex] = useState(0)
     const [animating, setAnimating] = useState(false);
     const [status, setStatus] = useState<
@@ -74,23 +75,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
           return setStatus("organizer");
         }
         if (!payments) return;
-        const tickets = await Promise.all(
-          payments.map(async (payment) => {
-            const targetCategory = categories.filter(
-              (catgegory) => catgegory.id === payment.category
-            )[0];
-            return {
-              ...targetCategory,
-              categoryId: targetCategory.id,
-              paymentId: payment.id,
-              accepted: payment.accepted,
-              error: payment.error,
-              buyer: payment.buyer,
-              seller: payment.seller,
-            };
-          })
-        );
-        setTickets(tickets);
+        setTickets(await createTicketsData([event], payments));
         setStatus(payments.length > 0 ? "bought" : "other");
         // ログイン済みで主催者以外の場合に履歴に追加
         let { eventHistory } = (
@@ -200,7 +185,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
           <Row style={{ marginTop: "1.5em" }}>
             <Col sm="12" style={{ margin: "0.2em" }}>
               <h5>購入済みチケット</h5>
-              {tickets.map((ticket, i) => (
+              {tickets[0].tickets.map((ticket, i) => (
                 <Tickets user={user} ticket={ticket} event={event} key={i} />
               ))}
             </Col>

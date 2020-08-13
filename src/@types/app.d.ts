@@ -57,4 +57,28 @@ declare module 'app' {
     text: string,
     url: string,
   }
+
+  export type tickets = ticket[]
+  
+  export type ticket = {
+    category: category,
+    payment: {
+        id: string;
+        category: any;
+        event: any;
+        accepted: boolean;
+        error: string;
+        buyer: string;
+        seller: string;
+        refund: {
+            detailText: string;
+            reason: string;
+            reasonText: string;
+            refunded?: boolean;
+            rejected?: boolean;
+        };
+        createdAt: firebase.firestore.Timestamp;
+        stripe: string;
+    };
+}
 }

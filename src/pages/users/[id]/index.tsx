@@ -22,7 +22,8 @@ export const User: React.FC<any> = ({user, serverEventHistory}) => {
 
   useEffect(() => {
     (async() => {
-      if (!lastVisitedEventData || serverEventHistory) return;
+      if (!user || !lastVisitedEventData || serverEventHistory) return;
+      if (user.uid === lastVisitedEventData.createdUser) return
       const photos =
         lastVisitedEventData.photos.length > 0
           ? await getImg(
@@ -44,7 +45,7 @@ export const User: React.FC<any> = ({user, serverEventHistory}) => {
           eventHistory: [lastVisitedEventData.id],
         });
     })()
-  }, [lastVisitedEventData])
+  }, [lastVisitedEventData, user])
   
   const renderUserEvent = () => {
       const showDate = () => {
