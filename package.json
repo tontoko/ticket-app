@@ -40,6 +40,7 @@
     "prop-types": "^15.7.2",
     "qrcode.react": "^0.9.3",
     "react": "^16.13.1",
+    "react-adsence": "0.0.1",
     "react-alert": "^6.0.1",
     "react-avatar": "^3.9.7",
     "react-datepicker": "^2.16.0",
