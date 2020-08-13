@@ -19,10 +19,14 @@ const MyTickets = ({ user }) => {
     { tickets: tickets, event: any, photos: string }[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const { data: payments, loading: paymentsLoading } = useCollection<payment>(user && `payments`, {
-    listen: true,
-    where: ["buyer", "==", user.uid],
-  });
+  const { data: payments, loading: paymentsLoading } = useCollection<payment>(
+    user && `payments`,
+    {
+      listen: true,
+      orderBy: ["createdAt", "desc"],
+      where: ["buyer", "==", user.uid],
+    }
+  );
   const { data: events, loading: eventsLoading } = useCollection<event>(
     payments && `events`,
     {

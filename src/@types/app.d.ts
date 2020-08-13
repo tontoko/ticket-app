@@ -56,6 +56,7 @@ declare module 'app' {
     read: boolean,
     text: string,
     url: string,
+    createdAt: firebase.firestore.Timestamp;
   }
 
   export type tickets = ticket[]

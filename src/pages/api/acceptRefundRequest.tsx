@@ -48,6 +48,7 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
       text: "返金申請が承諾されました。入金をお待ちください。",
       url: `/users/${buyer}/payments/${paymentId}`,
       read: false,
+      createdAt: new Date(),
     });
     
   res.status(200).end()

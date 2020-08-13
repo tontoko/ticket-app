@@ -37,6 +37,7 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
         "あなたが主催するイベントに対して返金が申請されました。3日以内に対処しない場合、返金されます。",
       url: `/users/${seller}/payments/${paymentId}`,
       read: false,
+      createdAt: new Date()
     });
   await firestore
     .collection("users")
@@ -47,6 +48,7 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
         "返金申請が送信されました。3日以内に対処されない場合、再度申請することで返金されます。",
       url: `/users/${buyer}/payments/${paymentId}`,
       read: false,
+      createdAt: new Date(),
     });
   res.status(200).end()
 }

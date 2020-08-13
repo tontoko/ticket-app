@@ -35,10 +35,10 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
     .doc(buyer)
     .collection("notifies")
     .add({
-      text:
-        "返金申請が却下されました。サービス管理者の審査をお待ちください。",
+      text: "返金申請が却下されました。サービス管理者の審査をお待ちください。",
       url: `/users/${buyer}/payments/${paymentId}`,
       read: false,
+      createdAt: new Date(),
     });
   res.status(200).end()
 }

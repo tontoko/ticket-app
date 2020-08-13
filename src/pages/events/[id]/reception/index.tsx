@@ -21,11 +21,9 @@ type manualPayment = {category: string, name: string, paid: boolean, id?: string
 
 const Reception = ({ categories, id, setModal, setModalInner }) => {
     const alert = useAlert()
-    const { data: manualPayments, loading } = useCollection(`events/${id}/manualPayments`, {
+    const { data: manualPayments, revalidate } = useCollection<manualPayment>(`events/${id}/manualPayments`, {
         listen: true
     })
-
-
 
     const [newManualPayment, setNewManualPayment] = useState<manualPayment>({
       name: "",
@@ -33,11 +31,22 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
       paid: true,
     });
 
+    const [tmpManualPayments, setTmpManualPayments] = useState<manualPayment[]>(
+      manualPayments
+    );
+
+    const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+      setTmpManualPayments(manualPayments);
+    }, [manualPayments]);
+
     const createManualPayment = async () => {
         if (loading) return
         if (!newManualPayment.category) return alert.error('先にチケットカテゴリを登録してください。')
         if (!newManualPayment.name) return alert.error('名前が入力されていません。')
         try {
+            setLoading(true)
             await fuego.db.runTransaction(async transaction => {
                 const categoryRef = fuego.db
                   .collection("events")
@@ -61,6 +70,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                 });
             })
             setNewManualPayment({...newManualPayment, name: ''});
+            await revalidate();
             alert.success('手動受付リストを更新しました。')
         } catch(e) {
             alert.error(e.message)
@@ -68,12 +78,14 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                 location.reload()
             }, 1000);
         }
+        setLoading(false)
     }
 
     const editManualPayment = async (newValue, beforeValue) => {
         if (loading) return
         if (!newValue.name) return alert.error("名前が入力されていません。");
         try {
+            setLoading(true);
             await fuego.db.runTransaction(async (transaction) => {
               const newCategoryRef = fuego.db
                 .collection("events")
@@ -112,6 +124,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                 });
               }
             });
+            await revalidate();
             alert.success('手動受付リストを更新しました。')
         } catch (e) {
             let msg = e.message
@@ -123,12 +136,14 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
             }
             alert.error(msg);
         }
+        setLoading(false);
     }
 
     const deleteManualPayment = async (payment) => {
         if (loading) return
         const submit = async () => {
             try {
+                setLoading(true);
                 setModal(false)
                 await fuego.db.runTransaction(async transaction => {
                     const categoryRef = fuego.db
@@ -148,6 +163,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                       stock: targetCategory.stock + 1,
                     });
                 })
+                await revalidate();
                 alert.success('項目を削除しました。')
             } catch (e) {
                 alert.error("エラーが発生しました。リロードします…");
@@ -155,6 +171,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                     location.reload()
                 }, 2000);
             }
+            setLoading(false);
         }
         setModalInner((
             <>
@@ -170,6 +187,12 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
         setModal(true)
     }
 
+    const changeName = (value,i) => {
+        const copyTmpManualPayments = [...tmpManualPayments];
+        copyTmpManualPayments[i].name = value
+        setTmpManualPayments(copyTmpManualPayments);
+    }
+
     const column = (payment,i) => {
 
         return (
@@ -177,7 +200,8 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
             <td>
               <Input
                 placeholder="お名前"
-                defaultValue={payment.name}
+                value={payment.name}
+                onChange={(e) => changeName(e.target.value, i)}
                 onBlur={(e) =>
                   editManualPayment(
                     { ...payment, name: e.target.value },
@@ -196,6 +220,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                     payment
                   )
                 }
+                disabled={loading}
               >
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -214,13 +239,21 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                     payment
                   )
                 }
+                disabled={loading}
               >
                 <option value="true">○</option>
                 <option value="false">×</option>
               </Input>
             </td>
-            <td style={{ width: '6em' }}>
-                <Button style={{ margin: '0.1em' }} color="danger" disabled={loading} onClick={() => deleteManualPayment(payment)}>削除</Button>
+            <td style={{ width: "6em" }}>
+              <Button
+                style={{ margin: "0.1em" }}
+                color="danger"
+                disabled={loading}
+                onClick={() => deleteManualPayment(payment)}
+              >
+                削除
+              </Button>
             </td>
           </tr>
         );
@@ -265,7 +298,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                                     <Button disabled={loading} color="primary" onClick={createManualPayment}>登録</Button>
                                 </td>
                             </tr>
-                            {manualPayments && manualPayments.map((e,i) => column(e,i))}
+                            {tmpManualPayments && tmpManualPayments.map((e,i) => column(e,i))}
                         </tbody>
                     </Table>
                 </Col>

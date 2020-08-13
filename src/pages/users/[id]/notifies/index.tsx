@@ -5,25 +5,15 @@ import { useRouter } from "next/router";
 import withAuth from "@/src/lib/withAuth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-import { fuego } from "@nandorojo/swr-firestore";
+import { fuego, useCollection } from "@nandorojo/swr-firestore";
+import { notify } from "app";
 
 const Notifies = ({user}) => {
-  const [notifies, setNotifies] = useState([])
-  const [loading, setLoading] = useState(true);
   const router = useRouter()
-
-  useEffect(() => {
-    (async () => {
-      fuego.db
-        .collection("users")
-        .doc(user.uid)
-        .collection("notifies").onSnapshot(async snap => {
-          const tmpNotifies = await Promise.all(snap.docs.map(async (doc) => {return {...doc.data(), id: doc.id} }));
-          setNotifies(tmpNotifies)
-          setLoading(false);
-        })
-    })()
-  }, [])
+  const { data: notifies, loading } = useCollection<notify>(user&& `users/${user.uid}/notifies`, {
+    orderBy: ['createdAt', 'desc'],
+    listen: true,
+  })
 
   const clickLinkWithsaveAsRead = async (id, url) => {
     if (!fuego) return;
