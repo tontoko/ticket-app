@@ -6,8 +6,8 @@ import { useAlert } from "react-alert"
 import { useRouter } from 'next/router'
 import { decodeQuery } from '@/src/lib/parseQuery'
 import dynamic from 'next/dynamic'
-const LoginMenu = dynamic(() => import("@/src/components/navLoginMenu"));
-const LogoutMenu = dynamic(() => import("@/src/components/navLogoutMenu"));
+const LoginMenu = dynamic(() => import("@/src/components/navLoginMenu"), { ssr: false });
+const LogoutMenu = dynamic(() => import("@/src/components/navLogoutMenu"), { ssr: false });
 
 const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
   const router = useRouter();

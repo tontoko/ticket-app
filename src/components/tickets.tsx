@@ -37,7 +37,7 @@ const Tickets = ({ user, ticket, event }: {user:firebase.User, ticket: ticket, e
                     <p>購入失敗 ({ticket.payment.error})</p>
                   </Col>
                 );
-              } else if (ticket.payment.refund.refunded) {
+              } else if (ticket.payment.refund?.refunded) {
                 return (
                   <Col>
                     <p>返金処理が行われました</p>

@@ -1,4 +1,3 @@
-import "firebase/messaging";
 import localforage from "localforage";
 import { fuego } from "@nandorojo/swr-firestore";
 
@@ -12,6 +11,7 @@ const firebaseCloudMessaging = {
 
   init: async function (env) {
     try {
+      await import("firebase/messaging");
       const messaging = fuego.db.app.messaging();
 
       if ((await this.tokenInlocalforage()) !== null) {

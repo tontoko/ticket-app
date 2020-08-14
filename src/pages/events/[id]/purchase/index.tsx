@@ -1,24 +1,27 @@
 import {useRouter} from 'next/router'
-import React, {useState, useRef} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import {
     Form, FormGroup, Button, Label, Input, Row, Col, Card, CardBody,
     CardTitle, CardSubtitle, } from 'reactstrap'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
 import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
-import { event } from 'app'
+import { event, category } from 'app'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 
 export const Purchase = ({ user, event, categories, photoUrls }) => {
     const router = useRouter();
-
-    const validCategories = categories.filter(category => category.stock - category.sold >= 0)
     const familyNameRef = useRef(null);
     const firstNameRef = useRef(null);
     const emailRef = useRef(null);
     const [invalidEmail, setInvalidEmail] = useState(false)
-    const [selectedCategory, setSelectedCategory] = useState(validCategories[0].id)
+    const [selectedCategory, setSelectedCategory] = useState(categories[0]?.id)
+
+    useEffect(() => {
+        if (!router) return
+        if (categories.length === 0) router.push({pathname: `/events/${router.query.id}`, query: { msg: encodeQuery('チケットは全て売り切れです。') }})
+    }, [router])
 
     const validationEmail = () => {
         setInvalidEmail(!emailRef.current.value.match(/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/))
@@ -26,6 +29,7 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
 
     const submit = (e) => {
         e.preventDefault();
+        if (categories.length === 0) return
         if (
           !emailRef.current.value.match(
             /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
@@ -86,15 +90,13 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
                             <Col>
                                 <Label>チケットカテゴリ</Label>
                                 <Input type="select" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
-                                    {validCategories.map(category => (
-                                        category && <option value={category.id} key={category.id}>{category.name}</option>
-                                    ))}
+                                    {categories.map(category => <option value={category.id} key={category.id}>{category.name}</option>)}
                                 </Input>
                             </Col>
                         </Row>
                         <Row className="flex-row-reverse">
                             <h4 style={{ marginTop: '1em', marginRight: '1em' }}>
-                                {categories.filter(category => category.id === selectedCategory)[0].price} 円
+                                {categories.filter(category => category.id === selectedCategory)[0]?.price} 円
                             </h4>
                         </Row>
                     </CardBody>
@@ -126,8 +128,8 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
     let categories: FirebaseFirestore.DocumentData[] = []
     categoriesSnapShot.forEach(e => {
         const id = e.id
-        const category = e.data()
-        category.public && categories.push({ ...category, id })
+        const category = e.data() as category
+        category.public && (category.stock - category.sold > 0) && categories.push({ ...category, id })
     })
     return {props: { event, categories, photoUrls }}
 }

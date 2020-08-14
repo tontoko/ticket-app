@@ -10,9 +10,9 @@ import Tickets from '@/src/components/tickets';
 import { fuego, useCollection } from '@nandorojo/swr-firestore';
 import withAuth from '@/src/lib/withAuth';
 import Loading from '@/src/components/loading';
-import { firestore } from 'firebase';
 import createTicketsData from '@/src/lib/createTicketsData';
 import { event, tickets, payment } from "app";
+import firebase from 'firebase/app';
 
 const MyTickets = ({ user }) => {
   const [myTicketsPerEvents, setMyTicketsPerEvents] = useState<
@@ -31,7 +31,7 @@ const MyTickets = ({ user }) => {
     {
       listen: true,
       where: [
-        firestore.FieldPath.documentId(),
+        firebase.firestore.FieldPath.documentId(),
         "in",
         Array.from(new Set(payments?.map((payment) => payment.event))),
       ], // 重複除外
