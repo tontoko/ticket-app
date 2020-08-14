@@ -4,9 +4,9 @@ service firebase.storage {
     match /{allPaths=**} {
       allow read: if request.auth.uid != null;
     }
-    match /{uid} {
+    match /{uid}/events/{filename} {
     	allow read: if request.auth.uid != null;
-      allow write: if request.auth.uid == uid;
+      allow create: if request.auth.uid == uid;
     }
   }
 }

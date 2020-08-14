@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {
   Card, CardText, CardBody,
   CardTitle, CardSubtitle, Button, Col, Row
@@ -15,26 +15,20 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import withAuth from '@/src/lib/withAuth';
 import useSWR from 'swr'
 
-const fetcher = (url, user) =>
-  fetch(url, {
+const fetcher = async (url, user) => {
+  const res = await fetch(url, {
     method: "POST",
     headers: new Headers({
       "Content-Type": "application/json",
     }),
     body: JSON.stringify({ uid: user.uid }),
-  });
+  })
+  const { individual } = await res.json();
+  return individual ? individual.requirements : null
+};
 
 const MyEvents = ({ user, events }) => {
-  const { data: res } = useSWR(user && ["/api/stripeAccountsRetrieve", user], fetcher);
-  const [requirements, setRequirements] = useState<Stripe.Person.Requirements | any>(null)
-
-  useEffect(() => {
-    if (!res) return;
-    (async () => {
-      const { individual } = await res.json();
-      setRequirements(individual ? individual.requirements : null);
-    })();
-  }, [res]);
+  const { data: requirements } = useSWR(user && ["/api/stripeAccountsRetrieve", user], fetcher);
 
   const renderUserEvents = () =>
     events.map((event, i) => {
@@ -75,7 +69,7 @@ const MyEvents = ({ user, events }) => {
     });
 
 
-  if (!res) return <Loading />;
+  if (requirements === undefined) return <Loading />;
 
   return (
     <>

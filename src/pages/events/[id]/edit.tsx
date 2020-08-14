@@ -50,7 +50,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
             async (photo) => await getImg(photo, data.createdUser, "800")
           )
         )
-      : [await getImg(null, data.createdUser)];
+      : [];
 
   return {
     props: { event, photoUrls },
