@@ -9,7 +9,6 @@ import { Fuego, FuegoProvider } from "@nandorojo/swr-firestore";
 import {useRouter} from 'next/router'
 import { AppProps, AppContext } from 'next/app'
 import Head from "next/head";
-import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { Provider, AlertPosition } from "react-alert";
 import AlertTemplate from '@/src/components/alert'
@@ -105,11 +104,14 @@ const App = ({ Component, pageProps }: AppProps) => {
   }, [router, router.pathname, fuego]);
 
   useEffect(() => {
-    router.events.on("routeChangeStart", (url) => {
-      NProgress.start();
-    });
-    router.events.on("routeChangeComplete", () => NProgress.done());
-    router.events.on("routeChangeError", () => NProgress.done());
+    (async() => {
+      const NProgress = await import('nprogress')
+      router.events.on("routeChangeStart", (url) => {
+        NProgress.start();
+      });
+      router.events.on("routeChangeComplete", () => NProgress.done());
+      router.events.on("routeChangeError", () => NProgress.done());
+    })()
   }, []);
 
   const options = {
