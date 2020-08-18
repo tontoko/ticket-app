@@ -16,10 +16,10 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
 
   const avater = useMemo(() => {
     if (user || tmpUser) {
-      const providerData = user
-        ? user.providerData[0]
-        : tmpUser.providerData[0];
-      if (providerData.photoURL) return providerData.photoURL;
+      const photoURL = user
+        ? user.providerData[0].photoURL
+        : tmpUser.photoURL;
+      if (photoURL) return photoURL;
     }
     return "/icons/person-icon-default.png";
   }, [user, tmpUser]);

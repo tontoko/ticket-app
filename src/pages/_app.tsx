@@ -48,8 +48,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             null,
             "tmpUser",
             JSON.stringify({
-              providerData: currentUser.providerData,
-              uid: currentUser.uid,
+              photoURL: currentUser.providerData[0].photoURL,
             }),
             {
               maxAge: 60,
