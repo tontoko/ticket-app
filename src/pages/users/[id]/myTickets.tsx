@@ -42,11 +42,16 @@ const MyTickets = ({ user }) => {
     (async () => {
       if (paymentsLoading || !payments || eventsLoading || !events) return;
       if (payments.length === 0) return setLoading(false);
+      events.sort(function (a, b) {
+        if (a.startDate.seconds > b.startDate.seconds) return -1;
+        if (a.startDate.seconds < b.startDate.seconds) return 1;
+        return 0;
+      })
       setMyTicketsPerEvents(await createTicketsData(events, payments));
       setLoading(false);
     })();
   }, [payments, paymentsLoading, events, eventsLoading]);
-  //TODO: 時期順にソート
+
   const renderUserTickets = () =>
     myTicketsPerEvents.map((ticketsPerEvent, i) => {
       const showDate = () => {
