@@ -1,25 +1,43 @@
 import Link from "next/link";
-import React from "react";
+import React, { useMemo } from "react";
 import { FormGroup, Label } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheckSquare,
   faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import { GetStaticPaths, GetStaticProps, GetServerSideProps } from "next";
+import { GetStaticPaths, GetStaticProps, GetServerSideProps, NextPage } from "next";
 import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
 import withAuth from "@/src/lib/withAuth";
 import { stripeAccounts, stripeBalance } from "@/src/lib/stripeRetrieve";
+import { Stripe } from "@/src/lib/stripe";
 
 // TODO: 本人確認書類の審査結果用Webhockを作成
-const Organizer = ({ user, status, balance }) => {
+const Organizer: NextPage<{
+  user: firebase.User;
+  status: "unverified" | "pending" | "verified";
+  balance: Stripe.Balance;
+}> = ({ user, status, balance }) => {
+
+  const available = useMemo(() => {
+    let sum = 0
+    balance.available.forEach(balance => sum += balance.amount)
+    return sum;
+  }, [balance.available]);
+
+  const pending = useMemo( () => {
+    let sum = 0;
+    balance.pending.forEach((balance) => (sum += balance.amount));
+    return sum;
+  }, [balance.pending]);
+
   return (
     <div style={{ marginTop: "1.5em", marginBottom: "1.5em" }}>
       <h4>イベント主催者用の登録情報</h4>
       <Label>
         イベントを開催するには、ユーザー情報と本人確認書類を登録する必要があります。
       </Label>
-      <FormGroup style={{ marginTop: '1.5em', marginBottom: "1em" }}>
+      <FormGroup style={{ marginTop: "1.5em", marginBottom: "1em" }}>
         <Link href={`/users/${user.uid}/edit/updateUser`}>
           <a>ユーザー情報を追加・修正する</a>
         </Link>
@@ -41,11 +59,7 @@ const Organizer = ({ user, status, balance }) => {
                 </Link>
               </p>
             );
-          if (status === "pending") 
-            return (
-                <p>
-                本人確認書類:{" "}確認中</p>
-            );
+          if (status === "pending") return <p>本人確認書類: 確認中</p>;
           if (status === "verified")
             return (
               <p>
@@ -68,8 +82,8 @@ const Organizer = ({ user, status, balance }) => {
       <FormGroup style={{ marginBottom: "1.5em" }}>
         <h4>売上と入金</h4>
         <p>
-          入金待ち: {balance.available[0].amount} 円<br />
-          暫定売上(確認中): {balance.pending[0].amount} 円
+          入金待ち: {available} 円<br />
+          暫定売上(確認中): {pending} 円
         </p>
       </FormGroup>
     </div>
