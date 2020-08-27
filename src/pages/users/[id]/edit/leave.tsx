@@ -35,7 +35,7 @@ export const Leave: NextPage<{user: firebase.User, balance: Stripe.Balance, canL
     if (!checkBox) return alert.error('チェックボックスが選択されていません。')
     if (available || pending) return alert.error('送金待ちの残高が残っています。')
     if (!canLeave) return alert.error("開催イベントの終了から10日間は退会できません。");
-    const { providerData } = user as firebase.User;
+    const { providerData } = user;
     try {
       if (providerData[0].providerId === "password") {
         const credencial: firebase.auth.AuthCredential = fuego.auth.EmailAuthProvider.credential(
@@ -103,8 +103,9 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   let canLeave = true;
   await Promise.all(events.map(event => {
     const endDate = moment((event.data() as event).endDate.toDate());
-    if (endDate.add(10, "days").valueOf() <= moment().valueOf())
+    if (endDate.add(10, "days").valueOf() > moment().valueOf()) {
       canLeave = false;
+    }
   }))
   return {
     props: { balance, canLeave },
