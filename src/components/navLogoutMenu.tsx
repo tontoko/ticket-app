@@ -23,8 +23,8 @@ const LogoutMenu = ({ toggle, isOpen }) => {
             </Link>
           </NavItem>
           <NavItem style={{ cursor: "pointer" }}>
-            <Link href={`/termsOfUse`}>
-              <NavLink>利用規約</NavLink>
+            <Link href={`/contact`}>
+              <NavLink>お問い合わせ</NavLink>
             </Link>
           </NavItem>
         </Nav>

@@ -40,5 +40,8 @@ service cloud.firestore {
       								request.auth.uid == resource.data.seller;
       allow update, delete: if false
     }
+    match /contacts/{contact} {
+    	allow create: if true
+    }
   }
 }
