@@ -53,7 +53,7 @@ export const Leave: NextPage<{user: firebase.User, balance: Stripe.Balance, canL
       alert.error(errorMsg(e))
     }
   }
-  // TODO: お問い合わせページ作成
+
   return (
     <Form style={{ marginTop: "6.5em" }} onSubmit={submit}>
       <h5>本当に退会しますか？</h5>

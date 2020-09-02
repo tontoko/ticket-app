@@ -6,13 +6,11 @@ import {
   faCheckSquare,
   faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import { GetStaticPaths, GetStaticProps, GetServerSideProps, NextPage } from "next";
-import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
+import { GetServerSideProps, NextPage } from "next";
 import withAuth from "@/src/lib/withAuth";
 import { stripeAccounts, stripeBalance } from "@/src/lib/stripeRetrieve";
 import { Stripe } from "@/src/lib/stripe";
 
-// TODO: 本人確認書類の審査結果用Webhockを作成
 const Organizer: NextPage<{
   user: firebase.User;
   status: "unverified" | "pending" | "verified";

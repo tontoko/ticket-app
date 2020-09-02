@@ -35,7 +35,7 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
       <Navbar style={{ backgroundColor: "#A0522D" }} expand="md" dark>
         <Link href={user ? `/users/${user.uid}` : "/login"}>
           <div>
-            <NavbarBrand style={{ cursor: "pointer" }}>Ticket-App</NavbarBrand>
+            <NavbarBrand style={{ cursor: "pointer" }}>Ticket-App(α)</NavbarBrand>
           </div>
         </Link>
         {user || tmpUser ? (

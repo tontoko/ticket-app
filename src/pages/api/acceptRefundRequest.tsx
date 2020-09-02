@@ -55,5 +55,3 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
 }
 
 export default sendRefundRequest
-
-// TODO: 返金失敗用のwebhook作成
