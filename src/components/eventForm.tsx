@@ -187,21 +187,23 @@ const EventForm = ({
       endDate: moment(endDate as string).toDate(),
     };
     try {
-        let msg = ''
-        let pathname = ''
-        if (mode === 'new') {
-            const result = await fuego.db.collection("events").add(eventData);
-            msg = "イベントを作成しました。";
-            pathname = `/events/${result.id}`;
-        } else if (mode === 'edit') {
-            await update(eventData);
-            msg = "イベントが更新されました。表示に反映されるまで時間がかかる場合があります。";
-            pathname = `/events/${router.query.id}`;
-        }
-        router.push({
-            pathname,
-            query: { msg: encodeQuery(msg) }})
-        return true
+      let msg = ''
+      let pathname = ''
+      if (mode === 'new') {
+          const result = await fuego.db.collection("events").add(eventData);
+          msg = "イベントを作成しました。";
+          pathname = `/events/${result.id}`;
+      } else if (mode === 'edit') {
+          await update(eventData);
+          msg = "イベントが更新されました。表示に反映されるまで時間がかかる場合があります。";
+          pathname = `/events/${router.query.id}`;
+      }
+      
+      setModal(false)
+      router.push({
+          pathname,
+          query: { msg: encodeQuery(msg) }})
+      return true
     } catch (e) {
       alert.error(errorMsg(e));
       setLoading(false);

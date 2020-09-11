@@ -49,10 +49,10 @@ const Webhock: NextApiHandler = async (req, res) => {
   try {
     switch (webhockEvent["type"]) {
       case "payment_intent.succeeded":
-        payment_intent_succeeded(webhockEvent);
+        await payment_intent_succeeded(webhockEvent);
         break;
       case "payment_intent.payment_failed":
-        payment_intent_payment_failed(webhockEvent);
+        await payment_intent_payment_failed(webhockEvent);
         break;
     }
   } catch (e) {

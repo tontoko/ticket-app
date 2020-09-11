@@ -250,6 +250,7 @@ const ModalInner = ({ currentCategories, user, alert, setModal }) => {
         addCategories.map(async (addCategory) => categoriesRef.add(addCategory))
       );
       await revalidateCollection(`events/${router.query.id}/categories`);
+      setModal(false)
       router.push({
         pathname: `/events/${router.query.id}`,
         query: { msg: encodeQuery("更新しました。表示に反映されるまで時間がかかる場合があります。") },

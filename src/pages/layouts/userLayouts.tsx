@@ -28,7 +28,7 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
     if (!router) return;
     const { msg } = router.query;
     if (msg) alert.success(decodeQuery(msg as string));
-  }, [router, router.query.msg]);
+  }, [!!router]);
 
   return (
     <>
