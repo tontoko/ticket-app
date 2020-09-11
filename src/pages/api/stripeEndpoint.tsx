@@ -1,12 +1,15 @@
-import { Stripe } from 'stripe'
-import { NextApiHandler } from 'next';
-import stripe from '@/src/lib/stripe';
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
+import { Stripe } from "stripe";
+import { NextApiHandler } from "next";
+import stripe from "@/src/lib/stripe";
+import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
 import { buffer } from "micro";
 import Cors from "micro-cors";
-import { category } from 'app';
+import { category } from "app";
 
-const endpointSecret = process.env.ENV === 'prod' ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD : process.env.STRIPE_PAYMENT_ENDPOINT_DEV
+const endpointSecret =
+  process.env.ENV === "prod"
+    ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD
+    : process.env.STRIPE_PAYMENT_ENDPOINT_DEV;
 
 class NoBuyableError extends Error {
   constructor(message: string) {
@@ -26,13 +29,13 @@ const cors = Cors({
 });
 
 const Webhock: NextApiHandler = async (req, res) => {
-  if (req.method !== 'POST') {
+  if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     res.status(405).end("Method Not Allowed");
   }
-  const sig = req.headers['stripe-signature'];
+  const sig = req.headers["stripe-signature"];
   let webhockEvent: Stripe.Event;
-  
+
   try {
     const buf = await buffer(req);
     webhockEvent = stripe.webhooks.constructEvent(
@@ -60,7 +63,7 @@ const Webhock: NextApiHandler = async (req, res) => {
   }
 
   res.json({ received: true });
-}
+};
 
 export const payment_intent_succeeded = async (webhockEvent: Stripe.Event) => {
   let error: string | null = null;
@@ -101,7 +104,7 @@ export const payment_intent_succeeded = async (webhockEvent: Stripe.Event) => {
     console.log("Succeeded:", intent.id);
   } catch (e) {
     // instanceofが動作しないので暫定
-    if (e.name == 'NoBuyableError') {
+    if (e.name == "NoBuyableError") {
       error = e.message;
     } else {
       error = "不明なエラーが発生しました。返金手続きが行われました。";
@@ -127,11 +130,14 @@ export const payment_intent_succeeded = async (webhockEvent: Stripe.Event) => {
   });
 };
 
-export const payment_intent_payment_failed = async (webhockEvent: Stripe.Event) => {
+export const payment_intent_payment_failed = async (
+  webhockEvent: Stripe.Event
+) => {
   const intent = webhockEvent.data.object as Stripe.PaymentIntent;
   const { event, category, seller, buyer } = intent.metadata;
   const { firestore } = await initFirebaseAdmin();
-  const message = intent.last_payment_error && intent.last_payment_error.message;
+  const message =
+    intent.last_payment_error && intent.last_payment_error.message;
   console.error("Failed:", intent.id, message);
   await firestore.collection("payments").add({
     event,
@@ -144,4 +150,4 @@ export const payment_intent_payment_failed = async (webhockEvent: Stripe.Event) 
   });
 };
 
-export default cors(Webhock)
+export default cors(Webhock);

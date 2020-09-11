@@ -1,23 +1,22 @@
 import { payment_intent_succeeded } from "@/src/pages/api/stripeEndpoint";
-import 'jest'
+import "jest";
 import { Stripe } from "@/src/lib/stripe";
 import * as firebase from "@firebase/testing";
-import { dev } from '@/ticket-app'
+import { dev } from "@/ticket-app";
 import stripe from "@/src/lib/stripe";
 import initFirebaseAdmin from "../lib/initFirebaseAdmin";
 import { setupBase } from "./lib/setupDB";
 
-
 describe("payment_intent_succeeded", () => {
-  firebase.initializeTestApp({ projectId: dev.projectId })
-  let refunded = false
+  firebase.initializeTestApp({ projectId: dev.projectId });
+  let refunded = false;
   const refundFn = async (props) =>
-    (refunded = true) as unknown as Stripe.Response<Stripe.Refund>;
-  jest.spyOn(stripe.refunds, "create").mockImplementation(refundFn)
+    ((refunded = true) as unknown) as Stripe.Response<Stripe.Refund>;
+  jest.spyOn(stripe.refunds, "create").mockImplementation(refundFn);
 
   beforeEach(async () => {
-    refunded = false
-    await setupBase()
+    refunded = false;
+    await setupBase();
   });
 
   afterEach(
@@ -34,7 +33,7 @@ describe("payment_intent_succeeded", () => {
       created: 1,
       data: {
         object: {
-          id: 'stripeId',
+          id: "stripeId",
           metadata: {
             event: "event1",
             category: "category1",
@@ -51,7 +50,14 @@ describe("payment_intent_succeeded", () => {
 
     await payment_intent_succeeded(mockWebhockEvent);
     const payments = await firestore.collection("payments").get();
-    const category = (await firestore.collection('events').doc('event1').collection('categories').doc('category1').get()).data()
+    const category = (
+      await firestore
+        .collection("events")
+        .doc("event1")
+        .collection("categories")
+        .doc("category1")
+        .get()
+    ).data();
     expect(category.sold).toBe(50);
     expect(refunded).toBeFalsy();
     expect(payments.docs[0].data().error).toBeFalsy();
@@ -123,4 +129,3 @@ describe("payment_intent_succeeded", () => {
     );
   });
 });
-
