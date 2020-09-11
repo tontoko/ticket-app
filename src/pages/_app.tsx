@@ -25,6 +25,12 @@ import { dev, prod } from "@/ticket-app";
 import { firebaseCloudMessaging } from '../lib/webPush'
 const firebaseConfig = process.env.ENV === "prod" ? prod : dev;
 const fuego = new Fuego(firebaseConfig);
+// if (location.hostname === "localhost") {
+//   fuego.db.settings({
+//     host: "localhost:8080",
+//     ssl: false,
+//   });
+// }
 
 const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter();

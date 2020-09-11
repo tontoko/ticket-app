@@ -8,12 +8,11 @@ declare module 'app' {
     photos: string[];
     id: string;
     placeName: string;
-    time: string;
     name: string;
     eventDetails: string;
-    categories: categories;
     createdUser: string;
     id?: string;
+    categories?: categories;
   };
 
   export type categories = category[];
