@@ -100,7 +100,8 @@ export const payment_intent_succeeded = async (webhockEvent: Stripe.Event) => {
     });
     console.log("Succeeded:", intent.id);
   } catch (e) {
-    if (e instanceof NoBuyableError) {
+    // instanceofが動作しないので暫定
+    if (e.name == 'NoBuyableError') {
       error = e.message;
     } else {
       error = "不明なエラーが発生しました。返金手続きが行われました。";

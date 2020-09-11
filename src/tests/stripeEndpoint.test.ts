@@ -11,9 +11,9 @@ import { setupBase } from "./lib/setupDB";
 describe("payment_intent_succeeded", () => {
   firebase.initializeTestApp({ projectId: dev.projectId })
   let refunded = false
-  const refundFn = async () => (refunded = true);
-  // @ts-ignore
-  jest.spyOn(stripe.refunds, "create").mockReturnValue(refundFn());
+  const refundFn = async (props) =>
+    (refunded = true) as unknown as Stripe.Response<Stripe.Refund>;
+  jest.spyOn(stripe.refunds, "create").mockImplementation(refundFn)
 
   beforeEach(async () => {
     refunded = false
@@ -51,8 +51,10 @@ describe("payment_intent_succeeded", () => {
 
     await payment_intent_succeeded(mockWebhockEvent);
     const payments = await firestore.collection("payments").get();
-    expect(!refunded);
-    return expect(!payments.docs[0].data().error);
+    const category = (await firestore.collection('events').doc('event1').collection('categories').doc('category1').get()).data()
+    expect(category.sold).toBe(50);
+    expect(refunded).toBeFalsy();
+    expect(payments.docs[0].data().error).toBeFalsy();
   });
 
   test("payment should fail when not public", async () => {
@@ -82,10 +84,9 @@ describe("payment_intent_succeeded", () => {
 
     await payment_intent_succeeded(mockWebhockEvent);
     const payments = await firestore.collection("payments").get();
-    expect(refunded);
-    return expect(
-      payments.docs[0].data().error ===
-        "購入したチケットは非公開になりました。返金手続きが行われました。"
+    expect(refunded).toBeTruthy();
+    expect(payments.docs[0].data().error).toBe(
+      "購入したチケットは非公開になりました。返金手続きが行われました。"
     );
   });
 
@@ -116,10 +117,9 @@ describe("payment_intent_succeeded", () => {
 
     await payment_intent_succeeded(mockWebhockEvent);
     const payments = await firestore.collection("payments").get();
-    expect(refunded);
-    return expect(
-      payments.docs[0].data().error ===
-        "在庫がありませんでした。返金手続きが行われました。"
+    expect(refunded).toBeTruthy();
+    expect(payments.docs[0].data().error).toBe(
+      "在庫がありませんでした。返金手続きが行われました。"
     );
   });
 });
