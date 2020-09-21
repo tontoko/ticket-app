@@ -96,6 +96,7 @@
     "shell": "firebase functions:shell",
     "logs": "firebase functions:log",
     "deploy-preview": "vercel",
-    "deploy-prod": "vercel --prod"
+    "deploy-prod": "vercel --prod",
+    "test": "firebase emulators:exec --only firestore --project ticket-app-dev-11346 'npx jest'"
   }
 }

@@ -4,7 +4,7 @@ import stripe from "@/src/lib/stripe";
 import initFirebaseAdmin from "@/src/lib/initFirebaseAdmin";
 import { buffer } from "micro";
 import Cors from "micro-cors";
-import { category } from "app";
+import { category, payment } from "app";
 
 const endpointSecret =
   process.env.ENV === "prod"
@@ -139,7 +139,7 @@ export const payment_intent_payment_failed = async (
   const message =
     intent.last_payment_error && intent.last_payment_error.message;
   console.error("Failed:", intent.id, message);
-  await firestore.collection("payments").add({
+  const payment: payment = {
     event,
     category,
     seller,
@@ -147,7 +147,11 @@ export const payment_intent_payment_failed = async (
     accepted: false,
     stripe: intent.id,
     error: "支払いが拒否されました。他の支払い方法をお試しください。",
-  });
+    errorInfo: message,
+    // @ts-ignore
+    createdAt: new Date(),
+  };
+  await firestore.collection("payments").add(payment);
 };
 
 export default cors(Webhock);
