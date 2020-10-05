@@ -9,7 +9,7 @@ const regExp = new RegExp(`.{${Math.ceil(secret.length / 2)}}`, "g");
 const splitedSecret = secret.match(regExp)
 
 export const encodeQuery = (v: string) => {
-    let result = [...splitedSecret];
+    const result = [...splitedSecret];
     result.splice(splitedSecret.length-1, 0, btoa(encodeURIComponent(v)));
     return result.join("");
 }

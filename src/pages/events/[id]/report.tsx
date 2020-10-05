@@ -10,7 +10,7 @@ const Report = ({ event, categories, payments }) => {
     let totalSales = 0
     let totalFee = 0
     let totalIncome = 0
-    let categoryReport: ReactElement[] = []
+    const categoryReport: ReactElement[] = []
 
     categories.map((category, i) => {
         const targetPayments = payments.filter(targetPayment => targetPayment.category === category.id)

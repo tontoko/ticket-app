@@ -79,7 +79,7 @@ export const BankAccounts: NextPage<props> = ({ user, setModal, setModalInner })
         }),
       });
       if (res.status === 200) {
-        let newBankAccounts = [...bankAccounts]
+        const newBankAccounts = [...bankAccounts]
         newBankAccounts.splice(i, 1)
         setBankAccounts(newBankAccounts)
         alert.success('口座を削除しました。')

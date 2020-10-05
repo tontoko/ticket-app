@@ -56,7 +56,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     });
 
     useEffect(() => {
-      let ticketListener = () => {
+      const ticketListener = () => {
         return;
       };
       if (!router) return;

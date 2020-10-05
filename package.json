@@ -74,20 +74,24 @@
     "@types/react-qr-reader": "^2.1.3",
     "@types/react-test-renderer": "^16.9.3",
     "@types/reactstrap": "^8.5.1",
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.4",
     "enzyme-to-json": "^3.5.0",
     "eslint": "^6.8.0",
     "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "^7.21.3",
     "eslint-plugin-react-hooks": "^1.6.1",
     "firebase-functions-test": "^0.1.6",
     "firebase-tools": "^8.10.0",
     "fs": "0.0.1-security",
     "jest": "^26.4.2",
-    "prettier": "^2.1.1",
+    "prettier": "^2.1.2",
+    "pretty-quick": "^3.0.2",
     "react-test-renderer": "^16.13.1",
     "ts-jest": "^26.3.0",
-    "vercel": "^19.2.0"
+    "vercel": "^20.1.1"
   },
   "scripts": {
     "predev": "vercel env pull .env.local",
@@ -97,6 +101,14 @@
     "logs": "firebase functions:log",
     "deploy-preview": "vercel",
     "deploy-prod": "vercel --prod",
-    "test": "firebase emulators:exec --only firestore --project ticket-app-dev-11346 jest"
+    "test": "firebase emulators:exec --only firestore --project ticket-app-dev-11346 jest",
+    "lint": "eslint src/** --ext .ts,.tsx",
+    "lint:fix": "npm run lint --fix"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged",
+      "pre-push": "npm run lint"
+    }
   }
 }

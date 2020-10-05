@@ -133,7 +133,7 @@ const Edit = ({ user, setModal, setModalInner }) => {
   const submit = (e) => {
     e.preventDefault();
     try {
-      let names = [];
+      const names = [];
       currentCategories.filter((category) => {
         if (!category.name) throw new Error("チケット名を入力してください。");
         if (category.price < 500)
@@ -191,7 +191,7 @@ const ModalInner = ({ currentCategories, user, alert, setModal }) => {
         .collection("events")
         .doc(router.query.id as string)
         .collection("categories");
-      let names = [];
+      const names = [];
       currentCategories.filter((e) => {
         if (!e.name) throw new Error("チケット名を入力してください。");
         if (e.price < 500)
@@ -204,8 +204,8 @@ const ModalInner = ({ currentCategories, user, alert, setModal }) => {
         }
         throw new Error("チケット名が重複しています");
       });
-      let addCategories = [];
-      let updateCategories: { string?: FirebaseFirestore.DocumentData } = {};
+      const addCategories = [];
+      const updateCategories: { string?: FirebaseFirestore.DocumentData } = {};
       await Promise.all(
         currentCategories.map(async (category, i) => {
           if (category.new) {

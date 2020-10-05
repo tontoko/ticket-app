@@ -7,7 +7,7 @@ const endpoint: NextApiHandler = (async (req, res) => {
         res.status(400).send({ body: 'body was empty' })
         return
     }
-    let session = await (await getSession())(req, res)
+    const session = await (await getSession())(req, res)
     try {
         const {firebase} = await initFirebaseAdmin()
         const decodedToken = await firebase.auth().verifyIdToken(req.body.token)

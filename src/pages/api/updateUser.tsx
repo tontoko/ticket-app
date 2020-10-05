@@ -23,7 +23,7 @@ const endpoint: NextApiHandler = (async (req, res) => {
     const usersRef = firestore.collection('users').doc(decodedToken.uid)
     const user = (await usersRef.get()).data()
 
-    let userData: Stripe.AccountUpdateParams = {
+    const userData: Stripe.AccountUpdateParams = {
       business_type: 'individual',
       individual: {
         first_name_kana,

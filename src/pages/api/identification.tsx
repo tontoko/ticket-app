@@ -20,7 +20,7 @@ const endpoint: NextApiHandler = upload(async (req, res) => {
 
     if (!individual) return res.status(500)
 
-    let document: Stripe.PersonUpdateParams.Verification.Document = {
+    const document: Stripe.PersonUpdateParams.Verification.Document = {
       front: null,
     };
 

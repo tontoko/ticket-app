@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { Table, Row, Col, Button, Input, ModalBody, ModalFooter } from 'reactstrap';
-import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next';
+import { GetServerSideProps } from 'next';
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin';
 import { useAlert } from 'react-alert';
 import { event } from 'app';
 import withAuth from '@/src/lib/withAuth';
-import { encodeQuery } from '@/src/lib/parseQuery';
-import { useCollection, fuego } from '@nandorojo/swr-firestore';
-
-class NoStockError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "NoStockError";
-    }
-}
+import { useCollection } from '@nandorojo/swr-firestore';
 
 type manualPayment = {category: string, name: string, paid: boolean, id?: string}
 
@@ -47,36 +38,20 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
         if (!newManualPayment.name) return alert.error('名前が入力されていません。')
         try {
             setLoading(true)
-            await fuego.db.runTransaction(async transaction => {
-                const categoryRef = fuego.db
-                  .collection("events")
-                  .doc(id as string)
-                  .collection("categories")
-                  .doc(newManualPayment.category);
-                const manualPaymentsRef = fuego.db
-                  .collection("events")
-                  .doc(id as string)
-                  .collection("manualPayments")
-                  .doc(
-                    new Date().getTime().toString() +
-                      encodeQuery(newManualPayment.name)
-                  );
-                const targetCategory = (await transaction.get(categoryRef)).data()
-                if (targetCategory.stock - targetCategory.sold < 1) throw new NoStockError('チケットの在庫がありません。')
-                transaction.set(manualPaymentsRef, { ...newManualPayment });
-                transaction.update(categoryRef, {
-                  sold: targetCategory.sold + 1,
-                  stock: targetCategory.stock - 1,
-                });
-            })
+            const res = await fetch("/api/createManualPayment", {
+              method: "POST",
+              headers: new Headers({
+                "Content-Type": "application/json",
+              }),
+              body: JSON.stringify({ eventId: id, newManualPayment }),
+            });
+            if (res.status !== 200) throw new Error((await res.json()).error)
             setNewManualPayment({...newManualPayment, name: ''});
             await revalidate();
             alert.success('手動受付リストを更新しました。')
         } catch(e) {
             alert.error(e.message)
-            if (!(e instanceof NoStockError)) setTimeout(() => {
-                location.reload()
-            }, 1000);
+          if (e.message !== "チケットの在庫がありません。") setTimeout(() => location.reload(), 1000);
         }
         setLoading(false)
     }
@@ -86,49 +61,19 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
         if (!newValue.name) return alert.error("名前が入力されていません。");
         try {
             setLoading(true);
-            await fuego.db.runTransaction(async (transaction) => {
-              const newCategoryRef = fuego.db
-                .collection("events")
-                .doc(id as string)
-                .collection("categories")
-                .doc(newValue.category);
-              const beforeCategoryRef = fuego.db
-                .collection("events")
-                .doc(id as string)
-                .collection("categories")
-                .doc(beforeValue.category);
-              const manualPaymentsRef = fuego.db
-                .collection("events")
-                .doc(id as string)
-                .collection("manualPayments")
-                .doc(beforeValue.id);
-              const newCategory = (
-                await transaction.get(newCategoryRef)
-              ).data();
-              const beforeCategory = (
-                await transaction.get(beforeCategoryRef)
-              ).data();
-
-              transaction.update(manualPaymentsRef, { ...newValue });
-
-              if (newValue.category !== beforeValue.category) {
-                if (newCategory.stock - newCategory.sold < 1)
-                  throw new NoStockError("チケットの在庫がありません。");
-                transaction.update(newCategoryRef, {
-                  sold: newCategory.sold + 1,
-                  stock: newCategory.stock - 1,
-                });
-                transaction.update(beforeCategoryRef, {
-                  sold: beforeCategory.sold - 1,
-                  stock: beforeCategory.stock + 1,
-                });
-              }
-            });
+          const res = await fetch("/api/changeManualPayment", {
+            method: "POST",
+            headers: new Headers({
+              "Content-Type": "application/json",
+            }),
+            body: JSON.stringify({ eventId: id, beforeValue, newValue }),
+          });
+          if (res.status !== 200) throw new Error((await res.json()).error)
             await revalidate();
             alert.success('手動受付リストを更新しました。')
         } catch (e) {
             let msg = e.message
-            if (!(e instanceof NoStockError)) {
+          if (e.message !== "チケットの在庫がありません。") {
                 msg = "エラーが発生しました。リロードします…";
                 setTimeout(() => {
                     location.reload()
@@ -145,29 +90,19 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
             try {
                 setLoading(true);
                 setModal(false)
-                await fuego.db.runTransaction(async transaction => {
-                    const categoryRef = fuego.db
-                      .collection("events")
-                      .doc(id as string)
-                      .collection("categories")
-                      .doc(payment.category);
-                    const manualPaymentsRef = fuego.db
-                      .collection("events")
-                      .doc(id as string)
-                      .collection("manualPayments")
-                      .doc(payment.id);
-                    const targetCategory = (await transaction.get(categoryRef)).data()
-                    transaction.delete(manualPaymentsRef);
-                    transaction.update(categoryRef, {
-                      sold: targetCategory.sold - 1,
-                      stock: targetCategory.stock + 1,
-                    });
-                })
+              const res = await fetch("/api/deleteManualPayment", {
+                method: "POST",
+                headers: new Headers({
+                  "Content-Type": "application/json",
+                }),
+                body: JSON.stringify({ eventId: id, payment }),
+              });
+              if (res.status !== 200) throw new Error((await res.json()).error)
                 await revalidate();
                 alert.success('項目を削除しました。')
             } catch (e) {
                 alert.error("エラーが発生しました。リロードします…");
-                if (!(e instanceof NoStockError)) setTimeout(() => {
+              if (e.message !== "チケットの在庫がありません。") setTimeout(() => {
                     location.reload()
                 }, 2000);
             }
@@ -317,7 +252,7 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
     const { id } = query;
     const { firestore } = await initFirebaseAdmin()
     const categoriesSnapShot = (await firestore.collection('events').doc(id as string).collection('categories').orderBy('index').get())
-    let categories: FirebaseFirestore.DocumentData[] = []
+    const categories: FirebaseFirestore.DocumentData[] = []
     categoriesSnapShot.forEach(e => {
         const id = e.id
         const category = e.data()

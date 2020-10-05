@@ -88,11 +88,11 @@ export const UpdateUser = ({ user }) => {
   
   const submit = async(e) => {
     e.preventDefault()
-    let needParams: string[] = []
-    for (let [key1, value1] of Object.entries(form)) {
+    const needParams: string[] = []
+    for (const [key1, value1] of Object.entries(form)) {
       if (typeof value1 !== 'string' && (key1 === 'address_kana' || key1 === 'address_kanji')) {
         // 入れ子2段目の判定
-        for (let [key2, value2] of Object.entries(value1)) {
+        for (const [key2, value2] of Object.entries(value1)) {
           if (key2 !== 'line2' && !value2) needParams.push(key2)
         }
       } else {
