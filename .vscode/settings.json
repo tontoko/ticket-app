@@ -1,5 +1,5 @@
 {
-  "typescript.tsdk": "/Users/hiraki-tomohiko/workspace/ticket-app/node_modules/typescript/lib",
+  "typescript.tsdk": "node_modules/typescript/lib",
   "svn.ignoreMissingSvnWarning": true,
   "now.instance.host.url": ""
 }
