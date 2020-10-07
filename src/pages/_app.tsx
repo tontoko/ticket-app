@@ -1,16 +1,16 @@
-import {useState, useEffect, Dispatch, ReactElement, SetStateAction} from 'react'
+import React, { useState, useEffect, Dispatch, ReactElement, SetStateAction } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import "react-datepicker/dist/react-datepicker.css"
+import 'react-datepicker/dist/react-datepicker.css'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import UserLayouts from './layouts/userLayouts'
-import "firebase/firestore";
-import "firebase/auth";
-import { Fuego, FuegoProvider } from "@nandorojo/swr-firestore";
-import {useRouter} from 'next/router'
-import { AppProps, AppContext } from 'next/app'
-import Head from "next/head";
+import 'firebase/firestore'
+import 'firebase/auth'
+import { Fuego, FuegoProvider } from '@nandorojo/swr-firestore'
+import { useRouter } from 'next/router'
+import { AppProps } from 'next/app'
+import Head from 'next/head'
 import 'nprogress/nprogress.css'
-import { Provider, AlertPosition } from "react-alert";
+import { Provider, AlertPosition } from 'react-alert'
 import AlertTemplate from '@/src/components/alert'
 import Modal from '@/src/components/modal'
 import { loadStripe } from '@stripe/stripe-js'
@@ -21,10 +21,10 @@ import { setCookie, destroyCookie, parseCookies } from 'nookies'
 const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
-import { dev, prod } from "@/ticket-app";
+import { dev, prod } from '@/ticket-app'
 import { firebaseCloudMessaging } from '../lib/webPush'
-const firebaseConfig = process.env.ENV === "prod" ? prod : dev;
-const fuego = new Fuego(firebaseConfig);
+const firebaseConfig = process.env.ENV === 'prod' ? prod : dev
+const fuego = new Fuego(firebaseConfig)
 // if (location.hostname === "localhost") {
 //   fuego.db.settings({
 //     host: "localhost:8080",
@@ -33,57 +33,59 @@ const fuego = new Fuego(firebaseConfig);
 // }
 
 const App = ({ Component, pageProps }: AppProps) => {
-  const router = useRouter();
-  const [modal, setModal] = useState(false);
-  const [modalInner, setModalInner]: [ReactElement, Dispatch<SetStateAction<ReactElement>>] = useState()
+  const router = useRouter()
+  const [modal, setModal] = useState(false)
+  const [modalInner, setModalInner]: [
+    ReactElement,
+    Dispatch<SetStateAction<ReactElement>>,
+  ] = useState()
   const cookies = parseCookies()
-  const [tmpUser, setTmpUser] = useState(cookies.tmpUser && JSON.parse(cookies.tmpUser));
-  const [user, setUser] = useState<firebase.User>();
-  let listner = () => {return}
+  const [tmpUser, setTmpUser] = useState(cookies.tmpUser && JSON.parse(cookies.tmpUser))
+  const [user, setUser] = useState<firebase.User>()
+  let listner = () => {
+    return
+  }
 
   useEffect(() => {
-    firebaseCloudMessaging.init(env);
-  }, []);
+    firebaseCloudMessaging.init(env)
+  }, [])
 
   useEffect(() => {
     if (!fuego || !router) return
-    (async () => {
+    ;(async () => {
       listner = fuego.auth().onAuthStateChanged(async (currentUser) => {
         if (currentUser) {
           setCookie(
             null,
-            "tmpUser",
+            'tmpUser',
             JSON.stringify({
               photoURL: currentUser.providerData[0].photoURL,
             }),
             {
               maxAge: 60,
-              path: "/",
+              path: '/',
               domain: document.domain,
-              secure: document.domain !== "localhost",
-            }
-          );
+              secure: document.domain !== 'localhost',
+            },
+          )
           if (
             !currentUser.emailVerified &&
-            currentUser.providerData[0].providerId === "password" &&
+            currentUser.providerData[0].providerId === 'password' &&
             !window.location.pathname.match(/^\/__\/auth\/action/)
           ) {
-            router.push("/confirmEmail");
-          } 
+            router.push('/confirmEmail')
+          }
           if (
-            window.location.pathname === "/login" ||
-            window.location.pathname === "/register" ||
-            window.location.pathname === "/forgetPassword"
+            window.location.pathname === '/login' ||
+            window.location.pathname === '/register' ||
+            window.location.pathname === '/forgetPassword'
           ) {
             router.push({
               pathname: `/users/${currentUser.uid}`,
-              query: { msg: encodeQuery("ログインしました") },
-            });
+              query: { msg: encodeQuery('ログインしました') },
+            })
           }
-          if (
-            window.location.pathname.match(/^\/users\//) &&
-            !router.query.id
-          ) return
+          if (window.location.pathname.match(/^\/users\//) && !router.query.id) return
           if (
             window.location.pathname.match(/^\/users\//) &&
             router.query.id &&
@@ -91,38 +93,38 @@ const App = ({ Component, pageProps }: AppProps) => {
           ) {
             return fuego.auth().signOut()
           }
-          setUser(currentUser);
+          setUser(currentUser)
         }
         if (!currentUser) {
-          setUser(null);
-          destroyCookie(null, "tmpUser");
-          setTmpUser(null);
+          setUser(null)
+          destroyCookie(null, 'tmpUser')
+          setTmpUser(null)
           if (!checkAllowNoLoginUrlList()) {
             await router.push({
-              pathname: "/login",
-              query: { msg: encodeQuery("ログアウトしました") },
-            });
+              pathname: '/login',
+              query: { msg: encodeQuery('ログアウトしました') },
+            })
           }
         }
-      });
-    })();
-  }, [router, router.pathname, fuego]);
+      })
+    })()
+  }, [router, router.pathname, fuego])
 
   useEffect(() => {
-    (async() => {
+    ;(async () => {
       const NProgress = await import('nprogress')
-      router.events.on("routeChangeStart", (url) => {
-        NProgress.start();
-      });
-      router.events.on("routeChangeComplete", () => NProgress.done());
-      router.events.on("routeChangeError", () => NProgress.done());
+      router.events.on('routeChangeStart', (url) => {
+        NProgress.start()
+      })
+      router.events.on('routeChangeComplete', () => NProgress.done())
+      router.events.on('routeChangeError', () => NProgress.done())
     })()
-  }, []);
+  }, [])
 
   const options = {
     timeout: 4000,
-    position: "top left" as AlertPosition,
-  };
+    position: 'top left' as AlertPosition,
+  }
 
   return (
     <>
@@ -146,10 +148,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         <link rel="manifest" href="/manifest.json" />
         <link rel="mask-icon" href="/favicon.ico" color="#5bbad5" />
         <link rel="shortcut icon" href="/favicon.ico" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css?family=Roboto:300,400,500"
-        />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
       </Head>
       <FuegoProvider fuego={fuego}>
         <Provider template={AlertTemplate} {...options}>
@@ -185,7 +184,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         </Provider>
       </FuegoProvider>
     </>
-  );
+  )
 }
-              
-export default App;
+
+export default App
