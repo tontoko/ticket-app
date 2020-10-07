@@ -104,7 +104,7 @@
     "deploy-prod": "vercel --prod",
     "test": "firebase emulators:exec --only firestore --project ticket-app-dev-11346 jest",
     "lint": "eslint src/** --ext .ts,.tsx",
-    "lint:fix": "npm run lint --fix",
+    "lint:fix": "eslint src/** --ext .ts,.tsx --fix",
     "prettier:quick": "pretty-quick --staged"
   },
   "husky": {
