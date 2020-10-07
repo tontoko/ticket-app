@@ -7,22 +7,23 @@ import { Stripe } from '@/src/lib/stripe'
 import * as firebase from '@firebase/testing'
 import { dev } from '@/ticket-app'
 import stripe from '@/src/lib/stripe'
-import initFirebaseAdmin from '../lib/initFirebaseAdmin'
 import { setupBase } from './lib/setupDB'
 
 describe('stripeEndpoint', () => {
+  const app = firebase.initializeAdminApp({ projectId: dev.projectId })
+  const firestore = app.firestore()
   let refunded = false
   beforeEach(async () => {
-    await firebase.clearFirestoreData({ projectId: dev.projectId })
-    await setupBase()
     refunded = false
+    return await setupBase(firestore)
   })
+  afterEach(async () => await firebase.clearFirestoreData({ projectId: dev.projectId }))
+
   describe('payment_intent_succeeded', () => {
     const refundFn = async () => ((refunded = true) as unknown) as Stripe.Response<Stripe.Refund>
     jest.spyOn(stripe.refunds, 'create').mockImplementation(refundFn)
 
     test('payment should success when data correct', async () => {
-      const { firestore } = await initFirebaseAdmin()
       const mockWebhockEvent: Stripe.Event = {
         id: 'string',
         object: 'event',
@@ -56,13 +57,13 @@ describe('stripeEndpoint', () => {
           .doc('category1')
           .get()
       ).data()
+
       expect(category.sold).toBe(50)
       expect(refunded).toBeFalsy()
       expect(payments.docs[0].data().error).toBeFalsy()
     })
 
     test('payment should fail when not public', async () => {
-      const { firestore } = await initFirebaseAdmin()
       const mockWebhockEvent: Stripe.Event = {
         id: 'string',
         object: 'event',
@@ -95,7 +96,6 @@ describe('stripeEndpoint', () => {
     })
 
     test('payment should fail when no more stock', async () => {
-      const { firestore } = await initFirebaseAdmin()
       const mockWebhockEvent: Stripe.Event = {
         id: 'string',
         object: 'event',
@@ -130,7 +130,6 @@ describe('stripeEndpoint', () => {
 
   describe('payment_intent_payment_faild', () => {
     test('should register new payment with errorInfo', async () => {
-      const { firestore } = await initFirebaseAdmin()
       const mockWebhockEvent: Stripe.Event = {
         id: 'string',
         object: 'event',

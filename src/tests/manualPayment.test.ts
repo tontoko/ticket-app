@@ -1,7 +1,6 @@
 import 'jest'
 import * as firebase from '@firebase/testing'
 import { dev } from '@/ticket-app'
-import initFirebaseAdmin from '../lib/initFirebaseAdmin'
 import { setupBase } from './lib/setupDB'
 import createManualPayment from '../pages/api/createManualPayment'
 import changeManualPayment from '../pages/api/changeManualPayment'
@@ -9,6 +8,9 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import deleteManualPayment from '../pages/api/deleteManualPayment'
 
 describe('manualPayment', () => {
+  const app = firebase.initializeAdminApp({ projectId: dev.projectId })
+  const firestore = app.firestore()
+
   const createReq = (eventId, categoryId) => {
     return {
       body: {
@@ -63,13 +65,13 @@ describe('manualPayment', () => {
   let res = new Res()
 
   beforeEach(async () => {
-    await firebase.clearFirestoreData({ projectId: dev.projectId })
-    await setupBase()
     res = new Res()
+    return await setupBase(firestore)
   })
+  afterEach(async () => await firebase.clearFirestoreData({ projectId: dev.projectId }))
+
   describe('create', () => {
     test('should success create', async () => {
-      const { firestore } = await initFirebaseAdmin()
       await createManualPayment(
         createReq('event1', 'category1') as NextApiRequest,
         (res as unknown) as NextApiResponse,
@@ -88,7 +90,6 @@ describe('manualPayment', () => {
     })
 
     test('should not create when no more stock', async () => {
-      const { firestore } = await initFirebaseAdmin()
       await createManualPayment(
         createReq('event1', 'category3') as NextApiRequest,
         (res as unknown) as NextApiResponse,
@@ -109,7 +110,6 @@ describe('manualPayment', () => {
 
   describe('change', () => {
     test('should success change', async () => {
-      const { firestore } = await initFirebaseAdmin()
       await changeManualPayment(
         changeReq('event1', 'category3', 'category1', 'manualPayment3') as NextApiRequest,
         (res as unknown) as NextApiResponse,
@@ -137,7 +137,6 @@ describe('manualPayment', () => {
     })
 
     test('should not create when no more stock', async () => {
-      const { firestore } = await initFirebaseAdmin()
       await changeManualPayment(
         changeReq('event1', 'category1', 'category3', 'manualPayment1') as NextApiRequest,
         (res as unknown) as NextApiResponse,
@@ -158,7 +157,6 @@ describe('manualPayment', () => {
 
   describe('delete', () => {
     test('should success delete', async () => {
-      const { firestore } = await initFirebaseAdmin()
       await deleteManualPayment(
         deleteReq('event1', 'category1', 'manualPayment1') as NextApiRequest,
         (res as unknown) as NextApiResponse,
