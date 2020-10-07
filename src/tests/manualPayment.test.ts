@@ -6,6 +6,7 @@ import { setupBase } from './lib/setupDB'
 import createManualPayment from '../pages/api/createManualPayment'
 import changeManualPayment from '../pages/api/changeManualPayment'
 import { NextApiRequest, NextApiResponse } from 'next'
+import deleteManualPayment from '../pages/api/deleteManualPayment'
 
 describe('manualPayment', () => {
   const createReq = (eventId, categoryId) => {
@@ -34,6 +35,19 @@ describe('manualPayment', () => {
       },
     }
   }
+
+  const deleteReq = (eventId, categoryId, manualPaymentId) => {
+    return {
+      body: {
+        eventId,
+        manualPayment: {
+          category: categoryId,
+          id: manualPaymentId,
+        },
+      },
+    }
+  }
+
   class Res {
     statusCode: number = null
     error: string = null
@@ -139,6 +153,27 @@ describe('manualPayment', () => {
       expect(category.sold).toBe(50)
       expect(res.statusCode).toBe(500)
       expect(res.error).toBe('チケットの在庫がありません。')
+    })
+  })
+
+  describe('delete', () => {
+    test('should success delete', async () => {
+      const { firestore } = await initFirebaseAdmin()
+      await deleteManualPayment(
+        deleteReq('event1', 'category1', 'manualPayment1') as NextApiRequest,
+        (res as unknown) as NextApiResponse,
+      )
+      const category1 = (
+        await firestore
+          .collection('events')
+          .doc('event1')
+          .collection('categories')
+          .doc('category1')
+          .get()
+      ).data()
+      expect(category1.sold).toBe(48)
+      expect(res.statusCode).toBe(200)
+      expect(res.error).toBeUndefined()
     })
   })
 })
