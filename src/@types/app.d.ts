@@ -1,84 +1,91 @@
-declare module "app" {
-  export type events = event[];
+declare module 'app' {
+  export type events = event[]
 
   export type event = {
-    startDate: FirebaseFirestore.Timestamp;
-    endDate: FirebaseFirestore.Timestamp;
-    photos: string[];
-    id: string;
-    placeName: string;
-    name: string;
-    eventDetails: string;
-    createdUser: string;
-    id?: string;
-    categories?: categories;
-  };
+    startDate: FirebaseFirestore.Timestamp
+    endDate: FirebaseFirestore.Timestamp
+    photos: string[]
+    id: string
+    placeName: string
+    name: string
+    eventDetails: string
+    createdUser: string
+    id?: string
+    categories?: categories
+  }
 
-  export type categories = category[];
+  export type categories = category[]
 
   export type category = {
-    name: string;
-    price: number;
-    createdUser: string;
-    stock: number;
-    sold: number;
-    public: boolean;
-    index: number;
-    id?: string;
-  };
+    name: string
+    price: number
+    createdUser: string
+    stock: number
+    sold: number
+    public: boolean
+    index: number
+    id?: string
+  }
 
-  export type payments = payment[];
+  export type payments = payment[]
 
   export type payment = {
-    category: category.id;
-    event: event.id;
-    accepted: boolean;
-    error: string;
-    buyer: string;
-    seller: string;
+    category: category.id
+    event: event.id
+    accepted: boolean
+    error: string
+    buyer: string
+    seller: string
     refund: {
-      detailText: string;
-      reason: string;
-      reasonText: string;
-      refunded?: boolean;
-      rejected?: boolean;
-    };
-    createdAt: firebase.firestore.Timestamp;
-    stripe: string;
-    id?: string;
-    errorInfo?: string;
-  };
+      detailText: string
+      reason: string
+      reasonText: string
+      refunded?: boolean
+      rejected?: boolean
+    }
+    createdAt: firebase.firestore.Timestamp
+    stripe: string
+    id?: string
+    errorInfo?: string
+  }
 
-  export type notifies = notify[];
+  export type manualPayment = {
+    id?: string
+    name: string
+    paid: boolean
+    category: category.id
+  }
+
+  export type notifies = notify[]
 
   export type notify = {
-    read: boolean;
-    text: string;
-    url: string;
-    createdAt: firebase.firestore.Timestamp;
-  };
+    read: boolean
+    text: string
+    url: string
+    createdAt: firebase.firestore.Timestamp
+  }
 
-  export type tickets = ticket[];
+  export type tickets = ticket[]
 
   export type ticket = {
-    category: category;
+    category: category
     payment: {
-      id: string;
-      category: any;
-      event: any;
-      accepted: boolean;
-      error: string;
-      buyer: string;
-      seller: string;
+      id: string
+      category: any
+      event: any
+      accepted: boolean
+      error: string
+      buyer: string
+      seller: string
       refund: {
-        detailText: string;
-        reason: string;
-        reasonText: string;
-        refunded?: boolean;
-        rejected?: boolean;
-      };
-      createdAt: firebase.firestore.Timestamp;
-      stripe: string;
-    };
-  };
+        detailText: string
+        reason: string
+        reasonText: string
+        refunded?: boolean
+        rejected?: boolean
+      }
+      createdAt: firebase.firestore.Timestamp
+      stripe: string
+    }
+  }
 }

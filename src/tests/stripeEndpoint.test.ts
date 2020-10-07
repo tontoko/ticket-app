@@ -11,21 +11,15 @@ import initFirebaseAdmin from '../lib/initFirebaseAdmin'
 import { setupBase } from './lib/setupDB'
 
 describe('stripeEndpoint', () => {
+  let refunded = false
   beforeEach(async () => {
+    await firebase.clearFirestoreData({ projectId: dev.projectId })
     await setupBase()
+    refunded = false
   })
-
-  afterEach(async () => await firebase.clearFirestoreData({ projectId: dev.projectId }))
-
   describe('payment_intent_succeeded', () => {
-    let refunded = false
-    const refundFn = async (props) =>
-      ((refunded = true) as unknown) as Stripe.Response<Stripe.Refund>
+    const refundFn = async () => ((refunded = true) as unknown) as Stripe.Response<Stripe.Refund>
     jest.spyOn(stripe.refunds, 'create').mockImplementation(refundFn)
-
-    beforeEach(async () => {
-      refunded = false
-    })
 
     test('payment should success when data correct', async () => {
       const { firestore } = await initFirebaseAdmin()
