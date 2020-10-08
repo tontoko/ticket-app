@@ -1,15 +1,19 @@
 import 'jest'
-import * as firebase from '@firebase/testing'
+import * as testFirebase from '@firebase/testing'
 import { dev } from '@/ticket-app'
 import { setupBase } from './lib/setupDB'
 import createManualPayment from '../pages/api/createManualPayment'
 import changeManualPayment from '../pages/api/changeManualPayment'
 import { NextApiRequest, NextApiResponse } from 'next'
 import deleteManualPayment from '../pages/api/deleteManualPayment'
+import firebase from 'firebase-admin'
 
 describe('manualPayment', () => {
-  const app = firebase.initializeAdminApp({ projectId: dev.projectId })
+  const app = testFirebase.initializeAdminApp({ projectId: dev.projectId })
   const firestore = app.firestore()
+  jest.spyOn(firebase.auth(), 'verifyIdToken').mockImplementation(async () => {
+    return null
+  })
 
   const createReq = (eventId, categoryId) => {
     return {
@@ -71,7 +75,7 @@ describe('manualPayment', () => {
     res = new Res()
     return await setupBase(firestore)
   })
-  afterEach(async () => await firebase.clearFirestoreData({ projectId: dev.projectId }))
+  afterEach(async () => await testFirebase.clearFirestoreData({ projectId: dev.projectId }))
 
   describe('create', () => {
     test('should success create', async () => {
