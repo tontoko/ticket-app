@@ -22,9 +22,9 @@ const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey = env === 'prod' ? 'test' : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
 import { dev, prod } from '@/ticket-app'
-import { firebaseCloudMessaging } from '../lib/webPush'
 const firebaseConfig = process.env.ENV === 'prod' ? prod : dev
 const fuego = new Fuego(firebaseConfig)
+// ローカルのFirestoreエミュレータに接続する設定
 // if (location.hostname === "localhost") {
 //   fuego.db.settings({
 //     host: "localhost:8080",
@@ -42,12 +42,12 @@ const App = ({ Component, pageProps }: AppProps) => {
   const cookies = parseCookies()
   const [tmpUser, setTmpUser] = useState(cookies.tmpUser && JSON.parse(cookies.tmpUser))
   const [user, setUser] = useState<firebase.User>()
-  let listner = () => {
+  let listner: firebase.Unsubscribe = () => {
     return
   }
 
   useEffect(() => {
-    firebaseCloudMessaging.init(env)
+    import('../lib/webPush').then(({ firebaseCloudMessaging }) => firebaseCloudMessaging.init(env))
   }, [])
 
   useEffect(() => {
@@ -108,6 +108,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         }
       })
     })()
+    return listner
   }, [router, router.pathname, fuego])
 
   useEffect(() => {
