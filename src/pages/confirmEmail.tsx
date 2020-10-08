@@ -1,40 +1,39 @@
-import React, {useState, useEffect} from 'react'
-import {useRouter} from 'next/router'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import { fuego } from '@nandorojo/swr-firestore'
 
 const ConfirmEmail = ({ user }) => {
-  const router = useRouter();
-  const [msg, setMsg] = useState("");
-  const [loading, setLoading] = useState(true);
+  const router = useRouter()
+  const [msg, setMsg] = useState('')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       // クライアント側の認証を待つuser
-      if (!user || !loading) return;
-      sendEmail();
-    })();
-  }, [user]);
+      if (!user || !loading) return
+      sendEmail()
+    })()
+  }, [user])
 
   const sendEmail = async () => {
     try {
-      await user.sendEmailVerification();
-      setLoading(false);
-      setMsg("登録されたメールアドレスに認証用メールを送信しました。");
+      await user.sendEmailVerification()
+      setLoading(false)
+      setMsg('登録されたメールアドレスに認証用メールを送信しました。')
     } catch (e) {
-      console.log(e);
-      setLoading(false);
-      setMsg(errorMsg(e));
+      console.log(e)
+      setLoading(false)
+      setMsg(errorMsg(e))
     }
     setTimeout(async () => {
-      fuego.auth().signOut();
-      router.push("/login");
-    }, 5000);
-  };
+      fuego.auth().signOut()
+    }, 5000)
+  }
 
-  if (loading) return <Loading />;
-  return <h4>{msg}</h4>;
-};
+  if (loading) return <Loading />
+  return <h4>{msg}</h4>
+}
 
 export default ConfirmEmail

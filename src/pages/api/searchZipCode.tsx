@@ -1,4 +1,3 @@
-import getSession from '@/src/lib/session'
 import { NextApiHandler } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { Client } from '@googlemaps/google-maps-services-js'
@@ -9,7 +8,7 @@ const gMapKey =
 const endpoint: NextApiHandler = async (req, res) => {
   try {
     const { token, zip } = req.body
-    if (!zip) throw new Error('zipcode was not given')
+    if (!zip) throw new Error('正しくない郵便番号です。')
     const { firebase } = await initFirebaseAdmin()
     await firebase.auth().verifyIdToken(token)
 
@@ -22,11 +21,10 @@ const endpoint: NextApiHandler = async (req, res) => {
         language: 'ja',
       },
     })
-
     res.status(200).json({ address: result.data.results[0].address_components })
   } catch (error) {
     console.log(error)
-    res.status(400).json({ error })
+    res.status(500).json({ error: error.message })
   }
 }
 
