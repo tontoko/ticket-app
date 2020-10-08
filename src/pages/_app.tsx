@@ -72,6 +72,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             },
           )
           if (
+            window.location.pathname !== '/confirmEmail' &&
             !currentUser.emailVerified &&
             currentUser.providerData[0].providerId === 'password' &&
             !window.location.pathname.match(/^\/__\/auth\/action/)

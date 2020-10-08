@@ -144,6 +144,7 @@ export const UpdateUser = ({ user }) => {
           zip,
         }),
       })
+      if (res.status !== 200) throw new Error((await res.json()).error)
       const { address } = await res.json()
       setForm({
         ...form,
