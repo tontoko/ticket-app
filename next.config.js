@@ -4,10 +4,10 @@ const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 
 module.exports = withPWA(
   withMDX({
-    target: "serverless",
     cssModule: true,
     pwa: {
-      dest: "public",
+      dest: 'public',
+      disable: process.env.NODE_ENV === "development",
     },
     webpack: (config) => {
       config.plugins.push(

@@ -5,7 +5,7 @@ import {
 } from 'reactstrap';
 import Link from 'next/link'
 
-export default () => {
+const Events = () => {
     return (
         <>
             <Form inline style={{ marginTop: "1em" }}>
@@ -97,3 +97,5 @@ export default () => {
         </>
     );
 };
+
+export default Events

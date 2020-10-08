@@ -2,16 +2,17 @@ import { Card, CardBody, Row, Col, Button } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckSquare, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { encodeQuery } from "../lib/parseQuery";
+import { encodeQuery } from "@/src/lib/parseQuery";
+import { ticket, event } from "app";
 
-const Tickets = ({ticket, event: event}) => {
+const Tickets = ({ user, ticket, event }: {user:firebase.User, ticket: ticket, event: event}) => {
     return (
       <Card style={{ marginBottom: "0.5em" }}>
         <CardBody>
           <p>
-            {ticket.name}: {ticket.price}円
+            {ticket.category.name}: {ticket.category.price}円
           </p>
-          {ticket.accepted ? (
+          {ticket.payment.accepted ? (
             <p>
               <FontAwesomeIcon
                 icon={faCheckSquare}
@@ -30,13 +31,13 @@ const Tickets = ({ticket, event: event}) => {
           )}
           <Row>
             {(() => {
-              if (ticket.error) {
+              if (ticket.payment.error) {
                 return (
                   <Col>
-                    <p>購入失敗 ({ticket.error})</p>
+                    <p>購入失敗 ({ticket.payment.error})</p>
                   </Col>
                 );
-              } else if (ticket.refund) {
+              } else if (ticket.payment.refund?.refunded) {
                 return (
                   <Col>
                     <p>返金処理が行われました</p>
@@ -45,13 +46,19 @@ const Tickets = ({ticket, event: event}) => {
               } else {
                 return (
                   <>
-                    {!ticket.accepted && (
+                    {!ticket.payment.accepted && (
                       <Col xs="12" style={{ marginBottom: "0.2em" }}>
                         <Link
                           href={{
                             pathname: `/events/${event.id}/reception/show`,
                             query: {
-                              ticket: encodeQuery(JSON.stringify(ticket)),
+                              ticket: encodeQuery(
+                                JSON.stringify({
+                                  paymentId: ticket.payment.id,
+                                  seller: ticket.payment.seller,
+                                  buyer: ticket.payment.buyer,
+                                })
+                              ),
                             },
                           }}
                         >
@@ -61,9 +68,9 @@ const Tickets = ({ticket, event: event}) => {
                     )}
                     <Col xs="12">
                       <Link
-                        href={`/events/${event.id}/refund/${ticket.paymentId}`}
+                        href={`/users/${user.uid}/payments/${ticket.payment.id}`}
                       >
-                        <Button color="danger">返金申請</Button>
+                        <Button color="secondary">詳細</Button>
                       </Link>
                     </Col>
                   </>

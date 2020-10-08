@@ -1,46 +1,49 @@
-import initFirebase from '@/src/lib/initFirebase'
+import storage from '@/src/lib/storage'
 
-export default async (img:string, uid: string, size?: string) => {
-  const {firebase, storage} = await initFirebase()
-  
-  if (!img) return await storage.ref('event_default_360x360.jpg').getDownloadURL() as string
-  
-  const ref = storage.ref(`${uid}/events`)
-  
-  if (size !== '800') {
+const getImg = async (img: string, uid: string, size?: '800' | '360') => {
+  if (!img) return '/images/event_default_360x360.jpg'
 
+  const ref = (await storage()).ref(`${uid}/events`)
+
+  if (size === '360') {
     try {
       const url: string = await ref.child(`${img}_360x360.jpg`).getDownloadURL()
-      
+
       return url
-    } catch { }
+    } catch {
+      console.warn(`${img}_360x360.jpg not found`)
+    }
 
     try {
       const url: string = await ref.child(`${img}.jpg`).getDownloadURL()
       return url
     } catch {
-      return await storage.ref('event_default_360x360.jpg').getDownloadURL() as string
+      return (await (await storage()).ref('event_default_360x360.jpg').getDownloadURL()) as string
     }
+  }
 
-  } else {
-    try {
-      const url: string = await ref.child(`${img}_800x800.jpg`).getDownloadURL()
+  try {
+    const url: string = await ref.child(`${img}_800x800.jpg`).getDownloadURL()
 
-      return url
-    } catch { }
+    return url
+  } catch {
+    console.warn(`${img}_800x800.jpg not found`)
+  }
 
-    try {
-      const url: string = await ref.child(`${img}_360x360.jpg`).getDownloadURL()
+  try {
+    const url: string = await ref.child(`${img}_360x360.jpg`).getDownloadURL()
 
-      return url
-    } catch { }
+    return url
+  } catch {
+    console.warn(`${img}_800x800.jpg not found`)
+  }
 
-    try {
-      const url: string = await ref.child(`${img}.jpg`).getDownloadURL()
-      return url
-    } catch {
-      return await storage.ref('event_default_800x800.jpg').getDownloadURL() as string
-    }
-
+  try {
+    const url: string = await ref.child(`${img}.jpg`).getDownloadURL()
+    return url
+  } catch {
+    return '/images/event_default_360x360.jpg'
   }
 }
+
+export default getImg

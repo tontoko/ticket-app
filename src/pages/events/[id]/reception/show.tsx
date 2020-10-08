@@ -2,26 +2,29 @@ import QRCode from "qrcode.react"
 import {
     Col, Row
 } from 'reactstrap';
-import { GetServerSideProps } from "next";
-import isLogin from "@/src/lib/isLogin";
 import { useState, useEffect } from "react";
 import Loading from '@/src/components/loading'
 import { decodeQuery, encodeQuery } from "@/src/lib/parseQuery";
-import initFirebase from "@/src/lib/initFirebase";
+import { useRouter } from "next/router";
+import withAuth from "@/src/lib/withAuth";
 
-export default ({ query, CSRUser }) => {
+const Show = () => {
+    const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [value, setValue] = useState('')
     
     useEffect(() => {
+        if (!router) return
         (async () => {
-            const decodedQuery = JSON.parse(decodeQuery(query.ticket))
+            const decodedQuery = JSON.parse(decodeQuery(router.query.ticket as string));
             const { paymentId, seller, buyer } = decodedQuery
             const encodedQuery = encodeQuery(JSON.stringify({ paymentId, seller, buyer }))
-            setValue(`https://${document.domain}/events/${query.id}/reception/qrReader?params=${encodedQuery}`)
+            setValue(
+              `https://${document.domain}/events/${router.query.id}/reception/qrReader?params=${encodedQuery}`
+            );
             setLoading(false)
         })()
-    }, [CSRUser])
+    }, [router])
 
     if (loading) return <Loading/>
 
@@ -39,8 +42,4 @@ export default ({ query, CSRUser }) => {
     )
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    const { user } = await isLogin(ctx, 'redirect')
-
-    return { props: { user, query: ctx.query } }
-}
+export default withAuth(Show)
