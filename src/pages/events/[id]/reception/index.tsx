@@ -48,7 +48,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
     if (!newManualPayment.name) return alert.error('名前が入力されていません。')
     try {
       setLoading(true)
-      const token = fuego.auth().currentUser.getIdToken
+      const token = await fuego.auth().currentUser.getIdToken()
       const res = await fetch('/api/createManualPayment', {
         method: 'POST',
         headers: new Headers({
@@ -71,7 +71,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
     if (!newValue.name) return alert.error('名前が入力されていません。')
     try {
       setLoading(true)
-      const token = fuego.auth().currentUser.getIdToken
+      const token = await fuego.auth().currentUser.getIdToken()
       const res = await fetch('/api/changeManualPayment', {
         method: 'POST',
         headers: new Headers({
@@ -94,7 +94,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
       try {
         setLoading(true)
         setModal(false)
-        const token = fuego.auth().currentUser.getIdToken
+        const token = await fuego.auth().currentUser.getIdToken()
         const res = await fetch('/api/deleteManualPayment', {
           method: 'POST',
           headers: new Headers({
