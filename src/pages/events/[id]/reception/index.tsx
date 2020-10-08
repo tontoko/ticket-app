@@ -6,7 +6,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { useAlert } from 'react-alert'
 import { event, manualPayment } from 'app'
 import withAuth from '@/src/lib/withAuth'
-import { useCollection } from '@nandorojo/swr-firestore'
+import { fuego, useCollection } from '@nandorojo/swr-firestore'
 
 const Reception = ({ categories, id, setModal, setModalInner }) => {
   const alert = useAlert()
@@ -48,12 +48,13 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
     if (!newManualPayment.name) return alert.error('名前が入力されていません。')
     try {
       setLoading(true)
+      const token = fuego.auth().currentUser.getIdToken
       const res = await fetch('/api/createManualPayment', {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json',
         }),
-        body: JSON.stringify({ eventId: id, newManualPayment }),
+        body: JSON.stringify({ eventId: id, newManualPayment, token }),
       })
       if (res.status !== 200) throw new Error((await res.json()).error)
       setNewManualPayment({ ...newManualPayment, name: '' })
@@ -70,12 +71,13 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
     if (!newValue.name) return alert.error('名前が入力されていません。')
     try {
       setLoading(true)
+      const token = fuego.auth().currentUser.getIdToken
       const res = await fetch('/api/changeManualPayment', {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/json',
         }),
-        body: JSON.stringify({ eventId: id, beforeValue, newValue }),
+        body: JSON.stringify({ eventId: id, beforeValue, newValue, token }),
       })
       if (res.status !== 200) throw new Error((await res.json()).error)
       await revalidate()
@@ -92,12 +94,13 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
       try {
         setLoading(true)
         setModal(false)
+        const token = fuego.auth().currentUser.getIdToken
         const res = await fetch('/api/deleteManualPayment', {
           method: 'POST',
           headers: new Headers({
             'Content-Type': 'application/json',
           }),
-          body: JSON.stringify({ eventId: id, manualPayment }),
+          body: JSON.stringify({ eventId: id, manualPayment, token }),
         })
         if (res.status !== 200) throw new Error((await res.json()).error)
         await revalidate()

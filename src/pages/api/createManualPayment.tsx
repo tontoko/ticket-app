@@ -4,8 +4,9 @@ import { NextApiHandler } from 'next'
 const createManualPayment: NextApiHandler = async (req, res) => {
   try {
     const { body } = req
-    const { eventId, newManualPayment } = body
-    const { firestore } = await initFirebaseAdmin()
+    const { eventId, newManualPayment, token } = body
+    const { firebase, firestore } = await initFirebaseAdmin()
+    await firebase.auth().verifyIdToken(token)
 
     await firestore.runTransaction(async (transaction) => {
       const categoryRef = firestore

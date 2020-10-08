@@ -4,8 +4,9 @@ import { NextApiHandler } from 'next'
 const deleteManualPayment: NextApiHandler = async (req, res) => {
   try {
     const { body } = req
-    const { eventId, manualPayment } = body
-    const { firestore } = await initFirebaseAdmin()
+    const { eventId, manualPayment, token } = body
+    const { firebase, firestore } = await initFirebaseAdmin()
+    await firebase.auth().verifyIdToken(token)
 
     await firestore.runTransaction(async (transaction) => {
       const categoryRef = firestore
