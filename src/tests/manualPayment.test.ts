@@ -57,7 +57,10 @@ describe('manualPayment', () => {
       this.statusCode = code
       return this
     }
-    end(responce?: { error: string }) {
+    end() {
+      return this
+    }
+    json(responce?: { error: string }) {
       this.error = responce?.error
       return this
     }
