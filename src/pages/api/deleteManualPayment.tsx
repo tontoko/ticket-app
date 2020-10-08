@@ -26,7 +26,7 @@ const deleteManualPayment: NextApiHandler = async (req, res) => {
     })
     res.status(200).end()
   } catch (error) {
-    res.status(500).end({ error: error.message })
+    res.status(500).json({ error: error.message })
   }
 }
 

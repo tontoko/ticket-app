@@ -20,7 +20,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
   const [newManualPayment, setNewManualPayment] = useState<manualPayment>({
     name: '',
     category: categories.length > 0 ? categories[0].id : '',
-    paid: true,
+    paid: false,
   })
 
   const [tmpManualPayments, setTmpManualPayments] = useState<manualPayment[]>(manualPayments)
@@ -30,6 +30,17 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
   useEffect(() => {
     setTmpManualPayments(manualPayments)
   }, [manualPayments])
+
+  const apiErrorHandle = (e) => {
+    let msg = e.message
+    if (e.message !== 'チケットの在庫がありません。') {
+      msg = 'エラーが発生しました。リロードします…'
+      setTimeout(() => {
+        location.reload()
+      }, 1000)
+    }
+    alert.error(msg)
+  }
 
   const createManualPayment = async () => {
     if (loading) return
@@ -49,8 +60,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
       await revalidate()
       alert.success('手動受付リストを更新しました。')
     } catch (e) {
-      alert.error(e.message)
-      if (e.message !== 'チケットの在庫がありません。') setTimeout(() => location.reload(), 1000)
+      apiErrorHandle(e)
     }
     setLoading(false)
   }
@@ -71,14 +81,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
       await revalidate()
       alert.success('手動受付リストを更新しました。')
     } catch (e) {
-      let msg = e.message
-      if (e.message !== 'チケットの在庫がありません。') {
-        msg = 'エラーが発生しました。リロードします…'
-        setTimeout(() => {
-          location.reload()
-        }, 1000)
-      }
-      alert.error(msg)
+      apiErrorHandle(e)
     }
     setLoading(false)
   }
@@ -100,11 +103,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
         await revalidate()
         alert.success('項目を削除しました。')
       } catch (e) {
-        alert.error('エラーが発生しました。リロードします…')
-        if (e.message !== 'チケットの在庫がありません。')
-          setTimeout(() => {
-            location.reload()
-          }, 2000)
+        apiErrorHandle(e)
       }
       setLoading(false)
     }
@@ -244,8 +243,8 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
                       setNewManualPayment({ ...newManualPayment, paid: e.target.value === 'true' })
                     }
                   >
-                    <option value="true">○</option>
                     <option value="false">×</option>
+                    <option value="true">○</option>
                   </Input>
                 </td>
                 <td style={{ width: '6em' }}>

@@ -7,6 +7,10 @@ const changeManualPayment: NextApiHandler = async (req, res) => {
     const { eventId, beforeValue, newValue } = body
     const { firestore } = await initFirebaseAdmin()
 
+    delete newValue.id
+    delete newValue.exist
+    delete newValue.hasPendingWrites
+
     await firestore.runTransaction(async (transaction) => {
       const newCategoryRef = firestore
         .collection('events')
@@ -41,7 +45,7 @@ const changeManualPayment: NextApiHandler = async (req, res) => {
     })
     res.status(200).end()
   } catch (error) {
-    res.status(500).end({ error: error.message })
+    res.status(500).json({ error: error.message })
   }
 }
 
