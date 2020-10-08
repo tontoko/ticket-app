@@ -18,14 +18,14 @@ import { Elements } from '@stripe/react-stripe-js'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import checkAllowNoLoginUrlList from '@/src/lib/checkAllowNoLoginUrlList'
 import { setCookie, destroyCookie, parseCookies } from 'nookies'
-const env = process.env.ENV === 'prod' ? 'prod' : 'dev'
+const env = process.env.NEXT_PUBLIC_ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey =
   env === 'prod'
     ? 'pk_live_1uhgTSRLmCH7K0aZIfNgfu0c007fLyl8aV'
     : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
 import { dev, prod } from '@/ticket-app'
-const firebaseConfig = process.env.ENV === 'prod' ? prod : dev
+const firebaseConfig = env === 'prod' ? prod : dev
 const fuego = new Fuego(firebaseConfig)
 // ローカルのFirestoreエミュレータに接続する設定
 // if (location.hostname === "localhost") {

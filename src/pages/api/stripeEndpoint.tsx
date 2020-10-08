@@ -7,7 +7,7 @@ import Cors from 'micro-cors'
 import { category, payment } from 'app'
 
 const endpointSecret =
-  process.env.ENV === 'prod'
+  process.env.SERVER_ENV === 'prod'
     ? process.env.STRIPE_PAYMENT_ENDPOINT_PROD
     : process.env.STRIPE_PAYMENT_ENDPOINT_DEV
 
