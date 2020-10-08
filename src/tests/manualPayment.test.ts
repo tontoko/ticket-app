@@ -89,7 +89,7 @@ describe('manualPayment', () => {
       ).data()
       expect(category.sold).toBe(50)
       expect(res.statusCode).toBe(200)
-      expect(res.error).toBeUndefined()
+      expect(res.error).toBeFalsy()
     })
 
     test('should not create when no more stock', async () => {
@@ -136,7 +136,7 @@ describe('manualPayment', () => {
       ).data()
       expect(category3.sold).toBe(49)
       expect(res.statusCode).toBe(200)
-      expect(res.error).toBeUndefined()
+      expect(res.error).toBeFalsy()
     })
 
     test('should not create when no more stock', async () => {
@@ -174,7 +174,7 @@ describe('manualPayment', () => {
       ).data()
       expect(category1.sold).toBe(48)
       expect(res.statusCode).toBe(200)
-      expect(res.error).toBeUndefined()
+      expect(res.error).toBeFalsy()
     })
   })
 })
