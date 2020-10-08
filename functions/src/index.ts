@@ -16,14 +16,17 @@ const stripeEnv = functions.config().stripe as stripeEnv
 const stripeSecret =
   process.env.GCLOUD_PROJECT === 'ticket-app-d3f5a' ? stripeEnv.apikey.prod : stripeEnv.apikey.dev
 // @ts-ignore
-const stripe = new Stripe(stripeSecret, { apiVersion: null })
+const stripe = new Stripe(stripeSecret, { apiVersion: null, typescript: true })
 
 exports.createUser = functions.auth.user().onCreate(async (user) => {
   try {
     const stripeAccount = await stripe.accounts.create({
       country: 'JP',
       type: 'custom',
-      requested_capabilities: ['card_payments', 'transfers'],
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
       email: user.email,
     })
     const usersRef = firestore.collection('users')

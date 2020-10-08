@@ -69,6 +69,7 @@ node_modules/
 .next/
 
 ticket-app-admin-dev.json
+ticket-app-admin-prod.json
 
 .DS_Store
 
