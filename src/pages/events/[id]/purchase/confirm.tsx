@@ -212,9 +212,9 @@ const Confirmation = ({ user }: { user: firebase.User }) => {
         <FormGroup check style={{ marginRight: '1em' }}>
           <Label>
             <Link href="/termsOfUse">
-              <a>利用規約</a>
+              <a>利用規約及び特定商取引法に基づく表示</a>
             </Link>
-            を確認の上同意します。
+            を確認の上、同意します。
           </Label>
         </FormGroup>
       </Row>
