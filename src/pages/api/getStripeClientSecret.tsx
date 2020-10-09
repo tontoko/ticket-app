@@ -1,4 +1,4 @@
-import getImg from '@/src/lib/getImg'
+import getImg from '@/src/lib/getImgSSR'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import stripe from '@/src/lib/stripe'
 import { category, event } from 'app'
