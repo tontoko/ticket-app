@@ -265,12 +265,6 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
   )
 }
 
-// export const getStaticPaths: GetStaticPaths = async () => {
-//     const { firestore } = await initFirebaseAdmin()
-//     const paths = await Promise.all((await firestore.collection('events').get()).docs.map(doc => `/events/${doc.id}/reception`))
-//     return { paths, fallback: true }
-// }
-
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const { id } = query
   const { firestore } = await initFirebaseAdmin()
