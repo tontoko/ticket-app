@@ -19,12 +19,14 @@ import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
 import { event, category } from 'app'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
+import { useAlert } from 'react-alert'
 
 export const Purchase = ({ user, event, categories, photoUrls }) => {
   const router = useRouter()
   const familyNameRef = useRef(null)
   const firstNameRef = useRef(null)
   const emailRef = useRef(null)
+  const alert = useAlert()
   const [invalidEmail, setInvalidEmail] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState(categories[0]?.id)
 
@@ -55,7 +57,7 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
       !firstNameRef.current.value ||
       !familyNameRef.current.value
     )
-      return
+      return alert.error('お名前・メールアドレスを入力してください。')
     const pathname = `/events/${router.query.id}/purchase/confirm`
     // クエリーをまるごとbase64化
     router.push({
@@ -80,22 +82,10 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
         <Label>お名前</Label>
         <Row>
           <Col xs="6">
-            <Input
-              type="text"
-              name="familyName"
-              placeholder="性"
-              innerRef={familyNameRef}
-              invalid={!familyNameRef.current?.value}
-            />
+            <Input type="text" name="familyName" placeholder="性" innerRef={familyNameRef} />
           </Col>
           <Col xs="6">
-            <Input
-              type="text"
-              name="firstName"
-              placeholder="名"
-              innerRef={firstNameRef}
-              invalid={!firstNameRef.current?.value}
-            />
+            <Input type="text" name="firstName" placeholder="名" innerRef={firstNameRef} />
           </Col>
         </Row>
       </FormGroup>

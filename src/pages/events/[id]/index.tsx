@@ -10,6 +10,7 @@ import {
   CarouselControl,
   CarouselIndicators,
   FormGroup,
+  Label,
 } from 'reactstrap'
 import getImg from '@/src/lib/getImgSSR'
 import { GetStaticProps, GetStaticPaths } from 'next'
@@ -198,6 +199,9 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
                 追加のチケットを購入する
               </Button>
             </Link>
+            <Label style={{ fontSize: 'small', color: 'gray' }}>
+              利用規約及び特定商取引法に基づく表示をご確認ください。
+            </Label>
           </Col>
         </Row>
       )
@@ -236,6 +240,9 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
                 チケットを購入する
               </Button>
             </Link>
+            <Label style={{ fontSize: 'small', color: 'gray' }}>
+              利用規約及び特定商取引法に基づく表示をご確認ください。
+            </Label>
           </Col>
         </Row>
       )
