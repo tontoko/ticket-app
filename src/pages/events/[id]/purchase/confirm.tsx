@@ -122,8 +122,7 @@ const Confirmation = ({ user }: { user: firebase.User }) => {
   const paymentComplete = () => {
     setComplete(true)
     let timer = timerRef.current
-    let count: NodeJS.Timeout
-    setInterval(() => {
+    const count = setInterval(() => {
       if (timer <= 1) {
         clearInterval(count)
         router.push(`/users/${user.uid}/myTickets`)
