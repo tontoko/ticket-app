@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { FormGroup, Button, Row, Col } from 'reactstrap'
-import { GetServerSideProps, GetStaticPaths, GetStaticProps } from 'next'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
+import { Button, Row, Col } from 'reactstrap'
 import moment from 'moment'
 import Link from 'next/link'
 import Loading from '@/src/components/loading'
@@ -10,7 +8,6 @@ import withAuth from '@/src/lib/withAuth'
 import { fuego, useDocument } from '@nandorojo/swr-firestore'
 import { event, payment, category } from 'app'
 import { useAlert } from 'react-alert'
-import { encodeQuery } from '@/src/lib/parseQuery'
 
 const Show = ({ user }) => {
   const [loading, setLoading] = useState(true)
@@ -172,55 +169,10 @@ const Show = ({ user }) => {
       <p>{`価格: ${category.price} 円`}</p>
       <p>{`購入日時: ${moment(payment.createdAt.toDate()).format('YYYY年 M月D日 H:mm')}`}</p>
       <p>{`受付済み: ${payment.accepted ? 'はい' : 'いいえ'}`}</p>
-      <h4>返金</h4>
+      <h4 style={{ marginTop: '1.5em' }}>返金</h4>
       {refundForm}
     </>
   )
 }
-
-// export const getStaticPaths: GetStaticPaths = async () => {
-//   const { firestore } = await initFirebaseAdmin();
-//   let paths = []
-//   await Promise.all((await firestore.collection("events").get()).docs.map(
-//     async (event) =>
-//       (await firestore.collection("payments").get()).docs.map(async (payment) => {
-//         return paths.push({
-//           params: { id: event.id, paymentId: payment.id },
-//         });
-//       })
-//   ));
-//   return { paths, fallback: true };
-// };
-
-// export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-//   const { firestore } = await initFirebaseAdmin();
-//   const { id, paymentId } = query
-//   const payment = (await firestore
-//     .collection("payments")
-//     .doc(paymentId as string)
-//     .get()).data()
-
-//   const eventSnapShot = await firestore.collection("events").doc(payment.event).get()
-//   const eventData = eventSnapShot.data()
-//   const event = {
-//     ...eventData,
-//     startDate: eventData.startDate.toMillis(),
-//     endDate: eventData.endDate.toMillis(),
-//     id: eventSnapShot.id,
-//   };
-//   const category = (
-//     await firestore
-//       .collection("events")
-//       .doc(payment.event)
-//       .collection("categories")
-//       .doc(payment.category)
-//       .get()
-//   ).data();
-
-//   return {
-//     props: { payment, event, category },
-//     // revalidate: 1,
-//   };
-// };
 
 export default withAuth(Show)
