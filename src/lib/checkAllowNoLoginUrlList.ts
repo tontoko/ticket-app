@@ -1,13 +1,15 @@
-const checkAllowNoLoginUrlList = () => {
+import { NextRouter } from 'next/router'
+
+const checkAllowNoLoginUrlList = (router: NextRouter) => {
   return (
-    window.location.pathname === '/' ||
-    window.location.pathname === '/login' ||
-    window.location.pathname === '/register' ||
-    window.location.pathname === '/termsOfUse' ||
-    window.location.pathname === '/forgetPassword' ||
-    window.location.pathname === '/contact' ||
-    !!window.location.pathname.match(/^\/__\/auth\/action/) ||
-    !!window.location.pathname.match(/^\/events\/[^/]+\/*/)
+    router.pathname === '/' ||
+    router.pathname === '/login' ||
+    router.pathname === '/register' ||
+    router.pathname === '/termsOfUse' ||
+    router.pathname === '/forgetPassword' ||
+    router.pathname === '/contact' ||
+    !!router.pathname.match(/^\/__\/auth\/action/) ||
+    !!router.pathname.match(/^\/events\/[^/]+\/*/)
   )
 }
 
