@@ -62,18 +62,18 @@ const App = ({ Component, pageProps }: AppProps) => {
           router.pathname !== '/confirmEmail' &&
           !router.pathname.match(/^\/__\/auth\/action/)
         ) {
-          router.push('/confirmEmail')
+          return router.push('/confirmEmail')
         }
         if (
           router.pathname.match(/^\/users\//) &&
           router.query.id &&
           router.query.id !== currentUser.uid
         ) {
-          fuego.auth().signOut()
+          return fuego.auth().signOut()
         }
         if (router.pathname === '/termsOfUse') return
         if (checkAllowNoLoginUrlList(router)) {
-          router.push({
+          return router.push({
             pathname: `/users/${currentUser.uid}`,
             query: { msg: encodeQuery('ログインしました') },
           })
@@ -82,7 +82,7 @@ const App = ({ Component, pageProps }: AppProps) => {
       if (!currentUser) {
         setUser(null)
         if (!checkAllowNoLoginUrlList(router)) {
-          router.push({
+          return router.push({
             pathname: '/login',
             query: { msg: encodeQuery('ログアウトしました') },
           })
