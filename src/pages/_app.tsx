@@ -51,9 +51,8 @@ const App = ({ Component, pageProps }: AppProps) => {
   }, [])
 
   useEffect(() => {
-    if (!router) return
+    if (!router || user !== undefined) return
     listner = fuego.auth().onAuthStateChanged((currentUser) => {
-      if (user?.uid === currentUser?.uid) return
       if (currentUser) {
         setUser(currentUser)
         if (
