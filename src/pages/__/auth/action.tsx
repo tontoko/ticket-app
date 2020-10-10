@@ -19,7 +19,7 @@ const Action = ({ user }) => {
 
   useEffect(() => {
     ;(async () => {
-      if (!loading || !router?.query) return
+      if (!loading || !router || !router.query.mode) return
       mode.current = router.query.mode as string
       oobCode.current = router.query.oobCode as string
       try {
@@ -48,7 +48,7 @@ const Action = ({ user }) => {
         setTimeout(() => redirectAfterUpdate(), 5000)
       }
     })()
-  }, [router?.query])
+  }, [router])
 
   const redirectAfterUpdate = async (msg?: string) => {
     if (user) await fuego.auth().signOut()
