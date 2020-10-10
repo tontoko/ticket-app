@@ -28,6 +28,13 @@ exports.createUser = functions.auth.user().onCreate(async (user) => {
         transfers: { requested: true },
       },
       email: user.email,
+      settings: {
+        payouts: {
+          schedule: {
+            interval: 'monthly',
+          },
+        },
+      },
     })
     const usersRef = firestore.collection('users')
     await usersRef.doc(user.uid).set({
