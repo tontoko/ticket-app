@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import { fuego } from '@nandorojo/swr-firestore'
@@ -16,7 +16,7 @@ const ConfirmEmail = ({ user }) => {
     })()
   }, [user])
 
-  const sendEmail = async () => {
+  const sendEmail = useCallback(async () => {
     try {
       await user.sendEmailVerification()
       setLoading(false)
@@ -29,7 +29,7 @@ const ConfirmEmail = ({ user }) => {
     setTimeout(async () => {
       fuego.auth().signOut()
     }, 5000)
-  }
+  }, [])
 
   if (loading) return <Loading />
   return <h4>{msg}</h4>
