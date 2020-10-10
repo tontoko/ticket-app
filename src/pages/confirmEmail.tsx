@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import { fuego } from '@nandorojo/swr-firestore'
 
 const ConfirmEmail = ({ user }) => {
-  const router = useRouter()
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(true)
+  const [sent, setSent] = useState(false)
 
   useEffect(() => {
     ;(async () => {
-      // クライアント側の認証を待つuser
-      if (!user || !loading) return
+      if (!user || !loading || sent) return
+      setSent(true)
       sendEmail()
     })()
   }, [user])
