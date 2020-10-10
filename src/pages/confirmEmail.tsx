@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import { fuego } from '@nandorojo/swr-firestore'
+import { NextPage } from 'next'
 
-const ConfirmEmail = ({ user }) => {
+const ConfirmEmail: NextPage<{ user: firebase.User }> = ({ user }) => {
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -19,9 +20,7 @@ const ConfirmEmail = ({ user }) => {
         setLoading(false)
         setMsg(errorMsg(e))
       }
-      setTimeout(() => {
-        fuego.auth().signOut()
-      }, 5000)
+      setTimeout(() => fuego.auth().signOut(), 5000)
     })()
   }, [])
 

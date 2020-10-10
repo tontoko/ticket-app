@@ -19,7 +19,7 @@ const Action = ({ user }) => {
 
   useEffect(() => {
     ;(async () => {
-      if (!loading || !router) return
+      if (!loading || !router || !router.query.mode) return
       mode.current = router.query.mode as string
       oobCode.current = router.query.oobCode as string
       try {
@@ -43,6 +43,7 @@ const Action = ({ user }) => {
             throw new Error('不正なリクエストです。')
         }
       } catch (e) {
+        console.error(e)
         alert.error(errorMsg(e))
         setTimeout(() => redirectAfterUpdate(), 5000)
       }
