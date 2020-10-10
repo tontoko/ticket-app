@@ -53,11 +53,11 @@ const App = ({ Component, pageProps }: AppProps) => {
   useEffect(() => {
     if (!fuego || !router) return
     listner = fuego.auth().onAuthStateChanged((currentUser) => {
-      console.log('test')
       if (currentUser) {
         if (
           !currentUser.emailVerified &&
           currentUser.providerData[0].providerId === 'password' &&
+          router.pathname !== '/confirmEmail' &&
           !router.pathname.match(/^\/__\/auth\/action/)
         ) {
           router.push('/confirmEmail')
