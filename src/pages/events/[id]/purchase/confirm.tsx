@@ -62,7 +62,7 @@ const Confirmation = ({ user }: { user: firebase.User }) => {
         )
         const token = await user.getIdToken()
         if (user.uid !== uid) return
-        const res = await fetch('/api/getStripeClientSecret', {
+        const res = await fetch('/api/createPaymentIntent', {
           method: 'POST',
           headers: new Headers({
             'Content-Type': 'application/json',
@@ -122,8 +122,7 @@ const Confirmation = ({ user }: { user: firebase.User }) => {
   const paymentComplete = () => {
     setComplete(true)
     let timer = timerRef.current
-    let count: NodeJS.Timeout
-    setInterval(() => {
+    const count = setInterval(() => {
       if (timer <= 1) {
         clearInterval(count)
         router.push(`/users/${user.uid}/myTickets`)
