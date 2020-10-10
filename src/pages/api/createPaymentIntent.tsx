@@ -4,7 +4,7 @@ import stripe from '@/src/lib/stripe'
 import { category, event } from 'app'
 import { NextApiHandler } from 'next'
 
-const getStripeClientSecret: NextApiHandler = async (req, res) => {
+const createPaymentIntent: NextApiHandler = async (req, res) => {
   const { eventId, categoryId, token } = req.body
   const { firebase, firestore } = await initFirebaseAdmin()
   const decodedToken = await firebase.auth().verifyIdToken(token)
@@ -47,4 +47,4 @@ const getStripeClientSecret: NextApiHandler = async (req, res) => {
   res.status(200).json({ clientSecret: client_secret, photoUrls, event })
 }
 
-export default getStripeClientSecret
+export default createPaymentIntent

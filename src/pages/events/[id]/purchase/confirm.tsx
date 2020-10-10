@@ -62,7 +62,7 @@ const Confirmation = ({ user }: { user: firebase.User }) => {
         )
         const token = await user.getIdToken()
         if (user.uid !== uid) return
-        const res = await fetch('/api/getStripeClientSecret', {
+        const res = await fetch('/api/createPaymentIntent', {
           method: 'POST',
           headers: new Headers({
             'Content-Type': 'application/json',
