@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react'
 import { Table, Row } from 'reactstrap'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import { GetStaticProps, GetStaticPaths, GetServerSideProps } from 'next'
+import { GetServerSideProps } from 'next'
 import { event } from 'app'
 import withAuth from '@/src/lib/withAuth'
 

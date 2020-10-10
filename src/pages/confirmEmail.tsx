@@ -26,7 +26,7 @@ const ConfirmEmail = ({ user }) => {
       setLoading(false)
       setMsg(errorMsg(e))
     }
-    setTimeout(async () => {
+    setTimeout(() => {
       fuego.auth().signOut()
     }, 5000)
   }, [])
