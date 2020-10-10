@@ -31,7 +31,7 @@ const createPaymentIntent: NextApiHandler = async (req, res) => {
     amount: categoryData.price,
     currency: 'jpy',
     transfer_data: {
-      amount: categoryData.price - Math.floor(categoryData.price * 0.05),
+      amount: categoryData.price - Math.floor(categoryData.price * 0.1),
       destination: stripeId,
     },
     payment_method_types: ['card'],
