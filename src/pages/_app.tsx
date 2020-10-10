@@ -71,6 +71,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         ) {
           fuego.auth().signOut()
         }
+        if (router.pathname === '/termsOfUse') return
         if (checkAllowNoLoginUrlList(router)) {
           router.push({
             pathname: `/users/${currentUser.uid}`,
