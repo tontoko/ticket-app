@@ -42,54 +42,52 @@ const App = ({ Component, pageProps }: AppProps) => {
     Dispatch<SetStateAction<ReactElement>>,
   ] = useState()
   const [user, setUser] = useState<firebase.User>()
-  let listner: firebase.Unsubscribe = () => {
-    return
-  }
 
   useEffect(() => {
     import('../lib/webPush').then(({ firebaseCloudMessaging }) => firebaseCloudMessaging.init(env))
   }, [])
 
   useEffect(() => {
-    if (!router || user !== undefined) return
-    listner = fuego.auth().onAuthStateChanged((currentUser) => {
-      if (currentUser) {
-        setUser(currentUser)
-        if (
-          !currentUser.emailVerified &&
-          currentUser.providerData[0].providerId === 'password' &&
-          router.pathname !== '/confirmEmail' &&
-          !router.pathname.match(/^\/__\/auth\/action/)
-        ) {
-          return router.push('/confirmEmail')
-        }
-        if (
-          router.pathname.match(/^\/users\//) &&
-          router.query.id &&
-          router.query.id !== currentUser.uid
-        ) {
-          return fuego.auth().signOut()
-        }
-        if (router.pathname === '/termsOfUse') return
-        if (checkAllowNoLoginUrlList(router)) {
-          return router.push({
-            pathname: `/users/${currentUser.uid}`,
-            query: { msg: encodeQuery('ログインしました') },
-          })
-        }
-      }
-      if (!currentUser) {
-        setUser(null)
-        if (!checkAllowNoLoginUrlList(router)) {
-          return router.push({
-            pathname: '/login',
-            query: { msg: encodeQuery('ログアウトしました') },
-          })
-        }
-      }
+    return fuego.auth().onAuthStateChanged((currentUser) => {
+      setUser(currentUser || null)
     })
-    return listner
-  }, [router])
+  }, [])
+
+  useEffect(() => {
+    if (!router) return
+    if (user) {
+      if (
+        !user.emailVerified &&
+        user.providerData[0].providerId === 'password' &&
+        router.pathname !== '/confirmEmail' &&
+        !router.pathname.match(/^\/__\/auth\/action/)
+      ) {
+        router.push('/confirmEmail')
+        return
+      }
+      if (router.pathname.match(/^\/users\//) && router.query.id && router.query.id !== user.uid) {
+        fuego.auth().signOut()
+        return
+      }
+      if (router.pathname === '/termsOfUse') return
+      if (checkAllowNoLoginUrlList(router)) {
+        router.push({
+          pathname: `/users/${user.uid}`,
+          query: { msg: encodeQuery('ログインしました') },
+        })
+        return
+      }
+    }
+    if (!user) {
+      if (!checkAllowNoLoginUrlList(router)) {
+        router.push({
+          pathname: '/login',
+          query: { msg: encodeQuery('ログアウトしました') },
+        })
+        return
+      }
+    }
+  }, [router?.pathname, user])
 
   useEffect(() => {
     ;(async () => {
