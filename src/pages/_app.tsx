@@ -52,7 +52,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 
   useEffect(() => {
     if (!fuego || !router) return
-    listner = fuego.auth().onAuthStateChanged((currentUser) => {
+    listner = fuego.auth().onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         if (
           !currentUser.emailVerified &&
@@ -60,14 +60,14 @@ const App = ({ Component, pageProps }: AppProps) => {
           router.pathname !== '/confirmEmail' &&
           !router.pathname.match(/^\/__\/auth\/action/)
         ) {
-          router.push('/confirmEmail')
+          await router.push('/confirmEmail')
         }
         if (
           router.pathname === '/login' ||
           router.pathname === '/register' ||
           router.pathname === '/forgetPassword'
         ) {
-          router.push({
+          await router.push({
             pathname: `/users/${currentUser.uid}`,
             query: { msg: encodeQuery('ログインしました') },
           })
@@ -77,14 +77,14 @@ const App = ({ Component, pageProps }: AppProps) => {
           router.query.id &&
           router.query.id !== currentUser.uid
         ) {
-          return fuego.auth().signOut()
+          return await fuego.auth().signOut()
         }
         setUser(currentUser)
       }
       if (!currentUser) {
         setUser(null)
         if (!checkAllowNoLoginUrlList()) {
-          router.push({
+          await router.push({
             pathname: '/login',
             query: { msg: encodeQuery('ログアウトしました') },
           })

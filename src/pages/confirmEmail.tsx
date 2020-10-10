@@ -23,7 +23,7 @@ const ConfirmEmail = ({ user }) => {
         fuego.auth().signOut()
       }, 5000)
     })()
-  }, [user])
+  }, [])
 
   if (loading) return <Loading />
   return <h4>{msg}</h4>
