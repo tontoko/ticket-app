@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Button, Col, Row, Form, Input, FormGroup, Label } from 'reactstrap'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import ja from 'date-fns/locale/ja'
@@ -11,7 +11,7 @@ import { useRouter } from 'next/router'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import errorMsg from '@/src/lib/errorMsg'
 import storage from '../lib/storage'
-import { useDocument, fuego, revalidateDocument } from '@nandorojo/swr-firestore'
+import { useDocument, fuego } from '@nandorojo/swr-firestore'
 
 const EventForm = ({
   user,

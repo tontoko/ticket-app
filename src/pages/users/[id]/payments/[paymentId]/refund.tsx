@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Button, Row, Form, Input, FormGroup, Label } from 'reactstrap'
 import { useRouter } from 'next/router'
-import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next'
+import { GetServerSideProps } from 'next'
 import { useAlert } from 'react-alert'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { fuego } from '@nandorojo/swr-firestore'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
-import { payment, event } from 'app'
 
 const Refund = ({ user, createdUser, payment }) => {
   const router = useRouter()

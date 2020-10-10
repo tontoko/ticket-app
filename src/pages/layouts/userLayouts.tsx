@@ -8,18 +8,18 @@ import dynamic from 'next/dynamic'
 const LoginMenu = dynamic(() => import('@/src/components/navLoginMenu'), { ssr: false })
 const LogoutMenu = dynamic(() => import('@/src/components/navLogoutMenu'), { ssr: false })
 
-const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
+const UserLayout: React.FC<any> = ({ user, children }) => {
   const router = useRouter()
   const alert = useAlert()
   const [isOpen, toggle] = useState(false)
 
   const avater = useMemo(() => {
-    if (user || tmpUser) {
-      const photoURL = user ? user.providerData[0].photoURL : tmpUser.photoURL
+    if (user) {
+      const photoURL = user.providerData[0].photoURL
       if (photoURL) return photoURL
     }
     return '/icons/person-icon-default.png'
-  }, [user, tmpUser])
+  }, [user])
 
   useEffect(() => {
     if (!router) return
@@ -35,10 +35,10 @@ const UserLayout: React.FC<any> = ({ user, tmpUser, children }) => {
             <NavbarBrand style={{ cursor: 'pointer' }}>Ticket-App(α)</NavbarBrand>
           </div>
         </Link>
-        {user || tmpUser ? (
-          <LoginMenu {...{ user, tmpUser, avater, toggle, isOpen }} />
+        {user ? (
+          <LoginMenu {...{ user, avater, toggle, isOpen }} />
         ) : (
-          <LogoutMenu {...{ avater, toggle, isOpen }} />
+          <LogoutMenu {...{ toggle, isOpen }} />
         )}
       </Navbar>
       <Container style={{ marginTop: '2em', marginBottom: '2em' }}>{children}</Container>

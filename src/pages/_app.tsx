@@ -17,7 +17,6 @@ import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import checkAllowNoLoginUrlList from '@/src/lib/checkAllowNoLoginUrlList'
-import { setCookie, destroyCookie, parseCookies } from 'nookies'
 const env = process.env.NEXT_PUBLIC_ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey =
   env === 'prod'
@@ -42,8 +41,6 @@ const App = ({ Component, pageProps }: AppProps) => {
     ReactElement,
     Dispatch<SetStateAction<ReactElement>>,
   ] = useState()
-  const cookies = parseCookies()
-  const [tmpUser, setTmpUser] = useState(cookies.tmpUser && JSON.parse(cookies.tmpUser))
   const [user, setUser] = useState<firebase.User>()
   let listner: firebase.Unsubscribe = () => {
     return
@@ -55,70 +52,52 @@ const App = ({ Component, pageProps }: AppProps) => {
 
   useEffect(() => {
     if (!fuego || !router) return
-    ;(async () => {
-      listner = fuego.auth().onAuthStateChanged(async (currentUser) => {
-        if (currentUser) {
-          setCookie(
-            null,
-            'tmpUser',
-            JSON.stringify({
-              photoURL: currentUser.providerData[0].photoURL,
-            }),
-            {
-              maxAge: 60,
-              path: '/',
-              domain: document.domain,
-              secure: document.domain !== 'localhost',
-            },
-          )
-          if (
-            window.location.pathname !== '/confirmEmail' &&
-            !currentUser.emailVerified &&
-            currentUser.providerData[0].providerId === 'password' &&
-            !window.location.pathname.match(/^\/__\/auth\/action/)
-          ) {
-            router.push('/confirmEmail')
-          }
-          if (
-            window.location.pathname === '/login' ||
-            window.location.pathname === '/register' ||
-            window.location.pathname === '/forgetPassword'
-          ) {
-            router.push({
-              pathname: `/users/${currentUser.uid}`,
-              query: { msg: encodeQuery('ログインしました') },
-            })
-          }
-          if (window.location.pathname.match(/^\/users\//) && !router.query.id) return
-          if (
-            window.location.pathname.match(/^\/users\//) &&
-            router.query.id &&
-            router.query.id !== currentUser.uid
-          ) {
-            return fuego.auth().signOut()
-          }
-          setUser(currentUser)
+    listner = fuego.auth().onAuthStateChanged(async (currentUser) => {
+      if (currentUser) {
+        if (
+          !currentUser.emailVerified &&
+          currentUser.providerData[0].providerId === 'password' &&
+          router.pathname !== '/confirmEmail' &&
+          !router.pathname.match(/^\/__\/auth\/action/)
+        ) {
+          await router.push('/confirmEmail')
         }
-        if (!currentUser) {
-          setUser(null)
-          destroyCookie(null, 'tmpUser')
-          setTmpUser(null)
-          if (!checkAllowNoLoginUrlList()) {
-            await router.push({
-              pathname: '/login',
-              query: { msg: encodeQuery('ログアウトしました') },
-            })
-          }
+        if (
+          router.pathname === '/login' ||
+          router.pathname === '/register' ||
+          router.pathname === '/forgetPassword'
+        ) {
+          await router.push({
+            pathname: `/users/${currentUser.uid}`,
+            query: { msg: encodeQuery('ログインしました') },
+          })
         }
-      })
-    })()
+        if (
+          router.pathname.match(/^\/users\//) &&
+          router.query.id &&
+          router.query.id !== currentUser.uid
+        ) {
+          return await fuego.auth().signOut()
+        }
+        setUser(currentUser)
+      }
+      if (!currentUser) {
+        setUser(null)
+        if (!checkAllowNoLoginUrlList()) {
+          await router.push({
+            pathname: '/login',
+            query: { msg: encodeQuery('ログアウトしました') },
+          })
+        }
+      }
+    })
     return listner
-  }, [router, router.pathname, fuego])
+  }, [router, fuego])
 
   useEffect(() => {
     ;(async () => {
       const NProgress = await import('nprogress')
-      router.events.on('routeChangeStart', (url) => {
+      router.events.on('routeChangeStart', () => {
         NProgress.start()
       })
       router.events.on('routeChangeComplete', () => NProgress.done())
@@ -168,7 +147,6 @@ const App = ({ Component, pageProps }: AppProps) => {
             <UserLayouts
               {...pageProps}
               {...{
-                tmpUser,
                 setModal,
                 setModalInner,
                 Component,

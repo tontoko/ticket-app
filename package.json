@@ -93,7 +93,7 @@
     "pretty-quick": "^3.0.2",
     "react-test-renderer": "^16.13.1",
     "ts-jest": "^26.4.1",
-    "vercel": "^20.1.1"
+    "vercel": "^20.1.2"
   },
   "scripts": {
     "predev": "vercel env pull .env.local",
