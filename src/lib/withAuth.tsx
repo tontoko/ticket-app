@@ -1,21 +1,17 @@
-import Loading from "@/src/components/loading";
-import React from "react";
-import Router from "next/router";
-import { encodeQuery } from "./parseQuery";
-import checkAllowNoLoginUrlList from "./checkAllowNoLoginUrlList";
+import Loading from '@/src/components/loading'
+import React from 'react'
 
+const withAuth = (Component) => {
+  return class withAuthHOC extends React.Component<{ user: string }> {
+    constructor(props) {
+      super(props)
+    }
 
-const withAuth = Component => {
-    return class withAuthHOC extends React.Component<{ user: string }> {
-      constructor(props) {
-        super(props);
-      }
-
-      render() {
-        if (!this.props.user) return <Loading />;
-        return <Component {...this.props} />;
-      }
-    };
+    render() {
+      if (!this.props.user) return <Loading />
+      return <Component {...this.props} />
+    }
+  }
 }
 
-export default withAuth;
+export default withAuth

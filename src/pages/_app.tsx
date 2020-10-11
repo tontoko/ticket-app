@@ -16,7 +16,10 @@ import Modal from '@/src/components/modal'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import { encodeQuery } from '@/src/lib/parseQuery'
-import checkAllowNoLoginUrlList from '@/src/lib/checkAllowNoLoginUrlList'
+import {
+  checkAllowNoLoginUrlList,
+  checkAllowBothLoginStatusUrls,
+} from '@/src/lib/checkAllowNoLoginUrlList'
 const env = process.env.NEXT_PUBLIC_ENV === 'prod' ? 'prod' : 'dev'
 const publishableKey =
   env === 'prod'
@@ -55,6 +58,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 
   useEffect(() => {
     if (!router) return
+    if (checkAllowBothLoginStatusUrls(router)) return
     if (user) {
       if (
         !user.emailVerified &&
@@ -69,7 +73,6 @@ const App = ({ Component, pageProps }: AppProps) => {
         fuego.auth().signOut()
         return
       }
-      if (router.pathname === '/termsOfUse') return
       if (checkAllowNoLoginUrlList(router)) {
         router.push({
           pathname: `/users/${user.uid}`,
