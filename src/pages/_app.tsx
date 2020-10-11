@@ -57,7 +57,7 @@ const App = ({ Component, pageProps }: AppProps) => {
   }, [])
 
   useEffect(() => {
-    if (!router) return
+    if (!router || user === undefined) return
     if (checkAllowBothLoginStatusUrls(router)) return
     if (user) {
       if (
@@ -67,10 +67,6 @@ const App = ({ Component, pageProps }: AppProps) => {
         !router.pathname.match(/^\/__\/auth\/action/)
       ) {
         router.push('/confirmEmail')
-        return
-      }
-      if (router.pathname.match(/^\/users\//) && router.query.id && router.query.id !== user.uid) {
-        fuego.auth().signOut()
         return
       }
       if (checkAllowNoLoginUrlList(router)) {
