@@ -16,6 +16,6 @@ export const checkAllowBothLoginStatusUrls = (router: NextRouter) => {
     router.pathname === '/' ||
     router.pathname === '/termsOfUse' ||
     !!router.pathname.match(/^\/events\/[^/]+\/*/) ||
-    !!router.pathname.match(/^\/events\/[^/]+\/*[^?]+?.+/)
+    !!router.pathname.match(/^\/events\/[^/]+\/[^?]+?.+/)
   )
 }
