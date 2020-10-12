@@ -27,9 +27,9 @@ const Organizer: NextPage<{
 
   return (
     <div style={{ marginTop: '1.5em', marginBottom: '1.5em' }}>
-      <h4>イベント主催者用の登録情報</h4>
+      <h4>イベント主催者用管理画面</h4>
       <Label>イベントを開催するには、ユーザー情報と本人確認書類を登録する必要があります。</Label>
-      <FormGroup style={{ marginTop: '1.5em', marginBottom: '1em' }}>
+      <FormGroup style={{ marginTop: '1.5em' }}>
         <Link href={`/users/${user.uid}/edit/updateUser`}>
           <a>ユーザー情報を追加・修正する</a>
         </Link>
@@ -71,7 +71,7 @@ const Organizer: NextPage<{
         </Link>
       </FormGroup>
 
-      <FormGroup style={{ marginBottom: '1.5em' }}>
+      <FormGroup style={{ marginTop: '3em', marginBottom: '1.5em' }}>
         <h4>売上と入金</h4>
         <p>
           入金待ち: {available} 円<br />
