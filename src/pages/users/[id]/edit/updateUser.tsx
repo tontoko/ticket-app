@@ -16,8 +16,9 @@ import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 import { fuego } from '@nandorojo/swr-firestore'
 import Loading from '@/src/components/loading'
+import { NextPage } from 'next'
 
-export const UpdateUser = ({ user }) => {
+export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
   const alert = useAlert()
   const router = useRouter()
   const [tosAcceptance, setTosAcceptance] = useState<Stripe.Account.TosAcceptance>()
@@ -50,6 +51,8 @@ export const UpdateUser = ({ user }) => {
       line2: '',
     },
     gender: 'male',
+    email: user ? user.email : '',
+    phone: '',
   })
   const [birthDay, setBirthDay] = useState(toUtcIso8601str(moment()))
   const [agree, setAgree] = useState(false)
@@ -87,6 +90,7 @@ export const UpdateUser = ({ user }) => {
   const submit = async (e) => {
     e.preventDefault()
     const needParams: string[] = []
+    // 住所の任意項目を除外して必須チェック
     for (const [key1, value1] of Object.entries(form)) {
       if (typeof value1 !== 'string' && (key1 === 'address_kana' || key1 === 'address_kanji')) {
         // 入れ子2段目の判定
@@ -94,7 +98,7 @@ export const UpdateUser = ({ user }) => {
           if (key2 !== 'line2' && !value2) needParams.push(key2)
         }
       } else {
-        if (key1 !== 'line2' && !value1) needParams.push(key1)
+        if (!value1) needParams.push(key1)
       }
     }
     if (needParams.length > 0) return alert.error('項目に入力漏れがあります。')
@@ -109,6 +113,7 @@ export const UpdateUser = ({ user }) => {
       body: JSON.stringify({
         token,
         ...form,
+        phone: `+81${form.phone}`,
       }),
     })
     if (res.status !== 200)
@@ -342,6 +347,25 @@ export const UpdateUser = ({ user }) => {
             onChange={(e) =>
               setForm({ ...form, address_kanji: { ...form.address_kanji, line2: e.target.value } })
             }
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label>メールアドレス</Label>
+          <Input
+            type="email"
+            placeholder="メールアドレス"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <Label>電話番号</Label>
+          <Input
+            placeholder="電話番号"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
           />
         </FormGroup>
       </FormGroup>
