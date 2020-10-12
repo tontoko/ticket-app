@@ -25,8 +25,8 @@ const Report = ({ event, categories, payments }) => {
     const sold = category.sold - manualUnpaid
     totalSalesProspect += category.stock * category.price
     totalSales += sold * category.price
-    totalFee += sold * Math.floor(category.price * 0.05)
-    totalIncome += sold * category.price - sold * Math.floor(category.price * 0.05)
+    totalFee += sold * Math.floor(category.price * 0.1)
+    totalIncome += sold * category.price - sold * Math.floor(category.price * 0.1)
     categoryReport.push(
       <tr key={i}>
         <td>{category.name}</td>
@@ -63,7 +63,7 @@ const Report = ({ event, categories, payments }) => {
             <th>売上見込み</th>
             <th>売上合計</th>
             <th>手数料合計</th>
-            <th>実収入</th>
+            <th>実利益</th>
           </tr>
         </thead>
         <tbody>
