@@ -2,8 +2,8 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
 import stripe, { Stripe } from '@/src/lib/stripe'
 
-const endpoint: NextApiHandler = (async (req, res) => {
-  if (!req.body) return res.status(400).send({body: 'body was empty'})
+const endpoint: NextApiHandler = async (req, res) => {
+  if (!req.body) return res.status(400).send({ body: 'body was empty' })
   try {
     const {
       token,
@@ -14,7 +14,9 @@ const endpoint: NextApiHandler = (async (req, res) => {
       dob,
       address_kana,
       address_kanji,
-      gender
+      gender,
+      email,
+      phone,
     } = req.body
 
     const { firebase, firestore } = await initFirebaseAdmin()
@@ -33,25 +35,25 @@ const endpoint: NextApiHandler = (async (req, res) => {
         dob,
         address_kana,
         address_kanji,
-        gender
+        gender,
+        email,
+        phone,
       },
     }
 
-    if (!user.userData) userData.tos_acceptance = {
-      date: Math.floor(Date.now() / 1000),
-      ip: req.connection.remoteAddress
-    }
+    if (!user.userData)
+      userData.tos_acceptance = {
+        date: Math.floor(Date.now() / 1000),
+        ip: req.connection.remoteAddress,
+      }
 
-    await stripe.accounts.update(
-      user.stripeId,
-      userData
-    )
+    await stripe.accounts.update(user.stripeId, userData)
 
     return res.json({ status: true })
   } catch (error) {
     console.log(error)
     res.status(400).json({ error })
   }
-})
+}
 
 export default endpoint
