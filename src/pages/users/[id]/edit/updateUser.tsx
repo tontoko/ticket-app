@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useState } from 'react'
 import { Form, FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 import 'firebase/storage'
@@ -57,7 +57,7 @@ export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
   const [birthDay, setBirthDay] = useState(toUtcIso8601str(moment()))
   const [agree, setAgree] = useState(false)
   const [loading, setLoading] = useState(true)
-  let isNew = true
+  const isNew = useRef(true)
 
   useEffect(() => {
     if (!user) return
@@ -71,7 +71,7 @@ export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
       })
       const { individual, tos_acceptance } = (await res.json()) as Stripe.AccountUpdateParams
       if (individual) {
-        isNew = false
+        isNew.current = false
         setForm({ ...individual, phone: individual.phone.replace(/^\+[0-9]{2}/, '0') })
       }
       tos_acceptance && setTosAcceptance(tos_acceptance)
@@ -119,7 +119,7 @@ export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
     if (res.status !== 200)
       return alert.error('エラーが発生しました。しばらくして再度お試しください。')
 
-    if (isNew)
+    if (isNew.current)
       return router.push({
         pathname: `/users/${user.uid}/edit/identification`,
         query: {
@@ -128,7 +128,7 @@ export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
       })
 
     return router.push({
-      pathname: `/users/${user.uid}/edit`,
+      pathname: `/users/${user.uid}/edit/organizer`,
       query: { msg: encodeQuery('ユーザー情報を更新しました。') },
     })
   }
