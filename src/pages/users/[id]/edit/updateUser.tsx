@@ -22,7 +22,7 @@ export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
   const alert = useAlert()
   const router = useRouter()
   const [tosAcceptance, setTosAcceptance] = useState<Stripe.Account.TosAcceptance>()
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Stripe.AccountUpdateParams.Individual>({
     first_name_kana: '',
     last_name_kana: '',
     first_name_kanji: '',
@@ -69,10 +69,10 @@ export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
         }),
         body: JSON.stringify({ uid: user.uid }),
       })
-      const { individual, tos_acceptance } = await res.json()
+      const { individual, tos_acceptance } = (await res.json()) as Stripe.AccountUpdateParams
       if (individual) {
         isNew = false
-        setForm(individual)
+        setForm({ ...individual, phone: individual.phone.replace(/^\+[0-9]{2}/, '0') })
       }
       tos_acceptance && setTosAcceptance(tos_acceptance)
       setLoading(false)
