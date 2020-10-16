@@ -10,6 +10,7 @@ import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
 import analytics from '@/src/lib/analytics'
 import { payment } from 'app'
+import { mutate } from 'swr'
 
 type Props = {
   user: firebase.User
@@ -107,6 +108,7 @@ const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
           },
         ],
       })
+      await mutate(`/payments/${payment.id}`)
       router.push({
         pathname: `/users/${user.uid}/payments/${payment.id}`,
         query: {

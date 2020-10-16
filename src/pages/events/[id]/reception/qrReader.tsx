@@ -5,8 +5,8 @@ import { useAlert } from 'react-alert'
 import Loading from '@/src/components/loading'
 import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
-import { fuego } from '@nandorojo/swr-firestore'
 import analytics from '@/src/lib/analytics'
+import { mutate } from 'swr'
 const QrReader = dynamic(() => import('react-qr-reader'), {
   // eslint-disable-next-line react/display-name
   loading: () => <p>loading...</p>,
@@ -52,6 +52,8 @@ const QrReaderPage = ({ user }) => {
         }),
       })
       if (res.status !== 200) throw new Error((await res.json()).error)
+      const { paymentId } = JSON.parse(decededData)
+      await mutate(`payments/${paymentId}`)
       router.push({
         pathname: `/events/${router.query.id}/reception`,
         query: { msg: encodeQuery((await res.json()).msg) },
