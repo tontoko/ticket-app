@@ -19,6 +19,7 @@ import { useStripe } from '@stripe/react-stripe-js'
 import zenginCode from 'zengin-code'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
+import analytics from '@/src/lib/analytics'
 
 export const CreateBankAccount: React.FC<any> = ({ user, setModal, setModalInner }) => {
   const stripe = useStripe()
@@ -77,6 +78,7 @@ export const CreateBankAccount: React.FC<any> = ({ user, setModal, setModalInner
         )
       }
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       alert.error('エラーが発生しました。しばらくしてお試しください。')
     }
     setLoading(false)

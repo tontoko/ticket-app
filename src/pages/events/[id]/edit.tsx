@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/router'
+import React, { useState } from 'react'
 import getImg from '@/src/lib/getImgSSR'
 import EventForm from '@/src/components/eventForm'
-import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next'
+import { GetServerSideProps } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import withAuth from '@/src/lib/withAuth'
 
 const Edit = ({ user, event, photoUrls, setModal, setModalInner }) => {
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   return (
     <EventForm

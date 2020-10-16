@@ -30,16 +30,6 @@ service cloud.firestore {
         get(/databases/$(database)/documents/events/$(event)).data.createdUser
     	allow update: if request.auth.uid == resource.data.createdUser;
     }
-    match /sessions/{session} {
-    	// クライアントサイドからの読み取り不可
-    	allow read, write: if false
-    }
-    match /refunds/{refund} {
-    	allow create: if request.auth.uid != null;
-      allow read: if request.auth.uid == resource.data.buyer ||
-      								request.auth.uid == resource.data.seller;
-      allow update, delete: if false
-    }
     match /contacts/{contact} {
     	allow create: if true
     }

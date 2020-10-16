@@ -4,19 +4,18 @@ import {
     CardTitle, CardSubtitle, Col, Row
 } from 'reactstrap';
 import Link from 'next/link'
-import getImg from '@/src/lib/getImg'
 import moment from 'moment'
 import Tickets from '@/src/components/tickets';
-import { fuego, useCollection } from '@nandorojo/swr-firestore';
+import { useCollection } from '@nandorojo/swr-firestore';
 import withAuth from '@/src/lib/withAuth';
 import Loading from '@/src/components/loading';
 import createTicketsData from '@/src/lib/createTicketsData';
-import { event, tickets, payment } from "app";
+import { event, ticket, payment } from "app";
 import firebase from 'firebase/app';
 
 const MyTickets = ({ user }) => {
   const [myTicketsPerEvents, setMyTicketsPerEvents] = useState<
-    { tickets: tickets, event: any, photos: string }[]
+    { tickets: ticket[], event: any, photos: string }[]
   >([]);
   const [loading, setLoading] = useState(true);
   const { data: payments, loading: paymentsLoading } = useCollection<payment>(

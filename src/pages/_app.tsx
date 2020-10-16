@@ -27,6 +27,7 @@ const publishableKey =
     : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
 const stripePromise = loadStripe(publishableKey)
 import { dev, prod } from '@/ticket-app'
+import analytics from '../lib/analytics'
 const firebaseConfig = env === 'prod' ? prod : dev
 const fuego = new Fuego(firebaseConfig)
 // ローカルのFirestoreエミュレータに接続する設定
@@ -47,12 +48,19 @@ const App = ({ Component, pageProps }: AppProps) => {
   const [user, setUser] = useState<firebase.User>()
 
   useEffect(() => {
-    import('../lib/webPush').then(({ firebaseCloudMessaging }) => firebaseCloudMessaging.init(env))
+    ;(async () => {
+      await analytics()
+      const { firebaseCloudMessaging } = await import('../lib/webPush')
+      firebaseCloudMessaging.init(env)
+    })()
   }, [])
 
   useEffect(() => {
-    return fuego.auth().onAuthStateChanged((currentUser) => {
+    return fuego.auth().onAuthStateChanged(async (currentUser) => {
       setUser(currentUser || null)
+      ;(await analytics()).setUserId(currentUser.uid)
+      if (currentUser)
+        (await analytics()).logEvent('login', { method: currentUser.providerData[0].providerId })
     })
   }, [])
 
@@ -94,7 +102,10 @@ const App = ({ Component, pageProps }: AppProps) => {
       router.events.on('routeChangeStart', () => {
         NProgress.start()
       })
-      router.events.on('routeChangeComplete', () => NProgress.done())
+      router.events.on('routeChangeComplete', async () => {
+        NProgress.done()
+        ;(await analytics()).logEvent('page_view', { page_path: router.pathname })
+      })
       router.events.on('routeChangeError', () => NProgress.done())
     })()
   }, [])

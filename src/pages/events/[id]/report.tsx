@@ -1,48 +1,70 @@
-import React, { ReactElement } from 'react'
+import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import { Table, Row } from 'reactstrap'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import { GetServerSideProps } from 'next'
-import { event } from 'app'
+import { category, event, manualPayment, payment } from 'app'
 import withAuth from '@/src/lib/withAuth'
+import { useCollection, useDocument } from '@nandorojo/swr-firestore'
+import { useRouter } from 'next/router'
 
-const Report = ({ event, categories, payments }) => {
-  let totalSalesProspect = 0
-  let totalSales = 0
-  let totalFee = 0
-  let totalIncome = 0
-  const categoryReport: ReactElement[] = []
+const Report = ({user}) => {
+  const router = useRouter()
+  const {id: eventId} = useMemo(() => {
+    if (!router) return
+    return router.query
+  }, [router])
 
-  categories.map((category, i) => {
-    const targetPayments = payments.filter(
-      (targetPayment) => targetPayment.category === category.id,
-    )
-    const manualPaid = category.manualPayments
-      ? category.manualPayments.filter((manualPayment) => manualPayment.paid).length
-      : 0
-    const manualUnpaid = (category.manualPayments ? category.manualPayments.length : 0) - manualPaid
-    const visited =
-      targetPayments.filter((targetPayment) => targetPayment.accepted).length + manualPaid
-    const sold = category.sold - manualUnpaid
-    totalSalesProspect += category.stock * category.price
-    totalSales += sold * category.price
-    totalFee += sold * Math.floor(category.price * 0.1)
-    totalIncome += sold * category.price - sold * Math.floor(category.price * 0.1)
-    categoryReport.push(
-      <tr key={i}>
-        <td>{category.name}</td>
-        <td>{sold}</td>
-        <td>{category.stock - sold}</td>
-        <td>{Math.floor((sold / category.stock) * 100)} %</td>
-        <td>{visited}</td>
-        <td>{sold ? Math.floor((visited / sold) * 100) : 0} %</td>
-      </tr>,
-    )
+  const {data: event} = useDocument<event>(eventId && `events/${eventId}`)
+  const {data: categories} = useCollection<category>(eventId && `events/${eventId}/categories`, {
+    orderBy: 'index'
   })
+  const {data: manualPayments} = useCollection<manualPayment>(eventId && `events/${eventId}/manualPayments`)
+  const {data: payments} = useCollection<payment>(eventId && 'payments', {
+    where: [['event', '==', eventId],['seller', '==', user.uid]]
+  })
+
+  const [state, setState] = useState({totalSalesProspect:0,totalSales:0,totalFee:0,totalIncome:0,categoryReport: []})
+  
+  useEffect(() => {
+    if (!event || !categories || !manualPayments || !payments) return
+    
+    let totalSalesProspect = 0
+    let totalSales = 0
+    let totalFee = 0
+    let totalIncome = 0
+    const categoryReport: ReactElement[] = []
+
+    categories.map((category, i) => {
+      const targetPayments = payments.filter(
+        (targetPayment) => targetPayment.category === category.id,
+      )
+      const manualPaid = manualPayments
+        ? manualPayments.filter((manualPayment) => manualPayment.paid).length
+        : 0
+      const manualUnpaid = (manualPayments ? manualPayments.length : 0) - manualPaid
+      const visited =
+        targetPayments.filter((targetPayment) => targetPayment.accepted).length + manualPaid
+      const sold = category.sold - manualUnpaid
+      totalSalesProspect += category.stock * category.price
+      totalSales += sold * category.price
+      totalFee += sold * Math.floor(category.price * 0.1)
+      totalIncome += sold * category.price - sold * Math.floor(category.price * 0.1)
+      categoryReport.push(
+        <tr key={i}>
+          <td>{category.name}</td>
+          <td>{sold}</td>
+          <td>{category.stock - sold}</td>
+          <td>{Math.floor((sold / category.stock) * 100)} %</td>
+          <td>{visited}</td>
+          <td>{sold ? Math.floor((visited / sold) * 100) : 0} %</td>
+        </tr>,
+      )
+    })
+    setState({totalSalesProspect,totalSales,totalFee,totalIncome,categoryReport})
+  }, [event, categories, manualPayments, payments])
 
   return (
     <>
       <Row style={{ margin: '0', marginTop: '1em' }}>
-        <h3>{event.name} レポート</h3>
+        <h3>{event?.name} レポート</h3>
       </Row>
       <Table striped style={{ marginTop: '1em' }}>
         <thead>
@@ -55,7 +77,7 @@ const Report = ({ event, categories, payments }) => {
             <th>来場 / 販売</th>
           </tr>
         </thead>
-        <tbody>{categoryReport}</tbody>
+        <tbody>{state.categoryReport}</tbody>
       </Table>
       <Table striped style={{ marginTop: '1em' }}>
         <thead>
@@ -68,46 +90,15 @@ const Report = ({ event, categories, payments }) => {
         </thead>
         <tbody>
           <tr>
-            <td>{totalSalesProspect} 円</td>
-            <td>{totalSales} 円</td>
-            <td>{totalFee} 円</td>
-            <td>{totalIncome} 円</td>
+            <td>{state.totalSalesProspect} 円</td>
+            <td>{state.totalSales} 円</td>
+            <td>{state.totalFee} 円</td>
+            <td>{state.totalIncome} 円</td>
           </tr>
         </tbody>
       </Table>
     </>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const { id } = query
-  const { firestore } = await initFirebaseAdmin()
-  const result = await firestore
-    .collection('events')
-    .doc(id as string)
-    .get()
-  const data = result.data() as event
-  const startDate = data.startDate.seconds
-  const endDate = data.endDate.seconds
-  const event = { ...data, startDate, endDate, id: result.id }
-
-  const categories = (
-    await firestore
-      .collection('events')
-      .doc(id as string)
-      .collection('categories')
-      .orderBy('index')
-      .get()
-  ).docs.map((category) => {
-    return { ...category.data(), id: category.id }
-  })
-  const payments = (
-    await firestore.collection('payments').where('event', '==', result.id).get()
-  ).docs.map((payment) => {
-    return { ...payment.data(), createdAt: payment?.data().createdAt }
-  })
-
-  return { props: { event, categories, payments } }
 }
 
 export default withAuth(Report)

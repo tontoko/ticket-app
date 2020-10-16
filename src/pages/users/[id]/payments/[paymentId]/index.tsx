@@ -8,6 +8,7 @@ import withAuth from '@/src/lib/withAuth'
 import { fuego, useDocument } from '@nandorojo/swr-firestore'
 import { event, payment, category } from 'app'
 import { useAlert } from 'react-alert'
+import analytics from '@/src/lib/analytics'
 
 const Show = ({ user }) => {
   const [loading, setLoading] = useState(true)
@@ -62,6 +63,7 @@ const Show = ({ user }) => {
       if (res.status !== 200) throw new Error()
       alert.info('返金申請を承諾しました。')
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       console.error(e.message)
       alert.error('エラーが発生しました。しばらくしてお試しください。')
       setLoading(false)
@@ -88,6 +90,7 @@ const Show = ({ user }) => {
       if (res.status !== 200) throw new Error()
       alert.info('返金申請を却下しました。')
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       console.error(e.message)
       alert.error('エラーが発生しました。しばらくしてお試しください。')
       setLoading(false)

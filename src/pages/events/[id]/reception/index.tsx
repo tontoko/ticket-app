@@ -7,6 +7,7 @@ import { useAlert } from 'react-alert'
 import { event, manualPayment } from 'app'
 import withAuth from '@/src/lib/withAuth'
 import { fuego, useCollection } from '@nandorojo/swr-firestore'
+import analytics from '@/src/lib/analytics'
 
 const Reception = ({ categories, id, setModal, setModalInner }) => {
   const alert = useAlert()
@@ -61,6 +62,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
       await revalidate()
       alert.success('手動受付リストを更新しました。')
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       apiErrorHandle(e)
     }
     setLoading(false)
@@ -83,6 +85,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
       await revalidate()
       alert.success('手動受付リストを更新しました。')
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       apiErrorHandle(e)
     }
     setLoading(false)
@@ -106,6 +109,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
         await revalidate()
         alert.success('項目を削除しました。')
       } catch (e) {
+        ;(await analytics()).logEvent('exception', { description: e.message })
         apiErrorHandle(e)
       }
       setLoading(false)

@@ -14,9 +14,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
-import { fuego } from '@nandorojo/swr-firestore'
 import Loading from '@/src/components/loading'
 import { NextPage } from 'next'
+import analytics from '@/src/lib/analytics'
 
 export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
   const alert = useAlert()
@@ -161,6 +161,7 @@ export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
         },
       })
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       alert.error('エラーが発生しました。入力項目が正しいか確認してください。')
       alert.error(e.message)
     }
