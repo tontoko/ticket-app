@@ -30,7 +30,7 @@ const events: { [key: string]: event } = {
     photos: [],
     placeName: 'place1',
     name: 'event1',
-    eventDetails: 'eventDetails1',
+    eventDetail: 'eventDetail1',
     createdUser: 'user1',
   },
   event2: {
@@ -39,7 +39,7 @@ const events: { [key: string]: event } = {
     photos: [],
     placeName: 'place2',
     name: 'event2',
-    eventDetails: 'eventDetails2',
+    eventDetail: 'eventDetail2',
     createdUser: 'user2',
   },
 }
