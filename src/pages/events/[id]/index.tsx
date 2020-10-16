@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, ReactNode, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import {
@@ -13,7 +13,7 @@ import {
   Label,
 } from 'reactstrap'
 import getImg from '@/src/lib/getImgSSR'
-import { GetStaticProps, GetStaticPaths } from 'next'
+import { GetStaticProps, GetStaticPaths, NextPage } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { fuego, useCollection } from '@nandorojo/swr-firestore'
 import moment from 'moment'
@@ -27,13 +27,25 @@ import {
   TwitterIcon,
 } from 'react-share'
 import Tickets from '@/src/components/tickets'
-import { payment, tickets, event } from 'app'
+import { payment, ticket, event, category } from 'app'
 import createTicketsData from '@/src/lib/createTicketsData'
+import analytics from '@/src/lib/analytics'
 
-const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
+type Props = {
+  user: firebase.User
+  event: event
+  categories: category[]
+  items: {
+    src: string
+  }[]
+  setModal: (open: boolean) => void
+  setModalInner: (element: ReactNode) => void
+}
+
+const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setModalInner }) => {
   if (!event) return <></>
   const router = useRouter()
-  const [tickets, setTickets] = useState<{ tickets: tickets; event: event; photos: string }[]>([])
+  const [tickets, setTickets] = useState<{ tickets: ticket[]; event: event; photos: string }[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
   const [animating, setAnimating] = useState(false)
   const [status, setStatus] = useState<'anonymous' | 'organizer' | 'bought' | 'other'>()
@@ -44,18 +56,24 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     ],
   })
 
-  const [twitterShareProps, setTwitterShareProps] = useState({
-    url: '',
-    title: '',
-  })
-  const [facebookShareProps, setFacebookShareProps] = useState({
-    url: '',
-    quote: '',
-  })
-  const [lineShareProps, setLineShareProps] = useState({
-    url: '',
-    title: '',
-  })
+  const twitterShareProps = useMemo(() => {
+    return {
+      url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
+      title: event.name,
+    }
+  }, [])
+  const facebookShareProps = useMemo(() => {
+    return {
+      url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
+      quote: event.name,
+    }
+  }, [])
+  const lineShareProps = useMemo(() => {
+    return {
+      url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
+      title: event.name,
+    }
+  }, [router])
 
   useEffect(() => {
     const ticketListener = () => {
@@ -63,6 +81,10 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     }
     if (!router) return
     ;(async () => {
+      ;(await analytics()).logEvent('view_item', {
+        id: event.id,
+        name: event.name,
+      })
       if (user === undefined) return
       if (user === null) {
         setStatus('anonymous')
@@ -89,55 +111,42 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
     return ticketListener
   }, [router, user, payments])
 
-  useEffect(() => {
-    setTwitterShareProps({
-      url: location.href.includes('?') ? location.href.split('?')[0] : location.href,
-      title: event.name,
-    })
-    setFacebookShareProps({
-      url: location.href.includes('?') ? location.href.split('?')[0] : location.href,
-      quote: event.name,
-    })
-    setLineShareProps({
-      url: location.href.includes('?') ? location.href.split('?')[0] : location.href,
-      title: event.name,
-    })
-  }, [])
-
-  const next = () => {
+  const next = useCallback(() => {
     if (animating) return
     const nextIndex = activeIndex === items.length - 1 ? 0 : activeIndex + 1
     setActiveIndex(nextIndex)
-  }
+  }, [])
 
-  const previous = () => {
+  const previous = useCallback(() => {
     if (animating) return
     const nextIndex = activeIndex === 0 ? items.length - 1 : activeIndex - 1
     setActiveIndex(nextIndex)
-  }
+  }, [])
 
-  const goToIndex = (newIndex) => {
+  const goToIndex = useCallback((newIndex) => {
     if (animating) return
     setActiveIndex(newIndex)
-  }
+  }, [])
 
-  const slides = items.map((item) => {
-    return (
-      <CarouselItem
-        onExiting={() => setAnimating(true)}
-        onExited={() => setAnimating(false)}
-        key={item.src}
-      >
-        <img
-          src={item.src}
-          style={{ width: '100%', height: '100%' }}
-          onClick={() => callModalForImg(item.src)}
-        />
-      </CarouselItem>
-    )
-  })
+  const slides = useMemo(
+    () =>
+      items.map((item) => (
+        <CarouselItem
+          onExiting={() => setAnimating(true)}
+          onExited={() => setAnimating(false)}
+          key={item.src}
+        >
+          <img
+            src={item.src}
+            style={{ width: '100%', height: '100%' }}
+            onClick={() => callModalForImg(item.src)}
+          />
+        </CarouselItem>
+      )),
+    [items],
+  )
 
-  const callModalForImg = (src) => {
+  const callModalForImg = useCallback((src) => {
     setModalInner(
       <img
         src={src}
@@ -147,14 +156,22 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
       />,
     )
     setModal(true)
-  }
+  }, [])
 
-  const urlToPurchase = `/events/${router.query.id}/purchase`
-  const urlToEdit = `/events/${router.query.id}/edit`
-  const urlToReception = `/events/${router.query.id}/reception`
-  const urlToReport = `/events/${router.query.id}/report`
+  const shareAnalytics = useCallback(async (type: string) => {
+    ;(await analytics()).logEvent('share', {
+      method: type,
+      content_type: 'event',
+      content_id: event.id,
+    })
+  }, [])
 
-  const buttons = () => {
+  const buttons = useMemo(() => {
+    const urlToPurchase = `/events/${router.query.id}/purchase`
+    const urlToEdit = `/events/${router.query.id}/edit`
+    const urlToReception = `/events/${router.query.id}/reception`
+    const urlToReport = `/events/${router.query.id}/report`
+
     if (status === 'organizer') {
       // 主催者
       return (
@@ -248,38 +265,41 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
       )
     }
     return <></>
-  }
+  }, [status, tickets, categories])
 
-  const returnCatetgories = () =>
-    categories.map((category, i) => {
-      const msg = `${category.name}: ${category.price} 円`
-      const organizerMsg = status == 'organizer' && ` 残り ${category.stock - category.sold} 枚`
-      if (status == 'organizer' && !category.public) {
-        return (
-          <h6 key={i}>
-            {msg}
-            {organizerMsg} (非公開)
-          </h6>
-        )
-      }
-      if (category.public) {
-        if (category.stock - category.sold < 1) {
+  const returnCatetgories = useMemo(
+    () =>
+      categories.map((category, i) => {
+        const msg = `${category.name}: ${category.price} 円`
+        const organizerMsg = status == 'organizer' && ` 残り ${category.stock - category.sold} 枚`
+        if (status == 'organizer' && !category.public) {
           return (
-            <h6 key={i} style={{ textDecorationLine: 'line-through' }}>
+            <h6 key={i}>
               {msg}
-              {organizerMsg}
-              <span> 完売</span>
+              {organizerMsg} (非公開)
             </h6>
           )
         }
-        return (
-          <h6 key={i}>
-            {msg}
-            {organizerMsg}
-          </h6>
-        )
-      }
-    })
+        if (category.public) {
+          if (category.stock - category.sold < 1) {
+            return (
+              <h6 key={i} style={{ textDecorationLine: 'line-through' }}>
+                {msg}
+                {organizerMsg}
+                <span> 完売</span>
+              </h6>
+            )
+          }
+          return (
+            <h6 key={i}>
+              {msg}
+              {organizerMsg}
+            </h6>
+          )
+        }
+      }),
+    [categories],
+  )
 
   return (
     <>
@@ -320,21 +340,27 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
             <p>{moment(event.endDate).format('YYYY年 M月D日 H:mm')}</p>
           </FormGroup>
           <FormGroup>
-            <TwitterShareButton {...twitterShareProps} style={{ marginRight: '1em' }}>
+            <TwitterShareButton
+              {...twitterShareProps}
+              onClick={() => shareAnalytics('twitter')}
+              style={{ marginRight: '1em' }}
+            >
               <TwitterIcon size={40} />
             </TwitterShareButton>
-            <FacebookShareButton {...facebookShareProps} style={{ marginRight: '1em' }}>
+            <FacebookShareButton
+              {...facebookShareProps}
+              onClick={() => shareAnalytics('facebook')}
+              style={{ marginRight: '1em' }}
+            >
               <FacebookIcon size={40} />
             </FacebookShareButton>
-            <LineShareButton {...lineShareProps}>
+            <LineShareButton {...lineShareProps} onClick={() => shareAnalytics('line')}>
               <LineIcon size={40} />
             </LineShareButton>
           </FormGroup>
           <FormGroup style={{ marginTop: '2em' }}>
             <h5>チケットカテゴリ</h5>
-            <FormGroup style={{ marginLeft: '0.5em' }}>
-              {categories && returnCatetgories()}
-            </FormGroup>
+            <FormGroup style={{ marginLeft: '0.5em' }}>{categories && returnCatetgories}</FormGroup>
             {status == 'organizer' && (
               <Link href={`/events/${router.query.id}/categories/edit`}>
                 <Button>カテゴリの編集</Button>
@@ -344,7 +370,7 @@ const Event = ({ user, event, categories, items, setModal, setModalInner }) => {
         </Col>
         <Col xs="12" md="6" lg="8" style={{ marginTop: '1em', whiteSpace: 'pre-wrap' }}>
           <h6>{event.eventDetail}</h6>
-          {buttons()}
+          {buttons}
         </Col>
       </Row>
     </>
@@ -362,7 +388,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     .collection('events')
     .doc(id as string)
     .get()
-  const data = snapshot.data()
+  const data = snapshot.data() as event
   const startDate = data.startDate.toMillis()
   const endDate = data.endDate.toMillis()
   const event = { ...data, startDate, endDate, id: snapshot.id }

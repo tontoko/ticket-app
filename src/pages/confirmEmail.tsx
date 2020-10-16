@@ -3,6 +3,7 @@ import errorMsg from '@/src/lib/errorMsg'
 import Loading from '@/src/components/loading'
 import { fuego } from '@nandorojo/swr-firestore'
 import { NextPage } from 'next'
+import analytics from '../lib/analytics'
 
 const ConfirmEmail: NextPage<{ user: firebase.User }> = ({ user }) => {
   const [msg, setMsg] = useState('')
@@ -16,6 +17,7 @@ const ConfirmEmail: NextPage<{ user: firebase.User }> = ({ user }) => {
         setLoading(false)
         setMsg('登録されたメールアドレスに認証用メールを送信しました。')
       } catch (e) {
+        ;(await analytics()).logEvent('exception', { description: e.message })
         console.log(e)
         setLoading(false)
         setMsg(errorMsg(e))

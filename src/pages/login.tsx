@@ -6,6 +6,7 @@ import { faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAlert } from 'react-alert'
 import errorMsg from '@/src/lib/errorMsg'
+import analytics from '../lib/analytics'
 
 const Login = () => {
   const alert = useAlert()
@@ -20,6 +21,7 @@ const Login = () => {
     try {
       await fuego.auth().signInWithEmailAndPassword(email, password)
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       alert.error(errorMsg(e, 'signin'))
     }
     setLoading(false)
@@ -32,6 +34,7 @@ const Login = () => {
       const provider = new fuego.auth.FacebookAuthProvider()
       await fuego.auth().signInWithPopup(provider)
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       alert.error(errorMsg(e, 'signin/popup'))
     }
     setLoading(false)
@@ -44,6 +47,7 @@ const Login = () => {
       const provider = new fuego.auth.GoogleAuthProvider()
       await fuego.auth().signInWithPopup(provider)
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       alert.error(errorMsg(e, 'signin/popup'))
     }
     setLoading(false)

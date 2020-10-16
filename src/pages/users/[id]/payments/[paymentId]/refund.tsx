@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { Button, Row, Form, Input, FormGroup, Label } from 'reactstrap'
 import { useRouter } from 'next/router'
-import { GetServerSideProps } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import { useAlert } from 'react-alert'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { fuego } from '@nandorojo/swr-firestore'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
+import analytics from '@/src/lib/analytics'
+import { payment } from 'app'
 
-const Refund = ({ user, createdUser, payment }) => {
+type Props = {
+  user: firebase.User
+  createdUser: firebase.User['uid']
+  payment: payment
+}
+
+const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
   const router = useRouter()
   const alert = useAlert()
   type select = '' | 'mistake' | 'fraud' | 'other'
@@ -91,6 +99,14 @@ const Refund = ({ user, createdUser, payment }) => {
         }),
       })
       if (res.status !== 200) throw new Error()
+      ;(await analytics()).logEvent('refund', {
+        transaction_id: payment.id,
+        items: [
+          {
+            id: payment.category,
+          },
+        ],
+      })
       router.push({
         pathname: `/users/${user.uid}/payments/${payment.id}`,
         query: {
@@ -100,6 +116,7 @@ const Refund = ({ user, createdUser, payment }) => {
         },
       })
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       console.error(e.message)
       alert.error('エラーが発生しました。しばらくしてお試しください。')
       setLoading(false)
@@ -125,6 +142,7 @@ const Refund = ({ user, createdUser, payment }) => {
         },
       })
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       console.error(e.message)
       alert.error('エラーが発生しました。しばらくしてお試しください。')
       setLoading(false)

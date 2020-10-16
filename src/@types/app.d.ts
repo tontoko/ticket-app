@@ -1,6 +1,4 @@
 declare module 'app' {
-  export type events = event[]
-
   export type event = {
     startDate: FirebaseFirestore.Timestamp
     endDate: FirebaseFirestore.Timestamp
@@ -8,7 +6,7 @@ declare module 'app' {
     id: string
     placeName: string
     name: string
-    eventDetails: string
+    eventDetail: string
     createdUser: string
     id?: string
     categories?: categories
@@ -26,8 +24,6 @@ declare module 'app' {
     index: number
     id?: string
   }
-
-  export type payments = payment[]
 
   export type payment = {
     category: category.id
@@ -56,16 +52,12 @@ declare module 'app' {
     category: category.id
   }
 
-  export type notifies = notify[]
-
   export type notify = {
     read: boolean
     text: string
     url: string
     createdAt: firebase.firestore.Timestamp
   }
-
-  export type tickets = ticket[]
 
   export type ticket = {
     category: category

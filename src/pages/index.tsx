@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react'
-import Login from './login'
 import React from 'react'
-import {useRouter} from 'next/router'
+import { useRouter } from 'next/router'
 
 const Index: React.FC = () => {
-    const router = useRouter()
+  const router = useRouter()
 
-    useEffect(() => {
-        location.replace('/login')
-    }, [])
+  useEffect(() => {
+    router && router.replace('/login')
+  }, [router])
 
-    // トップページ作る
-    return <div>リダイレクトします...</div>
+  // トップページ作る
+  return <div>リダイレクトします...</div>
 }
 
 export default Index

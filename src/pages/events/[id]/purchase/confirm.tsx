@@ -25,6 +25,7 @@ import { category, event } from 'app'
 import withAuth from '@/src/lib/withAuth'
 import { fuego, useDocument } from '@nandorojo/swr-firestore'
 import Loading from '@/src/components/loading'
+import analytics from '@/src/lib/analytics'
 
 const Confirmation = ({ user }: { user: firebase.User }) => {
   const stripe = useStripe()
@@ -69,7 +70,11 @@ const Confirmation = ({ user }: { user: firebase.User }) => {
           }),
           body: JSON.stringify({ eventId: router.query.id, categoryId: selectedCategory, token }),
         })
-        const { clientSecret, photoUrls, event } = await res.json()
+        const { clientSecret, photoUrls, event } = (await res.json()) as {
+          clientSecret: string
+          photoUrls: string[]
+          event: event
+        }
         setPaymentState({
           familyName,
           firstName,
@@ -80,7 +85,17 @@ const Confirmation = ({ user }: { user: firebase.User }) => {
           selectedCategory,
         })
         setLoading(false)
+        ;(await analytics()).logEvent('begin_checkout', {
+          items: [
+            {
+              id: category.id,
+              price: category.price,
+              name: category.name,
+            },
+          ],
+        })
       } catch (e) {
+        ;(await analytics()).logEvent('exception', { description: e.message })
         console.error(e)
         await fuego.auth().signOut()
       }
@@ -103,6 +118,16 @@ const Confirmation = ({ user }: { user: firebase.User }) => {
       }, 3000)
       return
     }
+    ;(await analytics()).logEvent('checkout_progress', {
+      checkout_option: 'card',
+      items: [
+        {
+          id: category.id,
+          price: category.price,
+          name: category.name,
+        },
+      ],
+    })
     const res = await stripe.confirmCardPayment(paymentState.clientSecret, {
       payment_method: {
         card: elements.getElement(CardElement),

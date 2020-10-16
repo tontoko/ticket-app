@@ -6,6 +6,7 @@ import Loading from '@/src/components/loading'
 import { decodeQuery, encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 import { fuego } from '@nandorojo/swr-firestore'
+import analytics from '@/src/lib/analytics'
 const QrReader = dynamic(() => import('react-qr-reader'), {
   // eslint-disable-next-line react/display-name
   loading: () => <p>loading...</p>,
@@ -56,6 +57,7 @@ const QrReaderPage = ({ user }) => {
         query: { msg: encodeQuery((await res.json()).msg) },
       })
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       alert.error(e.message)
     }
     setProccesing(false)

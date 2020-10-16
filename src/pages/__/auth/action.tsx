@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import ResetPassword from './resetPassword'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import { fuego } from '@nandorojo/swr-firestore'
+import analytics from '@/src/lib/analytics'
 
 const Action = ({ user }) => {
   const alert = useAlert()
@@ -43,6 +44,7 @@ const Action = ({ user }) => {
             throw new Error('不正なリクエストです。')
         }
       } catch (e) {
+        ;(await analytics()).logEvent('exception', { description: e.message })
         console.error(e)
         alert.error(errorMsg(e))
         setTimeout(() => redirectAfterUpdate(), 5000)
@@ -72,6 +74,7 @@ const Action = ({ user }) => {
       await fuego.auth().confirmPasswordReset(oobCode.current, newPwd)
       redirectAfterUpdate('新しいパスワードに更新しました。')
     } catch (e) {
+      ;(await analytics()).logEvent('exception', { description: e.message })
       alert.error(errorMsg(e))
     }
   }
