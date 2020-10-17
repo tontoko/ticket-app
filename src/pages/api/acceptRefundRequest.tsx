@@ -5,7 +5,7 @@ import stripe from '@/src/lib/stripe'
 import { payment } from 'app'
 
 const sendRefundRequest: NextApiHandler = async (req, res) => {
-  const { firestore, firebase, messaging } = await initFirebaseAdmin()
+  const { firestore, firebase } = await initFirebaseAdmin()
   const { seller, buyer, paymentId, token } = req.body
 
   const decodedIdToken = await firebase.auth().verifyIdToken(token)

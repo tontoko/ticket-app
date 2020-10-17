@@ -23,24 +23,26 @@ const fetcher = async (url, user) => {
   return individual ? individual.requirements : null
 }
 
-const MyEvents: NextPage<{user: firebase.User}> = ({user}) => {
+const MyEvents: NextPage<{ user: firebase.User }> = ({ user }) => {
   const router = useRouter()
   const { data: requirements } = useSWR(user && ['/api/stripeAccountsRetrieve', user], fetcher)
-  const {data: eventsData} = useCollection<event>(router && `events`, {
+  const { data: eventsData } = useCollection<event>(router && `events`, {
     listen: true,
     where: ['createdUser', '==', router?.query?.id],
   })
-  const [events, setEvents] = useState<({thumbnail: string} & event)[]>([])
-  
+  const [events, setEvents] = useState<({ thumbnail: string } & event)[]>([])
+
   useEffect(() => {
     if (!user || !eventsData) return
-    Promise.all(eventsData.map(async eventData => {
-      const thumbnail =
-        eventData.photos.length > 0
-          ? await getImg(eventData.photos[0], user.uid, '360')
-          : await getImg(null, user.uid, '360')
-      return { ...eventData, thumbnail }
-    })).then((result) => setEvents(result as ({thumbnail: string} & event)[]))
+    Promise.all(
+      eventsData.map(async (eventData) => {
+        const thumbnail =
+          eventData.photos.length > 0
+            ? await getImg(eventData.photos[0], user.uid, '360')
+            : await getImg(null, user.uid, '360')
+        return { ...eventData, thumbnail }
+      }),
+    ).then((result) => setEvents(result as ({ thumbnail: string } & event)[]))
   }, [user, eventsData])
 
   const renderUserEvents = () =>

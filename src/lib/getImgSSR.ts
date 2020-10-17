@@ -12,7 +12,6 @@ export default async (img: string, uid: string, size?: '360' | '800') => {
 
   let result: boolean
   if (!img) return `/images/event_default${sizeSuffix}`
-
   ;[result] = await storage.file(`${filepath}${sizeSuffix}`).exists()
   if (result) {
     return (

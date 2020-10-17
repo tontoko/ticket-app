@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Form,
   Button,
@@ -11,51 +11,60 @@ import {
   CardSubtitle,
   CardText,
 } from 'reactstrap'
-import { fuego, useDocument } from '@nandorojo/swr-firestore'
+import { fuego } from '@nandorojo/swr-firestore'
 import getImg from '@/src/lib/getImg'
-import getImgSSR from '@/src/lib/getImgSSR'
 import moment from 'moment'
 import { parseCookies } from 'nookies'
 import { event } from 'app'
 import withAuth from '@/src/lib/withAuth'
-import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
+import { useRouter } from 'next/router'
+import { NextPage } from 'next'
 
-export const User: React.FC<any> = ({ user, serverEventHistory }) => {
-  const [event, setEvent] = useState(serverEventHistory)
-  const cookie = parseCookies()
-  const { data: lastVisitedEventData } = useDocument<event>(
-    cookie.lastVisitedEvent && !serverEventHistory && `events/${cookie.lastVisitedEvent}`,
-  )
+export const User: NextPage<{ user: firebase.User }> = ({ user }) => {
+  const router = useRouter()
+  const [event, setEvent] = useState<event & { photo: string }>()
 
   useEffect(() => {
     ;(async () => {
-      if (!user || !lastVisitedEventData || serverEventHistory) return
-      if (user.uid === lastVisitedEventData.createdUser) return
-      const photos =
-        lastVisitedEventData.photos.length > 0
-          ? await getImg(lastVisitedEventData.photos[0], lastVisitedEventData.createdUser)
-          : await getImg(null, lastVisitedEventData.createdUser)
-      setEvent({
-        ...lastVisitedEventData,
-        startDate: lastVisitedEventData.startDate.toMillis(),
-        endDate: lastVisitedEventData.endDate.toMillis(),
-        photos,
-        id: lastVisitedEventData.id,
-      })
-      fuego.db
-        .collection('users')
-        .doc(user.uid)
-        .update({
-          eventHistory: [lastVisitedEventData.id],
-        })
-    })()
-  }, [lastVisitedEventData, user])
+      if (!router) return
+      const { id } = router?.query
+      const userData = (
+        await fuego.db
+          .collection('users')
+          .doc(id as string)
+          .get()
+      ).data()
 
-  const renderUserEvent = () => {
+      let targetEventId: string = null
+      const cookie = parseCookies()
+      if (cookie.lastVisitedEvent) {
+        targetEventId = cookie.lastVisitedEvent
+      }
+      if (userData && userData.eventHistory) {
+        const index =
+          userData.eventHistory.length === 1
+            ? 0
+            : userData.eventHistory.length - Math.floor(Math.random() * 2 + 1)
+        targetEventId = userData.eventHistory[index]
+      }
+      if (targetEventId) {
+        const result = await fuego.db.collection('events').doc(targetEventId).get()
+        const data = result.data() as event
+        const photo =
+          data.photos.length > 0
+            ? await getImg(data.photos[0], data.createdUser)
+            : await getImg(null, data.createdUser)
+        setEvent({ ...data, photo, id: result.id })
+      }
+    })()
+  }, [user, router])
+
+  const renderUserEvent = useMemo(() => {
+    if (!event) return
+
     const showDate = () => {
-      const startDate = moment(event.startDate)
-      const endDate = moment(event.endDate)
+      const startDate = moment(event.startDate.toDate())
+      const endDate = moment(event.endDate.toDate())
       if (startDate.format('YYYYMD') === endDate.format('YYYYMD')) {
         return `${startDate.format('YYYY年 M月D日  H:mm')} - ${endDate.format('H:mm')}`
       } else {
@@ -73,7 +82,7 @@ export const User: React.FC<any> = ({ user, serverEventHistory }) => {
             <CardBody>
               <Row>
                 <Col sm="2" xs="3">
-                  <img width="100%" src={event.photos} alt="image" />
+                  <img width="100%" src={event.photo} alt="image" />
                 </Col>
                 <Col xs="auto">
                   <CardTitle>{event.name}</CardTitle>
@@ -86,7 +95,7 @@ export const User: React.FC<any> = ({ user, serverEventHistory }) => {
         </div>
       </Link>
     )
-  }
+  }, [event])
 
   return (
     <>
@@ -94,7 +103,7 @@ export const User: React.FC<any> = ({ user, serverEventHistory }) => {
       <Form style={{ marginTop: '1.5em' }}>
         {event && (
           <Row form style={{ marginBottom: '2em' }}>
-            {renderUserEvent()}
+            {renderUserEvent}
           </Row>
         )}
         <Row form style={{ marginBottom: '1em' }}>
@@ -108,35 +117,3 @@ export const User: React.FC<any> = ({ user, serverEventHistory }) => {
 }
 
 export default withAuth(User)
-
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const { id } = query
-  const { firestore } = await initFirebaseAdmin()
-  const userData = (
-    await firestore
-      .collection('users')
-      .doc(id as string)
-      .get()
-  ).data()
-
-  let serverEventHistory = null
-
-  if (userData && userData.eventHistory) {
-    const result = await firestore
-      .collection('events')
-      .doc(userData.eventHistory[userData.eventHistory.length - 1])
-      .get()
-    const data = result.data() as event
-    const startDate = data.startDate.toMillis()
-    const endDate = data.endDate.toMillis()
-    const photos =
-      data.photos.length > 0
-        ? await getImgSSR(data.photos[0], data.createdUser)
-        : await getImgSSR(null, data.createdUser)
-    serverEventHistory = { ...data, startDate, endDate, photos, id: result.id }
-  }
-  return {
-    props: { serverEventHistory },
-    // revalidate: 1
-  }
-}
