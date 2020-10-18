@@ -1,6 +1,6 @@
-import admin from "firebase-admin"
+import admin from 'firebase-admin'
 import getSession from '@/src/lib/session'
-import { GetServerSidePropsContext } from "next"
+import { GetServerSidePropsContext } from 'next'
 
 type mode = 'redirect'
 
@@ -19,20 +19,24 @@ export default async (ctx: GetServerSidePropsContext, mode?: mode) => {
     req,
     res,
     url,
-    query
+    query,
   }
 
   if (mode !== 'redirect') return params
-  
+
   if (uid) {
-    if (session.token.firebase.sign_in_provider === 'password' && !session.token.email_verified && url !== '/confirmEmail') {
+    if (
+      session.token.firebase.sign_in_provider === 'password' &&
+      !session.token.email_verified &&
+      url !== '/confirmEmail'
+    ) {
       res.writeHead(302, {
-        Location: '/confirmEmail'
+        Location: '/confirmEmail',
       })
       res.end()
     } else if (url === '/login' || url === '/register' || url === '/forgetPassword') {
       res.writeHead(302, {
-        Location: `/user`
+        Location: `/user`,
       })
       res.end()
     }
@@ -41,7 +45,7 @@ export default async (ctx: GetServerSidePropsContext, mode?: mode) => {
 
   if (url !== '/login' && url !== '/register' && url !== '/' && url !== '/__/auth/action') {
     res.writeHead(302, {
-      Location: `/login`
+      Location: `/login`,
     })
     res.end()
     return params

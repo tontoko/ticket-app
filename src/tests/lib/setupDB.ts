@@ -1,4 +1,3 @@
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { category, event, manualPayment } from 'app'
 import moment from 'moment'
 

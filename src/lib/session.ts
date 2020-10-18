@@ -1,11 +1,11 @@
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 
-export default async() => {
+export default async () => {
   const session = (await import('micro-session')).default
   const FirestoreStore = (await import('firestore-store')).default(session)
   const { firestore } = await initFirebaseAdmin()
   const store = new FirestoreStore({
-    database: firestore
+    database: firestore,
   })
 
   return session({
@@ -15,7 +15,7 @@ export default async() => {
     saveUninitialized: true,
     cookie: {
       sameSite: 'Lax',
-      secure: true
-    } as any
+      secure: true,
+    } as any,
   })
 }

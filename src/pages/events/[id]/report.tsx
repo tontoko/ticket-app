@@ -5,27 +5,38 @@ import withAuth from '@/src/lib/withAuth'
 import { useCollection, useDocument } from '@nandorojo/swr-firestore'
 import { useRouter } from 'next/router'
 
-const Report = ({user}) => {
+const Report = ({ user }) => {
   const router = useRouter()
-  const {id: eventId} = useMemo(() => {
+  const { id: eventId } = useMemo(() => {
     if (!router) return
     return router.query
   }, [router])
 
-  const {data: event} = useDocument<event>(eventId && `events/${eventId}`)
-  const {data: categories} = useCollection<category>(eventId && `events/${eventId}/categories`, {
-    orderBy: 'index'
+  const { data: event } = useDocument<event>(eventId && `events/${eventId}`)
+  const { data: categories } = useCollection<category>(eventId && `events/${eventId}/categories`, {
+    orderBy: 'index',
   })
-  const {data: manualPayments} = useCollection<manualPayment>(eventId && `events/${eventId}/manualPayments`)
-  const {data: payments} = useCollection<payment>(eventId && 'payments', {
-    where: [['event', '==', eventId],['seller', '==', user.uid]]
+  const { data: manualPayments } = useCollection<manualPayment>(
+    eventId && `events/${eventId}/manualPayments`,
+  )
+  const { data: payments } = useCollection<payment>(eventId && 'payments', {
+    where: [
+      ['event', '==', eventId],
+      ['seller', '==', user.uid],
+    ],
   })
 
-  const [state, setState] = useState({totalSalesProspect:0,totalSales:0,totalFee:0,totalIncome:0,categoryReport: []})
-  
+  const [state, setState] = useState({
+    totalSalesProspect: 0,
+    totalSales: 0,
+    totalFee: 0,
+    totalIncome: 0,
+    categoryReport: [],
+  })
+
   useEffect(() => {
     if (!event || !categories || !manualPayments || !payments) return
-    
+
     let totalSalesProspect = 0
     let totalSales = 0
     let totalFee = 0
@@ -58,7 +69,7 @@ const Report = ({user}) => {
         </tr>,
       )
     })
-    setState({totalSalesProspect,totalSales,totalFee,totalIncome,categoryReport})
+    setState({ totalSalesProspect, totalSales, totalFee, totalIncome, categoryReport })
   }, [event, categories, manualPayments, payments])
 
   return (

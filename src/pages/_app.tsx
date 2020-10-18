@@ -58,9 +58,10 @@ const App = ({ Component, pageProps }: AppProps) => {
   useEffect(() => {
     return fuego.auth().onAuthStateChanged(async (currentUser) => {
       setUser(currentUser || null)
-      ;(await analytics()).setUserId(currentUser.uid)
-      if (currentUser)
-        (await analytics()).logEvent('login', { method: currentUser.providerData[0].providerId })
+      if (currentUser) {
+        ;(await analytics()).setUserId(currentUser.uid)
+        ;(await analytics()).logEvent('login', { method: currentUser.providerData[0].providerId })
+      }
     })
   }, [])
 

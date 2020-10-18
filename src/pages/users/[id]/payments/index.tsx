@@ -1,16 +1,57 @@
-import { GetStaticPaths, GetStaticProps, GetServerSideProps } from 'next'
 import { Row, Col, Card, CardBody } from 'reactstrap'
 import { useRouter } from 'next/router'
-import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
+
 import moment from 'moment'
 import Link from 'next/link'
 import withAuth from '@/src/lib/withAuth'
+import { fuego, useCollection } from '@nandorojo/swr-firestore'
+import { useEffect, useRef, useState } from 'react'
+import { category, event, payment } from 'app'
 
-const Payments = ({ user, payments, events, categories }) => {
+const Payments = ({ user }) => {
+  const router = useRouter()
+  const { id } = router?.query
+  const [events, setEvents] = useState<{ [x: string]: event }>({})
+  const [categories, setCategories] = useState<{ [x: string]: category }>({})
+  const { data: payments } = useCollection<payment>(router && '/payments', {
+    where: ['buyer', '==', id],
+    listen: true,
+  })
+  const tmpEvents = useRef({})
+  const tmpCategories = useRef({})
+
+  useEffect(() => {
+    if (!payments) return
+    ;(async () => {
+      await Promise.all(
+        payments.map(async (payment) => {
+          tmpEvents.current = { ...tmpEvents.current, [payment.event]: {} }
+          tmpCategories.current = { ...tmpCategories.current, [payment.category]: {} }
+        }),
+      )
+      await Promise.all(
+        Object.keys(tmpEvents.current).map(async (key) => {
+          const event = (await fuego.db.collection('events').doc(key).get()).data() as event
+          tmpEvents.current = { ...tmpEvents.current, [key]: event }
+          setEvents(tmpEvents.current)
+        }),
+      )
+      await Promise.all(
+        Object.keys(tmpCategories.current).map(async (key) => {
+          const category = (
+            await fuego.db.collection('events').doc(key).collection('categories').doc(key).get()
+          ).data() as category
+          tmpCategories.current = { ...tmpCategories.current, [key]: category }
+          setCategories(tmpCategories.current)
+        }),
+      )
+    })()
+  }, [payments])
+
   const renderPayments = () => {
-    if (!payments.length) return <p>購入履歴はありません。</p>
+    if (!payments?.length) return <p>購入履歴はありません。</p>
     const sortedPayment = [...payments]
-    sortedPayment.sort((a, b) => b.createdAt - a.createdAt)
+    sortedPayment.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds)
 
     return sortedPayment.map((payment, i) => {
       return (
@@ -20,11 +61,14 @@ const Payments = ({ user, payments, events, categories }) => {
               <Col xs="12" style={{ padding: '0', cursor: 'pointer' }}>
                 <Card style={{ height: '100%', width: '100%' }}>
                   <CardBody>
-                    <p>{events[payment.event].name}</p>
-                    <p>{`${categories[payment.category].name}: ${
-                      categories[payment.category].price
-                    } 円`}</p>
-                    <p>{moment(payment.createdAt).format('YYYY年 M月D日 H:mm')}</p>
+                    <p>{events[payment.event] && events[payment.event].name}</p>
+                    <p>
+                      {categories[payment.category] &&
+                        `${categories[payment.category].name}: ${
+                          categories[payment.category].price
+                        } 円`}
+                    </p>
+                    <p>{moment(payment.createdAt.toDate()).format('YYYY年 M月D日 H:mm')}</p>
                   </CardBody>
                 </Card>
               </Col>
@@ -44,53 +88,3 @@ const Payments = ({ user, payments, events, categories }) => {
 }
 
 export default withAuth(Payments)
-
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  const { firebase, firestore } = await initFirebaseAdmin()
-  const { id } = params
-  const events = {}
-  const categories = {}
-  const payments = await Promise.all(
-    (await firestore.collection('payments').where('buyer', '==', id).get()).docs.map(
-      async (doc) => {
-        const data = doc.data()
-        const eventId = data.event
-        const catId = data.category
-        if (!Object.keys(events).includes(eventId)) {
-          const data = (await firestore.collection('events').doc(eventId).get()).data()
-          const startDate = data.startDate.seconds
-          const endDate = data.endDate.seconds
-          events[eventId] = {
-            ...data,
-            startDate,
-            endDate,
-          }
-        }
-        if (!Object.keys(categories).includes(catId)) {
-          categories[catId] = (
-            await firestore
-              .collection('events')
-              .doc(eventId)
-              .collection('categories')
-              .doc(catId)
-              .get()
-          ).data()
-        }
-        return {
-          ...data,
-          id: doc.id,
-          createdAt: data.createdAt.toMillis(),
-        }
-      },
-    ),
-  )
-
-  return {
-    props: {
-      payments,
-      events,
-      categories,
-    },
-    // revalidate: 1
-  }
-}
