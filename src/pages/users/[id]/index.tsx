@@ -17,30 +17,27 @@ import moment from 'moment'
 import { parseCookies } from 'nookies'
 import { event } from 'app'
 import withAuth from '@/src/lib/withAuth'
-import { useRouter } from 'next/router'
 import { NextPage } from 'next'
 
 export const User: NextPage<{ user: firebase.User }> = ({ user }) => {
-  const router = useRouter()
   const [event, setEvent] = useState<event & { photo: string }>()
 
   useEffect(() => {
     ;(async () => {
-      if (!router) return
-      const { id } = router?.query
+      const uid = user?.uid
       const userData = (
         await fuego.db
           .collection('users')
-          .doc(id as string)
+          .doc(uid as string)
           .get()
       ).data()
 
       let targetEventId: string = null
       const cookie = parseCookies()
-      if (cookie.lastVisitedEvent) {
+      if (!userData && cookie.lastVisitedEvent) {
         targetEventId = cookie.lastVisitedEvent
       }
-      if (userData && userData.eventHistory) {
+      if (userData?.eventHistory) {
         const index =
           userData.eventHistory.length === 1
             ? 0
@@ -57,7 +54,7 @@ export const User: NextPage<{ user: firebase.User }> = ({ user }) => {
         setEvent({ ...data, photo, id: result.id })
       }
     })()
-  }, [user, router])
+  }, [user])
 
   const renderUserEvent = useMemo(() => {
     if (!event) return
