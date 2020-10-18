@@ -1,29 +1,54 @@
 import Link from 'next/link'
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { FormGroup, Label } from 'reactstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
-import { GetServerSideProps, NextPage } from 'next'
+import { NextPage } from 'next'
 import withAuth from '@/src/lib/withAuth'
-import { stripeAccounts, stripeBalance } from '@/src/lib/stripeRetrieve'
 import { Stripe } from '@/src/lib/stripe'
 
 const Organizer: NextPage<{
   user: firebase.User
-  status: 'unverified' | 'pending' | 'verified'
-  balance: Stripe.Balance
-}> = ({ user, status, balance }) => {
+}> = ({ user }) => {
+  const [state, setState] = useState<{ status: string; balance: Stripe.Balance }>()
+
   const available = useMemo(() => {
     let sum = 0
-    balance.available.forEach((balance) => (sum += balance.amount))
+    state?.balance.available.forEach((balance) => (sum += balance.amount))
     return sum
-  }, [balance.available])
+  }, [state?.balance.available])
 
   const pending = useMemo(() => {
     let sum = 0
-    balance.pending.forEach((balance) => (sum += balance.amount))
+    state?.balance.pending.forEach((balance) => (sum += balance.amount))
     return sum
-  }, [balance.pending])
+  }, [state?.balance.pending])
+
+  useEffect(() => {
+    ;(async () => {
+      const { individual } = (await (
+        await fetch('/api/stripeAccountsRetrieve', {
+          method: 'POST',
+          headers: new Headers({
+            'Content-Type': 'application/json',
+          }),
+          body: JSON.stringify({ uid: user.uid }),
+        })
+      ).json()) as Stripe.Account
+      const { balance } = (await (
+        await fetch('/api/stripeBalanceRetrieve', {
+          method: 'POST',
+          headers: new Headers({
+            'Content-Type': 'application/json',
+          }),
+          body: JSON.stringify({ uid: user.uid }),
+        })
+      ).json()) as { balance: Stripe.Balance }
+      const verification = individual ? individual.verification : null
+      const status = verification && verification.status
+      setState({ status, balance })
+    })()
+  }, [])
 
   return (
     <div style={{ marginTop: '1.5em', marginBottom: '1.5em' }}>
@@ -80,18 +105,6 @@ const Organizer: NextPage<{
       </FormGroup>
     </div>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const { id } = query
-  const { individual } = await stripeAccounts(id)
-  const verification = individual ? individual.verification : null
-  const status = verification && verification.status
-  const balance = await stripeBalance(id)
-  return {
-    props: { status, balance },
-    // revalidate: 1
-  }
 }
 
 export default withAuth(Organizer)
