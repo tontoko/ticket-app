@@ -135,7 +135,7 @@ export const BankAccounts: NextPage<props> = ({ user, setModal, setModalInner })
                       <Button
                         color="success"
                         disabled={loading}
-                        onClick={() => changeDefaultBankAccount(bankAccount.id, i)}
+                        onClick={() => changeDefaultBankAccount(bankAccount.id)}
                         style={{ marginBottom: '0.2em' }}
                       >
                         既定に変更

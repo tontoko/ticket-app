@@ -22,7 +22,6 @@ const previewEvent = ({ setModal, setModalInner, submitEvent, loading, params, p
     <PreviewModal
       setModal={setModal}
       submitEvent={submitEvent}
-      loading={loading}
       photos={photos}
       eventName={eventName}
       placeName={placeName}
@@ -38,7 +37,6 @@ const previewEvent = ({ setModal, setModalInner, submitEvent, loading, params, p
 const PreviewModal = ({
   setModal,
   submitEvent,
-
   photos,
   eventName,
   placeName,
