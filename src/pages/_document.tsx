@@ -10,11 +10,11 @@ class MyDocument extends Document {
     return (
       <Html lang="ja" title="Ticket-App">
         <Head>
-          <script
+          {/* <script
             data-ad-client="ca-pub-6198405782288989"
             async
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"
-          ></script>
+          ></script> */}
         </Head>
         <body>
           <Main />
