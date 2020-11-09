@@ -32,7 +32,7 @@ declare module 'app' {
     error: string
     buyer: string
     seller: string
-    refund: {
+    refund?: {
       detailText: string
       reason: string
       reasonText: string

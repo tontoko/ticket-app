@@ -47,7 +47,7 @@ const App = ({ Component, pageProps }: AppProps) => {
     ReactElement,
     Dispatch<SetStateAction<ReactElement>>,
   ] = useState()
-  const [user, setUser] = useState<firebase.User>()
+  const [user, setUser] = useState<firebase.default.User>()
 
   useEffect(() => {
     ;(async () => {

@@ -10,7 +10,7 @@ const Tickets = ({
   ticket,
   event,
 }: {
-  user: firebase.User
+  user: firebase.default.User
   ticket: ticket
   event: event
 }) => {

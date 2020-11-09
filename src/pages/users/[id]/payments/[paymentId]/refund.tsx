@@ -13,8 +13,8 @@ import { payment } from 'app'
 import { mutate } from 'swr'
 
 type Props = {
-  user: firebase.User
-  createdUser: firebase.User['uid']
+  user: firebase.default.User
+  createdUser: firebase.default.User['uid']
   payment: payment
 }
 

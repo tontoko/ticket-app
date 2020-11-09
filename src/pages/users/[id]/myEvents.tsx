@@ -23,7 +23,7 @@ const fetcher = async (url, user) => {
   return individual ? individual.requirements : null
 }
 
-const MyEvents: NextPage<{ user: firebase.User }> = ({ user }) => {
+const MyEvents: NextPage<{ user: firebase.default.User }> = ({ user }) => {
   const router = useRouter()
   const { data: requirements } = useSWR(user && ['/api/stripeAccountsRetrieve', user], fetcher)
   const { data: eventsData } = useCollection<event>(router && `events`, {

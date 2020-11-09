@@ -32,7 +32,7 @@ import createTicketsData from '@/src/lib/createTicketsData'
 import analytics from '@/src/lib/analytics'
 
 type Props = {
-  user: firebase.User
+  user: firebase.default.User
   event: event
   categories: category[]
   items: {

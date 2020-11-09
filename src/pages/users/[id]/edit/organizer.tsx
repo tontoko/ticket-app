@@ -8,7 +8,7 @@ import withAuth from '@/src/lib/withAuth'
 import { Stripe } from '@/src/lib/stripe'
 
 const Organizer: NextPage<{
-  user: firebase.User
+  user: firebase.default.User
 }> = ({ user }) => {
   const [state, setState] = useState<{ status: string; balance: Stripe.Balance }>()
 

@@ -17,7 +17,7 @@ import Loading from '@/src/components/loading'
 import { NextPage } from 'next'
 import analytics from '@/src/lib/analytics'
 
-export const UpdateUser: NextPage<{ user: firebase.User }> = ({ user }) => {
+export const UpdateUser: NextPage<{ user: firebase.default.User }> = ({ user }) => {
   const alert = useAlert()
   const router = useRouter()
   const [tosAcceptance, setTosAcceptance] = useState<Stripe.Account.TosAcceptance>()

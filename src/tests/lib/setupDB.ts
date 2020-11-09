@@ -126,7 +126,7 @@ const manualPayments: { [key: string]: { [key: string]: manualPayment } } = {
   event3: {},
 }
 
-export const setupBase = async (firestore: firebase.firestore.Firestore) => {
+export const setupBase = async (firestore: firebase.default.firestore.Firestore) => {
   await Promise.all(
     Object.keys(users).map(
       async (userId) =>
