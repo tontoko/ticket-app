@@ -1,7 +1,8 @@
+import { fuego } from '@nandorojo/swr-firestore'
+
 const storage = async () => {
-  const firebase = await import('firebase/app')
-  await import('firebase/storage')
-  return firebase.storage()
+  console.log(fuego)
+  return fuego.storage()
 }
 
 export default storage
