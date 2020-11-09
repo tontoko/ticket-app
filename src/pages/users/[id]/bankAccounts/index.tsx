@@ -20,7 +20,7 @@ import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
 
 type props = {
-  user: firebase.User
+  user: firebase.default.User
   bankAccounts: Stripe.BankAccount[]
   setModal: Dispatch<SetStateAction<boolean>>
   setModalInner: Dispatch<SetStateAction<ReactElement>>

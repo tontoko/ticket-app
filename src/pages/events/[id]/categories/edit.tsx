@@ -42,7 +42,7 @@ const Edit = ({ user, setModal, setModalInner }) => {
 
   const renderCategories = () =>
     currentCategories &&
-    currentCategories.map((category: firebase.firestore.DocumentData, i) => {
+    currentCategories.map((category: firebase.default.firestore.DocumentData, i) => {
       const setName = (name: string) => {
         const copyCategories = [...currentCategories]
         copyCategories[i] = { ...copyCategories[i], name }
@@ -284,7 +284,7 @@ const ModalInner = ({ currentCategories, user, alert, setModal }) => {
         throw new Error('チケット名が重複しています')
       })
       const addCategories = []
-      const updateCategories: { string?: FirebaseFirestore.DocumentData } = {}
+      const updateCategories: { string?: firebase.default.firestore.DocumentData } = {}
       await Promise.all(
         currentCategories.map(async (category, i) => {
           if (category.new) {

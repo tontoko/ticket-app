@@ -15,7 +15,7 @@ import moment from 'moment'
 import analytics from '@/src/lib/analytics'
 
 export const Leave: NextPage<{
-  user: firebase.User
+  user: firebase.default.User
   balance: Stripe.Balance
   canLeave: boolean
 }> = ({ user, balance, canLeave }) => {
@@ -43,7 +43,7 @@ export const Leave: NextPage<{
     const { providerData } = user
     try {
       if (providerData[0].providerId === 'password') {
-        const credencial: firebase.auth.AuthCredential = fuego.auth.EmailAuthProvider.credential(
+        const credencial: firebase.default.auth.AuthCredential = fuego.auth.EmailAuthProvider.credential(
           user.email,
           pwd,
         )

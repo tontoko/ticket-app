@@ -5,7 +5,7 @@ import { fuego } from '@nandorojo/swr-firestore'
 import { NextPage } from 'next'
 import analytics from '../lib/analytics'
 
-const ConfirmEmail: NextPage<{ user: firebase.User }> = ({ user }) => {
+const ConfirmEmail: NextPage<{ user: firebase.default.User }> = ({ user }) => {
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(true)
 

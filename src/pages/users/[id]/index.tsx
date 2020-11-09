@@ -19,7 +19,7 @@ import { event } from 'app'
 import withAuth from '@/src/lib/withAuth'
 import { NextPage } from 'next'
 
-export const User: NextPage<{ user: firebase.User }> = ({ user }) => {
+export const User: NextPage<{ user: firebase.default.User }> = ({ user }) => {
   const [event, setEvent] = useState<event & { photo: string }>()
 
   useEffect(() => {

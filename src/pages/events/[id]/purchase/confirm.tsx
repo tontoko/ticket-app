@@ -27,7 +27,7 @@ import { fuego, useDocument } from '@nandorojo/swr-firestore'
 import Loading from '@/src/components/loading'
 import analytics from '@/src/lib/analytics'
 
-const Confirmation = ({ user }: { user: firebase.User }) => {
+const Confirmation = ({ user }: { user: firebase.default.User }) => {
   const stripe = useStripe()
   const elements = useElements()
   const router = useRouter()

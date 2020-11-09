@@ -4,7 +4,7 @@ import Router from 'next/router'
 import React from 'react'
 
 const withAuth = (Component) => {
-  return class withAuthHOC extends React.Component<{ user: firebase.User }> {
+  return class withAuthHOC extends React.Component<{ user: firebase.default.User }> {
     constructor(props) {
       super(props)
     }

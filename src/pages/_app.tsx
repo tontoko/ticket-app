@@ -5,7 +5,8 @@ import '@fortawesome/fontawesome-svg-core/styles.css'
 import UserLayouts from './layouts/userLayouts'
 import 'firebase/firestore'
 import 'firebase/auth'
-import { Fuego, FuegoProvider } from '@nandorojo/swr-firestore'
+import 'firebase/storage'
+import { FuegoProvider } from '@nandorojo/swr-firestore'
 import { useRouter } from 'next/router'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
@@ -28,6 +29,7 @@ const publishableKey =
 const stripePromise = loadStripe(publishableKey)
 import { dev, prod } from '@/ticket-app'
 import analytics from '../lib/analytics'
+import { Fuego } from '../lib/fuego'
 const firebaseConfig = env === 'prod' ? prod : dev
 const fuego = new Fuego(firebaseConfig)
 // ローカルのFirestoreエミュレータに接続する設定
@@ -45,7 +47,7 @@ const App = ({ Component, pageProps }: AppProps) => {
     ReactElement,
     Dispatch<SetStateAction<ReactElement>>,
   ] = useState()
-  const [user, setUser] = useState<firebase.User>()
+  const [user, setUser] = useState<firebase.default.User>()
 
   useEffect(() => {
     ;(async () => {

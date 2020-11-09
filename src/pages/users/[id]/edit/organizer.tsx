@@ -8,7 +8,7 @@ import withAuth from '@/src/lib/withAuth'
 import { Stripe } from '@/src/lib/stripe'
 
 const Organizer: NextPage<{
-  user: firebase.User
+  user: firebase.default.User
 }> = ({ user }) => {
   const [state, setState] = useState<{ status: string; balance: Stripe.Balance }>()
 
@@ -61,7 +61,7 @@ const Organizer: NextPage<{
       </FormGroup>
       <FormGroup>
         {(() => {
-          if (status === 'unverified')
+          if (state?.status === 'unverified')
             return (
               <p>
                 本人確認書類:
@@ -76,8 +76,8 @@ const Organizer: NextPage<{
                 </Link>
               </p>
             )
-          if (status === 'pending') return <p>本人確認書類: 確認中</p>
-          if (status === 'verified')
+          if (state?.status === 'pending') return <p>本人確認書類: 確認中</p>
+          if (state?.status === 'verified')
             return (
               <p>
                 本人確認書類:{' '}
