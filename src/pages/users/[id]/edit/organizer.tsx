@@ -6,6 +6,7 @@ import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-
 import { NextPage } from 'next'
 import withAuth from '@/src/lib/withAuth'
 import { Stripe } from '@/src/lib/stripe'
+import Loading from '@/src/components/loading'
 
 const Organizer: NextPage<{
   user: firebase.default.User
@@ -46,9 +47,12 @@ const Organizer: NextPage<{
       ).json()) as { balance: Stripe.Balance }
       const verification = individual ? individual.verification : null
       const status = verification && verification.status
+      console.log(verification)
       setState({ status, balance })
     })()
   }, [])
+
+  if (!state) return <Loading />
 
   return (
     <div style={{ marginTop: '1.5em', marginBottom: '1.5em' }}>
