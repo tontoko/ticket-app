@@ -85,15 +85,6 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
           selectedCategory,
         })
         setLoading(false)
-        ;(await analytics()).logEvent('begin_checkout', {
-          items: [
-            {
-              id: category.id,
-              price: category.price,
-              name: category.name,
-            },
-          ],
-        })
       } catch (e) {
         ;(await analytics()).logEvent('exception', { description: e.message })
         console.error(e)
@@ -101,6 +92,20 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
       }
     })()
   }, [user, router])
+
+  useEffect(() => {
+    if (!category) return
+    ;(async () =>
+      (await analytics()).logEvent('begin_checkout', {
+        items: [
+          {
+            id: category.id,
+            price: category.price,
+            name: category.name,
+          },
+        ],
+      }))()
+  }, [category])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
