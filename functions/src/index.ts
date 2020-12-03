@@ -52,3 +52,28 @@ exports.createUser = functions.auth.user().onCreate(async (user) => {
     admin.auth().deleteUser(user.uid)
   }
 })
+
+exports.contactsToSlackNotify = functions.firestore
+  .document('contacts/{id}')
+  .onCreate(async (snap) => {
+    const request = await import('request')
+    const data = snap.data()
+    const msg = Object.keys(data)
+      .map((key) => `${key}: ${data[key]}`)
+      .join('\n')
+    const slackEnv = functions.config().slack as {
+      webhock: {
+        dev: string
+        prod: string
+      }
+    }
+    const webhock =
+      process.env.GCLOUD_PROJECT === 'ticket-app-d3f5a'
+        ? slackEnv.webhock.prod
+        : slackEnv.webhock.dev
+    request.post({
+      uri: webhock,
+      headers: { 'Content-type': 'application/json' },
+      json: { text: msg },
+    })
+  })
