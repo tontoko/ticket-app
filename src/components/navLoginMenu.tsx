@@ -58,17 +58,22 @@ const LoginMenu = ({ user, avater, toggle, isOpen }) => {
         <Nav navbar>
           <NavItem style={{ cursor: 'pointer' }}>
             <Link href={`/users/${user.uid}/myEvents`}>
-              <NavLink style={{ color: 'white' }}>主催するイベント</NavLink>
+              <NavLink>主催するイベント</NavLink>
             </Link>
           </NavItem>
           <NavItem style={{ cursor: 'pointer' }}>
             <Link href={`/users/${user.uid}/myTickets`}>
-              <NavLink style={{ color: 'white' }}>購入済みチケット</NavLink>
+              <NavLink>購入済みチケット</NavLink>
+            </Link>
+          </NavItem>
+          <NavItem style={{ cursor: 'pointer' }}>
+            <Link href={`/contact`}>
+              <NavLink>お問い合わせ</NavLink>
             </Link>
           </NavItem>
           <NavItem style={{ cursor: 'pointer' }}>
             <Link href={`/termsOfUse`}>
-              <NavLink style={{ color: 'white' }}>利用規約</NavLink>
+              <NavLink>利用規約</NavLink>
             </Link>
           </NavItem>
         </Nav>
