@@ -75,7 +75,7 @@ const Organizer: NextPage<{
                       icon={faExclamationCircle}
                       style={{ color: 'red', marginLeft: '0.5em' }}
                     />{' '}
-                    提出が必要です
+                    提出が必要です。提出しない場合、銀行口座への出金が行えない場合があります。
                   </a>
                 </Link>
               </p>
