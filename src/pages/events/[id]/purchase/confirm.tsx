@@ -285,35 +285,36 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
         </Card>
       </FormGroup>
       <FormGroup style={{ marginBottom: '2em' }}>
-        <Row form className="flex-row-reverse">
-          {paymentRequest && (
-            <Col sm="6">
+        <Row form>
+          {paymentRequest ? (
+            <Col sm={{ size: 6, offset: 6 }}>
               <PaymentRequestButtonElement options={{ paymentRequest }} />
             </Col>
-          )}
-          <Col sm="6">
-            <Card>
-              <CardBody>
-                <Label>クレジットカード情報を入力</Label>
-                <CardElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: '16px',
-                        color: '#424770',
-                        '::placeholder': {
-                          color: '#aab7c4',
+          ) : (
+            <Col sm={{ size: 6, offset: 6 }}>
+              <Card>
+                <CardBody>
+                  <Label>クレジットカード情報を入力</Label>
+                  <CardElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: '16px',
+                          color: '#424770',
+                          '::placeholder': {
+                            color: '#aab7c4',
+                          },
+                        },
+                        invalid: {
+                          color: '#9e2146',
                         },
                       },
-                      invalid: {
-                        color: '#9e2146',
-                      },
-                    },
-                  }}
-                />
-              </CardBody>
-            </Card>
-          </Col>
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          )}
         </Row>
       </FormGroup>
       <Row className="flex-row-reverse">
