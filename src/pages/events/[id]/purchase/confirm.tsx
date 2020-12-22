@@ -6,14 +6,12 @@ import {
   FormGroup,
   Button,
   Label,
-  Input,
   Row,
   Col,
   Card,
   CardBody,
   CardTitle,
   CardSubtitle,
-  FormFeedback,
   Spinner,
 } from 'reactstrap'
 import { useAlert } from 'react-alert'
@@ -39,7 +37,6 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
   const elements = useElements()
   const router = useRouter()
   const alert = useAlert()
-  const [agree, setAgree] = useState(false)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [complete, setComplete] = useState(false)
@@ -210,7 +207,6 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
   }
 
   const paymentValidation = async () => {
-    if (!agree) throw new Error('同意します が選択されていません')
     if (category?.stock - category?.sold < 1 || !category?.public) {
       const msg =
         category?.stock - category?.sold < 1
@@ -286,12 +282,16 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
       </FormGroup>
       <FormGroup style={{ marginBottom: '2em' }}>
         <Row form>
-          {paymentRequest ? (
-            <Col sm={{ size: 6, offset: 6 }}>
+          <Col sm={{ size: 6, offset: 6 }}>
+            <Label style={{ fontSize: 12, color: 'gray' }}>
+              <Link href="/termsOfUse">
+                <a>利用規約及び特定商取引法に基づく表示</a>
+              </Link>
+              に同意します。
+            </Label>
+            {paymentRequest ? (
               <PaymentRequestButtonElement options={{ paymentRequest }} />
-            </Col>
-          ) : (
-            <Col sm={{ size: 6, offset: 6 }}>
+            ) : (
               <Card>
                 <CardBody>
                   <Label>クレジットカード情報を入力</Label>
@@ -313,39 +313,17 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
                   />
                 </CardBody>
               </Card>
-            </Col>
-          )}
+            )}
+          </Col>
         </Row>
       </FormGroup>
-      <Row className="flex-row-reverse">
-        <FormGroup check style={{ marginRight: '1em' }}>
-          <Label>
-            <Link href="/termsOfUse">
-              <a>利用規約及び特定商取引法に基づく表示</a>
-            </Link>
-            を確認の上、同意します。
-          </Label>
-        </FormGroup>
-      </Row>
-      <Row className="flex-row-reverse">
-        <FormGroup check style={{ marginRight: '1em' }}>
-          <Label check>
-            <Input
-              type="checkbox"
-              checked={agree}
-              onChange={() => setAgree(!agree)}
-              invalid={!agree}
-            />{' '}
-            同意します
-            <FormFeedback>必須項目です</FormFeedback>
-          </Label>
-        </FormGroup>
-      </Row>
-      <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
-        <Button disabled={!stripe || !elements || loading}>
-          {processing ? <Spinner /> : '購入'}
-        </Button>
-      </Row>
+      {!paymentRequest && (
+        <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
+          <Button disabled={!stripe || !elements || loading}>
+            {processing ? <Spinner /> : '購入'}
+          </Button>
+        </Row>
+      )}
     </Form>
   )
 }
