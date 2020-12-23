@@ -6,18 +6,22 @@ import {
   FormGroup,
   Button,
   Label,
-  Input,
   Row,
   Col,
   Card,
   CardBody,
   CardTitle,
   CardSubtitle,
-  FormFeedback,
   Spinner,
 } from 'reactstrap'
 import { useAlert } from 'react-alert'
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
+import {
+  CardElement,
+  useStripe,
+  useElements,
+  PaymentRequestButtonElement,
+  Elements,
+} from '@stripe/react-stripe-js'
 import { decodeQuery } from '@/src/lib/parseQuery'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
@@ -26,13 +30,13 @@ import withAuth from '@/src/lib/withAuth'
 import { fuego, useDocument } from '@nandorojo/swr-firestore'
 import Loading from '@/src/components/loading'
 import analytics from '@/src/lib/analytics'
+import { loadStripe } from '@stripe/stripe-js'
 
 const Confirmation = ({ user }: { user: firebase.default.User }) => {
   const stripe = useStripe()
   const elements = useElements()
   const router = useRouter()
   const alert = useAlert()
-  const [agree, setAgree] = useState(false)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [complete, setComplete] = useState(false)
@@ -49,6 +53,7 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
     event: event
     selectedCategory: string
   }>()
+  const [paymentRequest, setPaymentRequest] = useState(null)
 
   const { data: category } = useDocument<category>(
     paymentState && `events/${router.query.id}/categories/${paymentState.selectedCategory}`,
@@ -107,46 +112,111 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
       }))()
   }, [category])
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    if (stripe && paymentState && category) {
+      const pr = stripe.paymentRequest({
+        country: 'JP',
+        currency: 'jpy',
+        total: {
+          label: paymentState.event.name,
+          amount: category.price,
+        },
+        requestPayerName: true,
+        requestPayerEmail: true,
+      })
+
+      pr.canMakePayment().then((result) => {
+        if (result) {
+          setPaymentRequest(pr)
+        }
+      })
+    }
+  }, [stripe, paymentState, category])
+
+  const handleSubmitCardPayment = async (e) => {
     e.preventDefault()
     if (!stripe || !elements || loading) return
-    if (!agree) return alert.error('同意します が選択されていません')
-    setProcessing(true)
+    try {
+      await paymentValidation()
+      setProcessing(true)
+      ;(await analytics()).logEvent('checkout_progress', {
+        checkout_option: 'card',
+        items: [
+          {
+            id: category.id,
+            price: category.price,
+            name: category.name,
+          },
+        ],
+      })
+      const { error: confirmError } = await stripe.confirmCardPayment(paymentState.clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+          billing_details: {
+            name: `${paymentState.familyName} ${paymentState.firstName}`,
+            email: paymentState.email,
+          },
+        },
+      })
+      if (confirmError) {
+        alert.error(
+          'エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。',
+        )
+        return setProcessing(false)
+      }
+      paymentComplete()
+    } catch (e) {
+      alert.error(e.message)
+      setProcessing(false)
+    }
+  }
+
+  if (paymentRequest) {
+    paymentRequest.on('paymentmethod', async (ev) => {
+      try {
+        await paymentValidation()
+        setProcessing(true)
+        ;(await analytics()).logEvent('checkout_progress', {
+          checkout_option: ev.paymentMethod.id,
+          items: [
+            {
+              id: category.id,
+              price: category.price,
+              name: category.name,
+            },
+          ],
+        })
+        const { error: confirmError } = await stripe.confirmCardPayment(
+          paymentState.clientSecret,
+          { payment_method: ev.paymentMethod.id },
+          { handleActions: false },
+        )
+
+        if (confirmError) {
+          alert.error(
+            'エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。',
+          )
+          return setProcessing(false)
+        }
+        paymentComplete()
+      } catch (e) {
+        alert.error(e.message)
+        setProcessing(false)
+      }
+    })
+  }
+
+  const paymentValidation = async () => {
     if (category?.stock - category?.sold < 1 || !category?.public) {
       const msg =
         category?.stock - category?.sold < 1
           ? '在庫がありませんでした。リダイレクトします。'
           : '対象のチケットは主催者によって非公開に設定されました。リダイレクトします。'
-      alert.error(msg)
       setTimeout(() => {
         router.push(`/events/${eventId}`)
       }, 3000)
-      return
+      throw new Error(msg)
     }
-    ;(await analytics()).logEvent('checkout_progress', {
-      checkout_option: 'card',
-      items: [
-        {
-          id: category.id,
-          price: category.price,
-          name: category.name,
-        },
-      ],
-    })
-    const res = await stripe.confirmCardPayment(paymentState.clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-        billing_details: {
-          name: `${paymentState.familyName} ${paymentState.firstName}`,
-          email: paymentState.email,
-        },
-      },
-    })
-    if (res.error) {
-      alert.error('エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。')
-      return setProcessing(false)
-    }
-    paymentComplete()
   }
 
   const paymentComplete = () => {
@@ -176,7 +246,7 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
   if (loading) return <Loading />
 
   return (
-    <Form style={{ marginBottom: '2em' }} onSubmit={handleSubmit}>
+    <Form style={{ marginBottom: '2em' }} onSubmit={handleSubmitCardPayment}>
       <FormGroup>
         <Label>お名前</Label>
         <FormGroup>
@@ -211,63 +281,77 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
         </Card>
       </FormGroup>
       <FormGroup style={{ marginBottom: '2em' }}>
-        <Row form className="flex-row-reverse">
-          <Col sm="6">
-            <Card>
-              <CardBody>
-                <Label>クレジットカード情報を入力</Label>
-                <CardElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: '16px',
-                        color: '#424770',
-                        '::placeholder': {
-                          color: '#aab7c4',
+        <Row form>
+          <Col sm={{ size: 6, offset: 6 }}>
+            <Label style={{ fontSize: 12, color: 'gray' }}>
+              <Link href="/termsOfUse">
+                <a>利用規約及び特定商取引法に基づく表示</a>
+              </Link>
+              に同意します。
+            </Label>
+            {paymentRequest ? (
+              <PaymentRequestButtonElement options={{ paymentRequest }} />
+            ) : (
+              <Card>
+                <CardBody>
+                  <Label>クレジットカード情報を入力</Label>
+                  <CardElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: '16px',
+                          color: '#424770',
+                          '::placeholder': {
+                            color: '#aab7c4',
+                          },
+                        },
+                        invalid: {
+                          color: '#9e2146',
                         },
                       },
-                      invalid: {
-                        color: '#9e2146',
-                      },
-                    },
-                  }}
-                />
-              </CardBody>
-            </Card>
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            )}
           </Col>
         </Row>
       </FormGroup>
-      <Row className="flex-row-reverse">
-        <FormGroup check style={{ marginRight: '1em' }}>
-          <Label>
-            <Link href="/termsOfUse">
-              <a>利用規約及び特定商取引法に基づく表示</a>
-            </Link>
-            を確認の上、同意します。
-          </Label>
-        </FormGroup>
-      </Row>
-      <Row className="flex-row-reverse">
-        <FormGroup check style={{ marginRight: '1em' }}>
-          <Label check>
-            <Input
-              type="checkbox"
-              checked={agree}
-              onChange={() => setAgree(!agree)}
-              invalid={!agree}
-            />{' '}
-            同意します
-            <FormFeedback>必須項目です</FormFeedback>
-          </Label>
-        </FormGroup>
-      </Row>
-      <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
-        <Button disabled={!stripe || !elements || loading}>
-          {processing ? <Spinner /> : '購入'}
-        </Button>
-      </Row>
+      {!paymentRequest && (
+        <Row className="flex-row-reverse" style={{ marginRight: '1em', marginTop: '0.5em' }}>
+          <Button disabled={!stripe || !elements || loading}>
+            {processing ? <Spinner /> : '購入'}
+          </Button>
+        </Row>
+      )}
     </Form>
   )
 }
 
-export default withAuth(Confirmation)
+const ConfirmationWrapper = ({ user }: { user: firebase.default.User }) => {
+  const env = process.env.NEXT_PUBLIC_ENV === 'prod' ? 'prod' : 'dev'
+  const publishableKey =
+    env === 'prod'
+      ? 'pk_live_1uhgTSRLmCH7K0aZIfNgfu0c007fLyl8aV'
+      : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
+
+  const stripePromise = useMemo(
+    async () =>
+      loadStripe(publishableKey, {
+        stripeAccount: (
+          await (fuego.db as firebase.default.firestore.Firestore)
+            .collection('users')
+            .doc(user.uid)
+            .get()
+        ).data().stripeId,
+      }),
+    [],
+  )
+  return (
+    <Elements stripe={stripePromise}>
+      <Confirmation user={user} />
+    </Elements>
+  )
+}
+
+export default withAuth(ConfirmationWrapper)

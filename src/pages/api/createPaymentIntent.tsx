@@ -3,6 +3,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import stripe from '@/src/lib/stripe'
 import { category, event } from 'app'
 import { NextApiHandler } from 'next'
+const env = process.env.SERVER_ENV === 'prod' ? 'prod' : 'dev'
 
 const createPaymentIntent: NextApiHandler = async (req, res) => {
   const { eventId, categoryId, token } = req.body
@@ -26,6 +27,10 @@ const createPaymentIntent: NextApiHandler = async (req, res) => {
   const categoryData = (
     await firestore.collection('events').doc(eventId).collection('categories').doc(categoryId).get()
   ).data() as category
+
+  await stripe.applePayDomains.create({
+    domain_name: env === 'prod' ? 'ticket-app.eu' : 'ticket-app-dev.tk',
+  })
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: categoryData.price,
