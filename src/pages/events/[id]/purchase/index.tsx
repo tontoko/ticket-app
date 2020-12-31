@@ -37,7 +37,7 @@ export const Purchase = ({ user, event, categories, photoUrls }) => {
         pathname: `/events/${router.query.id}`,
         query: { msg: encodeQuery('チケットは全て売り切れです。') },
       })
-  }, [router])
+  }, [categories.length, router])
 
   const validationEmail = () => {
     setInvalidEmail(

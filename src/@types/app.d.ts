@@ -63,8 +63,8 @@ declare module 'app' {
     category: category
     payment: {
       id: string
-      category: any
-      event: any
+      category: category
+      event: event
       accepted: boolean
       error: string
       buyer: string

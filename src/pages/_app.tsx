@@ -90,7 +90,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         return
       }
     }
-  }, [router?.pathname, user])
+  }, [router, user])
 
   useEffect(() => {
     ;(async () => {
@@ -104,6 +104,7 @@ const App = ({ Component, pageProps }: AppProps) => {
       })
       router.events.on('routeChangeError', () => NProgress.done())
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const options = {

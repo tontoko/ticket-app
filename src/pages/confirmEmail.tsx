@@ -24,7 +24,7 @@ const ConfirmEmail: NextPage<{ user: firebase.default.User }> = ({ user }) => {
       }
       setTimeout(() => fuego.auth().signOut(), 5000)
     })()
-  }, [])
+  }, [loading, user])
 
   if (loading) return <Loading />
   return <h4>{msg}</h4>

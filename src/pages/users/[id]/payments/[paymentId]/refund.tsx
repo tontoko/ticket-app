@@ -37,7 +37,7 @@ const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
       return
     }
     setLoading(false)
-  }, [user])
+  }, [createdUser, payment.error, user])
 
   useEffect(() => {
     if (select === 'other') {

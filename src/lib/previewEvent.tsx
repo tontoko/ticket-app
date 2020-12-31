@@ -15,7 +15,7 @@ import {
 import moment from 'moment'
 import { useState } from 'react'
 
-const previewEvent = ({ setModal, setModalInner, submitEvent, loading, params, photos }) => {
+const previewEvent = ({ setModal, setModalInner, submitEvent, params, photos }) => {
   const { eventName, placeName, eventDetail, startDate, endDate } = params
 
   setModalInner(

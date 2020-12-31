@@ -1,6 +1,6 @@
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
-import stripe, { Stripe } from '@/src/lib/stripe'
+import stripe from '@/src/lib/stripe'
 
 const endpoint: NextApiHandler = async (req, res) => {
   try {
@@ -16,10 +16,7 @@ const endpoint: NextApiHandler = async (req, res) => {
     const usersRef = firestore.collection('users').doc(decodedToken.uid)
     const user = (await usersRef.get()).data()
 
-    const result = (await stripe.accounts.deleteExternalAccount(
-      user.stripeId,
-      id,
-    )) as Stripe.DeletedBankAccount
+    await stripe.accounts.deleteExternalAccount(user.stripeId, id)
 
     res.json({ status: true })
   } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { useAlert } from 'react-alert'
@@ -18,12 +18,45 @@ const QrReaderPage = ({ user }) => {
   const alert = useAlert()
   const [proccessing, setProccesing] = useState(false)
 
+  const proccessQRCode = useCallback(
+    async (data: string) => {
+      try {
+        setProccesing(true)
+        const token = await user.getIdToken()
+        const decededData = decodeQuery(data)
+        const res = await fetch('/api/ticketReception', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: new Headers({
+            'Content-Type': 'application/json',
+          }),
+          body: JSON.stringify({
+            ...JSON.parse(decededData),
+            token,
+          }),
+        })
+        if (res.status !== 200) throw new Error((await res.json()).error)
+        const { paymentId } = JSON.parse(decededData)
+        await mutate(`payments/${paymentId}`)
+        router.push({
+          pathname: `/events/${router.query.id}/reception`,
+          query: { msg: encodeQuery((await res.json()).msg) },
+        })
+      } catch (e) {
+        ;(await analytics()).logEvent('exception', { description: e.message })
+        alert.error(e.message)
+      }
+      setProccesing(false)
+    },
+    [alert, router, user],
+  )
+
   useEffect(() => {
     if (!router) return
     if (router.query.params) {
       proccessQRCode(router.query.params as string)
     }
-  }, [router])
+  }, [proccessQRCode, router])
 
   const handleScan = (data: string) => {
     if (data) {
@@ -33,36 +66,6 @@ const QrReaderPage = ({ user }) => {
 
   const handleError = (err) => {
     console.error(err)
-  }
-
-  const proccessQRCode = async (data: string) => {
-    try {
-      setProccesing(true)
-      const token = await user.getIdToken()
-      const decededData = decodeQuery(data)
-      const res = await fetch('/api/ticketReception', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: new Headers({
-          'Content-Type': 'application/json',
-        }),
-        body: JSON.stringify({
-          ...JSON.parse(decededData),
-          token,
-        }),
-      })
-      if (res.status !== 200) throw new Error((await res.json()).error)
-      const { paymentId } = JSON.parse(decededData)
-      await mutate(`payments/${paymentId}`)
-      router.push({
-        pathname: `/events/${router.query.id}/reception`,
-        query: { msg: encodeQuery((await res.json()).msg) },
-      })
-    } catch (e) {
-      ;(await analytics()).logEvent('exception', { description: e.message })
-      alert.error(e.message)
-    }
-    setProccesing(false)
   }
 
   if (proccessing) return <Loading />

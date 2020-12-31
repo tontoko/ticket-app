@@ -8,8 +8,9 @@ import { encodeQuery } from '@/src/lib/parseQuery'
 import { fuego } from '@nandorojo/swr-firestore'
 import withAuth from '@/src/lib/withAuth'
 import analytics from '@/src/lib/analytics'
+import { NextPage } from 'next'
 
-export const UpdateEmail: React.FC<any> = ({ user }) => {
+export const UpdateEmail: NextPage<{ user: firebase.default.User }> = ({ user }) => {
   const router = useRouter()
   const alert = useAlert()
   const [email, setEmail] = useState('')

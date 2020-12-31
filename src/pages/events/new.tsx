@@ -34,7 +34,7 @@ const New = ({ setModal, setModalInner, user }) => {
         setLoading(false)
       }
     })()
-  }, [user])
+  }, [router, user])
 
   return (
     <EventForm

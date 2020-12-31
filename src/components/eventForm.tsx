@@ -91,7 +91,6 @@ const EventForm = ({
       setModalInner,
       setModal,
       submitEvent,
-      loading,
       params,
       photos,
     })

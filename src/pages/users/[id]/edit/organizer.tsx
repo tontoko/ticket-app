@@ -50,7 +50,7 @@ const Organizer: NextPage<{
       console.log(verification)
       setState({ status, balance })
     })()
-  }, [])
+  }, [user.uid])
 
   if (!state) return <Loading />
 

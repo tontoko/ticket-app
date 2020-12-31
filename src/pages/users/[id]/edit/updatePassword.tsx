@@ -8,8 +8,9 @@ import errorMsg from '@/src/lib/errorMsg'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 import analytics from '@/src/lib/analytics'
+import { NextPage } from 'next'
 
-export const UpdatePassword: React.FC<any> = ({ user }) => {
+export const UpdatePassword: NextPage<{ user: firebase.default.User }> = ({ user }) => {
   const router = useRouter()
   const alert = useAlert()
   const [pwd, setPwd] = useState('')
