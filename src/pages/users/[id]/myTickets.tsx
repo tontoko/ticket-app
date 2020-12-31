@@ -12,7 +12,7 @@ import firebase from 'firebase/app'
 
 const MyTickets = ({ user }) => {
   const [myTicketsPerEvents, setMyTicketsPerEvents] = useState<
-    { tickets: ticket[]; event: any; photos: string }[]
+    { tickets: ticket[]; event: event; photos: string }[]
   >([])
   const [loading, setLoading] = useState(true)
   const { data: payments, loading: paymentsLoading } = useCollection<payment>(user && `payments`, {

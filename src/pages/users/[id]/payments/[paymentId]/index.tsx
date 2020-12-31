@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { Button, Row, Col } from 'reactstrap'
 import moment from 'moment'
 import Link from 'next/link'
@@ -41,9 +41,9 @@ const Show = ({ user }) => {
       return
     }
     setLoading(false)
-  }, [payment])
+  }, [payment, user.uid])
 
-  const acceptRefund = async () => {
+  const acceptRefund = useCallback(async () => {
     try {
       setLoading(true)
       const token = await fuego.auth().currentUser.getIdToken()
@@ -68,9 +68,9 @@ const Show = ({ user }) => {
       alert.error('エラーが発生しました。しばらくしてお試しください。')
       setLoading(false)
     }
-  }
+  }, [alert, payment, router])
 
-  const rejectRefund = async () => {
+  const rejectRefund = useCallback(async () => {
     try {
       setLoading(true)
       const token = await fuego.auth().currentUser.getIdToken()
@@ -95,7 +95,7 @@ const Show = ({ user }) => {
       alert.error('エラーが発生しました。しばらくしてお試しください。')
       setLoading(false)
     }
-  }
+  }, [alert, payment, router?.query.paymentId])
 
   const refundForm = useMemo(() => {
     if (!payment) return
@@ -155,7 +155,7 @@ const Show = ({ user }) => {
         </>
       )
     return <p>返金申請はありません</p>
-  }, [payment])
+  }, [acceptRefund, payment, rejectRefund, user.uid])
 
   if (loading || paymentLoading || eventLoading || categoryLoading) return <Loading />
 

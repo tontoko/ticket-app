@@ -16,6 +16,6 @@ export default async () => {
     cookie: {
       sameSite: 'Lax',
       secure: true,
-    } as any,
+    },
   })
 }

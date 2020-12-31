@@ -43,7 +43,6 @@ type Props = {
 }
 
 const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setModalInner }) => {
-  if (!event) return <></>
   const router = useRouter()
   const [tickets, setTickets] = useState<{ tickets: ticket[]; event: event; photos: string }[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
@@ -61,19 +60,19 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
       url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
       title: event.name,
     }
-  }, [])
+  }, [event.name, router?.pathname])
   const facebookShareProps = useMemo(() => {
     return {
       url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
       quote: event.name,
     }
-  }, [])
+  }, [event.name, router?.pathname])
   const lineShareProps = useMemo(() => {
     return {
       url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
       title: event.name,
     }
-  }, [router])
+  }, [event.name, router?.pathname])
 
   useEffect(() => {
     const ticketListener = () => {
@@ -109,7 +108,7 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
       await fuego.db.collection('users').doc(user.uid).update({ eventHistory })
     })()
     return ticketListener
-  }, [router, user, payments])
+  }, [router, user, payments, event])
 
   const next = useCallback(() => {
     if (animating) return
@@ -131,6 +130,21 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
     [animating],
   )
 
+  const callModalForImg = useCallback(
+    (src) => {
+      setModalInner(
+        <img
+          src={src}
+          style={{ width: '100%', height: '100%' }}
+          onClick={() => setModal(false)}
+          alt={`preview image`}
+        />,
+      )
+      setModal(true)
+    },
+    [setModal, setModalInner],
+  )
+
   const slides = useMemo(
     () =>
       items.map((item) => (
@@ -146,28 +160,19 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
           />
         </CarouselItem>
       )),
-    [items],
+    [callModalForImg, items],
   )
 
-  const callModalForImg = useCallback((src) => {
-    setModalInner(
-      <img
-        src={src}
-        style={{ width: '100%', height: '100%' }}
-        onClick={() => setModal(false)}
-        alt={`preview image`}
-      />,
-    )
-    setModal(true)
-  }, [])
-
-  const shareAnalytics = useCallback(async (type: string) => {
-    ;(await analytics()).logEvent('share', {
-      method: type,
-      content_type: 'event',
-      content_id: event.id,
-    })
-  }, [])
+  const shareAnalytics = useCallback(
+    async (type: string) => {
+      ;(await analytics()).logEvent('share', {
+        method: type,
+        content_type: 'event',
+        content_id: event.id,
+      })
+    },
+    [event.id],
+  )
 
   const buttons = useMemo(() => {
     const urlToPurchase = `/events/${router.query.id}/purchase`
@@ -268,7 +273,7 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
       )
     }
     return <></>
-  }, [status, tickets, categories])
+  }, [router, status, categories, tickets, user, event])
 
   const returnCatetgories = useMemo(
     () =>
@@ -301,7 +306,7 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
           )
         }
       }),
-    [categories],
+    [categories, status],
   )
 
   return (

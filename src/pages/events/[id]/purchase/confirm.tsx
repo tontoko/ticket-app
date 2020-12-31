@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState, useRef, useMemo } from 'react'
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import {
   Form,
   FormGroup,
@@ -171,7 +171,8 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
     }
   }
 
-  if (paymentRequest) {
+  useEffect(() => {
+    if (!paymentRequest) return
     paymentRequest.on('paymentmethod', async (ev) => {
       try {
         await paymentValidation()
@@ -204,9 +205,10 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
         setProcessing(false)
       }
     })
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alert, paymentRequest, paymentState, stripe])
 
-  const paymentValidation = async () => {
+  const paymentValidation = useCallback(async () => {
     if (category?.stock - category?.sold < 1 || !category?.public) {
       const msg =
         category?.stock - category?.sold < 1
@@ -217,9 +219,9 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
       }, 3000)
       throw new Error(msg)
     }
-  }
+  }, [category?.public, category?.sold, category?.stock, eventId, router])
 
-  const paymentComplete = () => {
+  const paymentComplete = useCallback(() => {
     setComplete(true)
     let timer = timerRef.current
     const count = setInterval(() => {
@@ -229,7 +231,7 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
       }
       setRedirectTimer(timer--)
     }, 1000)
-  }
+  }, [router, user.uid])
 
   if (complete)
     return (
@@ -345,7 +347,7 @@ const ConfirmationWrapper = ({ user }: { user: firebase.default.User }) => {
             .get()
         ).data().stripeId,
       }),
-    [],
+    [publishableKey, user.uid],
   )
   return (
     <Elements stripe={stripePromise}>

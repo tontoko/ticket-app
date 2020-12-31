@@ -35,7 +35,7 @@ const Contact: NextPage = () => {
         alert.error('エラーが発生しました。しばらくしてお試しください。')
       }
     },
-    [emailRef.current, textRef.current],
+    [alert, router],
   )
 
   return (

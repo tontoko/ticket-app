@@ -33,7 +33,9 @@ const Edit = ({ user, setModal, setModalInner }) => {
     },
   )
 
-  const [currentCategories, setCategories] = useState<any>([])
+  const [currentCategories, setCategories] = useState<
+    (Pick<category, 'name' | 'price' | 'public' | 'stock'> & { new?: boolean; sold?: number })[]
+  >([])
 
   useEffect(() => {
     if (loading) return

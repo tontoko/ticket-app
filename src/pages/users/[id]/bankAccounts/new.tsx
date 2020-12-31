@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { useState } from 'react'
 import {
   Form,
@@ -20,8 +20,13 @@ import zenginCode from 'zengin-code'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 import analytics from '@/src/lib/analytics'
+import { NextPage } from 'next'
 
-export const CreateBankAccount: React.FC<any> = ({ user, setModal, setModalInner }) => {
+export const CreateBankAccount: NextPage<{
+  user: firebase.default.User
+  setModal: React.Dispatch<React.SetStateAction<boolean>>
+  setModalInner: React.Dispatch<React.SetStateAction<ReactNode>>
+}> = ({ user, setModal, setModalInner }) => {
   const stripe = useStripe()
   const router = useRouter()
   const alert = useAlert()

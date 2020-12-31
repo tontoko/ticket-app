@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Form } from 'reactstrap'
 import { useAlert } from 'react-alert'
 import errorMsg from '@/src/lib/errorMsg'
@@ -50,36 +50,44 @@ const Action = ({ user }) => {
         setTimeout(() => redirectAfterUpdate(), 5000)
       }
     })()
-  }, [router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alert, loading, router])
 
-  const redirectAfterUpdate = async (msg?: string) => {
-    if (user) await fuego.auth().signOut()
-    if (msg) {
-      const message = encodeQuery(msg)
-      return router.push({ pathname: `/login`, query: { msg: message } }, '/login')
-    }
-    router.push('/login')
-  }
+  const redirectAfterUpdate = useCallback(
+    async (msg?: string) => {
+      if (user) await fuego.auth().signOut()
+      if (msg) {
+        const message = encodeQuery(msg)
+        return router.push({ pathname: `/login`, query: { msg: message } }, '/login')
+      }
+      router.push('/login')
+    },
+    [router, user],
+  )
 
-  const handleResetPassword = async () => {
+  const handleResetPassword = useCallback(async () => {
     await fuego.auth().verifyPasswordResetCode(oobCode.current)
     setValid(true)
     setView(<ResetPassword confirmResetPassword={confirmResetPassword} />)
     setLoading(false)
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  const confirmResetPassword = async (newPwd, newPwdConfirm) => {
-    if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません。')
-    try {
-      await fuego.auth().confirmPasswordReset(oobCode.current, newPwd)
-      redirectAfterUpdate('新しいパスワードに更新しました。')
-    } catch (e) {
-      ;(await analytics()).logEvent('exception', { description: e.message })
-      alert.error(errorMsg(e))
-    }
-  }
+  const confirmResetPassword = useCallback(
+    async (newPwd, newPwdConfirm) => {
+      if (newPwd !== newPwdConfirm) return alert.error('確認用パスワードが一致しません。')
+      try {
+        await fuego.auth().confirmPasswordReset(oobCode.current, newPwd)
+        redirectAfterUpdate('新しいパスワードに更新しました。')
+      } catch (e) {
+        ;(await analytics()).logEvent('exception', { description: e.message })
+        alert.error(errorMsg(e))
+      }
+    },
+    [alert, redirectAfterUpdate],
+  )
 
-  const handleRecoverEmail = async () => {
+  const handleRecoverEmail = useCallback(async () => {
     const info = await fuego.auth().checkActionCode(oobCode.current)
     const restoredEmail = info['data']['email']
     await fuego.auth().applyActionCode(oobCode.current)
@@ -89,14 +97,14 @@ const Action = ({ user }) => {
     )
     setValid(true)
     setLoading(false)
-  }
+  }, [])
 
-  const handleVerifyEmail = async () => {
+  const handleVerifyEmail = useCallback(async () => {
     await fuego.auth().applyActionCode(oobCode.current)
     setView(<h4>メールアドレスが認証されました。リダイレクトします。</h4>)
     setValid(true)
     setLoading(false)
-  }
+  }, [])
 
   if (loading) return <Loading />
 
