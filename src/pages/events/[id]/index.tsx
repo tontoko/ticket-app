@@ -50,7 +50,7 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
   const [status, setStatus] = useState<'anonymous' | 'organizer' | 'bought' | 'other'>()
   const { data: payments } = useCollection<payment>(user && 'payments', {
     where: [
-      ['event', '==', event.id],
+      ['event', '==', event?.id],
       ['buyer', '==', user?.uid],
     ],
   })
@@ -58,21 +58,21 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
   const twitterShareProps = useMemo(() => {
     return {
       url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
-      title: event.name,
+      title: event?.name,
     }
-  }, [event.name, router?.pathname])
+  }, [event?.name, router?.pathname])
   const facebookShareProps = useMemo(() => {
     return {
       url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
-      quote: event.name,
+      quote: event?.name,
     }
-  }, [event.name, router?.pathname])
+  }, [event?.name, router?.pathname])
   const lineShareProps = useMemo(() => {
     return {
       url: router?.pathname?.includes('?') ? router?.pathname?.split('?')[0] : router?.pathname,
-      title: event.name,
+      title: event?.name,
     }
-  }, [event.name, router?.pathname])
+  }, [event?.name, router?.pathname])
 
   useEffect(() => {
     const ticketListener = () => {
@@ -81,20 +81,20 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
     if (!router) return
     ;(async () => {
       ;(await analytics()).logEvent('view_item', {
-        id: event.id,
-        name: event.name,
+        id: event?.id,
+        name: event?.name,
       })
       if (user === undefined) return
       if (user === null) {
         setStatus('anonymous')
-        setCookie(null, 'lastVisitedEvent', event.id, {
+        setCookie(null, 'lastVisitedEvent', event?.id, {
           maxAge: 30 * 24 * 60 * 60,
           path: '/',
           secure: true,
         })
         return
       }
-      if (event.createdUser == user.uid) {
+      if (event?.createdUser == user.uid) {
         return setStatus('organizer')
       }
       if (!payments) return
@@ -103,7 +103,7 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
       // ログイン済みで主催者以外の場合に履歴に追加
       let { eventHistory } = (await fuego.db.collection('users').doc(user.uid).get()).data()
       if (!eventHistory) eventHistory = []
-      eventHistory = Array.from(new Set([...eventHistory, event.id]))
+      eventHistory = Array.from(new Set([...eventHistory, event?.id]))
       eventHistory.length > 10 && eventHistory.shift()
       await fuego.db.collection('users').doc(user.uid).update({ eventHistory })
     })()
@@ -147,7 +147,7 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
 
   const slides = useMemo(
     () =>
-      items.map((item) => (
+      items?.map((item) => (
         <CarouselItem
           onExiting={() => setAnimating(true)}
           onExited={() => setAnimating(false)}
@@ -168,10 +168,10 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
       ;(await analytics()).logEvent('share', {
         method: type,
         content_type: 'event',
-        content_id: event.id,
+        content_id: event?.id,
       })
     },
-    [event.id],
+    [event?.id],
   )
 
   const buttons = useMemo(() => {
@@ -231,7 +231,7 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
         </Row>
       )
     }
-    if (categories.filter((category) => category.public).length === 0) {
+    if (categories?.filter((category) => category.public).length === 0) {
       return (
         <Row style={{ marginTop: '1.5em' }}>
           <Col sm="12" style={{ margin: '0.2em' }}>
@@ -277,7 +277,7 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
 
   const returnCatetgories = useMemo(
     () =>
-      categories.map((category, i) => {
+      categories?.map((category, i) => {
         const msg = `${category.name}: ${category.price} 円`
         const organizerMsg = status == 'organizer' && ` 残り ${category.stock - category.sold} 枚`
         if (status == 'organizer' && !category.public) {
@@ -313,39 +313,45 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
     <>
       <Row style={{ marginTop: '1em', marginLeft: '0' }}>
         <h3>
-          【{moment(event.startDate).format('M/D')}】{event.name}
+          【{moment(event?.startDate).format('M/D')}】{event?.name}
         </h3>
       </Row>
       <Row style={{ marginTop: '1em' }}>
         <Col xs="12" md="6" lg="4">
-          <Carousel
-            activeIndex={activeIndex}
-            next={next}
-            previous={previous}
-            className="carousel-fade"
-            style={{ width: '100%' }}
-            interval="20000"
-          >
-            <CarouselIndicators
-              items={items}
+          {slides?.length > 0 && (
+            <Carousel
               activeIndex={activeIndex}
-              onClickHandler={goToIndex}
-            />
-            {slides}
-            <CarouselControl direction="prev" directionText="Previous" onClickHandler={previous} />
-            <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
-          </Carousel>
+              next={next}
+              previous={previous}
+              className="carousel-fade"
+              style={{ width: '100%' }}
+              interval="20000"
+            >
+              <CarouselIndicators
+                items={items}
+                activeIndex={activeIndex}
+                onClickHandler={goToIndex}
+              />
+              {slides}
+              <CarouselControl
+                direction="prev"
+                directionText="Previous"
+                onClickHandler={previous}
+              />
+              <CarouselControl direction="next" directionText="Next" onClickHandler={next} />
+            </Carousel>
+          )}
           <FormGroup style={{ marginTop: '1em' }}>
             <h5>会場</h5>
-            <p style={{ marginLeft: '0.5em' }}>{event.placeName}</p>
+            <p style={{ marginLeft: '0.5em' }}>{event?.placeName}</p>
           </FormGroup>
           <FormGroup>
             <h5>開始</h5>
-            <p>{moment(event.startDate).format('YYYY年 M月D日 H:mm')}</p>
+            <p>{moment(event?.startDate).format('YYYY年 M月D日 H:mm')}</p>
           </FormGroup>
           <FormGroup>
             <h5>終了</h5>
-            <p>{moment(event.endDate).format('YYYY年 M月D日 H:mm')}</p>
+            <p>{moment(event?.endDate).format('YYYY年 M月D日 H:mm')}</p>
           </FormGroup>
           <FormGroup>
             <TwitterShareButton
@@ -370,14 +376,14 @@ const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setM
             <h5>チケットカテゴリ</h5>
             <FormGroup style={{ marginLeft: '0.5em' }}>{categories && returnCatetgories}</FormGroup>
             {status == 'organizer' && (
-              <Link href={`/events/${router.query.id}/categories/edit`}>
+              <Link href={`/events/${router?.query.id}/categories/edit`}>
                 <Button>カテゴリの編集</Button>
               </Link>
             )}
           </FormGroup>
         </Col>
         <Col xs="12" md="6" lg="8" style={{ marginTop: '1em', whiteSpace: 'pre-wrap' }}>
-          <h6>{event.eventDetail}</h6>
+          <h6>{event?.eventDetail}</h6>
           {buttons}
         </Col>
       </Row>
@@ -408,15 +414,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
           }),
         )
       : [{ src: await getImg(null, data.createdUser) }]
+  const categoryDocs = (
+    await firestore
+      .collection('events')
+      .doc(id as string)
+      .collection('categories')
+      .orderBy('index')
+      .get()
+  ).docs
   const categories = await Promise.all(
-    (
-      await firestore
-        .collection('events')
-        .doc(id as string)
-        .collection('categories')
-        .orderBy('index')
-        .get()
-    ).docs.map(async (category) => {
+    categoryDocs.map(async (category) => {
       return { ...category.data(), id: category.id }
     }),
   )
