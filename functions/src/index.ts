@@ -32,6 +32,7 @@ exports.createUser = functions.auth.user().onCreate(async (user) => {
         payouts: {
           schedule: {
             interval: 'monthly',
+            monthly_anchor: 28,
           },
         },
       },
