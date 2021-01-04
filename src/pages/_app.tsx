@@ -23,6 +23,13 @@ const env = process.env.NEXT_PUBLIC_ENV === 'prod' ? 'prod' : 'dev'
 import { dev, prod } from '@/ticket-app'
 import analytics from '../lib/analytics'
 import { Fuego } from '../lib/fuego'
+import { Elements } from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+const publishableKey =
+  env === 'prod'
+    ? 'pk_live_1uhgTSRLmCH7K0aZIfNgfu0c007fLyl8aV'
+    : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
+const stripePromise = loadStripe(publishableKey)
 const firebaseConfig = env === 'prod' ? prod : dev
 const fuego = new Fuego(firebaseConfig)
 // ローカルのFirestoreエミュレータに接続する設定
@@ -138,23 +145,15 @@ const App = ({ Component, pageProps }: AppProps) => {
       </Head>
       <FuegoProvider fuego={fuego}>
         <Provider template={AlertTemplate} {...options}>
-          <Modal
-            {...{
-              modal,
-              setModal,
-              modalInner,
-            }}
-          />
-          <UserLayouts
-            {...pageProps}
-            {...{
-              setModal,
-              setModalInner,
-              Component,
-              user,
-            }}
-          >
-            <Component
+          <Elements stripe={stripePromise}>
+            <Modal
+              {...{
+                modal,
+                setModal,
+                modalInner,
+              }}
+            />
+            <UserLayouts
               {...pageProps}
               {...{
                 setModal,
@@ -162,8 +161,18 @@ const App = ({ Component, pageProps }: AppProps) => {
                 Component,
                 user,
               }}
-            />
-          </UserLayouts>
+            >
+              <Component
+                {...pageProps}
+                {...{
+                  setModal,
+                  setModalInner,
+                  Component,
+                  user,
+                }}
+              />
+            </UserLayouts>
+          </Elements>
         </Provider>
       </FuegoProvider>
     </>

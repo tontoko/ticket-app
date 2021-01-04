@@ -20,7 +20,6 @@ import {
   useStripe,
   useElements,
   PaymentRequestButtonElement,
-  Elements,
 } from '@stripe/react-stripe-js'
 import { decodeQuery } from '@/src/lib/parseQuery'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -30,7 +29,6 @@ import withAuth from '@/src/lib/withAuth'
 import { fuego, useDocument } from '@nandorojo/swr-firestore'
 import Loading from '@/src/components/loading'
 import analytics from '@/src/lib/analytics'
-import { loadStripe } from '@stripe/stripe-js'
 
 const Confirmation = ({ user }: { user: firebase.default.User }) => {
   const stripe = useStripe()
@@ -133,43 +131,71 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
     }
   }, [stripe, paymentState, category])
 
-  const handleSubmitCardPayment = async (e) => {
-    e.preventDefault()
-    if (!stripe || !elements || loading) return
-    try {
-      await paymentValidation()
-      setProcessing(true)
-      ;(await analytics()).logEvent('checkout_progress', {
-        checkout_option: 'card',
-        items: [
-          {
-            id: category.id,
-            price: category.price,
-            name: category.name,
-          },
-        ],
-      })
-      const { error: confirmError } = await stripe.confirmCardPayment(paymentState.clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-          billing_details: {
-            name: `${paymentState.familyName} ${paymentState.firstName}`,
-            email: paymentState.email,
-          },
-        },
-      })
-      if (confirmError) {
-        alert.error(
-          'エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。',
-        )
-        return setProcessing(false)
-      }
-      paymentComplete()
-    } catch (e) {
-      alert.error(e.message)
-      setProcessing(false)
+  const paymentValidation = useCallback(async () => {
+    if (category?.stock - category?.sold < 1 || !category?.public) {
+      const msg =
+        category?.stock - category?.sold < 1
+          ? '在庫がありませんでした。リダイレクトします。'
+          : '対象のチケットは主催者によって非公開に設定されました。リダイレクトします。'
+      setTimeout(() => {
+        router.push(`/events/${eventId}`)
+      }, 3000)
+      throw new Error(msg)
     }
-  }
+  }, [category?.public, category?.sold, category?.stock, eventId, router])
+
+  const paymentComplete = useCallback(() => {
+    setComplete(true)
+    let timer = timerRef.current
+    const count = setInterval(() => {
+      if (timer <= 1) {
+        clearInterval(count)
+        router.push(`/users/${user.uid}/myTickets`)
+      }
+      setRedirectTimer(timer--)
+    }, 1000)
+  }, [router, user.uid])
+
+  const handleSubmitCardPayment = useCallback(
+    async (e) => {
+      e.preventDefault()
+      if (!stripe || !elements || loading) return
+      try {
+        await paymentValidation()
+        setProcessing(true)
+        ;(await analytics()).logEvent('checkout_progress', {
+          checkout_option: 'card',
+          items: [
+            {
+              id: category.id,
+              price: category.price,
+              name: category.name,
+            },
+          ],
+        })
+        const { error: confirmError } = await stripe.confirmCardPayment(paymentState.clientSecret, {
+          payment_method: {
+            card: elements.getElement(CardElement),
+            billing_details: {
+              name: `${paymentState.familyName} ${paymentState.firstName}`,
+              email: paymentState.email,
+            },
+          },
+        })
+        if (confirmError) {
+          alert.error(
+            'エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。',
+          )
+          return setProcessing(false)
+        }
+        paymentComplete()
+      } catch (e) {
+        alert.error(e.message)
+        setProcessing(false)
+      }
+    },
+    [alert, category, elements, loading, paymentComplete, paymentState, paymentValidation, stripe],
+  )
 
   useEffect(() => {
     if (!paymentRequest) return
@@ -207,31 +233,6 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alert, paymentRequest, paymentState, stripe])
-
-  const paymentValidation = useCallback(async () => {
-    if (category?.stock - category?.sold < 1 || !category?.public) {
-      const msg =
-        category?.stock - category?.sold < 1
-          ? '在庫がありませんでした。リダイレクトします。'
-          : '対象のチケットは主催者によって非公開に設定されました。リダイレクトします。'
-      setTimeout(() => {
-        router.push(`/events/${eventId}`)
-      }, 3000)
-      throw new Error(msg)
-    }
-  }, [category?.public, category?.sold, category?.stock, eventId, router])
-
-  const paymentComplete = useCallback(() => {
-    setComplete(true)
-    let timer = timerRef.current
-    const count = setInterval(() => {
-      if (timer <= 1) {
-        clearInterval(count)
-        router.push(`/users/${user.uid}/myTickets`)
-      }
-      setRedirectTimer(timer--)
-    }, 1000)
-  }, [router, user.uid])
 
   if (complete)
     return (
@@ -330,30 +331,4 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
   )
 }
 
-const ConfirmationWrapper = ({ user }: { user: firebase.default.User }) => {
-  const env = process.env.NEXT_PUBLIC_ENV === 'prod' ? 'prod' : 'dev'
-  const publishableKey =
-    env === 'prod'
-      ? 'pk_live_1uhgTSRLmCH7K0aZIfNgfu0c007fLyl8aV'
-      : 'pk_test_DzqNDAGEkW8eadwK9qc1NlrW003yS2dW8N'
-
-  const stripePromise = useMemo(
-    async () =>
-      loadStripe(publishableKey, {
-        stripeAccount: (
-          await (fuego.db as firebase.default.firestore.Firestore)
-            .collection('users')
-            .doc(user.uid)
-            .get()
-        ).data().stripeId,
-      }),
-    [publishableKey, user.uid],
-  )
-  return (
-    <Elements stripe={stripePromise}>
-      <Confirmation user={user} />
-    </Elements>
-  )
-}
-
-export default withAuth(ConfirmationWrapper)
+export default withAuth(Confirmation)
