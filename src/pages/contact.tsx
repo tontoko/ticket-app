@@ -7,7 +7,7 @@ import { useRouter } from 'next/router'
 import { encodeQuery } from '../lib/parseQuery'
 import analytics from '../lib/analytics'
 
-const Contact: NextPage = () => {
+const Contact: NextPage<{ user?: firebase.default.User }> = ({ user }) => {
   const alert = useAlert()
   const router = useRouter()
 
@@ -44,7 +44,7 @@ const Contact: NextPage = () => {
         <h4>お問い合わせ</h4>
         <FormGroup>
           <Label>メールアドレス</Label>
-          <Input type="email" innerRef={emailRef} />
+          <Input type="email" innerRef={emailRef} defaultValue={user?.email || ''} />
         </FormGroup>
         <FormGroup>
           <Label>お問い合わせ内容</Label>
