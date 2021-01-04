@@ -1,7 +1,7 @@
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import admin from 'firebase-admin'
 import { NextApiHandler } from 'next'
-import { payment } from 'app'
+import { Payment } from 'app'
 
 const ticketReception: NextApiHandler = async (req, res) => {
   const { firebase, firestore } = await initFirebaseAdmin()
@@ -18,7 +18,7 @@ const ticketReception: NextApiHandler = async (req, res) => {
   // ユーザーuid突き合わせ
   if (decodedToken.uid !== seller) return res.status(400).json({ error: '認証に失敗しました。' })
 
-  const payment = (await firestore.collection('payments').doc(paymentId).get()).data() as payment
+  const payment = (await firestore.collection('payments').doc(paymentId).get()).data() as Payment
   if (payment.accepted) return res.status(400).json({ error: '受付済みです。' })
   if (payment.refund?.refunded) return res.status(400).json({ error: '返金済みです。' })
 

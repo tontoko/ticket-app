@@ -19,14 +19,14 @@ import { Stripe } from '@/src/lib/stripe'
 import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
 
-type props = {
+type Props = {
   user: firebase.default.User
   bankAccounts: Stripe.BankAccount[]
   setModal: Dispatch<SetStateAction<boolean>>
   setModalInner: Dispatch<SetStateAction<ReactElement>>
 }
 
-export const BankAccounts: NextPage<props> = ({ user, setModal, setModalInner }) => {
+export const BankAccounts: NextPage<Props> = ({ user, setModal, setModalInner }) => {
   const alert = useAlert()
   const [bankAccounts, setBankAccounts] = useState([])
   const [loading, setLoading] = useState(false)

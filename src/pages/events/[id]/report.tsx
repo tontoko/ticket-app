@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import { Table, Row } from 'reactstrap'
-import { category, event, manualPayment, payment } from 'app'
+import { Category, Event, ManualPayment, Payment } from 'app'
 import withAuth from '@/src/lib/withAuth'
 import { useCollection, useDocument } from '@nandorojo/swr-firestore'
 import { useRouter } from 'next/router'
@@ -12,14 +12,14 @@ const Report = ({ user }) => {
     return router.query
   }, [router])
 
-  const { data: event } = useDocument<event>(eventId && `events/${eventId}`)
-  const { data: categories } = useCollection<category>(eventId && `events/${eventId}/categories`, {
+  const { data: event } = useDocument<Event>(eventId && `events/${eventId}`)
+  const { data: categories } = useCollection<Category>(eventId && `events/${eventId}/categories`, {
     orderBy: 'index',
   })
-  const { data: manualPayments } = useCollection<manualPayment>(
+  const { data: manualPayments } = useCollection<ManualPayment>(
     eventId && `events/${eventId}/manualPayments`,
   )
-  const { data: payments } = useCollection<payment>(eventId && 'payments', {
+  const { data: payments } = useCollection<Payment>(eventId && 'payments', {
     where: [
       ['event', '==', eventId],
       ['seller', '==', user.uid],

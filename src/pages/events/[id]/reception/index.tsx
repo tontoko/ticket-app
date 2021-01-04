@@ -4,27 +4,27 @@ import { Table, Row, Col, Button, Input, ModalBody, ModalFooter } from 'reactstr
 import { GetServerSideProps } from 'next'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { useAlert } from 'react-alert'
-import { event, manualPayment } from 'app'
+import { Event, ManualPayment } from 'app'
 import withAuth from '@/src/lib/withAuth'
 import { fuego, useCollection } from '@nandorojo/swr-firestore'
 import analytics from '@/src/lib/analytics'
 
 const Reception = ({ categories, id, setModal, setModalInner }) => {
   const alert = useAlert()
-  const { data: manualPayments, revalidate } = useCollection<manualPayment>(
+  const { data: manualPayments, revalidate } = useCollection<ManualPayment>(
     `events/${id}/manualPayments`,
     {
       listen: true,
     },
   )
 
-  const [newManualPayment, setNewManualPayment] = useState<manualPayment>({
+  const [newManualPayment, setNewManualPayment] = useState<ManualPayment>({
     name: '',
     category: categories.length > 0 ? categories[0].id : '',
     paid: false,
   })
 
-  const [tmpManualPayments, setTmpManualPayments] = useState<manualPayment[]>(manualPayments)
+  const [tmpManualPayments, setTmpManualPayments] = useState<ManualPayment[]>(manualPayments)
 
   const [loading, setLoading] = useState(false)
 
@@ -68,7 +68,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
     setLoading(false)
   }
 
-  const editManualPayment = async (newValue: manualPayment, beforeValue: manualPayment) => {
+  const editManualPayment = async (newValue: ManualPayment, beforeValue: ManualPayment) => {
     if (loading) return
     if (!newValue.name) return alert.error('名前が入力されていません。')
     try {
@@ -91,7 +91,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
     setLoading(false)
   }
 
-  const deleteManualPayment = async (manualPayment: manualPayment) => {
+  const deleteManualPayment = async (manualPayment: ManualPayment) => {
     if (loading) return
     const submit = async () => {
       try {
@@ -136,7 +136,7 @@ const Reception = ({ categories, id, setModal, setModalInner }) => {
     setTmpManualPayments(copyTmpManualPayments)
   }
 
-  const column = (manualPayment: manualPayment, i) => {
+  const column = (manualPayment: ManualPayment, i) => {
     return (
       <tr key={i}>
         <td>
@@ -288,7 +288,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     .collection('events')
     .doc(id as string)
     .get()
-  const data = eventsSnapShot.data() as event
+  const data = eventsSnapShot.data() as Event
   const startDate = data.startDate.seconds
   const endDate = data.endDate.seconds
   const events = { ...data, startDate, endDate, id: eventsSnapShot.id }

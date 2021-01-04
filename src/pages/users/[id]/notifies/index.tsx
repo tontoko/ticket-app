@@ -6,11 +6,11 @@ import withAuth from '@/src/lib/withAuth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import { fuego, useCollection } from '@nandorojo/swr-firestore'
-import { notify } from 'app'
+import { Notify } from 'app'
 
 const Notifies = ({ user }) => {
   const router = useRouter()
-  const { data: notifies, loading } = useCollection<notify>(user && `users/${user.uid}/notifies`, {
+  const { data: notifies, loading } = useCollection<Notify>(user && `users/${user.uid}/notifies`, {
     orderBy: ['createdAt', 'desc'],
     listen: true,
   })

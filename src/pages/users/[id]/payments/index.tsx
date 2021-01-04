@@ -6,14 +6,14 @@ import Link from 'next/link'
 import withAuth from '@/src/lib/withAuth'
 import { fuego, useCollection } from '@nandorojo/swr-firestore'
 import { useEffect, useRef, useState } from 'react'
-import { category, event, payment } from 'app'
+import { Category, Event, Payment } from 'app'
 
 const Payments = ({ user }) => {
   const router = useRouter()
   const { id } = router?.query
-  const [events, setEvents] = useState<{ [x: string]: event }>({})
-  const [categories, setCategories] = useState<{ [x: string]: category }>({})
-  const { data: payments } = useCollection<payment>(router && '/payments', {
+  const [events, setEvents] = useState<{ [x: string]: Event }>({})
+  const [categories, setCategories] = useState<{ [x: string]: Category }>({})
+  const { data: payments } = useCollection<Payment>(router && '/payments', {
     where: ['buyer', '==', id],
     listen: true,
   })
@@ -31,7 +31,7 @@ const Payments = ({ user }) => {
       )
       await Promise.all(
         Object.keys(tmpEvents.current).map(async (key) => {
-          const event = (await fuego.db.collection('events').doc(key).get()).data() as event
+          const event = (await fuego.db.collection('events').doc(key).get()).data() as Event
           tmpEvents.current = { ...tmpEvents.current, [key]: event }
           setEvents(tmpEvents.current)
         }),
@@ -40,7 +40,7 @@ const Payments = ({ user }) => {
         Object.keys(tmpCategories.current).map(async (key) => {
           const category = (
             await fuego.db.collection('events').doc(key).collection('categories').doc(key).get()
-          ).data() as category
+          ).data() as Category
           tmpCategories.current = { ...tmpCategories.current, [key]: category }
           setCategories(tmpCategories.current)
         }),

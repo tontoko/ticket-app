@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 import Link from 'next/link'
 import { encodeQuery } from '@/src/lib/parseQuery'
-import { ticket, event } from 'app'
+import { Ticket, Event } from 'app'
 
 const Tickets = ({
   user,
@@ -11,8 +11,8 @@ const Tickets = ({
   event,
 }: {
   user: firebase.default.User
-  ticket: ticket
-  event: event
+  ticket: Ticket
+  event: Event
 }) => {
   return (
     <Card style={{ marginBottom: '0.5em' }}>

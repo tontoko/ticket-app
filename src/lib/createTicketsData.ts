@@ -1,8 +1,8 @@
 import { fuego } from '@nandorojo/swr-firestore'
 import getImg from './getImg'
-import { event, payment, ticket } from 'app'
+import { Event, Payment, Ticket } from 'app'
 
-const createTicketsData = async (events: event[], payments: payment[]) => {
+const createTicketsData = async (events: Event[], payments: Payment[]) => {
   return await Promise.all(
     events.map(async (event) => {
       const tickets = await Promise.all(
@@ -21,7 +21,7 @@ const createTicketsData = async (events: event[], payments: payment[]) => {
                 id: categorySnapShot.id,
               },
               payment: { ...payment, id: payment.id },
-            } as ticket
+            } as Ticket
           }),
       )
       const photos =

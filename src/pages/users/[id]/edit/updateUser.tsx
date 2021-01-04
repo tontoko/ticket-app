@@ -68,6 +68,7 @@ export const UpdateUser: NextPage<{ user: firebase.default.User }> = ({ user }) 
         }),
         body: JSON.stringify({ uid: user.uid }),
       })
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { individual, tos_acceptance } = (await res.json()) as Stripe.AccountUpdateParams
       if (individual) {
         isNew.current = false

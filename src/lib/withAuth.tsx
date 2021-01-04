@@ -3,8 +3,9 @@ import { fuego } from '@nandorojo/swr-firestore'
 import Router from 'next/router'
 import React from 'react'
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const withAuth = (Component) => {
-  return class withAuthHOC extends React.Component<{ user: firebase.default.User }> {
+  return class WithAuthHOC extends React.Component<{ user: firebase.default.User }> {
     constructor(props) {
       super(props)
     }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
 import stripe, { Stripe } from '@/src/lib/stripe'

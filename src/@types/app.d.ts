@@ -1,5 +1,5 @@
 declare module 'app' {
-  export type event = {
+  export type Event = {
     startDate: FirebaseFirestore.Timestamp
     endDate: FirebaseFirestore.Timestamp
     photos: string[]
@@ -9,12 +9,10 @@ declare module 'app' {
     eventDetail: string
     createdUser: string
     id?: string
-    categories?: categories
+    categories?: Category[]
   }
 
-  export type categories = category[]
-
-  export type category = {
+  export type Category = {
     name: string
     price: number
     createdUser: string
@@ -25,9 +23,9 @@ declare module 'app' {
     id?: string
   }
 
-  export type payment = {
-    category: category.id
-    event: event.id
+  export type Payment = {
+    category: Category.id
+    event: Event.id
     accepted: boolean
     error: string
     buyer: string
@@ -45,26 +43,26 @@ declare module 'app' {
     errorInfo?: string
   }
 
-  export type manualPayment = {
+  export type ManualPayment = {
     id?: string
     name: string
     paid: boolean
     category: category.id
   }
 
-  export type notify = {
+  export type Notify = {
     read: boolean
     text: string
     url: string
     createdAt: firebase.firestore.Timestamp
   }
 
-  export type ticket = {
-    category: category
+  export type Ticket = {
+    category: Category
     payment: {
       id: string
-      category: category
-      event: event
+      category: Category
+      event: Event
       accepted: boolean
       error: string
       buyer: string

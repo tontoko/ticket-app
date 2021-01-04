@@ -4,7 +4,7 @@ import {
 } from '@/src/pages/api/stripeEndpoint'
 import 'jest'
 import { Stripe } from '@/src/lib/stripe'
-import * as firebase from '@firebase/testing'
+import * as firebase from '@firebase/rules-unit-testing'
 import { dev } from '@/ticket-app'
 import stripe from '@/src/lib/stripe'
 import { setupBase } from './lib/setupDB'
