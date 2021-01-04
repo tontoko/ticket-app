@@ -221,10 +221,12 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
 
         if (confirmError) {
           alert.error(
-            'エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。',
+            'エラーが発生しました。入力情報をご確認いただくか、他の支払い方法をお試しください。',
           )
+          ev.complete('fail')
           return setProcessing(false)
         }
+        ev.complete('success')
         paymentComplete()
       } catch (e) {
         alert.error(e.message)
