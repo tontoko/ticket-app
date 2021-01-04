@@ -2,7 +2,7 @@ import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
 import moment from 'moment'
 import stripe from '@/src/lib/stripe'
-import { payment } from 'app'
+import { Payment } from 'app'
 
 const sendRefundRequest: NextApiHandler = async (req, res) => {
   const { firestore, firebase } = await initFirebaseAdmin()
@@ -12,7 +12,7 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
 
   if (decodedIdToken.uid !== buyer && decodedIdToken.uid !== seller) return res.status(500).end()
 
-  const payment = (await firestore.collection('payments').doc(paymentId).get()).data() as payment
+  const payment = (await firestore.collection('payments').doc(paymentId).get()).data() as Payment
 
   if (
     decodedIdToken.uid === buyer &&

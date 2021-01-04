@@ -1,7 +1,7 @@
 import getImg from '@/src/lib/getImgSSR'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import stripe from '@/src/lib/stripe'
-import { category, event } from 'app'
+import { Category, Event } from 'app'
 import { NextApiHandler } from 'next'
 const env = process.env.SERVER_ENV === 'prod' ? 'prod' : 'dev'
 
@@ -11,7 +11,7 @@ const createPaymentIntent: NextApiHandler = async (req, res) => {
   const decodedToken = await firebase.auth().verifyIdToken(token)
   const { uid } = decodedToken
 
-  const eventData = (await firestore.collection('events').doc(eventId).get()).data() as event
+  const eventData = (await firestore.collection('events').doc(eventId).get()).data() as Event
   const { createdUser } = eventData
 
   const { stripeId } = (await firestore.collection('users').doc(createdUser).get()).data()
@@ -26,7 +26,7 @@ const createPaymentIntent: NextApiHandler = async (req, res) => {
 
   const categoryData = (
     await firestore.collection('events').doc(eventId).collection('categories').doc(categoryId).get()
-  ).data() as category
+  ).data() as Category
 
   await stripe.applePayDomains.create({
     domain_name: env === 'prod' ? 'ticket-app.eu' : 'ticket-app-dev.tk',
@@ -48,6 +48,7 @@ const createPaymentIntent: NextApiHandler = async (req, res) => {
       buyer: uid,
     },
   })
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { client_secret } = paymentIntent
   res.status(200).json({ clientSecret: client_secret, photoUrls, event })
 }

@@ -27,14 +27,14 @@ import {
   TwitterIcon,
 } from 'react-share'
 import Tickets from '@/src/components/tickets'
-import { payment, ticket, event, category } from 'app'
+import { Payment, Ticket, Event, Category } from 'app'
 import createTicketsData from '@/src/lib/createTicketsData'
 import analytics from '@/src/lib/analytics'
 
 type Props = {
   user: firebase.default.User
-  event: event
-  categories: category[]
+  event: Event
+  categories: Category[]
   items: {
     src: string
   }[]
@@ -42,13 +42,20 @@ type Props = {
   setModalInner: (element: ReactNode) => void
 }
 
-const Event: NextPage<Props> = ({ user, event, categories, items, setModal, setModalInner }) => {
+const EventPage: NextPage<Props> = ({
+  user,
+  event,
+  categories,
+  items,
+  setModal,
+  setModalInner,
+}) => {
   const router = useRouter()
-  const [tickets, setTickets] = useState<{ tickets: ticket[]; event: event; photos: string }[]>([])
+  const [tickets, setTickets] = useState<{ tickets: Ticket[]; event: Event; photos: string }[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
   const [animating, setAnimating] = useState(false)
   const [status, setStatus] = useState<'anonymous' | 'organizer' | 'bought' | 'other'>()
-  const { data: payments } = useCollection<payment>(user && 'payments', {
+  const { data: payments } = useCollection<Payment>(user && 'payments', {
     where: [
       ['event', '==', event?.id],
       ['buyer', '==', user?.uid],
@@ -402,7 +409,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     .collection('events')
     .doc(id as string)
     .get()
-  const data = snapshot.data() as event
+  const data = snapshot.data() as Event
   const startDate = data.startDate.toMillis()
   const endDate = data.endDate.toMillis()
   const event = { ...data, startDate, endDate, id: snapshot.id }
@@ -431,4 +438,4 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return { props: { event, categories, items }, revalidate: 1 }
 }
 
-export default Event
+export default EventPage

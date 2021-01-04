@@ -15,12 +15,12 @@ import { fuego } from '@nandorojo/swr-firestore'
 import getImg from '@/src/lib/getImg'
 import moment from 'moment'
 import { parseCookies } from 'nookies'
-import { event } from 'app'
+import { Event } from 'app'
 import withAuth from '@/src/lib/withAuth'
 import { NextPage } from 'next'
 
 export const User: NextPage<{ user: firebase.default.User }> = ({ user }) => {
-  const [event, setEvent] = useState<event & { photo: string }>()
+  const [event, setEvent] = useState<Event & { photo: string }>()
 
   useEffect(() => {
     ;(async () => {
@@ -46,7 +46,7 @@ export const User: NextPage<{ user: firebase.default.User }> = ({ user }) => {
       }
       if (targetEventId) {
         const result = await fuego.db.collection('events').doc(targetEventId).get()
-        const data = result.data() as event
+        const data = result.data() as Event
         const photo =
           data.photos.length > 0
             ? await getImg(data.photos[0], data.createdUser)

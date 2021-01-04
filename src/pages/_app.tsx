@@ -40,6 +40,7 @@ const fuego = new Fuego(firebaseConfig)
 //   });
 // }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const App = ({ Component, pageProps }: AppProps) => {
   const router = useRouter()
   const [modal, setModal] = useState(false)

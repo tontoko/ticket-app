@@ -10,7 +10,7 @@ import { GetServerSideProps, NextPage } from 'next'
 import { stripeBalance } from '@/src/lib/stripeRetrieve'
 import { Stripe } from '@/src/lib/stripe'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
-import { event } from 'app'
+import { Event } from 'app'
 import moment from 'moment'
 import analytics from '@/src/lib/analytics'
 
@@ -109,7 +109,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   let canLeave = true
   await Promise.all(
     events.map((event) => {
-      const endDate = moment((event.data() as event).endDate.toDate())
+      const endDate = moment((event.data() as Event).endDate.toDate())
       if (endDate.add(10, 'days').valueOf() > moment().valueOf()) {
         canLeave = false
       }

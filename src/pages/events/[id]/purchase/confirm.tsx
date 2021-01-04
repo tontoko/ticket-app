@@ -24,7 +24,7 @@ import {
 import { decodeQuery } from '@/src/lib/parseQuery'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheckSquare } from '@fortawesome/free-solid-svg-icons'
-import { category, event } from 'app'
+import { Category, Event } from 'app'
 import withAuth from '@/src/lib/withAuth'
 import { fuego, useDocument } from '@nandorojo/swr-firestore'
 import Loading from '@/src/components/loading'
@@ -48,12 +48,12 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
     email: string
     clientSecret: string
     photoUrls: string[]
-    event: event
+    event: Event
     selectedCategory: string
   }>()
   const [paymentRequest, setPaymentRequest] = useState(null)
 
-  const { data: category } = useDocument<category>(
+  const { data: category } = useDocument<Category>(
     paymentState && `events/${router.query.id}/categories/${paymentState.selectedCategory}`,
   )
 
@@ -76,7 +76,7 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
         const { clientSecret, photoUrls, event } = (await res.json()) as {
           clientSecret: string
           photoUrls: string[]
-          event: event
+          event: Event
         }
         setPaymentState({
           familyName,
@@ -221,10 +221,12 @@ const Confirmation = ({ user }: { user: firebase.default.User }) => {
 
         if (confirmError) {
           alert.error(
-            'エラーが発生しました。入力情報をご確認いただくか、他のカードをお試しください。',
+            'エラーが発生しました。入力情報をご確認いただくか、他の支払い方法をお試しください。',
           )
+          ev.complete('fail')
           return setProcessing(false)
         }
+        ev.complete('success')
         paymentComplete()
       } catch (e) {
         alert.error(e.message)

@@ -7,19 +7,19 @@ import { useCollection } from '@nandorojo/swr-firestore'
 import withAuth from '@/src/lib/withAuth'
 import Loading from '@/src/components/loading'
 import createTicketsData from '@/src/lib/createTicketsData'
-import { event, ticket, payment } from 'app'
+import { Event, Ticket, Payment } from 'app'
 import firebase from 'firebase/app'
 
 const MyTickets = ({ user }) => {
   const [myTicketsPerEvents, setMyTicketsPerEvents] = useState<
-    { tickets: ticket[]; event: event; photos: string }[]
+    { tickets: Ticket[]; event: Event; photos: string }[]
   >([])
   const [loading, setLoading] = useState(true)
-  const { data: payments, loading: paymentsLoading } = useCollection<payment>(user && `payments`, {
+  const { data: payments, loading: paymentsLoading } = useCollection<Payment>(user && `payments`, {
     listen: true,
     where: ['buyer', '==', user.uid],
   })
-  const { data: events, loading: eventsLoading } = useCollection<event>(payments && `events`, {
+  const { data: events, loading: eventsLoading } = useCollection<Event>(payments && `events`, {
     listen: true,
     where: [
       firebase.firestore.FieldPath.documentId(),

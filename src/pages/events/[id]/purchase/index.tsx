@@ -16,7 +16,7 @@ import {
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import getImg from '@/src/lib/getImgSSR'
 import { GetServerSideProps } from 'next'
-import { event, category } from 'app'
+import { Event, Category } from 'app'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 import { useAlert } from 'react-alert'
@@ -153,7 +153,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
       .collection('events')
       .doc(id as string)
       .get()
-  ).data() as event
+  ).data() as Event
   const photos: undefined | string[] = data.photos
   const photoUrls = photos.length
     ? await Promise.all(photos.map(async (photo) => getImg(photo, data.createdUser)))
@@ -170,7 +170,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const categories: FirebaseFirestore.DocumentData[] = []
   categoriesSnapShot.forEach((e) => {
     const id = e.id
-    const category = e.data() as category
+    const category = e.data() as Category
     category.public && category.stock - category.sold > 0 && categories.push({ ...category, id })
   })
   return { props: { event, categories, photoUrls } }

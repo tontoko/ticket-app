@@ -1,6 +1,6 @@
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { NextApiHandler } from 'next'
-import { payment } from 'app'
+import { Payment } from 'app'
 
 const sendRefundRequest: NextApiHandler = async (req, res) => {
   const { firestore, firebase } = await initFirebaseAdmin()
@@ -10,7 +10,7 @@ const sendRefundRequest: NextApiHandler = async (req, res) => {
 
   if (decodedIdToken.uid !== buyer) return res.status(500).end()
 
-  const data = (await firestore.collection('payments').doc(paymentId).get()).data() as payment
+  const data = (await firestore.collection('payments').doc(paymentId).get()).data() as Payment
   if (data.refund && (data.refund.refunded || data.refund.rejected)) return res.status(500).end()
 
   await firestore.collection('payments').doc(paymentId).update({

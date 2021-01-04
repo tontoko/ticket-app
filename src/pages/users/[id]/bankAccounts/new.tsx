@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { useRouter } from 'next/router'
 import React, { ReactNode } from 'react'
 import { useState } from 'react'

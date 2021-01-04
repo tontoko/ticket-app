@@ -9,25 +9,25 @@ import { encodeQuery } from '@/src/lib/parseQuery'
 import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
 import analytics from '@/src/lib/analytics'
-import { payment } from 'app'
+import { Payment } from 'app'
 import { mutate } from 'swr'
 
 type Props = {
   user: firebase.default.User
   createdUser: firebase.default.User['uid']
-  payment: payment
+  payment: Payment
 }
 
 const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
   const router = useRouter()
   const alert = useAlert()
-  type select = '' | 'mistake' | 'fraud' | 'other'
-  type problem = '' | 'event' | 'payment' | 'system'
-  type sentTo = '' | 'user' | 'system'
-  const [select, setSelect] = useState('' as select)
-  const [problem, setProblem] = useState('' as problem)
+  type Select = '' | 'mistake' | 'fraud' | 'other'
+  type Problem = '' | 'event' | 'payment' | 'system'
+  type SentTo = '' | 'user' | 'system'
+  const [select, setSelect] = useState('' as Select)
+  const [problem, setProblem] = useState('' as Problem)
   const [detailText, setDetailText] = useState('')
-  const [sentTo, setSentTo] = useState('' as sentTo)
+  const [sentTo, setSentTo] = useState('' as SentTo)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
     }
   }, [select, problem])
 
-  const createRefund = async (reason: select | problem) => {
+  const createRefund = async (reason: Select | Problem) => {
     setLoading(true)
 
     try {
@@ -125,7 +125,7 @@ const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
     }
   }
 
-  const contactAdmin = async (reason: select | problem) => {
+  const contactAdmin = async (reason: Select | Problem) => {
     setLoading(true)
 
     try {
@@ -153,7 +153,7 @@ const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
 
   const submit = async (e) => {
     e.preventDefault()
-    let reason: select | problem
+    let reason: Select | Problem
     switch (select) {
       case 'mistake':
         return alert.error(
@@ -182,7 +182,7 @@ const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
       <FormGroup>
         <h4>返金申請</h4>
         <p>返金理由を選択してください</p>
-        <Input type="select" value={select} onChange={(e) => setSelect(e.target.value as select)}>
+        <Input type="select" value={select} onChange={(e) => setSelect(e.target.value as Select)}>
           <option value="">選択してください</option>
           <option value="mistake">間違ったチケットを購入してしまった</option>
           <option value="fraud">詐欺・事実と異なるイベント内容</option>
@@ -195,7 +195,7 @@ const Refund: NextPage<Props> = ({ user, createdUser, payment }) => {
           <Input
             type="select"
             value={problem}
-            onChange={(e) => setProblem(e.target.value as problem)}
+            onChange={(e) => setProblem(e.target.value as Problem)}
           >
             <option value="">選択してください</option>
             <option value="event">このイベントについて</option>

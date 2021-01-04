@@ -4,7 +4,7 @@ import stripe from '@/src/lib/stripe'
 import initFirebaseAdmin from '@/src/lib/initFirebaseAdmin'
 import { buffer } from 'micro'
 import Cors from 'micro-cors'
-import { category, payment } from 'app'
+import { Category, Payment } from 'app'
 
 const endpointSecret =
   process.env.SERVER_ENV === 'prod'
@@ -61,6 +61,7 @@ const Webhock: NextApiHandler = async (req, res) => {
   res.json({ received: true })
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const payment_intent_succeeded = async (webhockEvent: Stripe.Event) => {
   let error: string | null = null
   const intent = webhockEvent.data.object as Stripe.PaymentIntent
@@ -73,7 +74,7 @@ export const payment_intent_succeeded = async (webhockEvent: Stripe.Event) => {
         .doc(event)
         .collection('categories')
         .doc(category)
-      const categoryResult = (await transaction.get(categoryRef)).data() as category
+      const categoryResult = (await transaction.get(categoryRef)).data() as Category
       const { stock, sold } = categoryResult
 
       if (stock === 0 || stock - sold < 1) {
@@ -120,13 +121,14 @@ export const payment_intent_succeeded = async (webhockEvent: Stripe.Event) => {
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const payment_intent_payment_failed = async (webhockEvent: Stripe.Event) => {
   const intent = webhockEvent.data.object as Stripe.PaymentIntent
   const { event, category, seller, buyer } = intent.metadata
   const { firestore } = await initFirebaseAdmin()
   const message = intent.last_payment_error && intent.last_payment_error.message
   console.error('Failed:', intent.id, message)
-  const payment: payment = {
+  const payment: Payment = {
     event,
     category,
     seller,

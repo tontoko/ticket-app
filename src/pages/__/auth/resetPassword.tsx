@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { FormGroup, Button, Label, Input, Row, Col } from 'reactstrap'
 
-interface props {
+interface Props {
   confirmResetPassword: (newPwd: string, newPwdConfirm: string) => void
 }
 
-const ResetPassword = (props: props) => {
+const ResetPassword = (props: Props) => {
   const [newPwd, setNewPwd] = useState('')
   const [newPwdConfirm, setNewPwdConfirm] = useState('')
 

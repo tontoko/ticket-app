@@ -1,4 +1,4 @@
-import { category, event, manualPayment } from 'app'
+import { Category, Event, ManualPayment } from 'app'
 import moment from 'moment'
 
 type UserType = {
@@ -22,7 +22,7 @@ const users: UserType = {
   },
 }
 
-const events: { [key: string]: event } = {
+const events: { [key: string]: Event } = {
   event1: {
     startDate: (moment('2020-01-01T09').toDate() as unknown) as FirebaseFirestore.Timestamp,
     endDate: (moment('2020-01-01T10').toDate() as unknown) as FirebaseFirestore.Timestamp,
@@ -45,7 +45,7 @@ const events: { [key: string]: event } = {
 
 const categories: {
   [key: string]: {
-    [key: string]: category
+    [key: string]: Category
   }
 } = {
   event1: {
@@ -101,7 +101,7 @@ const categories: {
   },
 }
 
-const manualPayments: { [key: string]: { [key: string]: manualPayment } } = {
+const manualPayments: { [key: string]: { [key: string]: ManualPayment } } = {
   event1: {
     manualPayment1: {
       id: 'manualPayment1',

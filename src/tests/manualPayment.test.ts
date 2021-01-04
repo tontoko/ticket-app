@@ -1,5 +1,5 @@
 import 'jest'
-import * as testFirebase from '@firebase/testing'
+import * as testFirebase from '@firebase/rules-unit-testing'
 import { dev } from '@/ticket-app'
 import { setupBase } from './lib/setupDB'
 import createManualPayment from '../pages/api/createManualPayment'

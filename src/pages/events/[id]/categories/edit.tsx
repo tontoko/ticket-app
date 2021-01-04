@@ -19,14 +19,14 @@ import { useAlert } from 'react-alert'
 import { encodeQuery } from '@/src/lib/parseQuery'
 import withAuth from '@/src/lib/withAuth'
 import { fuego, useCollection, revalidateCollection } from '@nandorojo/swr-firestore'
-import { category } from 'app'
+import { Category } from 'app'
 import Loading from '@/src/components/loading'
 import analytics from '@/src/lib/analytics'
 
 const Edit = ({ user, setModal, setModalInner }) => {
   const alert = useAlert()
   const router = useRouter()
-  const { data: categories, loading } = useCollection<category>(
+  const { data: categories, loading } = useCollection<Category>(
     `events/${router.query.id}/categories`,
     {
       orderBy: 'index',
@@ -34,7 +34,7 @@ const Edit = ({ user, setModal, setModalInner }) => {
   )
 
   const [currentCategories, setCategories] = useState<
-    (Pick<category, 'name' | 'price' | 'public' | 'stock'> & { new?: boolean; sold?: number })[]
+    (Pick<Category, 'name' | 'price' | 'public' | 'stock'> & { new?: boolean; sold?: number })[]
   >([])
 
   useEffect(() => {

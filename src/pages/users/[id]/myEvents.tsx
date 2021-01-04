@@ -3,7 +3,7 @@ import { Card, CardText, CardBody, CardTitle, CardSubtitle, Button, Col, Row } f
 import Link from 'next/link'
 import getImg from '@/src/lib/getImg'
 import moment from 'moment'
-import { event } from 'app'
+import { Event } from 'app'
 import Loading from '@/src/components/loading'
 import withAuth from '@/src/lib/withAuth'
 import useSWR from 'swr'
@@ -26,11 +26,11 @@ const fetcher = async (url, user) => {
 const MyEvents: NextPage<{ user: firebase.default.User }> = ({ user }) => {
   const router = useRouter()
   const { data: requirements } = useSWR(user && ['/api/stripeAccountsRetrieve', user], fetcher)
-  const { data: eventsData } = useCollection<event>(router && `events`, {
+  const { data: eventsData } = useCollection<Event>(router && `events`, {
     listen: true,
     where: ['createdUser', '==', router?.query?.id],
   })
-  const [events, setEvents] = useState<({ thumbnail: string } & event)[]>([])
+  const [events, setEvents] = useState<({ thumbnail: string } & Event)[]>([])
 
   useEffect(() => {
     if (!user || !eventsData) return
@@ -42,7 +42,7 @@ const MyEvents: NextPage<{ user: firebase.default.User }> = ({ user }) => {
             : await getImg(null, user.uid, '360')
         return { ...eventData, thumbnail }
       }),
-    ).then((result) => setEvents(result as ({ thumbnail: string } & event)[]))
+    ).then((result) => setEvents(result as ({ thumbnail: string } & Event)[]))
   }, [user, eventsData])
 
   const renderUserEvents = () =>

@@ -6,7 +6,7 @@ import Loading from '@/src/components/loading'
 import { useRouter } from 'next/router'
 import withAuth from '@/src/lib/withAuth'
 import { fuego, useDocument } from '@nandorojo/swr-firestore'
-import { event, payment, category } from 'app'
+import { Event, Payment, Category } from 'app'
 import { useAlert } from 'react-alert'
 import analytics from '@/src/lib/analytics'
 
@@ -14,19 +14,19 @@ const Show = ({ user }) => {
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const alert = useAlert()
-  const { data: payment, loading: paymentLoading } = useDocument<payment>(
+  const { data: payment, loading: paymentLoading } = useDocument<Payment>(
     router && `payments/${router.query.paymentId}`,
     {
       listen: true,
     },
   )
-  const { data: event, loading: eventLoading } = useDocument<event>(
+  const { data: event, loading: eventLoading } = useDocument<Event>(
     payment && `events/${payment.event}`,
     {
       listen: true,
     },
   )
-  const { data: category, loading: categoryLoading } = useDocument<category>(
+  const { data: category, loading: categoryLoading } = useDocument<Category>(
     event && payment && `events/${payment.event}/categories/${payment.category}`,
     {
       listen: true,
