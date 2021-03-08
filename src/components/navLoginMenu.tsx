@@ -19,6 +19,7 @@ const LoginMenu = ({ user, avater, toggle, isOpen }) => {
               height: '40px',
               width: '40px',
               cursor: 'pointer',
+              backgroundColor: 'white',
             }}
           />
         </div>

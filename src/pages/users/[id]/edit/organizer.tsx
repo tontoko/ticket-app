@@ -47,7 +47,6 @@ const Organizer: NextPage<{
       ).json()) as { balance: Stripe.Balance }
       const verification = individual ? individual.verification : null
       const status = verification && verification.status
-      console.log(verification)
       setState({ status, balance })
     })()
   }, [user.uid])
