@@ -29,7 +29,7 @@
     "micro-cors": "^0.1.1",
     "micro-session": "^2.0.1",
     "micro-upload": "^1.0.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "moment-locales-webpack-plugin": "^1.2.0",
     "next": "^10.0.8",
     "next-pwa": "^5.0.6",
